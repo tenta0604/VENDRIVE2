@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VENDRIVE</title>
+<style>
+:root{--bg:#f3f4f5;--card:#fff;--ink:#111;--muted:#7b7e84;--line:#e3e4e6;--soft:#eceef0;--shadow:0 10px 30px rgba(0,0,0,.055);--purple:#7c3aed;--red:#dc2626;--orange:#f59e0b;--green:#16a34a}
+*{box-sizing:border-box}html,body{margin:0;background:#dfe2e6;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+body{min-height:100vh}.app{width:min(100%,430px);min-height:100vh;margin:auto;background:var(--bg)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 16px}
+.brand{display:flex;align-items:center;gap:10px}.mark{width:37px;height:37px;border-radius:12px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900;letter-spacing:-1px}.name{font-size:19px;font-weight:900;letter-spacing:1.6px}.date{font-size:10px;color:var(--muted);margin-top:2px}
+.tabs{position:sticky;top:65px;z-index:19;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);white-space:nowrap}.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:9px 2px;font-size:12px;font-weight:850;color:#777}.tabs button.active{background:#111;color:#fff}
+.main{padding:15px}.page{display:block}.hidden{display:none!important}.ey{font-size:9px;letter-spacing:1.4px;color:#92959a;font-weight:900}.title{font-size:25px;line-height:1.15;font-weight:900;margin-top:3px}.subtitle{font-size:11px;color:var(--muted);margin-top:4px}.row{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.pill,.secondary,.primary{border:1px solid #ddd;background:#fff;border-radius:11px;padding:9px 11px;font-size:11px;font-weight:850}.primary{background:#111;color:#fff;border-color:#111}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.card,.kpi,.item{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}.kpi{border-radius:15px;padding:11px;cursor:pointer}.kpi span{font-size:9px;color:#888}.kpi b{display:block;font-size:21px;margin-top:2px}
+.section{margin-top:17px}.sectionhead{display:flex;justify-content:space-between;align-items:center}.sectionhead b{font-size:14px}.muted{font-size:10px;color:var(--muted)}
+.item{margin-top:7px;border-radius:15px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.item.done{opacity:.43}.item.order{border-color:#d6c8ed}.item.urgent{border-left:4px solid var(--red)}
+.meta{font-size:10px;color:#888;margin-top:3px;line-height:1.4}.badge{font-size:9px;font-weight:900;padding:5px 7px;border-radius:99px;white-space:nowrap}.b-red{background:#fee2e2;color:#b91c1c}.b-purple{background:#ede9fe;color:#6d28d9}.b-gray{background:#eff0f1;color:#73777d}.b-orange{background:#fef3c7;color:#a16207}.b-green{background:#dcfce7;color:#166534}
+.hero{background:#111;color:#fff;border-radius:20px;padding:17px;margin-top:11px;box-shadow:0 14px 32px rgba(0,0,0,.14)}.hero .ey{color:#a8abb0}.heroTitle{font-size:28px;font-weight:900;margin-top:3px}.heroSub{font-size:10px;color:#c5c7ca;margin-top:5px}
+.progress{height:7px;border-radius:99px;background:#343434;margin-top:14px;overflow:hidden}.progress>i{display:block;height:100%;background:#fff;border-radius:99px;width:0}
+.notice{padding:11px 12px;background:#f0eef4;border:1px solid #ddd4e9;border-radius:13px;font-size:11px;color:#5d4b70;font-weight:750;margin-top:9px}
+.map{height:360px;margin-top:11px;border-radius:20px;border:1px solid #d5d8db;overflow:hidden;position:relative;background:#e6e8e9;background-image:linear-gradient(27deg,transparent 47%,#fff 48%,#fff 52%,transparent 53%),linear-gradient(108deg,transparent 47%,#fff 48%,#fff 52%,transparent 53%);background-size:150px 150px,190px 190px}
+.map.adding{outline:3px solid #111;outline-offset:-3px}.maptag{position:absolute;top:10px;left:10px;z-index:6;background:#fffffff0;border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:9px;font-weight:900}.mapAdd{position:absolute;bottom:10px;left:10px;z-index:6}.mapTools{position:absolute;right:9px;top:9px;z-index:6;display:grid;gap:5px}.mapTools button{width:36px;height:36px;border:1px solid #ddd;background:#fff;border-radius:10px;font-weight:900;box-shadow:0 4px 12px #00000012}
+.route{position:absolute;height:5px;border-radius:99px;transform-origin:left;opacity:.55;z-index:1}.r0{background:#2563eb}.r1{background:#16a34a}.r2{background:#ea580c}.r3{background:#7c3aed}.r4{background:#db2777}.r5{background:#0891b2}.r6{background:#ca8a04}
+.pin{position:absolute;width:36px;height:36px;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;box-shadow:0 4px 12px #0004;z-index:3}.pin span{transform:rotate(45deg);color:#fff;font-size:10px;font-weight:900}.red{background:#e53935}.blue{background:#2979ff}.purple{background:#7c3aed}.orange{background:#f59e0b}.gray{background:#9ca3af;opacity:.45}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:13px 0}.day{border:1px solid #ddd;background:#fff;border-radius:10px;padding:9px 0;font-size:11px;font-weight:850}.day.active{background:#111;color:#fff;border-color:#111}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:9px 11px;margin-top:11px}.search input{border:0;outline:0;width:100%;background:transparent;font-size:12px}.searchIcon{font-size:13px;color:#888}
+.results{background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:6px;overflow:hidden;box-shadow:var(--shadow)}.result{padding:11px 12px;border-bottom:1px solid #eee;cursor:pointer}.result:last-child{border-bottom:0}.result b{font-size:12px}.result small{display:block;color:#888;font-size:9px;margin-top:2px}
+.formGroup{margin-top:11px}.formGroup label{display:block;font-size:9px;color:#777;font-weight:900;margin-bottom:5px}.formGroup input,.formGroup select,.formGroup textarea{width:100%;border:1px solid #ddd;border-radius:11px;background:#fafafa;padding:10px;font-size:12px;outline:none}.formGroup textarea{min-height:75px;resize:vertical}
+.actions{display:flex;gap:7px;margin-top:13px}.actions>*{flex:1}.bigComplete{width:100%;padding:13px;border-radius:12px;border:0;background:#111;color:#fff;font-size:13px;font-weight:900}
+.modal{position:fixed;inset:0;background:#0008;z-index:80;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{width:min(100%,430px);max-height:90vh;overflow:auto;background:#fff;margin:auto;border-radius:24px 24px 0 0;padding:18px}.modalTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.orderTypeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}.orderType{padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;text-align:left;font-weight:850;font-size:11px}.orderType.active{border-color:#111;background:#111;color:#fff}
+.subtypes{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.subtype{border:1px solid #ddd;background:#fff;border-radius:99px;padding:8px 10px;font-size:10px;font-weight:850}.subtype.active{background:#111;color:#fff;border-color:#111}
+.history{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:7px}.history b{font-size:11px}.history .meta{font-size:9px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:120;background:#111;color:#fff;padding:9px 13px;border-radius:99px;font-size:10px;font-weight:850;display:none}.toast.show{display:block}
+@media(max-width:360px){.tabs button{font-size:11px}.main{padding:12px}.title{font-size:23px}}
+</style>
+<style>
+.pin{width:30px;height:30px;border-radius:50%;transform:translate(-50%,-50%);border:3px solid #fff;display:grid;place-items:center}
+.pin span{display:none}
+.pin.orderPin:after{content:"!";color:#fff;font-size:13px;font-weight:950}
+.pin.orderNormal{background:#7c3aed}.pin.orderUrgent{background:#dc2626;animation:orderPulse 1.35s infinite}.pin.timePin{background:#f59e0b}.pin.normalPin{background:#2979ff}.pin.donePin{background:#9ca3af;opacity:.5}
+@keyframes orderPulse{0%,100%{box-shadow:0 0 0 0 #dc262655}50%{box-shadow:0 0 0 8px #dc262600}}
+</style>
+<style>
+#detailOrder{background:#f0eef4;border:1px solid #d9cdea;color:#5b3f78}
+#detailOrderType{word-break:break-word}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+#map{height:430px;background:#e8e9ea;overflow:hidden;position:relative;z-index:1}
+#map .leaflet-container{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;overflow:hidden}.leaflet-tile-pane{position:absolute;left:0;top:0}.leaflet-tile-container{position:absolute;left:0;top:0}
+#map .leaflet-control-zoom{display:none}
+.mapTools{position:absolute;right:9px;top:9px;z-index:1000;display:grid;gap:6px}.mapTools button{width:40px;height:40px;border:1px solid #ddd;background:#fff;border-radius:11px;font-weight:900;box-shadow:0 4px 12px #0002}
+.mapAdd{position:absolute;bottom:10px;left:10px;z-index:1000}.maptag{position:absolute;top:10px;left:10px;z-index:1000;background:#fffffff2;border:1px solid #ddd;border-radius:9px;padding:6px 8px;font-size:9px;font-weight:900}
+.vendrive-pin{background:transparent;border:0}.pinDot{width:25px;height:25px;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px #0005;display:grid;place-items:center}.pinDot.normal{background:#2979ff}.pinDot.time{background:#f59e0b}.pinDot.done{background:#9ca3af;opacity:.55}.pinDot.order{background:#7c3aed}.pinDot.urgent{background:#dc2626;animation:pinPulse 1.35s infinite}.pinDot.order:after{content:"!";color:#fff;font-size:12px;font-weight:950}.pinDot.orderSoon{background:#f59e0b}.currentDot{width:16px;height:16px;border-radius:50%;background:#111;border:3px solid #fff;box-shadow:0 0 0 7px #1112}
+@keyframes pinPulse{0%,100%{box-shadow:0 0 0 0 #dc262655}50%{box-shadow:0 0 0 8px #dc262600}}
+</style><style>.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.taskItem{border-left:4px solid #dc2626!important}.taskMeta{font-size:10px;color:#777;margin-top:4px;line-height:1.45}.makerChip{display:inline-block;padding:4px 7px;border-radius:99px;background:#eff0f1;font-size:9px;font-weight:850;margin-top:5px}</style><style>
+.swipeRow{position:relative;overflow:hidden;border-radius:15px;margin-top:7px}
+.swipeAction{position:absolute;inset:0 0 0 auto;width:92px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;transform:translateX(100%);opacity:0;transition:transform .18s ease,opacity .18s ease;pointer-events:none}.swipeRow.revealed .swipeAction{transform:translateX(0);opacity:1}
+.swipeCard{position:relative;z-index:1;transition:transform .18s ease;touch-action:pan-y}
+.swipeCard.swiping{transition:none}
+.swipeHint{font-size:8px;color:#999;margin-right:4px}
+</style><style>
+.dayPicker{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:6px}.dayPicker button{border:1px solid #ddd;background:#fff;border-radius:10px;padding:9px 0;font-size:11px;font-weight:850;color:#777}.dayPicker button.active{background:#111;color:#fff;border-color:#111}
+.machineFilters{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.machineFilters select{width:100%;border:1px solid #ddd;background:#fff;border-radius:11px;padding:9px;font-size:10px;font-weight:750}
+.taskPinDot{width:25px;height:25px;border:3px solid #fff;border-radius:50%;background:#0891b2;box-shadow:0 2px 8px #0005;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:950}
+#map,.leaflet-container{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{overscroll-behavior-y:none}body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea,select{-webkit-user-select:text;user-select:text}
+</style><style>.days .day{border-color:var(--day-color);}.days .day.active{background:var(--day-color);border-color:var(--day-color);color:#fff!important}</style><style>.mapSlashPin{width:25px;height:25px;border:2px solid #d8d8d8;border-radius:50%;display:grid;place-items:center;color:#c9c9c9;font-size:18px;font-weight:900;opacity:.38;background:#f7f7f7}.todayDonePin{opacity:.38!important;filter:grayscale(1)}</style><style>.danger{background:#dc2626!important;color:#fff!important;border:0}</style></head>
+<body>
+<div class="app">
+<header class="header"><div class="brand"><div class="mark">V</div><div><div class="name">VENDRIVE</div><div class="date" id="headerDate"></div></div></div></header>
+<nav class="tabs">
+<button class="active" data-page="todayPage">本日</button>
+<button data-page="tasksPage">タスク</button><button data-page="mapPage">マップ</button>
+<button data-page="machinesPage">自販機</button>
+<button data-page="ordersPage">オーダー</button>
+</nav>
+
+<main class="main">
+<section id="todayPage" class="page">
+<div class="ey">TODAY</div><div class="title">本日の訪問</div><div class="subtitle" id="todaySub"></div>
+<div class="hero"><div class="ey">WORK PROGRESS</div><div class="heroTitle"><span id="heroDone">0</span> / <span id="heroTotal">0</span> 台</div><div class="heroSub" id="heroText">本日の訪問を開始しましょう</div><div class="progress"><i id="progressBar"></i></div></div>
+<div class="stats"><div class="kpi"><span>未訪問</span><b id="todayTodo">0</b></div><div class="kpi"><span>訪問済</span><b id="todayVisited">0</b></div><div class="kpi"><span>オーダー</span><b id="todayOrders">0</b></div></div>
+<div class="section"><div class="sectionhead"><b>本日の訪問先</b><span class="swipeHint">左スワイプで訪問完了</span><span class="muted" id="todayRoute"></span></div><div id="todayList"></div></div>
+<div class="section"><button class="bigComplete" id="finishDay">本日の業務終了</button></div>
+</section>
+
+<section id="tasksPage" class="page hidden">
+<div class="row"><div><div class="ey">TASKS</div><div class="title">タスク</div><div class="subtitle">完了するまで残り続ける作業</div></div><button class="primary pill" id="addTask">＋登録</button></div>
+<div class="hero" style="margin-top:11px"><div class="ey">UNFINISHED</div><div class="heroTitle"><span id="taskCount">0</span> 件</div><div class="heroSub">完了するまで本日の画面の最上部に表示されます</div></div>
+<div class="section"><div class="sectionhead"><b>未完了タスク</b><span class="muted">メーカー連動</span></div><div id="taskList"></div></div>
+</section>
+
+<section id="mapPage" class="page hidden">
+<div class="row"><div><div class="ey">MAP</div><div class="title">マップ</div><div class="subtitle">実際の地図・現在地・自販機位置を管理</div></div>
+<div style="display:flex;gap:6px;align-items:center"><button class="secondary pill" id="officeAddTop">＋営業所</button><button class="pill" id="allRoutes">全ルート</button></div></div>
+<div class="days" id="mapDays"></div><div class="search"><span class="searchIcon">⌕</span><input id="addressSearch" placeholder="住所から場所を検索"></div><div id="addressResults" class="results hidden"></div>
+<div class="map" id="map"><div class="maptag" id="mapTag"></div>
+<div class="mapTools"><button id="locateMe" title="現在地">⌖</button><button id="zoomIn">＋</button><button id="zoomOut">−</button></div>
+<button class="primary mapAdd" id="mapAdd">＋ 自販機追加</button><button class="secondary" id="officeAdd" style="position:absolute;bottom:10px;left:155px;z-index:6;font-size:10px;padding:10px 12px">＋ 営業所設定</button></div>
+<div class="notice" id="mapStatus">地図を読み込んでいます…</div><div class="section"><div class="sectionhead"><b>営業所</b><button class="secondary" id="officeAddList">＋追加</button></div><div id="officeList"></div></div>
+<div class="section"><div class="sectionhead"><b>表示中の自販機</b><span class="muted" id="mapCount"></span></div><div id="mapList"></div></div>
+</section>
+
+<section id="machinesPage" class="page hidden">
+<div class="row"><div><div class="ey">MACHINES</div><div class="title">自販機</div><div class="subtitle">設備・訪問・販売データを管理</div></div><button class="primary pill" id="addMachine">＋追加</button></div>
+<div class="search"><span class="searchIcon">⌕</span><input id="machineSearch" placeholder="自販機名・住所・管理番号を検索"></div><div id="machineResults" class="results hidden"></div><div class="machineFilters"><select id="machineDayFilter"><option value="all">曜日：すべて</option><option>月</option><option>火</option><option>水</option><option>木</option><option>金</option><option>土</option><option>日</option></select><select id="machineMakerFilter"><option value="all">メーカー：すべて</option></select></div>
+<div class="section"><div class="sectionhead"><b>メーカー設定</b><button class="pill" id="manageMakers">管理</button></div><div id="makerSummary" class="muted" style="margin-top:6px"></div></div><div class="section" id="machineList"></div>
+</section>
+
+<section id="ordersPage" class="page hidden">
+<div class="row"><div><div class="ey">ORDER</div><div class="title">オーダー</div><div class="subtitle">24時間以内の臨時対応</div></div><button class="primary pill" id="addOrder">＋登録</button></div>
+<div class="notice">登録した自販機は通常の曜日に関係なく、本日・マップにオーダーとして表示されます。</div>
+<div class="section"><div class="sectionhead"><b>対応待ち</b><span class="muted" id="pendingCount"></span></div><div id="ordersList"></div></div>
+<div class="section"><div class="sectionhead"><b>過去30日間の対応履歴</b><span class="muted">自動保存</span></div><div id="historyList"></div></div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="orderVisitConfirm"><div class="sheet">
+<div class="modalTop"><div><div class="ey">ORDER</div><div class="title">オーダー対応の確認</div></div></div>
+<div class="notice" style="margin-top:10px"><b>オーダー対応は済みましたか？</b><div id="orderVisitConfirmDetail" style="font-size:10px;margin-top:5px;line-height:1.5"></div></div>
+<div class="actions" style="margin-top:12px"><button class="secondary" id="orderVisitKeep">訪問だけ完了</button><button class="primary" id="orderVisitDone">完了</button></div>
+</div></div>
+
+<div class="modal" id="statsModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">TODAY</div><div class="title" id="statsModalTitle">一覧</div></div><button class="pill" id="closeStats">閉じる</button></div>
+<div id="statsList"></div></div></div>
+
+<div class="modal" id="officeModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">OFFICE</div><div class="title">営業所を設定</div></div><button class="pill" id="closeOffice">閉じる</button></div>
+<div class="notice" style="margin-top:10px">MAP上をタップして営業所の位置を指定してください。</div>
+<div class="formGroup"><label>営業所名</label><input id="officeName" placeholder="例：一宮営業所"></div>
+<div class="formGroup"><label>住所</label><input id="officeAddress" placeholder="住所（任意）"></div>
+<div class="formGroup"><label>GPS</label><input id="officeGps" readonly placeholder="MAPで位置指定"></div>
+<div class="actions"><button class="secondary" id="officePick">MAPで位置指定</button><button class="primary" id="officeSave">登録</button></div>
+</div></div>
+<div class="modal" id="machineModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">MACHINE</div><div class="title" id="machineModalTitle"></div><div class="makerChip" id="detailMaker" style="margin-top:5px;display:inline-block"></div></div><button class="pill" id="closeMachine">閉じる</button></div>
+<div class="card" style="padding:14px;margin-top:11px">
+<div id="detailOrder" class="notice hidden" style="margin-top:10px">
+  <div style="font-size:9px;letter-spacing:.7px;font-weight:900">ORDER</div>
+  <div id="detailOrderType" style="font-size:13px;font-weight:900;margin-top:2px"></div>
+  <div id="detailOrderText" style="font-size:10px;margin-top:3px;line-height:1.45"></div>
+</div>
+
+<div id="detailTask" class="notice hidden" style="margin-top:10px">
+  <div style="font-size:9px;letter-spacing:.7px;font-weight:900">TASK</div>
+  <div id="detailTaskText" style="font-size:11px;font-weight:850;margin-top:3px;line-height:1.45"></div>
+  <div id="detailTaskMaker" style="font-size:9px;color:#777;margin-top:3px"></div>
+</div>
+  <div class="muted">前回訪問日</div><b id="detailLast" style="font-size:14px"></b>
+  <div class="muted" style="margin-top:10px">次回訪問予定日</div><b id="detailNext" style="font-size:14px"></b>
+  <div class="muted" style="margin-top:10px">販売データ</div><div id="detailSales" style="font-size:11px;margin-top:3px;line-height:1.5"></div>
+</div>
+<div class="actions" style="margin-top:10px">
+  <button class="secondary" id="detailMore">詳細表示</button>
+  <button class="primary" id="completeMachine">訪問完了</button>
+</div>
+<div class="actions">
+  <button class="secondary" id="skipMachine">訪問スキップ</button>
+  <button class="secondary" id="forceMachine">臨時訪問</button>
+  <button class="primary" id="machineRoute">経路</button>
+</div>
+<div id="machineExtra" class="hidden">
+  <div class="formGroup"><label>自販機名</label><input id="mName"></div><div class="formGroup"><label>メーカー</label><select id="mMaker"></select><input id="mMakerCustom" class="hidden" style="margin-top:7px" placeholder="メーカー名を入力"></div>
+  <div class="formGroup"><label>管理番号</label><input id="mCode"></div>
+  <div class="formGroup"><label>住所</label><input id="mAddress"></div>
+  <div class="formGroup"><label>訪問曜日（複数可）</label><div class="dayPicker" id="mDaysPicker">
+<button type="button" data-day="月">月</button><button type="button" data-day="火">火</button><button type="button" data-day="水">水</button><button type="button" data-day="木">木</button><button type="button" data-day="金">金</button><button type="button" data-day="土">土</button><button type="button" data-day="日">日</button>
+</div></div>
+  <div class="formGroup"><label>訪問周期</label><select id="mCycle"><option>毎日</option><option>2日周期</option><option>3日周期</option><option>1週間に1回</option><option>2週間に1回</option><option>3週間に1回</option><option>1ヶ月に1回</option></select></div>
+  <div class="formGroup"><label>前回訪問日</label><input id="mLast" type="date"></div>
+  <div class="formGroup"><label>訪問時間</label><input id="mTime" placeholder="例：14:00〜16:00"></div>
+  <div class="formGroup"><label>販売データ</label><textarea id="mSales"></textarea></div>
+  <div class="formGroup"><label>メモ</label><textarea id="mMemo"></textarea></div>
+  <div class="actions"><button class="primary" id="saveMachine">保存</button></div>
+</div>
+</div></div>
+
+<div class="modal" id="orderModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">NEW ORDER</div><div class="title">オーダー登録</div></div><button class="pill" id="closeOrder">閉じる</button></div>
+<div class="formGroup"><label>自販機</label><div class="search"><span class="searchIcon">⌕</span><input id="orderMachineSearch" placeholder="自販機名・住所・管理番号で検索"></div><div id="orderResults" class="results hidden"></div><div id="selectedMachine" class="notice hidden"></div></div>
+<div class="formGroup"><label>オーダー内容</label><div class="orderTypeGrid">
+<button class="orderType" data-type="ゴミ回収">ゴミ回収</button><button class="orderType" data-type="自販機不良">自販機不良</button><button class="orderType" data-type="商品関連">商品関連</button><button class="orderType" data-type="クレーム">クレーム</button><button class="orderType" data-type="その他">その他</button>
+</div><div id="productSub" class="subtypes hidden"><button class="subtype" data-sub="品切れ">品切れ</button><button class="subtype" data-sub="商品違い">商品違い</button><button class="subtype" data-sub="その他">その他</button></div></div>
+<div class="formGroup"><label>詳細（必要な場合）</label><textarea id="orderDetail" placeholder="商品名・症状・内容など"></textarea></div>
+<div class="actions"><button class="secondary" id="cancelOrder">キャンセル</button><button class="primary" id="saveOrder">オーダー登録</button></div>
+</div></div>
+
+<div class="modal" id="tomorrowModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">NEXT DAY PLAN</div><div class="title">明日の予定</div></div><button class="pill" id="closeTomorrow">閉じる</button></div>
+<div class="hero" style="margin-top:10px"><div class="ey">TOMORROW</div><div class="heroTitle" id="tomorrowDate"></div><div class="heroSub" id="tomorrowSummary"></div></div>
+<div class="stats"><div class="kpi"><span>訪問予定</span><b id="tomorrowVisits">0</b></div><div class="kpi"><span>時間指定</span><b id="tomorrowTimed">0</b></div><div class="kpi"><span>オーダー</span><b id="tomorrowOrders">0</b></div></div>
+<div class="section"><div class="sectionhead"><b>明日の訪問先</b><span class="muted">除外できます</span></div><div id="tomorrowList"></div></div><div class="section"><div class="sectionhead"><b>未完了タスク</b><span class="muted">明日の対象</span></div><div id="tomorrowTasks"></div></div>
+<div class="actions"><button class="secondary" id="tomorrowAdd">＋ 自販機を追加</button><button class="secondary" id="tomorrowMap">明日の予定をMAPで確認</button></div>
+<div class="actions"><button class="secondary" id="tomorrowLater">確認せず終了</button><button class="primary" id="tomorrowSave">予定を保存</button></div>
+</div></div>
+
+<div class="modal" id="tomorrowAddModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">ADD TO TOMORROW</div><div class="title">明日の予定に追加</div></div><button class="pill" id="closeTomorrowAdd">閉じる</button></div>
+<div class="notice">明日の通常ルートに含まれていない自販機を、臨時で追加できます。</div>
+<div class="formGroup"><label>自販機を検索</label><input id="tomorrowAddSearch" placeholder="自販機名・管理番号・メーカー・住所"></div>
+<div id="tomorrowAddList"></div>
+</div></div>
+<div class="modal" id="deleteMachineModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">DELETE MACHINE</div><div class="title">自販機を削除</div></div><button class="pill" id="closeDeleteMachine">閉じる</button></div>
+<div class="notice" id="deleteMachineText">この自販機を削除しますか？</div>
+<div class="actions"><button class="secondary" id="cancelDeleteMachine">キャンセル</button><button class="danger" id="confirmDeleteMachine">削除する</button></div>
+</div></div>
+<div class="modal" id="addMachineModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">NEW MACHINE</div><div class="title">自販機を追加</div></div><button class="pill" id="closeAdd">閉じる</button></div>
+<div class="notice">マップ上の位置を指定して登録できます。住所は自動取得後も手動修正できる設計です。</div>
+<div class="formGroup"><label>自販機名</label><input id="newName" placeholder="例：○○自販機"></div><div class="formGroup"><label>メーカー</label><select id="newMaker"></select><input id="newMakerCustom" class="hidden" style="margin-top:7px" placeholder="メーカー名を入力"></div><div class="formGroup"><label>訪問曜日</label><div class="dayPicker" id="newDaysPicker"><button type="button" data-day="月">月</button><button type="button" data-day="火">火</button><button type="button" data-day="水">水</button><button type="button" data-day="木">木</button><button type="button" data-day="金">金</button><button type="button" data-day="土">土</button><button type="button" data-day="日">日</button></div></div><div class="formGroup"><label>管理番号</label><input id="newCode" placeholder="例：A-001"></div><div class="formGroup"><label>住所（手動修正可）</label><input id="newAddress"></div><div class="formGroup"><label>GPS</label><input id="newGps" readonly></div>
+<div class="actions"><button class="secondary" id="cancelAdd">キャンセル</button><button class="primary" id="saveAdd">登録</button></div>
+</div></div>
+<div class="modal" id="taskModal"><div class="sheet"><div class="modalTop"><div><div class="ey">NEW TASK</div><div class="title">タスク登録</div></div><button class="pill" id="closeTask">閉じる</button></div>
+<div class="formGroup"><label>タスク内容</label><textarea id="taskText" placeholder="例：新商品のPOPを張り替える"></textarea></div>
+<div class="formGroup"><label>対象メーカー</label><select id="taskTarget"><option value="all">全メーカー</option></select></div>
+<div class="notice">メーカーを指定すると、そのメーカーの自販機すべてに自動で紐付きます。</div>
+<div class="actions"><button class="secondary" id="cancelTask">キャンセル</button><button class="primary" id="saveTask">タスク登録</button></div></div></div>
+<div class="modal" id="makerModal"><div class="sheet"><div class="modalTop"><div><div class="ey">MAKERS</div><div class="title">メーカー設定</div></div><button class="pill" id="closeMaker">閉じる</button></div>
+<div class="formGroup"><label>メーカー名</label><input id="makerName" placeholder="例：サントリー"></div><div class="actions"><button class="secondary" id="cancelMaker">閉じる</button><button class="primary" id="saveMaker">メーカー追加</button></div>
+<div class="section"><div class="sectionhead"><b>登録済みメーカー</b></div><div id="makerList"></div></div></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+"use strict";
+var WEEK=['日','月','火','水','木','金','土'];
+var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
+var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':30};
+var key='vendrive2_v7_data';
+var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{}};
+var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null;
+
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function diff(a,b){return Math.floor((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000)}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]})}
+function toast(t){var e=$id('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('show')},1500)}
+function $id(x){return document.getElementById(x)}
+function openModal(id){$id(id).classList.add('open')}
+function closeModal(id){$id(id).classList.remove('open')}
+var STORAGE_VERSION=1,dbPromise=null;
+function stateSnapshot(){return JSON.parse(JSON.stringify(state))}
+function persist(){
+  var raw=JSON.stringify(state);
+  try{
+    localStorage.setItem(key,raw);
+    if(localStorage.getItem(key)!==raw)throw new Error('verification failed');
+    localStorage.setItem(key+'_version',String(STORAGE_VERSION));
+  }catch(e){
+    toast('保存に失敗しました。ブラウザの保存領域を確認してください');
+  }
+  try{
+    if(!dbPromise)dbPromise=new Promise(function(resolve,reject){
+      var req=indexedDB.open('VENDRIVE2_DB',1);
+      req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots')};
+      req.onsuccess=function(){resolve(req.result)};
+      req.onerror=function(){reject(req.error)};
+    });
+    dbPromise.then(function(db){
+      var tx=db.transaction('snapshots','readwrite');
+      tx.objectStore('snapshots').put({version:STORAGE_VERSION,savedAt:Date.now(),raw:raw},'current');
+    }).catch(function(){});
+  }catch(e){}
+}
+function invalidateAutoTomorrowPlan(){
+  if(state.tomorrowPlan && state.tomorrowPlan.manual!==true)state.tomorrowPlan=null;
+}
+
+function migrateCoordinates(){state.machines.forEach(function(m){if(typeof m.lat==='number'&&typeof m.lng==='number'&&m.lat>=0&&m.lat<=100&&m.lng>=0&&m.lng<=100){m.lat=35.285+(m.lat/100)*0.06;m.lng=136.76+(m.lng/100)*0.09}});persist()}
+function normalizeLoadedState(x){
+  if(!x||!Array.isArray(x.machines))return false;
+  state=x;
+  if(!Array.isArray(state.offices))state.offices=[];
+  if(!Array.isArray(state.history))state.history=[];
+  if(!Array.isArray(state.tasks))state.tasks=[];
+  if(!Array.isArray(state.makers)||!state.makers.length)state.makers=['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'];
+  state.machines.forEach(function(m){m.days=Array.isArray(m.days)?m.days:[];m.makerGroup=makerGroup(m.maker)});
+  return true;
+}
+function load(){
+  state.offices=state.offices||[];
+  var loaded=false;
+  try{var raw=localStorage.getItem(key);if(raw)loaded=normalizeLoadedState(JSON.parse(raw))}catch(e){loaded=false}
+  if(!loaded){
+    state.machines=[
+      {id:'A',name:'自販機 A',code:'A-001',address:'愛知県一宮市',days:['木'],cycle:'3日周期',last:'2026-08-24',time:'指定なし',sales:'コーラ 5本/日・お茶 7本/日',memo:'駐車スペースに注意',lat:20,lng:20},
+      {id:'B',name:'自販機 B',code:'A-002',address:'愛知県一宮市',days:['木'],cycle:'1週間に1回',last:'2026-08-20',time:'14:00〜16:00',sales:'コーヒー 8本/日・水 3本/日',memo:'午後指定',lat:55,lng:65},
+      {id:'C',name:'自販機 C',code:'A-003',address:'愛知県一宮市',days:['木'],cycle:'2週間に1回',last:'2026-08-13',time:'10:00〜12:00',sales:'水 10本/日・お茶 6本/日',memo:'午前中推奨',lat:30,lng:80},
+      {id:'D',name:'自販機 D',code:'A-004',address:'愛知県一宮市',days:['木'],cycle:'3日周期',last:today,time:'指定なし',sales:'コーラ 4本/日',memo:'本日補充完了',lat:70,lng:25,visited:true},
+      {id:'E',name:'自販機 E',code:'A-005',address:'愛知県一宮市',days:['金'],cycle:'1週間に1回',last:'2026-08-21',time:'指定なし',sales:'お茶 6本/日',memo:'商品が出ないとの電話',lat:70,lng:78,order:{type:'商品関連',sub:'商品違い',detail:'コーラを押したらお茶が出た',createdAt:Date.now()-3600000}},
+      {id:'F',name:'自販機 F',code:'A-006',address:'愛知県一宮市',days:['月'],cycle:'2日周期',last:'2026-08-25',time:'指定なし',sales:'水 9本/日',memo:'在庫少なめ',lat:45,lng:45}
+    ];
+    state.history=[];state.machines.forEach(function(m){m.makerGroup=makerGroup(m.maker)});persist();
+  }
+  // If localStorage is unavailable/corrupt, recover the latest verified IndexedDB snapshot.
+  if(!loaded&&window.indexedDB){
+    try{
+        var rq=indexedDB.open('VENDRIVE2_DB',1);
+      rq.onsuccess=function(){
+        var db=rq.result;
+        if(!db.objectStoreNames.contains('snapshots'))return;
+        var g=db.transaction('snapshots','readonly').objectStore('snapshots').get('current');
+        g.onsuccess=function(){
+          try{
+            var rec=g.result,x=rec&&rec.raw?JSON.parse(rec.raw):null;
+            if(normalizeLoadedState(x)){renderAll();toast('保存データを復元しました')}
+          }catch(e){}
+        };
+      };
+    }catch(e){}
+  }
+  // New calendar day: reset only visit UI state. Orders remain.
+  var dayKey='vendrive2_last_day';
+  try{var last=localStorage.getItem(dayKey);if(last!==today){state.machines.forEach(function(m){m.visited=false;m.skip=null;m.force=null});localStorage.setItem(dayKey,today);persist()}}catch(e){}
+  ensureMakerColors();
+  migrateCoordinates();
+  cleanupHistory();
+}
+function cleanupHistory(){
+  var cutoff=Date.now()-30*86400000;
+  state.history=(state.history||[]).filter(function(h){return h.completedAt>=cutoff});
+  persist();
+}
+function isDue(m,day){
+  if(m.skip===today && !m.order)return false;
+  if(m.force===today)return true;
+  // 未対応オーダーは本日タブ/MAP本日に必ず表示。
+  if(m.visited && day===todayDay)return true;
+  if(m.order && day===todayDay)return true;
+  if(!m.days||m.days.indexOf(day)<0)return false;
+  if(m.cycle==='毎日')return true;
+  if(!m.last||!CYCLES[m.cycle])return true;
+  return diff(today,m.last)>=CYCLES[m.cycle];
+}
+function targets(day,all){return state.machines.filter(function(m){return all?true:isDue(m,day)})}
+
+function nextVisitDate(m){
+  var days=Array.isArray(m.days)?m.days:[];
+  if(!days.length)return null;
+  var base=m.last?new Date(m.last+'T00:00:00'):new Date(today+'T00:00:00');
+  if(isNaN(base.getTime()))return null;
+  var interval=CYCLES[m.cycle]||1;
+  // まず周期を加算。未訪問なら今日以降の登録曜日を初回予定日にする。
+  if(m.last){
+    base.setDate(base.getDate()+interval);
+  }
+  for(var i=0;i<31;i++){
+    if(days.indexOf(WEEK[base.getDay()])>=0)return iso(base);
+    base.setDate(base.getDate()+1);
+  }
+  return null;
+}
+function card(m,context){
+  var order=m.order, status=order?'オーダー':m.visited?'訪問済':'未訪問';
+  var badge=order?'b-purple':m.visited?'b-gray':'b-red';
+  var cls='item '+(m.visited&&!order?'done ':'')+(order?'order ':'')+(order?'urgent':'');
+  var detail=order?(order.type+(order.sub?' ＞ '+order.sub:'')+' ・ '+timeLeft(order.createdAt)):m.cycle+' ・ '+m.time;
+  var e=document.createElement('div');e.className=cls;
+  var right=context==='machines'?('<button class="pill machineDeleteBtn" type="button" title="この自販機を削除">削除</button>'):('<span class="badge '+badge+'">'+status+'</span>');
+  e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="makerChip">'+esc(m.maker||'メーカー未設定')+'</div><div class="meta">'+esc(detail)+'</div></div>'+right;
+  e.onclick=function(){openMachine(m.id,order?'order':'normal')};
+  if(context==='machines'){
+    e.querySelector('.machineDeleteBtn').onclick=function(ev){ev.stopPropagation();confirmDeleteMachine(m.id)};
+  }
+  return e;
+}
+function timeLeft(ts){
+  var left=86400000-(Date.now()-ts), h=Math.ceil(left/3600000);
+  if(h<=0)return'期限超過';if(h<24)return'残り'+h+'時間';return'期限内';
+}
+function renderHeader(){$id('headerDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日（'+todayDay+'）'}
+function showTodayStat(kind){
+var list=targets(todayDay,false),arr=kind==='todo'?list.filter(function(m){return !m.visited||!!m.order}):kind==='done'?list.filter(function(m){return m.visited&&!m.order}):state.machines.filter(function(m){return !!m.order});
+$id('statsModalTitle').textContent=kind==='todo'?'未訪問':kind==='done'?'訪問済':'オーダー';
+var box=$id('statsList');box.innerHTML='';
+if(!arr.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">該当する自販機はありません。</div>';
+arr.forEach(function(m){
+var e=document.createElement('div');e.className='item';
+e.innerHTML='<div><b>'+esc(m.name)+'</b></div><button class="primary pill statNav" type="button">⤴︎</button>';
+e.querySelector('.statNav').onclick=function(ev){ev.stopPropagation();navigateToMachine(m)};
+e.onclick=function(){openMachine(m.id,'normal')};box.appendChild(e)
+});
+openModal('statsModal')
+}
+function navigateToMachine(m){
+var dest=typeof m.lat==='number'&&typeof m.lng==='number'?m.lat+','+m.lng:encodeURIComponent(m.address||m.name);
+location.href='https://www.google.com/maps/dir/?api=1&destination='+dest
+}
+
+function renderToday(){
+  var t=targets(todayDay,false), done=t.filter(function(m){return m.visited&&!m.order}).length, orders=state.machines.filter(function(m){return m.order}).length;
+  $id('todaySub').textContent=todayDay+'曜日の訪問予定';
+  $id('heroDone').textContent=done;$id('heroTotal').textContent=t.length;$id('heroText').textContent=t.length?(done===t.length?'本日の訪問がすべて完了しています':'本日の訪問を進めましょう'):'本日の訪問予定はありません';
+  $id('progressBar').style.width=(t.length?Math.round(done/t.length*100):0)+'%';
+  $id('todayTodo').textContent=t.filter(function(m){return !m.visited}).length;$id('todayVisited').textContent=done;$id('todayOrders').textContent=orders;$id('todayRoute').textContent=todayDay+'曜ルート';
+  var box=$id('todayList');box.innerHTML='';t.forEach(function(m){var w=document.createElement('div');w.className='swipeRow';w.innerHTML='<div class="swipeAction">訪問完了</div>';var c=card(m,'today');c.classList.add('swipeCard');w.appendChild(c);box.appendChild(w);if(!m.visited)makeSwipeComplete(w,m)});
+  if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">本日の訪問予定はありません。</div>';
+}
+function hasActiveTask(m){return (state.tasks||[]).some(function(t){return !t.completed&&(t.target==='all'||makerGroup(m.maker)===t.target)})}
+function markerClass(m){if(m.order){var left=86400000-(Date.now()-m.order.createdAt);return left<=0?'urgent':left<=6*3600000?'urgent':'order'}if(hasActiveTask(m))return'task';return m.visited?'done':m.time!=='指定なし'?'time':'normal'}
+function ensureMap(){
+  if(leafletMap||typeof L==='undefined')return;
+  leafletMap=L.map('map',{zoomControl:false,attributionControl:true,tap:true}).setView([35.30,136.80],13);
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',{minZoom:5,maxZoom:18,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a>'}).addTo(leafletMap);
+  machineLayer=L.layerGroup().addTo(leafletMap);routeLayer=L.layerGroup().addTo(leafletMap);currentLocationLayer=L.layerGroup().addTo(leafletMap);setTimeout(function(){leafletMap.invalidateSize({pan:false})},100);
+  leafletMap.on('click',function(e){
+ if(addingMachine){addingMachine=false;$id('map').classList.remove('adding');addMachineAt(e.latlng.lat,e.latlng.lng);return}
+ if(addingOffice){addingOffice=false;$id('map').classList.remove('adding');officePoint={lat:e.latlng.lat,lng:e.latlng.lng};$id('officeGps').value=e.latlng.lat.toFixed(6)+', '+e.latlng.lng.toFixed(6);openModal('officeModal')}
+});leafletMap.getContainer().addEventListener('contextmenu',function(e){e.preventDefault()});
+  var press=null;leafletMap.getContainer().addEventListener('touchstart',function(e){if(e.touches.length!==1)return;press=setTimeout(function(){if(!addingMachine&&!addingOffice){addingMachine=true;$id('map').classList.add('adding');toast('登録位置をタップしてください')}} ,650)},{passive:true});
+  ['touchend','touchcancel','touchmove'].forEach(function(ev){leafletMap.getContainer().addEventListener(ev,function(){if(press){clearTimeout(press);press=null}},{passive:true})});
+  $id('mapStatus').textContent='地図を利用できます。＋自販機追加 またはマップ長押しで登録';
+}
+function dayRouteColor(day){
+ var colors={月:'#2563eb',火:'#ef4444',水:'#16a34a',木:'#ea580c',金:'#7c3aed',土:'#db2777',日:'#0891b2'};
+ return colors[day]||'#64748b';
+}
+function routePinHtml(day){
+ return '<div style="width:29px;height:29px;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+dayRouteColor(day)+';box-shadow:0 2px 8px #0005;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:950"><span style="transform:rotate(45deg)">'+day+'</span></div>';
+}
+function officePinHtml(){return '<div style="width:31px;height:31px;border:3px solid #fff;border-radius:50%;background:#111;box-shadow:0 2px 9px #0006;display:grid;place-items:center;color:#fff;font-size:16px;font-weight:950">⌂</div>'}
+var officePoint=null;
+function saveOffice(){
+ if(!officePoint){toast('MAPで位置を指定してください');return}
+ var name=($id('officeName').value||'').trim()||'営業所';
+ state.offices=state.offices||[];
+ state.offices.push({id:'office-'+Date.now(),name:name,address:($id('officeAddress').value||'').trim(),lat:officePoint.lat,lng:officePoint.lng});
+ persist();officePoint=null;closeModal('officeModal');renderAll();if(leafletMap)setTimeout(function(){leafletMap.invalidateSize({pan:false});renderMap()},50);toast('営業所を登録しました')
+}
+function renderOffices(){
+ var box=$id('officeList');if(!box)return;box.innerHTML='';
+ var offices=state.offices||[];
+ if(!offices.length){box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">営業所はまだ登録されていません。</div>';return}
+ offices.forEach(function(o){
+   var e=document.createElement('div');e.className='item';
+   e.innerHTML='<div><b>⌂ '+esc(o.name||'営業所')+'</b><div class="meta">'+esc(o.address||'住所未登録')+'</div></div><button class="badge b-gray">ナビ</button>';
+   e.querySelector('button').onclick=function(ev){ev.stopPropagation();navigateToMachine(o)};
+   box.appendChild(e);
+ });
+}
+var MAKER_COLOR_PALETTE=['#2563eb','#dc2626','#16a34a','#ea580c','#7c3aed','#db2777','#0891b2','#92400e','#0f766e','#4f46e5','#be123c','#65a30d'];
+function ensureMakerColors(){
+  if(!state.makerColors||typeof state.makerColors!=='object')state.makerColors={};
+  var used={},index=Object.keys(state.makerColors).length;
+  Object.keys(state.makerColors).forEach(function(k){used[state.makerColors[k]]=true});
+  makerOptions().forEach(function(name){
+    var group=makerGroup(name);
+    if(group==='未設定'||state.makerColors[group])return;
+    var color=null;
+    for(var i=0;i<MAKER_COLOR_PALETTE.length;i++)if(!used[MAKER_COLOR_PALETTE[i]]){color=MAKER_COLOR_PALETTE[i];break}
+    if(!color){do{color='hsl('+((index*137.508)%360)+' 72% 42%)';index++}while(used[color])}
+    state.makerColors[group]=color;used[color]=true;
+  });
+}
+function makerPinColor(name){var g=makerGroup(name)||'未設定';return state.makerColors&&state.makerColors[g]||'#64748b'}
+function makerPinHtml(name){
+  var g=makerGroup(name)||'未設定';
+  var chars=Array.from(g.replace(/\s/g,''));
+  var label=chars.length?chars[0]:'未';
+  return '<div style="width:29px;height:29px;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+makerPinColor(g)+';box-shadow:0 2px 8px #0005;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:950"><span style="transform:rotate(45deg)">'+esc(label)+'</span></div>';
+}
+function renderMap(){
+  ensureMap();if(!leafletMap)return;
+  machineLayer.clearLayers();routeLayer.clearLayers();
+  var mode=allRoutes?'all':(mapTomorrowMode?'tomorrow':(mapTodayMode?'today':'weekday'));
+  $id('mapTag').textContent=mode==='all'?'MAP · 全ルート':mode==='today'?'MAP · 本日':mode==='tomorrow'?'MAP · 明日の予定':'MAP · '+selectedMapDay+'曜';
+
+  var t;
+  if(mode==='all'){
+    t=state.machines.slice();
+  }else if(mode==='tomorrow'){
+    var td=tomorrowDate(),tt=iso(td);
+    var plan=state.tomorrowPlan&&state.tomorrowPlan.date===tt?state.tomorrowPlan:null;
+    var ids=plan?plan.ids:state.machines.filter(eligibleTomorrow).map(function(m){return m.id});
+    t=state.machines.filter(function(m){return ids.indexOf(m.id)>=0});
+  }else if(mode==='today'){
+    t=state.machines.filter(function(m){
+      return isDue(m,todayDay)||m.force===today||!!m.order;
+    });
+  }else{
+    t=state.machines.filter(function(m){return Array.isArray(m.days)&&m.days.indexOf(selectedMapDay)>=0});
+  }
+
+  $id('mapCount').textContent=t.length+'台';
+  var bounds=[];
+  t.forEach(function(m){
+    if(typeof m.lat!=='number'||typeof m.lng!=='number')return;
+    var html,icon;
+    if(mode==='all'){
+      var routeDay=(m.days&&m.days.length)?m.days[0]:todayDay;
+      html=routePinHtml(routeDay);
+      icon=L.divIcon({className:'vendrive-route-pin',html:html,iconSize:[29,29],iconAnchor:[14.5,14.5]});
+    }else if(mode==='weekday'){
+      html=makerPinHtml(m.maker);
+      icon=L.divIcon({className:'vendrive-maker-pin',html:html,iconSize:[29,29],iconAnchor:[14.5,14.5]});
+    }else if(mode==='tomorrow'){
+      var tomorrowCls=markerClass(m);
+      html=tomorrowCls==='task'?'<div class="taskPinDot">✓</div>':'<div class="pinDot '+tomorrowCls+'"></div>';
+      icon=L.divIcon({className:'vendrive-pin',html:html,iconSize:[25,25],iconAnchor:[12.5,12.5]});
+    }else{
+      var due=isDue(m,todayDay);
+      if(m.order){
+        var orderCls=markerClass(m);
+        html='<div class="pinDot '+orderCls+'"></div>';
+      }else if(m.visited){
+        html='<div class="pinDot done todayDonePin"></div>';
+      }else if(!due && m.force!==today){
+        html='<div class="mapSlashPin">／</div>';
+      }else{
+        var cls=markerClass(m);
+        html=cls==='task'?'<div class="taskPinDot">✓</div>':'<div class="pinDot '+cls+'"></div>';
+      }
+      icon=L.divIcon({className:'vendrive-pin',html:html,iconSize:[25,25],iconAnchor:[12.5,12.5]});
+    }
+    var mk=L.marker([m.lat,m.lng],{icon:icon,title:m.name});
+    mk.on('click',function(){openMachine(m.id,m.order?'order':'normal')});
+    mk.addTo(machineLayer);bounds.push([m.lat,m.lng]);
+  });
+
+  (state.offices||[]).forEach(function(o){
+    if(typeof o.lat!=='number'||typeof o.lng!=='number')return;
+    var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]});
+    var mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);
+    mk.bindTooltip(o.name||'営業所',{direction:'top',offset:[0,-12]});
+    mk.on('click',function(){navigateToMachine(o)});
+    bounds.push([o.lat,o.lng]);
+  });
+
+  var box=$id('mapList');box.innerHTML='';
+  t.forEach(function(m){box.appendChild(card(m,'map'))});
+  if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">このルートの表示対象はありません。</div>';
+}
+
+function renderMachines(list){
+  var day=$id('machineDayFilter')?$id('machineDayFilter').value:'all', maker=$id('machineMakerFilter')?$id('machineMakerFilter').value:'all';
+  list=list.filter(function(m){return day==='all'||(m.days||[]).indexOf(day)>=0}).filter(function(m){return maker==='all'||makerGroup(m.maker)===maker});
+  var box=$id('machineList');box.innerHTML='';list.forEach(function(m){box.appendChild(card(m,'machines'))});
+  if(!list.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">条件に一致する自販機はありません。</div>';
+}
+function renderOrders(){
+  cleanupHistory();var pending=state.machines.filter(function(m){return m.order});$id('pendingCount').textContent=pending.length+'件';var box=$id('ordersList');box.innerHTML='';
+  pending.forEach(function(m){var o=m.order,e=document.createElement('div');e.className='item order urgent';e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="meta">'+esc(o.type)+(o.sub?' ＞ '+esc(o.sub):'')+' ・ '+esc(o.detail||'詳細なし')+' ・ '+timeLeft(o.createdAt)+'</div></div><button class="badge b-purple">対応完了</button>';e.onclick=function(){openMachine(m.id,'order')};e.querySelector('button').onclick=function(ev){ev.stopPropagation();completeOrder(m.id)};box.appendChild(e)});
+  if(!pending.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">対応待ちのオーダーはありません。</div>';
+  var hbox=$id('historyList');hbox.innerHTML='';(state.history||[]).slice().sort(function(a,b){return b.completedAt-a.completedAt}).forEach(function(h){var e=document.createElement('div');e.className='history';e.innerHTML='<b>'+esc(h.machineName)+'</b><div class="meta">'+esc(h.type)+(h.sub?' ＞ '+esc(h.sub):'')+(h.detail?' ・ '+esc(h.detail):'')+'<br>'+new Date(h.completedAt).toLocaleString('ja-JP')+'</div>';hbox.appendChild(e)});if(!hbox.children.length)hbox.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">過去30日間の対応履歴はありません。</div>';
+}
+function renderAll(){renderHeader();renderTodayWithTasks();renderMachines(state.machines);renderOrders();renderTasks();renderMakers();refreshMakerOptions();renderOffices();if(!document.getElementById('mapPage').classList.contains('hidden'))renderMap()}
+var deleteMachineTargetId=null;
+function confirmDeleteMachine(id){
+  var m=state.machines.find(function(x){return x.id===id});if(!m)return;
+  deleteMachineTargetId=id;
+  $id('deleteMachineText').textContent='「'+m.name+'」を削除します。この操作は元に戻せません。';
+  openModal('deleteMachineModal');
+}
+function deleteMachine(){
+  if(!deleteMachineTargetId)return;
+  var id=deleteMachineTargetId;
+  state.machines=state.machines.filter(function(m){return m.id!==id});
+  if(state.tomorrowPlan&&Array.isArray(state.tomorrowPlan.ids)){
+    state.tomorrowPlan.ids=state.tomorrowPlan.ids.filter(function(x){return x!==id});
+  }
+  if(selectedMachine&&selectedMachine.id===id)selectedMachine=null;
+  if(selectedOrderMachine&&selectedOrderMachine.id===id)selectedOrderMachine=null;
+  deleteMachineTargetId=null;
+  persist();closeModal('deleteMachineModal');renderAll();toast('自販機を削除しました');
+}
+function openMachine(id,mode){
+  var m=state.machines.find(function(x){return x.id===id});if(!m)return;selectedMachine=m;
+  $id('machineModalTitle').textContent=m.name;$id('detailMaker').textContent=m.maker||'メーカー未設定';document.querySelectorAll('#mDaysPicker button').forEach(function(b){b.classList.toggle('active',(m.days||[]).indexOf(b.dataset.day)>=0)});var activeTasks=(state.tasks||[]).filter(function(t){return !t.completed&&(t.target==='all'||makerGroup(m.maker)===t.target)});if(activeTasks.length){$id('detailTaskText').textContent=activeTasks[0].text+(activeTasks.length>1?' ほか'+(activeTasks.length-1)+'件':'');$id('detailTaskMaker').textContent=activeTasks[0].target==='all'?'全メーカー':'対象：'+activeTasks[0].target;$id('detailTask').classList.remove('hidden')}else{$id('detailTask').classList.add('hidden')}applyMakerSelect('mMaker','mMakerCustom',m.maker||'');$id('detailLast').textContent=m.last||'未登録';var next=nextVisitDate(m);$id('detailNext').textContent=next?next+'（'+WEEK[new Date(next+'T00:00:00').getDay()]+'）':'未定';$id('detailSales').textContent=m.sales||'販売データ未登録';if(m.order){$id('detailOrderType').textContent=m.order.type+(m.order.sub?' ＞ '+m.order.sub:'');$id('detailOrderText').textContent=(m.order.detail||'詳細なし')+' ・ '+timeLeft(m.order.createdAt);$id('detailOrder').classList.remove('hidden')}else{$id('detailOrder').classList.add('hidden')};$id('mName').value=m.name;$id('mCode').value=m.code||'';$id('mAddress').value=m.address||'';$id('mCycle').value=m.cycle||'1週間に1回';$id('mLast').value=m.last||today;$id('mTime').value=m.time||'指定なし';$id('mSales').value=m.sales||'';$id('mMemo').value=m.memo||'';$id('machineExtra').classList.add('hidden');$id('detailMore').textContent='詳細表示';
+  
+  openModal('machineModal');
+}
+/* ORDER DATA IS STORED SEPARATELY FROM MEMO. */
+function saveMachineData(){
+invalidateAutoTomorrowPlan();if(!selectedMachine)return;var m=selectedMachine;m.name=$id('mName').value.trim()||m.name;m.maker=selectedMakerValue('mMaker','mMakerCustom');m.makerGroup=makerGroup(m.maker);m.code=$id('mCode').value.trim();m.address=$id('mAddress').value.trim();var enteredDays=Array.from(document.querySelectorAll('#mDaysPicker button.active')).map(function(b){return b.dataset.day});if(enteredDays.length)m.days=enteredDays;else if(!Array.isArray(m.days)||!m.days.length)m.days=[todayDay];m.cycle=$id('mCycle').value;m.last=$id('mLast').value||m.last;m.time=$id('mTime').value||'指定なし';m.sales=$id('mSales').value;m.memo=$id('mMemo').value;ensureMakerColors();persist();closeModal('machineModal');renderAll();toast('保存しました')}
+function finishVisitCore(){
+if(!selectedMachine)return;
+var hadOrder=!!selectedMachine.order;
+if(hadOrder){
+  var o=selectedMachine.order;
+  state.history.push({machineId:selectedMachine.id,machineName:selectedMachine.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});
+  selectedMachine.order=null;
+  selectedMachine.visited=true;selectedMachine.last=today;
+  selectedMachine.force=null;
+  selectedMachine.skip=null;
+}else{
+  selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;
+}
+persist();closeModal('machineModal');closeModal('orderVisitConfirm');renderAll();toast(hadOrder?'オーダー対応完了':'訪問完了')
+}
+function completeVisit(){
+if(!selectedMachine)return;
+if(selectedMachine.order){$id('orderVisitConfirmDetail').textContent=selectedMachine.order.type+(selectedMachine.order.sub?' ＞ '+selectedMachine.order.sub:'');closeModal('machineModal');openModal('orderVisitConfirm');return}
+finishVisitCore()
+}
+function skipVisit(){if(!selectedMachine)return;selectedMachine.skip=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の訪問をスキップ')}
+function forceVisit(){if(!selectedMachine)return;selectedMachine.force=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の臨時訪問に追加')}
+function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var o=m.order;state.history.push({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();toast('オーダー対応完了')}
+function openOrder(){selectedOrderMachine=null;selectedOrderType=null;selectedProductSub=null;$id('orderMachineSearch').value='';$id('orderResults').classList.add('hidden');$id('selectedMachine').classList.add('hidden');$id('orderDetail').value='';document.querySelectorAll('.orderType,.subtype').forEach(function(e){e.classList.remove('active')});$id('productSub').classList.add('hidden');openModal('orderModal')}
+function orderSearch(){
+  var q=$id('orderMachineSearch').value.trim().toLowerCase();var box=$id('orderResults');box.innerHTML='';var list=state.machines.filter(function(m){return !q||[m.name,m.address,m.code,m.id].join(' ').toLowerCase().indexOf(q)>=0}).slice(0,12);
+  list.forEach(function(m){var e=document.createElement('div');e.className='result';e.innerHTML='<b>'+esc(m.name)+'</b><small>'+esc(m.address||'住所未登録')+' ・ '+esc(m.code||m.id)+'</small>';e.onclick=function(){selectedOrderMachine=m;$id('selectedMachine').textContent='選択中：'+m.name;$id('selectedMachine').classList.remove('hidden');box.classList.add('hidden');};box.appendChild(e)});
+  box.classList.toggle('hidden',!list.length)
+}
+function saveOrder(){
+invalidateAutoTomorrowPlan();
+  if(!selectedOrderMachine){toast('自販機を選択してください');return}
+  if(!selectedOrderType){toast('オーダー内容を選択してください');return}
+  if(selectedOrderType==='商品関連'&&!selectedProductSub){toast('商品関連の種類を選択してください');return}
+  var type=selectedOrderType,sub=selectedOrderType==='商品関連'?selectedProductSub:'',detail=$id('orderDetail').value.trim();
+  selectedOrderMachine.order={type:type,sub:sub,detail:detail,createdAt:Date.now()};persist();closeModal('orderModal');renderAll();toast('オーダーを登録しました')
+}
+function tomorrowDate(){
+  var d=new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+1);
+  return d;
+}
+function eligibleTomorrow(m){
+  var d=tomorrowDate(),day=WEEK[d.getDay()],t=iso(d);
+  if(m.skip===t)return false;
+  if(m.force===t)return true;
+  if(m.order)return true;
+  if(!m.days||m.days.indexOf(day)<0)return false;
+  if(m.cycle==='毎日')return true;
+  if(!m.last||!CYCLES[m.cycle])return true;
+  return diff(t,m.last)>=CYCLES[m.cycle];
+}
+function tomorrowDefaultIds(){
+  return state.machines.filter(eligibleTomorrow).map(function(m){return m.id});
+}
+function renderTomorrowAddList(){
+  var box=$id('tomorrowAddList');if(!box)return;
+  var q=($id('tomorrowAddSearch').value||'').trim().toLowerCase();
+  var d=tomorrowDate(),t=iso(d);
+  var saved=state.tomorrowPlan&&state.tomorrowPlan.date===t&&state.tomorrowPlan.manual===true?state.tomorrowPlan:null;
+  var ids=saved?saved.ids:tomorrowDefaultIds();
+  var arr=state.machines.filter(function(m){
+    if(ids.indexOf(m.id)>=0)return false;
+    var hay=[m.name,m.code,m.maker,m.address].join(' ').toLowerCase();
+    return !q||hay.indexOf(q)>=0;
+  });
+  box.innerHTML='';
+  if(!arr.length){box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">追加できる自販機がありません。</div>';return}
+  arr.forEach(function(m){
+    var e=document.createElement('div');e.className='item';
+    e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="meta">'+esc(m.maker||'メーカー未設定')+' ・ '+esc(m.address||m.code||'')+'</div></div><button class="pill">追加</button>';
+    e.querySelector('button').onclick=function(){
+      var current=state.tomorrowPlan&&state.tomorrowPlan.date===t&&state.tomorrowPlan.manual===true?state.tomorrowPlan:{date:t,ids:tomorrowDefaultIds(),manual:false};
+      if(current.ids.indexOf(m.id)<0)current.ids.push(m.id);
+      current.manual=true;state.tomorrowPlan=current;persist();
+      closeModal('tomorrowAddModal');openTomorrow();
+    };
+    box.appendChild(e);
+  });
+}
+function openTomorrowAdd(){
+  $id('tomorrowAddSearch').value='';
+  renderTomorrowAddList();
+  openModal('tomorrowAddModal');
+}
+function openTomorrow(){
+  var d=tomorrowDate(),t=iso(d),defaultIds=tomorrowDefaultIds();
+  // 古いバージョンで保存された「空の予定」は採用せず、必ず明日の条件から再計算する。
+  // ユーザーが明示的に除外/変更して保存した予定だけ manual=true として維持する。
+  var saved=state.tomorrowPlan&&state.tomorrowPlan.date===t&&state.tomorrowPlan.manual===true?state.tomorrowPlan:null;
+  var p=saved||{date:t,ids:defaultIds,manual:false};
+  var items=p.ids.map(function(id){return state.machines.find(function(m){return m.id===id})}).filter(Boolean);
+  $id('tomorrowDate').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+WEEK[d.getDay()]+'）';$id('tomorrowVisits').textContent=items.length;$id('tomorrowTimed').textContent=items.filter(function(m){return m.time&&m.time!=='指定なし'}).length;$id('tomorrowOrders').textContent=items.filter(function(m){return m.order}).length;$id('tomorrowSummary').textContent=(items.filter(function(m){return m.time&&m.time!=='指定なし'}).length?'時間指定あり':'時間指定なし')+(items.some(function(m){return m.order})?' ・ オーダーあり':'');
+  var box=$id('tomorrowList');box.innerHTML='';items.forEach(function(m){var e=document.createElement('div');e.className='item';e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="meta">'+esc(m.cycle)+' ・ '+esc(m.time)+(m.order?' ・ '+esc(m.order.type):'')+'</div></div><button class="pill">除外</button>';e.querySelector('button').onclick=function(){p.ids=p.ids.filter(function(x){return x!==m.id});p.manual=true;state.tomorrowPlan=p;persist();openTomorrow()};box.appendChild(e)});
+  if(!items.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">明日の訪問予定はありません。</div>';
+  var tb=$id('tomorrowTasks');if(tb){var active=(state.tasks||[]).filter(function(t){return !t.completed&&(t.target==='all'||items.some(function(m){return makerGroup(m.maker)===t.target}))});tb.innerHTML='';if(!active.length)tb.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">明日の対象タスクはありません。</div>';else active.forEach(function(t){var e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+'</div></div><span class="badge b-red">未完了</span>';tb.appendChild(e)})}
+  state.tomorrowPlan=p;openModal('tomorrowModal')
+}
+function finishDay(){
+  if(!confirm('本日の業務を終了しますか？'))return;
+  toast('本日の業務を終了しました');setTimeout(function(){if(confirm('明日の予定を確認しますか？'))openTomorrow()},220)
+}
+function addMachineAt(lat,lng){addPoint={lat:lat,lng:lng};applyMakerSelect('newMaker','newMakerCustom',state.makers[0]||'');document.querySelectorAll('#newDaysPicker button').forEach(function(b){b.classList.toggle('active',b.dataset.day===todayDay)});$id('newGps').value=lat.toFixed(6)+', '+lng.toFixed(6);$id('newAddress').value='住所を取得中…';openModal('addMachineModal');reverseGeocode(lat,lng)}
+function reverseGeocode(lat,lng){
+  $id('newAddress').value='住所を取得中…';
+  clearTimeout(geoTimer);geoTimer=setTimeout(function(){fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng)+'&zoom=18&addressdetails=1&accept-language=ja').then(function(r){if(!r.ok)throw new Error('geocode '+r.status);return r.json()}).then(function(d){$id('newAddress').value=d.display_name||''}).catch(function(){$id('newAddress').value='住所を取得できませんでした。手動入力してください。'})},1100)}
+function saveNewMachine(){
+invalidateAutoTomorrowPlan();
+  var id=($id('newCode').value.trim()||'M-'+Date.now().toString().slice(-6));if(state.machines.some(function(m){return m.code===id||m.id===id})){toast('管理番号が重複しています');return}
+  if(!addPoint){toast('マップ上の位置を指定してください');return}
+  var pickedDays=Array.from(document.querySelectorAll('#newDaysPicker button.active')).map(function(b){return b.dataset.day});if(!pickedDays.length)pickedDays=[todayDay];var chosenMaker=selectedMakerValue('newMaker','newMakerCustom')||state.makers[0]||'';state.machines.push({id:id,name:$id('newName').value.trim()||'新規自販機',maker:chosenMaker,makerGroup:makerGroup(chosenMaker),code:id,address:$id('newAddress').value.trim(),days:pickedDays,cycle:'1週間に1回',last:null,time:'指定なし',sales:'',memo:'',lat:addPoint.lat,lng:addPoint.lng});ensureMakerColors();persist();closeModal('addMachineModal');renderAll();if(leafletMap&&!document.getElementById('mapPage').classList.contains('hidden')){setTimeout(function(){leafletMap.invalidateSize({pan:false});renderMap()},50)}toast('自販機を登録しました');addPoint=null
+}
+
+
+function makerGroup(name){
+ var n=String(name||'').trim().toLowerCase().replace(/\s+/g,'');
+ if(!n)return'未設定';
+ if(n.indexOf('コカ・コーラ')>=0||n.indexOf('コカコーラ')>=0||n.indexOf('coca-cola')>=0||n.indexOf('coca cola')>=0)return'コカ・コーラ';
+ if(n.indexOf('サントリー')>=0||n.indexOf('suntory')>=0)return'サントリー';
+ if(n.indexOf('キリン')>=0||n.indexOf('kirin')>=0)return'KIRIN';
+ if(n.indexOf('アサヒ')>=0||n.indexOf('asahi')>=0)return'アサヒ';
+ if(n.indexOf('伊藤園')>=0||n.indexOf('itoen')>=0)return'伊藤園';
+ if(n.indexOf('ダイドー')>=0||n.indexOf('dydo')>=0)return'DyDo';
+ if(n.indexOf('ポッカサッポロ')>=0||n.indexOf('pokka')>=0||n.indexOf('sapporo')>=0)return'ポッカサッポロ';
+ if(n.indexOf('大塚製薬')>=0||n.indexOf('otsuka')>=0)return'大塚製薬';
+ return String(name).trim();
+}
+var STANDARD_MAKERS=['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'];
+function makerOptions(){
+ var groups=STANDARD_MAKERS.slice();
+ state.machines.forEach(function(m){var g=makerGroup(m.maker);if(g!=='未設定'&&groups.indexOf(g)<0)groups.push(g)});
+ state.makers.forEach(function(m){var g=makerGroup(m);if(g!=='未設定'&&g!=='その他（手入力）'&&groups.indexOf(g)<0)groups.push(g)});
+ return groups;
+}
+function makerSelectHtml(selected){
+ var opts=makerOptions(),html=opts.map(function(m){return'<option value="'+esc(m)+'">'+esc(m)+'</option>'}).join('');
+ html+='<option value="__CUSTOM__">その他（手入力）</option>';
+ return html;
+}
+function applyMakerSelect(selectId,inputId,value){
+ var sel=$id(selectId),inp=$id(inputId);if(!sel)return;
+ sel.innerHTML=makerSelectHtml();
+ var g=makerGroup(value);
+ if(g==='未設定'||makerOptions().indexOf(g)<0){sel.value='__CUSTOM__';if(inp){inp.value=value||'';inp.classList.remove('hidden')}}else{sel.value=g;if(inp){inp.value='';inp.classList.add('hidden')}}
+}
+function selectedMakerValue(selectId,inputId){
+ var sel=$id(selectId);if(!sel)return'';
+ if(sel.value==='__CUSTOM__')return($id(inputId)?.value||'').trim();
+ return sel.value;
+}
+
+function renderMakers(){
+ var box=$id('makerList');
+ if(box){box.innerHTML='';makerOptions().forEach(function(m){var count=state.machines.filter(function(x){return makerGroup(x.maker)===m}).length;var e=document.createElement('div');e.className='item';e.innerHTML='<div><b>'+esc(m)+'</b><div class="meta">'+count+'台</div></div>';box.appendChild(e)})}
+ var sum=$id('makerSummary');if(sum)sum.textContent=makerOptions().length+'グループ：'+makerOptions().join(' ・ ')
+}
+function refreshMakerOptions(){
+ var opts=makerOptions();
+ var a=$id('taskTarget');if(a)a.innerHTML='<option value="all">全メーカー</option>'+opts.map(function(m){return'<option value="'+esc(m)+'">'+esc(m)+'</option>'}).join('');
+ var f=$id('machineMakerFilter');if(f){var keep=f.value;f.innerHTML='<option value="all">メーカー：すべて</option>'+opts.map(function(m){return'<option value="'+esc(m)+'">'+esc(m)+'</option>'}).join('');if(Array.from(f.options).some(function(o){return o.value===keep}))f.value=keep}
+}
+function renderTasks(){
+ var active=(state.tasks||[]).filter(function(t){return !t.completed}),box=$id('taskList');if(!box)return;$id('taskCount').textContent=active.length;box.innerHTML='';
+ if(!active.length){box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';return}
+ active.forEach(function(t){var ms=state.machines.filter(function(m){return t.target==='all'||makerGroup(m.maker)===t.target});var done=ms.filter(function(m){return m.taskDone&&m.taskDone[t.id]}).length;var e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+ms.length+'台'+(ms.length?' ・ 完了 '+done+'/'+ms.length+'台':'')+'</div></div><button class="badge b-green">タスク完了</button>';e.querySelector('button').onclick=function(){t.completed=true;t.completedAt=Date.now();persist();renderAll()};box.appendChild(e)})
+}
+
+function makeSwipeComplete(wrapper,m){
+ var card=wrapper.querySelector('.swipeCard'),sx=0,sy=0,dx=0,tracking=false;
+ function reset(){card.classList.remove('swiping');wrapper.classList.remove('revealed');card.style.transform='translateX(0)';dx=0;tracking=false}
+ card.addEventListener('touchstart',function(e){if(e.touches.length!==1)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;card.classList.add('swiping')},{passive:true});
+ card.addEventListener('touchmove',function(e){if(!tracking)return;var x=e.touches[0].clientX,y=e.touches[0].clientY,mx=x-sx,my=y-sy;if(Math.abs(my)>Math.abs(mx)+8){reset();return}dx=Math.min(0,Math.max(-105,mx));if(dx<0){card.style.transform='translateX('+dx+'px)';if(dx<=-12)wrapper.classList.add('revealed')}else wrapper.classList.remove('revealed')},{passive:true});
+ card.addEventListener('touchend',function(){if(!tracking)return;card.classList.remove('swiping');if(dx<=-70){wrapper.classList.add('revealed');card.style.transform='translateX(-92px)';setTimeout(function(){selectedMachine=m;completeVisit()},140)}else reset()});
+}
+
+function renderTodayWithTasks(){
+ renderToday();var old=$id('todayTaskBlock');if(old)old.remove();var a=(state.tasks||[]).filter(function(t){return !t.completed});if(!a.length)return;
+ var b=document.createElement('div');b.id='todayTaskBlock';b.className='section';b.innerHTML='<div class="sectionhead"><b>重要タスク</b><span class="badge b-red">'+a.length+'件</span></div>';
+ a.slice(0,5).forEach(function(t){var e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+'</div></div><span class="badge b-red">未完了</span>';b.appendChild(e)});
+ var h=$id('todayPage').querySelector('.hero');h.parentNode.insertBefore(b,h)
+}
+
+function initDays(){
+  var b=$id('mapDays'),items=['本日','月','火','水','木','金','土','日'];
+  b.innerHTML=items.map(function(x){
+    var active=x==='本日'?(mapTodayMode&&!mapTomorrowMode&&!allRoutes):(x===selectedMapDay&&!mapTodayMode&&!mapTomorrowMode&&!allRoutes);
+    var color=x==='本日'?'#111':dayRouteColor(x);
+    return'<button class="day '+(active?'active':'')+'" data-day="'+x+'" style="--day-color:'+color+'">'+x+'</button>';
+  }).join('');
+  b.querySelectorAll('.day').forEach(function(e){
+    e.style.color=e.classList.contains('active')?'#fff':e.style.getPropertyValue('--day-color');
+    e.onclick=function(){
+      if(e.dataset.day==='本日'){mapTodayMode=true;mapTomorrowMode=false;allRoutes=false}
+      else{mapTodayMode=false;mapTomorrowMode=false;selectedMapDay=e.dataset.day;allRoutes=false}
+      $id('allRoutes').textContent='全ルート';initDays();renderMap()
+    }
+  })
+}
+function bind(){
+  $id('officeAddList').onclick=startOfficeAdd;
+  function startOfficeAdd(){
+ officePoint=null;
+ $id('officeName').value='';
+ $id('officeAddress').value='';
+ $id('officeGps').value='MAPで位置指定';
+ addingMachine=false;
+ addingOffice=true;
+ $id('map').classList.add('adding');
+ toast('MAPをタップして営業所位置を指定');
+}
+$id('officeAdd').onclick=startOfficeAdd;
+$id('officeAddTop').onclick=function(){startOfficeAdd();};
+  $id('closeOffice').onclick=function(){closeModal('officeModal');officePoint=null;addingOffice=false;$id('map').classList.remove('adding')};
+  $id('officePick').onclick=function(){closeModal('officeModal');addingOffice=true;toast('MAPをタップして営業所位置を指定')};
+  $id('officeSave').onclick=saveOffice;
+  document.querySelectorAll('#mDaysPicker button').forEach(function(b){b.onclick=function(){b.classList.toggle('active')}});
+  document.querySelectorAll('#newDaysPicker button').forEach(function(b){b.onclick=function(){b.classList.toggle('active')}});
+  document.querySelectorAll('.tabs button').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('active')});b.classList.add('active');document.querySelectorAll('.page').forEach(function(p){p.classList.add('hidden')});$id(b.dataset.page).classList.remove('hidden');if(b.dataset.page==='mapPage'){ensureMap();setTimeout(function(){if(leafletMap){leafletMap.invalidateSize();renderMap()}},50)}}})
+  $id('allRoutes').onclick=function(){allRoutes=!allRoutes;mapTodayMode=false;mapTomorrowMode=false;$id('allRoutes').textContent=allRoutes?'曜日ルート':'全ルート';initDays();renderMap()}
+  $id('finishDay').onclick=finishDay;$id('todayTodo').parentNode.onclick=function(){showTodayStat('todo')};$id('todayVisited').parentNode.onclick=function(){showTodayStat('done')};$id('todayOrders').parentNode.onclick=function(){showTodayStat('order')};$id('closeStats').onclick=function(){closeModal('statsModal')};$id('orderVisitDone').onclick=finishVisitCore;$id('orderVisitKeep').onclick=function(){if(selectedMachine){selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;persist();closeModal('orderVisitConfirm');renderAll();toast('訪問完了')}}
+  $id('closeTomorrow').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowAdd').onclick=openTomorrowAdd;$id('closeTomorrowAdd').onclick=function(){closeModal('tomorrowAddModal')};$id('tomorrowAddSearch').oninput=renderTomorrowAddList;$id('tomorrowMap').onclick=function(){
+  closeModal('tomorrowModal');
+  // 明日の予定をその場で最新計算。曜日登録台の全表示にはしない。
+  var td=tomorrowDate(),tt=iso(td);
+  if(!(state.tomorrowPlan&&state.tomorrowPlan.date===tt&&state.tomorrowPlan.manual===true)){
+    state.tomorrowPlan={date:tt,ids:tomorrowDefaultIds(),manual:false};
+    persist();
+  }
+  mapTomorrowMode=true;mapTodayMode=false;allRoutes=false;
+  $id('allRoutes').textContent='全ルート';
+  var mapTab=document.querySelector('.tabs button[data-page="mapPage"]');
+  if(mapTab)mapTab.click();
+  initDays();renderMap();
+  toast('明日の予定だけをMAPに表示しています');
+};$id('tomorrowLater').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowSave').onclick=function(){if(state.tomorrowPlan)state.tomorrowPlan.manual=true;persist();closeModal('tomorrowModal');toast('明日の予定を保存しました')}
+  $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
+  $id('addOrder').onclick=openOrder;
+  $id('addTask').onclick=function(){refreshMakerOptions();$id('taskText').value='';openModal('taskModal')};
+  $id('closeTask').onclick=function(){closeModal('taskModal')};$id('cancelTask').onclick=function(){closeModal('taskModal')};
+  $id('saveTask').onclick=function(){var t=$id('taskText').value.trim();if(!t){toast('タスク内容を入力してください');return}state.tasks.push({id:'T-'+Date.now(),text:t,target:$id('taskTarget').value,createdAt:Date.now(),completed:false});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
+  $id('manageMakers').onclick=function(){renderMakers();openModal('makerModal')};$id('closeMaker').onclick=function(){closeModal('makerModal')};$id('cancelMaker').onclick=function(){closeModal('makerModal')};
+  $id('saveMaker').onclick=function(){var n=$id('makerName').value.trim();if(!n){toast('メーカー名を入力してください');return}if(state.makers.indexOf(n)>=0){toast('同じメーカーが登録されています');return}state.makers.push(n);ensureMakerColors();$id('makerName').value='';persist();renderMakers();refreshMakerOptions();toast('メーカーを追加しました')};$id('closeOrder').onclick=function(){closeModal('orderModal')};$id('cancelOrder').onclick=function(){closeModal('orderModal')};$id('orderMachineSearch').oninput=orderSearch;$id('saveOrder').onclick=saveOrder
+  document.querySelectorAll('.orderType').forEach(function(b){b.onclick=function(){document.querySelectorAll('.orderType').forEach(function(x){x.classList.remove('active')});b.classList.add('active');selectedOrderType=b.dataset.type;selectedProductSub=null;$id('productSub').classList.toggle('hidden',selectedOrderType!=='商品関連');document.querySelectorAll('.subtype').forEach(function(x){x.classList.remove('active')})}})
+  document.querySelectorAll('.subtype').forEach(function(b){b.onclick=function(){document.querySelectorAll('.subtype').forEach(function(x){x.classList.remove('active')});b.classList.add('active');selectedProductSub=b.dataset.sub}})
+  $id('machineSearch').oninput=function(){var q=this.value.trim().toLowerCase();var list=state.machines.filter(function(m){return !q||[m.name,m.address,m.code,m.id].join(' ').toLowerCase().indexOf(q)>=0});var r=$id('machineResults');r.innerHTML='';list.slice(0,12).forEach(function(m){var e=document.createElement('div');e.className='result';e.innerHTML='<b>'+esc(m.name)+'</b><small>'+esc(m.address||'住所未登録')+' ・ '+esc(m.code||m.id)+'</small>';e.onclick=function(){openMachine(m.id)};r.appendChild(e)});r.classList.toggle('hidden',!q||!list.length);if(!q)renderMachines(state.machines)}
+  $id('machineDayFilter').onchange=function(){renderMachines(state.machines)};$id('machineMakerFilter').onchange=function(){renderMachines(state.machines)};
+  $id('newMaker').onchange=function(){var e=$id('newMakerCustom');if(this.value==='__CUSTOM__')e.classList.remove('hidden');else{e.classList.add('hidden');e.value=''}};
+  $id('mMaker').onchange=function(){var e=$id('mMakerCustom');if(this.value==='__CUSTOM__')e.classList.remove('hidden');else{e.classList.add('hidden');e.value=''}};
+  $id('addMachine').onclick=function(){addPoint=null;applyMakerSelect('newMaker','newMakerCustom',state.makers[0]||'');document.querySelectorAll('#newDaysPicker button').forEach(function(b){b.classList.toggle('active',b.dataset.day===todayDay)});$id('newGps').value='未指定（後からマップで設定）';openModal('addMachineModal')}
+  $id('mapAdd').onclick=function(e){e.stopPropagation();addingMachine=true;$id('map').classList.add('adding');toast('登録位置をタップしてください')}
+  $id('locateMe').onclick=function(){if(!navigator.geolocation){toast('この端末では現在地取得に対応していません');return}toast('現在地を取得しています…');navigator.geolocation.getCurrentPosition(function(pos){var lat=pos.coords.latitude,lng=pos.coords.longitude;currentLocationLayer.clearLayers();L.circleMarker([lat,lng],{radius:8,color:'#fff',weight:3,fillColor:'#111',fillOpacity:1}).addTo(currentLocationLayer);leafletMap.setView([lat,lng],16);toast('現在地を表示しました')},function(){toast('現在地を取得できませんでした')},{enableHighAccuracy:true,timeout:10000,maximumAge:30000})}
+  $id('closeAdd').onclick=function(){closeModal('addMachineModal');addPoint=null};$id('cancelAdd').onclick=function(){closeModal('addMachineModal');addPoint=null};$id('saveAdd').onclick=saveNewMachine
+
+  var addrBox=$id('addressResults'),addrInput=$id('addressSearch'),addrTimer=null;
+  addrInput.oninput=function(){var q=this.value.trim();clearTimeout(addrTimer);if(!q){addrBox.classList.add('hidden');addrBox.innerHTML='';return}addrTimer=setTimeout(function(){addrBox.classList.remove('hidden');addrBox.innerHTML='<div class="result"><b>住所を検索中…</b></div>';fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=ja&q='+encodeURIComponent(q)).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(items){addrBox.innerHTML='';if(!items.length){addrBox.innerHTML='<div class="result"><b>候補が見つかりません</b></div>';return}items.forEach(function(x){var e=document.createElement('div');e.className='result';e.innerHTML='<b>'+esc(x.display_name)+'</b>';e.onclick=function(){var lat=parseFloat(x.lat),lng=parseFloat(x.lon);if(!isFinite(lat)||!isFinite(lng))return;ensureMap();leafletMap.setView([lat,lng],17);addPoint={lat:lat,lng:lng};$id('newGps').value=lat.toFixed(6)+', '+lng.toFixed(6);$id('newAddress').value=x.display_name;$id('newMaker').innerHTML=state.makers.map(function(m){return'<option>'+esc(m)+'</option>'}).join('');addrBox.classList.add('hidden');openModal('addMachineModal')};addrBox.appendChild(e)})}).catch(function(){addrBox.innerHTML='<div class="result"><b>住所検索に失敗しました</b><small>通信状況を確認してください</small></div>'})},450)};
+  $id('zoomIn').onclick=function(){leafletMap.zoomIn()};$id('zoomOut').onclick=function(){leafletMap.zoomOut()}
+}
+load();initDays();bind();renderAll();
+window.addEventListener('beforeunload',function(){persist()});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')persist()});
+
+})();
+</script>
+</body>
+</html>
