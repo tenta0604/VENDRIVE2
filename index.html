@@ -111,7 +111,7 @@ html,body{overscroll-behavior-y:none}body{-webkit-user-select:none;user-select:n
 <section id="machinesPage" class="page hidden">
 <div class="row"><div><div class="ey">MACHINES</div><div class="title">自販機</div><div class="subtitle">設備・訪問・販売データを管理</div></div><button class="primary pill" id="addMachine">＋追加</button></div>
 <div class="search"><span class="searchIcon">⌕</span><input id="machineSearch" placeholder="自販機名・住所・管理番号を検索"></div><div id="machineResults" class="results hidden"></div><div class="machineFilters"><select id="machineDayFilter"><option value="all">曜日：すべて</option><option>月</option><option>火</option><option>水</option><option>木</option><option>金</option><option>土</option><option>日</option></select><select id="machineMakerFilter"><option value="all">メーカー：すべて</option></select></div>
-<div class="section"><div class="sectionhead"><b>メーカー設定</b><button class="pill" id="manageMakers">管理</button></div><div id="makerSummary" class="muted" style="margin-top:6px"></div></div><div class="section" id="machineList"></div>
+<div class="section"><div class="sectionhead"><b>メーカー設定</b><button class="pill" id="manageMakers">管理</button></div><div id="makerSummary" class="muted" style="margin-top:6px"></div></div><div class="section"><div class="sectionhead"><b>データバックアップ</b><button class="secondary" id="exportBackup">バックアップを書き出す</button></div><div class="muted" style="margin-top:6px">この端末のVENDRIVE2データをJSONファイルで保存します。</div></div><div class="section" id="machineList"></div>
 </section>
 
 <section id="ordersPage" class="page hidden">
@@ -249,9 +249,19 @@ function toast(t){var e=$id('toast');e.textContent=t;e.classList.add('show');cle
 function $id(x){return document.getElementById(x)}
 function openModal(id){$id(id).classList.add('open')}
 function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.01-phase1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 function stateSnapshot(){return JSON.parse(JSON.stringify(state))}
-function persist(){
+function exportBackup(){
+  try{
+    var backup={kind:'VENDRIVE2_BACKUP',formatVersion:BACKUP_FORMAT_VERSION,appVersion:APP_VERSION,createdAt:new Date().toISOString(),data:stateSnapshot(),runtime:{lastDay:localStorage.getItem('vendrive2_last_day')||null}};
+    var nowForBackup=new Date(),stamp=iso(nowForBackup)+'-'+String(nowForBackup.getHours()).padStart(2,'0')+String(nowForBackup.getMinutes()).padStart(2,'0')+String(nowForBackup.getSeconds()).padStart(2,'0');
+    var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'});
+    var url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download='vendrive2-backup-'+stamp+'.json';link.style.display='none';document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(url)},0);
+    if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});
+    toast('バックアップを書き出しました');
+  }catch(e){toast('バックアップの作成に失敗しました')}
+}function persist(){
   var raw=JSON.stringify(state);
   try{
     localStorage.setItem(key,raw);
@@ -825,7 +835,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   $id('closeTask').onclick=function(){closeModal('taskModal')};$id('cancelTask').onclick=function(){closeModal('taskModal')};
   $id('saveTask').onclick=function(){var t=$id('taskText').value.trim();if(!t){toast('タスク内容を入力してください');return}state.tasks.push({id:'T-'+Date.now(),text:t,target:$id('taskTarget').value,createdAt:Date.now(),completed:false});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
   $id('manageMakers').onclick=function(){renderMakers();openModal('makerModal')};$id('closeMaker').onclick=function(){closeModal('makerModal')};$id('cancelMaker').onclick=function(){closeModal('makerModal')};
-  $id('saveMaker').onclick=function(){var n=$id('makerName').value.trim();if(!n){toast('メーカー名を入力してください');return}if(state.makers.indexOf(n)>=0){toast('同じメーカーが登録されています');return}state.makers.push(n);ensureMakerColors();$id('makerName').value='';persist();renderMakers();refreshMakerOptions();toast('メーカーを追加しました')};$id('closeOrder').onclick=function(){closeModal('orderModal')};$id('cancelOrder').onclick=function(){closeModal('orderModal')};$id('orderMachineSearch').oninput=orderSearch;$id('saveOrder').onclick=saveOrder
+  $id('saveMaker').onclick=function(){var n=$id('makerName').value.trim();if(!n){toast('メーカー名を入力してください');return}if(state.makers.indexOf(n)>=0){toast('同じメーカーが登録されています');return}state.makers.push(n);ensureMakerColors();$id('makerName').value='';persist();renderMakers();refreshMakerOptions();toast('メーカーを追加しました')};$id('exportBackup').onclick=exportBackup;$id('closeOrder').onclick=function(){closeModal('orderModal')};$id('cancelOrder').onclick=function(){closeModal('orderModal')};$id('orderMachineSearch').oninput=orderSearch;$id('saveOrder').onclick=saveOrder
   document.querySelectorAll('.orderType').forEach(function(b){b.onclick=function(){document.querySelectorAll('.orderType').forEach(function(x){x.classList.remove('active')});b.classList.add('active');selectedOrderType=b.dataset.type;selectedProductSub=null;$id('productSub').classList.toggle('hidden',selectedOrderType!=='商品関連');document.querySelectorAll('.subtype').forEach(function(x){x.classList.remove('active')})}})
   document.querySelectorAll('.subtype').forEach(function(b){b.onclick=function(){document.querySelectorAll('.subtype').forEach(function(x){x.classList.remove('active')});b.classList.add('active');selectedProductSub=b.dataset.sub}})
   $id('machineSearch').oninput=function(){var q=this.value.trim().toLowerCase();var list=state.machines.filter(function(m){return !q||[m.name,m.address,m.code,m.id].join(' ').toLowerCase().indexOf(q)>=0});var r=$id('machineResults');r.innerHTML='';list.slice(0,12).forEach(function(m){var e=document.createElement('div');e.className='result';e.innerHTML='<b>'+esc(m.name)+'</b><small>'+esc(m.address||'住所未登録')+' ・ '+esc(m.code||m.id)+'</small>';e.onclick=function(){openMachine(m.id)};r.appendChild(e)});r.classList.toggle('hidden',!q||!list.length);if(!q)renderMachines(state.machines)}
