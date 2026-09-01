@@ -1,0 +1,8 @@
+{
+  "name": "VENDRIVE2",
+  "short_name": "VENDRIVE2",
+  "display": "standalone",
+  "start_url": "/VENDRIVE2/",
+  "id": "/VENDRIVE2/",
+  "scope": "/VENDRIVE2/"
+}

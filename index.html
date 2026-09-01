@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#111111">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>VENDRIVE</title>
 <style>
 :root{--bg:#f3f4f5;--card:#fff;--ink:#111;--muted:#7b7e84;--line:#e3e4e6;--soft:#eceef0;--shadow:0 10px 30px rgba(0,0,0,.055);--purple:#7c3aed;--red:#dc2626;--orange:#f59e0b;--green:#16a34a}
@@ -12,7 +13,7 @@
 body{min-height:100vh}.app{width:min(100%,430px);min-height:100vh;margin:auto;background:var(--bg)}
 button,input,select,textarea{font:inherit}button{cursor:pointer}
 .header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 16px}
-.brand{display:flex;align-items:center;gap:10px}.mark{width:37px;height:37px;border-radius:12px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900;letter-spacing:-1px}.name{font-size:19px;font-weight:900;letter-spacing:1.6px}.date{font-size:10px;color:var(--muted);margin-top:2px}
+.brand{display:flex;align-items:center;gap:10px}.mark{width:37px;height:37px;border-radius:12px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900;letter-spacing:-1px}.name{font-size:19px;font-weight:900;letter-spacing:1.6px}.date{font-size:10px;color:var(--muted);margin-top:2px}.appVersion{font-size:8px;color:#a0a3a8;margin-top:2px;letter-spacing:.1px}
 .tabs{position:sticky;top:65px;z-index:19;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);white-space:nowrap}.tabs button{min-width:0;border:0;background:transparent;border-radius:10px;padding:9px 2px;font-size:12px;font-weight:850;color:#777}.tabs button.active{background:#111;color:#fff}
 .main{padding:15px}.page{display:block}.hidden{display:none!important}.ey{font-size:9px;letter-spacing:1.4px;color:#92959a;font-weight:900}.title{font-size:25px;line-height:1.15;font-weight:900;margin-top:3px}.subtitle{font-size:11px;color:var(--muted);margin-top:4px}.row{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
 .pill,.secondary,.primary{border:1px solid #ddd;background:#fff;border-radius:11px;padding:9px 11px;font-size:11px;font-weight:850}.primary{background:#111;color:#fff;border-color:#111}
@@ -74,7 +75,7 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
 </style><style>.days .day{border-color:var(--day-color);}.days .day.active{background:var(--day-color);border-color:var(--day-color);color:#fff!important}</style><style>.mapSlashPin{width:25px;height:25px;border:2px solid #d8d8d8;border-radius:50%;display:grid;place-items:center;color:#c9c9c9;font-size:18px;font-weight:900;opacity:.38;background:#f7f7f7}.todayDonePin{opacity:.38!important;filter:grayscale(1)}</style><style>.danger{background:#dc2626!important;color:#fff!important;border:0}</style></head>
 <body>
 <div class="app">
-<header class="header"><div class="brand"><div class="mark">V</div><div><div class="name">VENDRIVE</div><div class="date" id="headerDate"></div></div></div></header>
+<header class="header"><div class="brand"><div class="mark">V</div><div><div class="name">VENDRIVE</div><div class="date" id="headerDate"></div><div class="appVersion" id="appVersion"></div></div></div></header>
 <nav class="tabs">
 <button class="active" data-page="todayPage">本日</button>
 <button data-page="tasksPage">タスク</button><button data-page="mapPage">マップ</button>
@@ -248,7 +249,19 @@ function toast(t){var e=$id('toast');e.textContent=t;e.classList.add('show');cle
 function $id(x){return document.getElementById(x)}
 function openModal(id){$id(id).classList.add('open')}
 function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.01-phase1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4A4',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var versionCheckAt=0,versionCheckInFlight=false;
+function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
+function checkForAppUpdate(){
+ var checkedAt=Date.now();
+ if(versionCheckInFlight||checkedAt-versionCheckAt<300000||typeof fetch!=='function')return;
+ versionCheckAt=checkedAt;versionCheckInFlight=true;
+ fetch('version.json?ts='+checkedAt,{cache:'no-store'}).then(function(response){if(!response.ok)throw new Error('version fetch failed');return response.json()}).then(function(payload){
+  var latest=payload&&typeof payload.version==='string'?payload.version.trim():'';
+  if(!latest||latest===APP_VERSION||currentVersionQuery()===latest)return;
+  location.replace(location.pathname+'?v='+encodeURIComponent(latest));
+ }).catch(function(){}).then(function(){versionCheckInFlight=false});
+}
 function stateSnapshot(){return JSON.parse(JSON.stringify(state))}
 function exportBackup(){
   try{
@@ -384,7 +397,7 @@ function timeLeft(ts){
   var left=86400000-(Date.now()-ts), h=Math.ceil(left/3600000);
   if(h<=0)return'期限超過';if(h<24)return'残り'+h+'時間';return'期限内';
 }
-function renderHeader(){$id('headerDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日（'+todayDay+'）'}
+function renderHeader(){$id('headerDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日（'+todayDay+'）';$id('appVersion').textContent='VENDRIVE2 v'+APP_VERSION}
 function showTodayStat(kind){
 var list=targets(todayDay,false),arr=kind==='todo'?list.filter(function(m){return !m.visited||!!m.order}):kind==='done'?list.filter(function(m){return m.visited&&!m.order}):state.machines.filter(function(m){return !!m.order});
 $id('statsModalTitle').textContent=kind==='todo'?'未訪問':kind==='done'?'訪問済':'オーダー';
@@ -893,9 +906,9 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   addrInput.oninput=function(){var q=this.value.trim();clearTimeout(addrTimer);if(!q){addrBox.classList.add('hidden');addrBox.innerHTML='';return}addrTimer=setTimeout(function(){addrBox.classList.remove('hidden');addrBox.innerHTML='<div class="result"><b>住所を検索中…</b></div>';fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=ja&q='+encodeURIComponent(q)).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(items){addrBox.innerHTML='';if(!items.length){addrBox.innerHTML='<div class="result"><b>候補が見つかりません</b></div>';return}items.forEach(function(x){var e=document.createElement('div');e.className='result';e.innerHTML='<b>'+esc(x.display_name)+'</b>';e.onclick=function(){var lat=parseFloat(x.lat),lng=parseFloat(x.lon);if(!isFinite(lat)||!isFinite(lng))return;ensureMap();leafletMap.setView([lat,lng],17);resetNewMachineForm();addPoint={lat:lat,lng:lng};$id('newGps').value=lat.toFixed(6)+', '+lng.toFixed(6);$id('newAddress').value=x.display_name;addrBox.classList.add('hidden');openModal('addMachineModal')};addrBox.appendChild(e)})}).catch(function(){addrBox.innerHTML='<div class="result"><b>住所検索に失敗しました</b><small>通信状況を確認してください</small></div>'})},450)};
   $id('zoomIn').onclick=function(){leafletMap.zoomIn()};$id('zoomOut').onclick=function(){leafletMap.zoomOut()}
 }
-load();initDays();bind();renderAll();
+load();initDays();bind();renderAll();checkForAppUpdate();
 window.addEventListener('beforeunload',function(){persist()});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')persist()});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')persist();else if(document.visibilityState==='visible')checkForAppUpdate()});
 
 })();
 </script>
