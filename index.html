@@ -37,7 +37,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .orderTypeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}.orderType{padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;text-align:left;font-weight:850;font-size:11px}.orderType.active{border-color:#111;background:#111;color:#fff}
 .subtypes{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.subtype{border:1px solid #ddd;background:#fff;border-radius:99px;padding:8px 10px;font-size:10px;font-weight:850}.subtype.active{background:#111;color:#fff;border-color:#111}
 .history{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:7px}.history b{font-size:11px}.history .meta{font-size:9px}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:120;background:#111;color:#fff;padding:9px 13px;border-radius:99px;font-size:10px;font-weight:850;display:none}.toast.show{display:block}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:120;background:#111;color:#fff;padding:9px 13px;border-radius:99px;font-size:10px;font-weight:850;display:none}.toast.show{display:block}.undoToast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:121;display:flex;align-items:center;gap:10px;max-width:calc(100% - 28px);padding:8px 9px 8px 13px;border:1px solid #2b2b2b;background:#111;color:#fff;border-radius:14px;box-shadow:0 7px 22px #0004;font-size:10px;font-weight:850}.undoToast button{flex:0 0 auto;min-height:32px;padding:0 11px;border:0;border-radius:9px;background:#fff;color:#111;font:inherit;font-weight:900;white-space:nowrap}
 @media(max-width:360px){.tabs button{font-size:11px}.main{padding:12px}.title{font-size:23px}}
 </style>
 <style>
@@ -229,7 +229,7 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
 <div class="modal" id="makerModal"><div class="sheet"><div class="modalTop"><div><div class="ey">MAKERS</div><div class="title">メーカー設定</div></div><button class="pill" id="closeMaker">閉じる</button></div>
 <div id="makerSettingsHome"><div class="section"><div class="sectionhead"><b>使用メーカー</b></div><div id="makerList"></div></div><button class="primary" id="openMakerAdd" style="width:100%;margin-top:6px">＋メーカー追加</button></div>
 <div id="makerEditor" class="makerEditor hidden"><div class="ey">MAKER</div><div class="makerEditorTitle" id="makerEditorTitle">メーカーを追加</div><div class="formGroup"><label>標準プリセット</label><select id="makerPreset"></select></div><div class="formGroup"><label>メーカー名</label><input id="makerName" placeholder="例：サントリー"></div><div class="formGroup"><label>表示</label><select id="makerVisibility"><option value="visible">表示</option><option value="hidden">非表示</option></select></div><div class="formGroup"><label>色</label><div id="makerColorChoices" class="colorChoices"></div><div class="colorSelected" id="makerColorSelected"></div><label class="colorPickerButton">その他の色を選ぶ<input id="makerColor" type="color" value="#2563eb" aria-label="その他の色を選ぶ"></label><div class="formHint" id="makerColorWarning"></div></div><div class="actions"><button class="secondary" id="cancelMakerEdit">キャンセル</button><button class="primary" id="saveMaker">保存</button></div><button class="dangerButton makerDeleteAction hidden" id="deleteMakerAction" style="width:100%;margin-top:10px">このメーカーを削除</button></div>
-</div></div><div class="toast" id="toast"></div>
+</div></div><div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
@@ -240,16 +240,20 @@ var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
 var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':30};
 var key='vendrive2_v7_data';
 var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
-var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null;
+var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null;
 
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function diff(a,b){return Math.floor((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000)}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]})}
 function toast(t){var e=$id('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('show')},1500)}
+function visitUndoSnapshot(machine){var fields=['visited','last','skip','force'],before={};fields.forEach(function(field){before[field]={exists:Object.prototype.hasOwnProperty.call(machine,field),value:machine[field]}});return before}
+function clearLatestUndo(){if(undoTimer){clearTimeout(undoTimer);undoTimer=null}latestUndoTransaction=null;var box=$id('undoToast');if(box)box.classList.add('hidden')}
+function offerUndo(type,machine,before,message){clearLatestUndo();latestUndoTransaction={type:type,machineId:machine.id,before:before,expiresAt:Date.now()+6000};$id('undoMessage').textContent=message;$id('undoToast').classList.remove('hidden');undoTimer=setTimeout(function(){clearLatestUndo()},6000)}
+function undoLatestOperation(){var tx=latestUndoTransaction;clearLatestUndo();if(!tx||Date.now()>tx.expiresAt){toast('元に戻せませんでした');return}var machine=state.machines.find(function(item){return item&&item.id===tx.machineId});if(!machine){toast('元に戻せませんでした');return}Object.keys(tx.before).forEach(function(field){var saved=tx.before[field];if(saved.exists)machine[field]=saved.value;else delete machine[field]});persist();renderAll();toast('元に戻しました')}
 function $id(x){return document.getElementById(x)}
 function openModal(id){$id(id).classList.add('open')}
 function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4A4.1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4B1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -613,7 +617,7 @@ function openMachine(id,mode){
 function saveMachineData(){
 if(!selectedMachine)return;var m=selectedMachine,previousDays=(m.days||[]).join(','),previousCycle=m.cycle,previousLast=m.last;m.name=$id('mName').value.trim()||m.name;m.maker=selectedMakerValue('mMaker','mMakerCustom');m.makerGroup=makerGroup(m.maker);m.code=$id('mCode').value.trim();m.address=$id('mAddress').value.trim();var enteredDays=Array.from(document.querySelectorAll('#mDaysPicker button.active')).map(function(b){return b.dataset.day});if(enteredDays.length)m.days=enteredDays;else if(!Array.isArray(m.days)||!m.days.length)m.days=[todayDay];m.cycle=$id('mCycle').value;m.last=$id('mLast').value||m.last;var condition=readTimeCondition('m',m);if(condition){m.timeCondition=condition;m.time='指定なし'}m.sales=$id('mSales').value;m.memo=$id('mMemo').value;if(previousDays!==(m.days||[]).join(',')||previousCycle!==m.cycle||previousLast!==m.last)invalidateAutoTomorrowPlan();migrateMakerSettings();ensureMakerColors();persist();closeModal('machineModal');renderAll();toast('保存しました')}function finishVisitCore(){
 if(!selectedMachine)return;
-var hadOrder=!!selectedMachine.order;
+var hadOrder=!!selectedMachine.order,before=hadOrder?null:visitUndoSnapshot(selectedMachine);
 if(hadOrder){
   var o=selectedMachine.order;
   state.history.push({machineId:selectedMachine.id,machineName:selectedMachine.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});
@@ -624,7 +628,7 @@ if(hadOrder){
 }else{
   selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;
 }
-persist();closeModal('machineModal');closeModal('orderVisitConfirm');renderAll();toast(hadOrder?'オーダー対応完了':'訪問完了')
+persist();closeModal('machineModal');closeModal('orderVisitConfirm');renderAll();if(!hadOrder)offerUndo('visit',selectedMachine,before,'訪問完了しました');toast(hadOrder?'オーダー対応完了':'訪問完了')
 }
 function completeVisit(){
 if(!selectedMachine)return;
@@ -639,7 +643,7 @@ function completeTaskForMachine(taskId){
  selectedMachine.taskDone[task.id]={completedAt:Date.now()};
  var parentCompleted=completeParentTaskIfDone(task);
  persist();renderAll();openMachine(selectedMachine.id);toast(parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました');
-}function skipVisit(){if(!selectedMachine)return;selectedMachine.skip=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の訪問をスキップ')}
+}function skipVisit(){if(!selectedMachine)return;var before=visitUndoSnapshot(selectedMachine);selectedMachine.skip=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();offerUndo('skip',selectedMachine,before,'本日の訪問をスキップしました');toast('本日の訪問をスキップ')}
 function forceVisit(){if(!selectedMachine)return;selectedMachine.force=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の臨時訪問に追加')}
 function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var o=m.order;state.history.push({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();toast('オーダー対応完了')}
 function openOrder(){selectedOrderMachine=null;selectedOrderType=null;selectedProductSub=null;$id('orderMachineSearch').value='';$id('orderResults').classList.add('hidden');$id('selectedMachine').classList.add('hidden');$id('orderDetail').value='';document.querySelectorAll('.orderType,.subtype').forEach(function(e){e.classList.remove('active')});$id('productSub').classList.add('hidden');openModal('orderModal')}
@@ -846,6 +850,7 @@ function initDays(){
   })
 }
 function bind(){
+  $id('undoAction').onclick=undoLatestOperation;
   $id('officeAddList').onclick=startOfficeAdd;
   function startOfficeAdd(){
  officePoint=null;
