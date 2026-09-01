@@ -249,7 +249,7 @@ function toast(t){var e=$id('toast');e.textContent=t;e.classList.add('show');cle
 function $id(x){return document.getElementById(x)}
 function openModal(id){$id(id).classList.add('open')}
 function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4A4',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4A4.1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -397,7 +397,7 @@ function timeLeft(ts){
   var left=86400000-(Date.now()-ts), h=Math.ceil(left/3600000);
   if(h<=0)return'期限超過';if(h<24)return'残り'+h+'時間';return'期限内';
 }
-function renderHeader(){$id('headerDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日（'+todayDay+'）';$id('appVersion').textContent='VENDRIVE2 v'+APP_VERSION}
+function renderHeader(){$id('headerDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日（'+todayDay+'）';$id('appVersion').textContent='Ver. '+APP_VERSION}
 function showTodayStat(kind){
 var list=targets(todayDay,false),arr=kind==='todo'?list.filter(function(m){return !m.visited||!!m.order}):kind==='done'?list.filter(function(m){return m.visited&&!m.order}):state.machines.filter(function(m){return !!m.order});
 $id('statsModalTitle').textContent=kind==='todo'?'未訪問':kind==='done'?'訪問済':'オーダー';
