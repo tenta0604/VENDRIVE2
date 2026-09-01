@@ -246,14 +246,19 @@ function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'
 function diff(a,b){return Math.floor((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000)}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]})}
 function toast(t){var e=$id('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('show')},1500)}
-function visitUndoSnapshot(machine){var fields=['visited','last','skip','force'],before={};fields.forEach(function(field){before[field]={exists:Object.prototype.hasOwnProperty.call(machine,field),value:machine[field]}});return before}
+function undoClone(value){return value===undefined?undefined:JSON.parse(JSON.stringify(value))}
+function undoPropertySnapshot(object,property){return {exists:Object.prototype.hasOwnProperty.call(object,property),value:undoClone(object[property])}}
+function restoreUndoProperty(object,property,snapshot){if(snapshot.exists)object[property]=undoClone(snapshot.value);else delete object[property]}
+function visitUndoSnapshot(machine){var fields=['visited','last','skip','force'],before={};fields.forEach(function(field){before[field]=undoPropertySnapshot(machine,field)});return before}
+function taskUndoSnapshot(machine,task){return {machine:visitUndoSnapshot(machine),taskDone:undoPropertySnapshot(machine,'taskDone'),parent:{completed:undoPropertySnapshot(task,'completed'),completedAt:undoPropertySnapshot(task,'completedAt')},taskHistory:undoPropertySnapshot(state,'taskHistory')}}
+function orderUndoSnapshot(machine){return {machine:visitUndoSnapshot(machine),order:undoPropertySnapshot(machine,'order'),history:undoPropertySnapshot(state,'history')}}
+function restoreVisitUndo(machine,before){Object.keys(before).forEach(function(field){restoreUndoProperty(machine,field,before[field])})}
 function clearLatestUndo(){if(undoTimer){clearTimeout(undoTimer);undoTimer=null}latestUndoTransaction=null;var box=$id('undoToast');if(box)box.classList.add('hidden')}
-function offerUndo(type,machine,before,message){clearLatestUndo();latestUndoTransaction={type:type,machineId:machine.id,before:before,expiresAt:Date.now()+6000};$id('undoMessage').textContent=message;$id('undoToast').classList.remove('hidden');undoTimer=setTimeout(function(){clearLatestUndo()},6000)}
-function undoLatestOperation(){var tx=latestUndoTransaction;clearLatestUndo();if(!tx||Date.now()>tx.expiresAt){toast('元に戻せませんでした');return}var machine=state.machines.find(function(item){return item&&item.id===tx.machineId});if(!machine){toast('元に戻せませんでした');return}Object.keys(tx.before).forEach(function(field){var saved=tx.before[field];if(saved.exists)machine[field]=saved.value;else delete machine[field]});persist();renderAll();toast('元に戻しました')}
-function $id(x){return document.getElementById(x)}
+function offerUndo(type,machine,before,message,taskId){clearLatestUndo();latestUndoTransaction={type:type,machineId:machine.id,taskId:taskId||null,before:before,expiresAt:Date.now()+6000};$id('undoMessage').textContent=message;$id('undoToast').classList.remove('hidden');undoTimer=setTimeout(function(){clearLatestUndo()},6000)}
+function undoLatestOperation(){var tx=latestUndoTransaction;clearLatestUndo();if(!tx||Date.now()>tx.expiresAt){toast('元に戻せませんでした');return}var machine=state.machines.find(function(item){return item&&item.id===tx.machineId});if(!machine){toast('元に戻せませんでした');return}var refreshDetail=false;if(tx.type==='task'){var task=(state.tasks||[]).find(function(item){return item&&item.id===tx.taskId});if(!task){toast('元に戻せませんでした');return}restoreUndoProperty(machine,'taskDone',tx.before.taskDone);restoreUndoProperty(task,'completed',tx.before.parent.completed);restoreUndoProperty(task,'completedAt',tx.before.parent.completedAt);restoreUndoProperty(state,'taskHistory',tx.before.taskHistory);refreshDetail=true}else if(tx.type==='order'||tx.type==='order-visit-keep'||tx.type==='order-visit-done'){restoreVisitUndo(machine,tx.before.machine);restoreUndoProperty(machine,'order',tx.before.order);restoreUndoProperty(state,'history',tx.before.history)}else restoreVisitUndo(machine,tx.before);persist();renderAll();if(refreshDetail&&$id('machineModal').classList.contains('open')){selectedMachine=machine;openMachine(machine.id)}toast('元に戻しました')}function $id(x){return document.getElementById(x)}
 function openModal(id){$id(id).classList.add('open')}
 function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4B1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4B2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -617,7 +622,7 @@ function openMachine(id,mode){
 function saveMachineData(){
 if(!selectedMachine)return;var m=selectedMachine,previousDays=(m.days||[]).join(','),previousCycle=m.cycle,previousLast=m.last;m.name=$id('mName').value.trim()||m.name;m.maker=selectedMakerValue('mMaker','mMakerCustom');m.makerGroup=makerGroup(m.maker);m.code=$id('mCode').value.trim();m.address=$id('mAddress').value.trim();var enteredDays=Array.from(document.querySelectorAll('#mDaysPicker button.active')).map(function(b){return b.dataset.day});if(enteredDays.length)m.days=enteredDays;else if(!Array.isArray(m.days)||!m.days.length)m.days=[todayDay];m.cycle=$id('mCycle').value;m.last=$id('mLast').value||m.last;var condition=readTimeCondition('m',m);if(condition){m.timeCondition=condition;m.time='指定なし'}m.sales=$id('mSales').value;m.memo=$id('mMemo').value;if(previousDays!==(m.days||[]).join(',')||previousCycle!==m.cycle||previousLast!==m.last)invalidateAutoTomorrowPlan();migrateMakerSettings();ensureMakerColors();persist();closeModal('machineModal');renderAll();toast('保存しました')}function finishVisitCore(){
 if(!selectedMachine)return;
-var hadOrder=!!selectedMachine.order,before=hadOrder?null:visitUndoSnapshot(selectedMachine);
+var hadOrder=!!selectedMachine.order,before=hadOrder?orderUndoSnapshot(selectedMachine):visitUndoSnapshot(selectedMachine);
 if(hadOrder){
   var o=selectedMachine.order;
   state.history.push({machineId:selectedMachine.id,machineName:selectedMachine.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});
@@ -628,7 +633,7 @@ if(hadOrder){
 }else{
   selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;
 }
-persist();closeModal('machineModal');closeModal('orderVisitConfirm');renderAll();if(!hadOrder)offerUndo('visit',selectedMachine,before,'訪問完了しました');toast(hadOrder?'オーダー対応完了':'訪問完了')
+persist();closeModal('machineModal');closeModal('orderVisitConfirm');renderAll();if(hadOrder)offerUndo('order-visit-done',selectedMachine,before,'オーダー対応を完了しました');else offerUndo('visit',selectedMachine,before,'訪問完了しました');toast(hadOrder?'オーダー対応完了':'訪問完了')
 }
 function completeVisit(){
 if(!selectedMachine)return;
@@ -639,13 +644,14 @@ function completeTaskForMachine(taskId){
  if(!selectedMachine)return;
  var task=(state.tasks||[]).find(function(t){return t&&typeof t==='object'&&t.id===taskId});
  if(!task||!taskTargetsMachine(task,selectedMachine)||taskDoneForMachine(task,selectedMachine))return;
+ var before=taskUndoSnapshot(selectedMachine,task);
  if(!selectedMachine.taskDone||typeof selectedMachine.taskDone!=='object')selectedMachine.taskDone={};
  selectedMachine.taskDone[task.id]={completedAt:Date.now()};
  var parentCompleted=completeParentTaskIfDone(task);
- persist();renderAll();openMachine(selectedMachine.id);toast(parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました');
+ persist();renderAll();openMachine(selectedMachine.id);offerUndo('task',selectedMachine,before,parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました',task.id);toast(parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました');
 }function skipVisit(){if(!selectedMachine)return;var before=visitUndoSnapshot(selectedMachine);selectedMachine.skip=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();offerUndo('skip',selectedMachine,before,'本日の訪問をスキップしました');toast('本日の訪問をスキップ')}
 function forceVisit(){if(!selectedMachine)return;selectedMachine.force=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の臨時訪問に追加')}
-function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var o=m.order;state.history.push({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();toast('オーダー対応完了')}
+function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var before=orderUndoSnapshot(m),o=m.order;state.history.push({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();offerUndo('order',m,before,'オーダー対応を完了しました');toast('オーダー対応完了')}
 function openOrder(){selectedOrderMachine=null;selectedOrderType=null;selectedProductSub=null;$id('orderMachineSearch').value='';$id('orderResults').classList.add('hidden');$id('selectedMachine').classList.add('hidden');$id('orderDetail').value='';document.querySelectorAll('.orderType,.subtype').forEach(function(e){e.classList.remove('active')});$id('productSub').classList.add('hidden');openModal('orderModal')}
 function orderSearch(){
   var q=$id('orderMachineSearch').value.trim().toLowerCase();var box=$id('orderResults');box.innerHTML='';var list=state.machines.filter(function(m){return !q||[m.name,m.address,m.code,m.id].join(' ').toLowerCase().indexOf(q)>=0}).slice(0,12);
@@ -871,7 +877,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   document.querySelectorAll('#newDaysPicker button').forEach(function(b){b.onclick=function(){b.classList.toggle('active')}});
   document.querySelectorAll('.tabs button').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('active')});b.classList.add('active');document.querySelectorAll('.page').forEach(function(p){p.classList.add('hidden')});$id(b.dataset.page).classList.remove('hidden');if(b.dataset.page==='mapPage'){ensureMap();setTimeout(function(){if(leafletMap){leafletMap.invalidateSize();renderMap()}},50)}}})
   $id('allRoutes').onclick=function(){allRoutes=!allRoutes;mapTodayMode=false;mapTomorrowMode=false;$id('allRoutes').textContent=allRoutes?'曜日ルート':'全ルート';initDays();renderMap()}
-  $id('finishDay').onclick=finishDay;$id('todayTodo').parentNode.onclick=function(){showTodayStat('todo')};$id('todayVisited').parentNode.onclick=function(){showTodayStat('done')};$id('todayOrders').parentNode.onclick=function(){showTodayStat('order')};$id('closeStats').onclick=function(){closeModal('statsModal')};$id('orderVisitDone').onclick=finishVisitCore;$id('orderVisitKeep').onclick=function(){if(selectedMachine){selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;persist();closeModal('orderVisitConfirm');renderAll();toast('訪問完了')}}
+  $id('finishDay').onclick=finishDay;$id('todayTodo').parentNode.onclick=function(){showTodayStat('todo')};$id('todayVisited').parentNode.onclick=function(){showTodayStat('done')};$id('todayOrders').parentNode.onclick=function(){showTodayStat('order')};$id('closeStats').onclick=function(){closeModal('statsModal')};$id('orderVisitDone').onclick=finishVisitCore;$id('orderVisitKeep').onclick=function(){if(selectedMachine&&selectedMachine.order){var before=orderUndoSnapshot(selectedMachine);selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;persist();closeModal('orderVisitConfirm');renderAll();offerUndo('order-visit-keep',selectedMachine,before,'訪問だけ完了しました');toast('訪問完了')}}
   $id('closeTomorrow').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowAdd').onclick=openTomorrowAdd;$id('closeTomorrowAdd').onclick=function(){closeModal('tomorrowAddModal')};$id('tomorrowAddSearch').oninput=renderTomorrowAddList;$id('tomorrowMap').onclick=function(){
   closeModal('tomorrowModal');
   // 明日の予定をその場で最新計算。曜日登録台の全表示にはしない。
