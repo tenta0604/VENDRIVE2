@@ -95,6 +95,7 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
 <div class="row"><div><div class="ey">TASKS</div><div class="title">タスク</div><div class="subtitle">完了するまで残り続ける作業</div></div><button class="primary pill" id="addTask">＋登録</button></div>
 <div class="hero" style="margin-top:11px"><div class="ey">UNFINISHED</div><div class="heroTitle"><span id="taskCount">0</span> 件</div><div class="heroSub">完了するまで本日の画面の最上部に表示されます</div></div>
 <div class="section"><div class="sectionhead"><b>未完了タスク</b><span class="muted">メーカー連動</span></div><div id="taskList"></div></div>
+<div class="section"><div class="sectionhead"><b>完了履歴</b><span class="muted">新しい順</span></div><div id="taskHistoryList"></div></div>
 </section>
 
 <section id="mapPage" class="page hidden">
@@ -237,7 +238,7 @@ var WEEK=['日','月','火','水','木','金','土'];
 var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
 var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':30};
 var key='vendrive2_v7_data';
-var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
+var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
 var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null;
 
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -294,6 +295,7 @@ function normalizeLoadedState(x){
     if(!Array.isArray(candidate.offices))candidate.offices=[];
     if(!Array.isArray(candidate.history))candidate.history=[];
     if(!Array.isArray(candidate.tasks))candidate.tasks=[];
+    if(!Array.isArray(candidate.taskHistory))candidate.taskHistory=[];
     if(!Array.isArray(candidate.makers)||!candidate.makers.length)candidate.makers=['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'];
     candidate.machines.forEach(function(m){if(!m||typeof m!=='object')throw new Error('invalid machine record');m.days=Array.isArray(m.days)?m.days:[];m.makerGroup=makerGroup(m.maker);if(!m.timeCondition&&m.time==='指定なし')m.timeCondition={type:'none',start:'',end:''}});
     migrateLegacyTaskTargets(candidate);
@@ -413,6 +415,9 @@ function renderToday(){
 function taskDoneForMachine(task,machine){var done=task&&machine&&machine.taskDone&&machine.taskDone[task.id];return done===true||!!(done&&typeof done==='object')}
 function taskTargetsMachine(task,machine){return !!(task&&typeof task==='object'&&!task.completed&&Array.isArray(task.targetMachineIds)&&machine&&machine.id!=null&&task.targetMachineIds.indexOf(machine.id)>=0)}
 function activeTasksForMachine(machine){return (state.tasks||[]).filter(function(task){return taskTargetsMachine(task,machine)&&!taskDoneForMachine(task,machine)})}
+function taskProgress(task){var ids=task&&Array.isArray(task.targetMachineIds)?task.targetMachineIds:[];return {total:ids.length,done:state.machines.filter(function(machine){return ids.indexOf(machine.id)>=0&&taskDoneForMachine(task,machine)}).length}}
+function addTaskHistory(task){if(!Array.isArray(state.taskHistory))state.taskHistory=[];if(state.taskHistory.some(function(item){return item&&item.taskId===task.id}))return;var progress=taskProgress(task);state.taskHistory.push({id:'TH-'+Date.now()+'-'+task.id,taskId:task.id,text:task.text||'',target:task.target||'',targetCount:progress.total,completedAt:task.completedAt})}
+function completeParentTaskIfDone(task){if(!task||typeof task!=='object'||task.completed)return false;var progress=taskProgress(task);if(progress.total<=0||progress.done!==progress.total)return false;task.completed=true;task.completedAt=Date.now();addTaskHistory(task);return true}
 function hasActiveTask(m){return activeTasksForMachine(m).length>0}
 function markerClass(m){if(m.order){var left=86400000-(Date.now()-m.order.createdAt);return left<=0?'urgent':left<=6*3600000?'urgent':'order'}if(hasActiveTask(m))return'task';return m.visited?'done':hasTimeCondition(m)?'time':'normal'}
 function ensureMap(){
@@ -570,15 +575,20 @@ function confirmDeleteMachine(id){
 }
 function deleteMachine(){
   if(!deleteMachineTargetId)return;
-  var id=deleteMachineTargetId;
+  var id=deleteMachineTargetId,autoCompleted=false;
   state.machines=state.machines.filter(function(m){return m.id!==id});
+  (state.tasks||[]).forEach(function(task){
+    if(!task||typeof task!=='object'||task.completed||!Array.isArray(task.targetMachineIds)||task.targetMachineIds.indexOf(id)<0)return;
+    task.targetMachineIds=task.targetMachineIds.filter(function(targetId){return targetId!==id});
+    if(completeParentTaskIfDone(task))autoCompleted=true;
+  });
   if(state.tomorrowPlan&&Array.isArray(state.tomorrowPlan.ids)){
     state.tomorrowPlan.ids=state.tomorrowPlan.ids.filter(function(x){return x!==id});
   }
   if(selectedMachine&&selectedMachine.id===id)selectedMachine=null;
   if(selectedOrderMachine&&selectedOrderMachine.id===id)selectedOrderMachine=null;
   deleteMachineTargetId=null;
-  persist();closeModal('deleteMachineModal');renderAll();toast('自販機を削除しました');
+  persist();closeModal('deleteMachineModal');renderAll();toast(autoCompleted?'自販機を削除しました。タスクがすべて完了しました':'自販機を削除しました');
 }
 function openMachine(id,mode){
   var m=state.machines.find(function(x){return x.id===id});if(!m)return;selectedMachine=m;
@@ -614,7 +624,8 @@ function completeTaskForMachine(taskId){
  if(!task||!taskTargetsMachine(task,selectedMachine)||taskDoneForMachine(task,selectedMachine))return;
  if(!selectedMachine.taskDone||typeof selectedMachine.taskDone!=='object')selectedMachine.taskDone={};
  selectedMachine.taskDone[task.id]={completedAt:Date.now()};
- persist();renderAll();openMachine(selectedMachine.id);toast('この自販機のタスクを完了しました');
+ var parentCompleted=completeParentTaskIfDone(task);
+ persist();renderAll();openMachine(selectedMachine.id);toast(parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました');
 }function skipVisit(){if(!selectedMachine)return;selectedMachine.skip=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の訪問をスキップ')}
 function forceVisit(){if(!selectedMachine)return;selectedMachine.force=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の臨時訪問に追加')}
 function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var o=m.order;state.history.push({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();toast('オーダー対応完了')}
@@ -779,12 +790,17 @@ function migrateLegacyTaskTargets(candidate){
   task.targetMachineIds=collectTaskTargetMachineIds(candidate.machines,task.target);
  });
 }
+function renderTaskHistory(){
+ var box=$id('taskHistoryList');if(!box)return;box.innerHTML='';
+ (state.taskHistory||[]).filter(function(item){return item&&typeof item==='object'}).slice().sort(function(a,b){return (b.completedAt||0)-(a.completedAt||0)}).forEach(function(item){var e=document.createElement('div');e.className='history';e.innerHTML='<b>'+esc(item.text||'タスク')+'</b><div class="meta">'+esc(item.target==='all'?'全メーカー':(item.target||'未設定'))+' ・ '+Number(item.targetCount||0)+'台<br>'+new Date(item.completedAt).toLocaleString('ja-JP')+' 完了</div>';box.appendChild(e)});
+ if(!box.children.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">完了履歴はありません。</div>';
+}
 function renderTasks(){
  var active=(state.tasks||[]).filter(function(t){return t&&typeof t==='object'&&!t.completed}),box=$id('taskList');if(!box)return;$id('taskCount').textContent=active.length;box.innerHTML='';
- if(!active.length){box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';return}
- active.forEach(function(t){var targetIds=Array.isArray(t.targetMachineIds)?t.targetMachineIds:[],targetCount=targetIds.length;var done=state.machines.filter(function(m){return targetIds.indexOf(m.id)>=0&&taskDoneForMachine(t,m)}).length;var e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+targetCount+'台'+(targetCount?' ・ 完了 '+done+'/'+targetCount+'台':'')+'</div></div><button class="badge b-green">タスク完了</button>';e.querySelector('button').onclick=function(){t.completed=true;t.completedAt=Date.now();persist();renderAll()};box.appendChild(e)})
+ if(!active.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';
+ else active.forEach(function(t){var progress=taskProgress(t),e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+progress.total+'台'+(progress.total?' ・ 完了 '+progress.done+'/'+progress.total+'台':'')+'</div></div>';box.appendChild(e)});
+ renderTaskHistory();
 }
-
 function makeSwipeComplete(wrapper,m){
  var card=wrapper.querySelector('.swipeCard'),sx=0,sy=0,dx=0,tracking=false;
  function reset(){card.classList.remove('swiping');wrapper.classList.remove('revealed');card.style.transform='translateX(0)';dx=0;tracking=false}
