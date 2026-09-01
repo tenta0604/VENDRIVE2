@@ -25,7 +25,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .progress{height:7px;border-radius:99px;background:#343434;margin-top:14px;overflow:hidden}.progress>i{display:block;height:100%;background:#fff;border-radius:99px;width:0}
 .notice{padding:11px 12px;background:#f0eef4;border:1px solid #ddd4e9;border-radius:13px;font-size:11px;color:#5d4b70;font-weight:750;margin-top:9px}
 .map{height:360px;margin-top:11px;border-radius:20px;border:1px solid #d5d8db;overflow:hidden;position:relative;background:#e6e8e9;background-image:linear-gradient(27deg,transparent 47%,#fff 48%,#fff 52%,transparent 53%),linear-gradient(108deg,transparent 47%,#fff 48%,#fff 52%,transparent 53%);background-size:150px 150px,190px 190px}
-.map.adding{outline:3px solid #111;outline-offset:-3px}.maptag{position:absolute;top:10px;left:10px;z-index:6;background:#fffffff0;border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:9px;font-weight:900}.mapAdd{position:absolute;bottom:10px;left:10px;z-index:6}.mapTools{position:absolute;right:9px;top:9px;z-index:6;display:grid;gap:5px}.mapTools button{width:36px;height:36px;border:1px solid #ddd;background:#fff;border-radius:10px;font-weight:900;box-shadow:0 4px 12px #00000012}
+.map.adding{outline:3px solid #111;outline-offset:-3px}.maptag{position:absolute;top:10px;left:10px;z-index:6;background:#fffffff0;border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:9px;font-weight:900}.mapAdd{position:absolute;bottom:10px;left:10px;z-index:6}.mapTools{position:absolute;right:9px;top:9px;z-index:6;display:grid;gap:5px}.mapTools button{width:36px;height:36px;border:1px solid #ddd;background:#fff;border-radius:10px;font-weight:900;box-shadow:0 4px 12px #00000012}.mapCrosshair{position:absolute;left:50%;top:50%;z-index:1000;width:30px;height:30px;transform:translate(-50%,-50%);pointer-events:none}.mapCrosshair:before,.mapCrosshair:after{content:"";position:absolute;left:50%;top:50%;background:#111;border-radius:99px;box-shadow:0 0 0 2px #fff9}.mapCrosshair:before{width:24px;height:2px;transform:translate(-50%,-50%)}.mapCrosshair:after{width:2px;height:24px;transform:translate(-50%,-50%)}.mapPositionBar{position:absolute;left:10px;right:10px;bottom:10px;z-index:1001;display:grid;grid-template-columns:1fr 1.3fr;gap:7px;padding:7px;background:#fffffff2;border:1px solid #d9d9d9;border-radius:14px;box-shadow:0 6px 18px #0002}.mapPositionBar button{min-height:38px;font-size:11px}.map.positioning{outline:3px solid #111;outline-offset:-3px}.map.positioning .mapAdd,.map.positioning #officeAdd{display:none}
 .route{position:absolute;height:5px;border-radius:99px;transform-origin:left;opacity:.55;z-index:1}.r0{background:#2563eb}.r1{background:#16a34a}.r2{background:#ea580c}.r3{background:#7c3aed}.r4{background:#db2777}.r5{background:#0891b2}.r6{background:#ca8a04}
 .pin{position:absolute;width:36px;height:36px;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;box-shadow:0 4px 12px #0004;z-index:3}.pin span{transform:rotate(45deg);color:#fff;font-size:10px;font-weight:900}.red{background:#e53935}.blue{background:#2979ff}.purple{background:#7c3aed}.orange{background:#f59e0b}.gray{background:#9ca3af;opacity:.45}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:13px 0}.day{border:1px solid #ddd;background:#fff;border-radius:10px;padding:9px 0;font-size:11px;font-weight:850}.day.active{background:#111;color:#fff;border-color:#111}
@@ -105,8 +105,8 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
 <div class="days" id="mapDays"></div><div class="search"><span class="searchIcon">⌕</span><input id="addressSearch" placeholder="住所から場所を検索"></div><div id="addressResults" class="results hidden"></div>
 <div class="map" id="map"><div class="maptag" id="mapTag"></div>
 <div class="mapTools"><button id="locateMe" title="現在地">⌖</button><button id="zoomIn">＋</button><button id="zoomOut">−</button></div>
-<button class="primary mapAdd" id="mapAdd">＋ 自販機追加</button><button class="secondary" id="officeAdd" style="position:absolute;bottom:10px;left:155px;z-index:6;font-size:10px;padding:10px 12px">＋ 営業所設定</button></div>
-<div class="notice" id="mapStatus">地図を読み込んでいます…</div><div class="section"><div class="sectionhead"><b>営業所</b><button class="secondary" id="officeAddList">＋追加</button></div><div id="officeList"></div></div>
+<div class="mapCrosshair hidden" id="mapCrosshair" aria-hidden="true"></div><div class="mapPositionBar hidden" id="mapPositionBar"><button class="secondary" id="mapPositionCancel" type="button">キャンセル</button><button class="primary" id="mapPositionConfirm" type="button">この位置に設定</button></div>
+<button class="primary mapAdd" id="mapAdd">＋ 自販機追加</button><button class="secondary" id="officeAdd" style="position:absolute;bottom:10px;left:155px;z-index:6;font-size:10px;padding:10px 12px">＋ 営業所設定</button></div><div class="notice" id="mapStatus">地図を読み込んでいます…</div><div class="section"><div class="sectionhead"><b>営業所</b><button class="secondary" id="officeAddList">＋追加</button></div><div id="officeList"></div></div>
 <div class="section"><div class="sectionhead"><b>表示中の自販機</b><span class="muted" id="mapCount"></span></div><div id="mapList"></div></div>
 </section>
 
@@ -172,7 +172,7 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
 <div id="machineExtra" class="hidden">
   <div class="formGroup"><label>自販機名</label><input id="mName"></div><div class="formGroup"><label>メーカー</label><select id="mMaker"></select><input id="mMakerCustom" class="hidden" style="margin-top:7px" placeholder="メーカー名を入力"></div>
   <div class="formGroup"><label>管理番号</label><input id="mCode"></div>
-  <div class="formGroup"><label>住所</label><input id="mAddress"></div>
+  <div class="formGroup"><label>住所</label><input id="mAddress"></div><div class="actions" style="margin-top:8px"><button class="secondary" id="editMachinePosition" type="button">MAP位置を修正</button></div>
   <div class="formGroup"><label>訪問曜日（複数可）</label><div class="dayPicker" id="mDaysPicker">
 <button type="button" data-day="月">月</button><button type="button" data-day="火">火</button><button type="button" data-day="水">水</button><button type="button" data-day="木">木</button><button type="button" data-day="金">金</button><button type="button" data-day="土">土</button><button type="button" data-day="日">日</button>
 </div></div>
@@ -240,7 +240,7 @@ var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
 var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':30};
 var key='vendrive2_v7_data';
 var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
-var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null;
+var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null,mapPositionMode=null,reverseGeocodeToken=0;
 
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function diff(a,b){return Math.floor((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000)}
@@ -258,7 +258,7 @@ function offerUndo(type,machine,before,message,taskId){clearLatestUndo();latestU
 function undoLatestOperation(){var tx=latestUndoTransaction;clearLatestUndo();if(!tx||Date.now()>tx.expiresAt){toast('元に戻せませんでした');return}var machine=state.machines.find(function(item){return item&&item.id===tx.machineId});if(!machine){toast('元に戻せませんでした');return}var refreshDetail=false;if(tx.type==='task'){var task=(state.tasks||[]).find(function(item){return item&&item.id===tx.taskId});if(!task){toast('元に戻せませんでした');return}restoreUndoProperty(machine,'taskDone',tx.before.taskDone);restoreUndoProperty(task,'completed',tx.before.parent.completed);restoreUndoProperty(task,'completedAt',tx.before.parent.completedAt);restoreUndoProperty(state,'taskHistory',tx.before.taskHistory);refreshDetail=true}else if(tx.type==='order'||tx.type==='order-visit-keep'||tx.type==='order-visit-done'){restoreVisitUndo(machine,tx.before.machine);restoreUndoProperty(machine,'order',tx.before.order);restoreUndoProperty(state,'history',tx.before.history)}else restoreVisitUndo(machine,tx.before);persist();renderAll();if(refreshDetail&&$id('machineModal').classList.contains('open')){selectedMachine=machine;openMachine(machine.id)}toast('元に戻しました')}function $id(x){return document.getElementById(x)}
 function openModal(id){$id(id).classList.add('open')}
 function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-4B2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-5A1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -442,20 +442,19 @@ function addTaskHistory(task){if(!Array.isArray(state.taskHistory))state.taskHis
 function completeParentTaskIfDone(task){if(!task||typeof task!=='object'||task.completed)return false;var progress=taskProgress(task);if(progress.total<=0||progress.done!==progress.total)return false;task.completed=true;task.completedAt=Date.now();addTaskHistory(task);return true}
 function hasActiveTask(m){return activeTasksForMachine(m).length>0}
 function markerClass(m){if(m.order){var left=86400000-(Date.now()-m.order.createdAt);return left<=0?'urgent':left<=6*3600000?'urgent':'order'}if(hasActiveTask(m))return'task';return m.visited?'done':hasTimeCondition(m)?'time':'normal'}
+function setMapPositionUi(active){var map=$id('map');map.classList.toggle('positioning',active);$id('mapCrosshair').classList.toggle('hidden',!active);$id('mapPositionBar').classList.toggle('hidden',!active)}
+function cancelMapPositionMode(){if(!mapPositionMode)return;mapPositionMode=null;addingMachine=false;setMapPositionUi(false);$id('mapStatus').textContent='地図を利用できます。＋ 自販機追加から登録'}
+function startMapPositionMode(mode){ensureMap();if(!leafletMap){toast('地図を利用できません');return}addingMachine=false;addingOffice=false;mapPositionMode=mode;setMapPositionUi(true);if(mode.type==='editMachine'){var machine=state.machines.find(function(item){return item&&item.id===mode.machineId});if(!machine){cancelMapPositionMode();toast('自販機が見つかりません');return}if(typeof machine.lat==='number'&&typeof machine.lng==='number')leafletMap.setView([machine.lat,machine.lng],Math.max(leafletMap.getZoom(),16))}$id('mapStatus').textContent='地図を動かして、中央の十字に位置を合わせてください'}
+function confirmMapPositionMode(){var mode=mapPositionMode;if(!mode||!leafletMap)return;var center=leafletMap.getCenter(),lat=center.lat,lng=center.lng;cancelMapPositionMode();if(mode.type==='newMachine'){addMachineAt(lat,lng);return}var machine=state.machines.find(function(item){return item&&item.id===mode.machineId});if(!machine){toast('自販機が見つかりません');return}machine.lat=lat;machine.lng=lng;persist();renderAll();toast('MAP位置を更新しました')}
+function startMachinePositionEdit(){if(!selectedMachine)return;var machineId=selectedMachine.id;closeModal('machineModal');var mapTab=document.querySelector('.tabs button[data-page="mapPage"]');if(mapTab)mapTab.click();ensureMap();setTimeout(function(){startMapPositionMode({type:'editMachine',machineId:machineId})},60)}
 function ensureMap(){
   if(leafletMap||typeof L==='undefined')return;
   leafletMap=L.map('map',{zoomControl:false,attributionControl:true,tap:true}).setView([35.30,136.80],13);
-  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',{minZoom:5,maxZoom:18,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a>'}).addTo(leafletMap);
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',{minZoom:5,maxNativeZoom:18,maxZoom:20,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a>'}).addTo(leafletMap);
   machineLayer=L.layerGroup().addTo(leafletMap);routeLayer=L.layerGroup().addTo(leafletMap);currentLocationLayer=L.layerGroup().addTo(leafletMap);setTimeout(function(){leafletMap.invalidateSize({pan:false})},100);
-  leafletMap.on('click',function(e){
- if(addingMachine){addingMachine=false;$id('map').classList.remove('adding');addMachineAt(e.latlng.lat,e.latlng.lng);return}
- if(addingOffice){addingOffice=false;$id('map').classList.remove('adding');officePoint={lat:e.latlng.lat,lng:e.latlng.lng};$id('officeGps').value=e.latlng.lat.toFixed(6)+', '+e.latlng.lng.toFixed(6);openModal('officeModal')}
-});leafletMap.getContainer().addEventListener('contextmenu',function(e){e.preventDefault()});
-  var press=null;leafletMap.getContainer().addEventListener('touchstart',function(e){if(e.touches.length!==1)return;press=setTimeout(function(){if(!addingMachine&&!addingOffice){addingMachine=true;$id('map').classList.add('adding');toast('登録位置をタップしてください')}} ,650)},{passive:true});
-  ['touchend','touchcancel','touchmove'].forEach(function(ev){leafletMap.getContainer().addEventListener(ev,function(){if(press){clearTimeout(press);press=null}},{passive:true})});
-  $id('mapStatus').textContent='地図を利用できます。＋自販機追加 またはマップ長押しで登録';
-}
-function dayRouteColor(day){
+  leafletMap.on('click',function(e){if(mapPositionMode)return;if(addingOffice){addingOffice=false;$id('map').classList.remove('adding');officePoint={lat:e.latlng.lat,lng:e.latlng.lng};$id('officeGps').value=e.latlng.lat.toFixed(6)+', '+e.latlng.lng.toFixed(6);openModal('officeModal')}});leafletMap.getContainer().addEventListener('contextmenu',function(e){e.preventDefault()});
+  $id('mapStatus').textContent='地図を利用できます。＋ 自販機追加から登録';
+}function dayRouteColor(day){
  var colors={月:'#2563eb',火:'#ef4444',水:'#16a34a',木:'#ea580c',金:'#7c3aed',土:'#db2777',日:'#0891b2'};
  return colors[day]||'#64748b';
 }
@@ -557,7 +556,7 @@ function renderMap(){
       icon=L.divIcon({className:'vendrive-pin',html:html,iconSize:[25,25],iconAnchor:[12.5,12.5]});
     }
     var mk=L.marker([m.lat,m.lng],{icon:icon,title:m.name});
-    mk.on('click',function(){openMachine(m.id,m.order?'order':'normal')});
+    mk.on('click',function(){if(mapPositionMode)return;openMachine(m.id,m.order?'order':'normal')});
     mk.addTo(machineLayer);bounds.push([m.lat,m.lng]);
   });
 
@@ -566,7 +565,7 @@ function renderMap(){
     var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]});
     var mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);
     mk.bindTooltip(o.name||'営業所',{direction:'top',offset:[0,-12]});
-    mk.on('click',function(){navigateToMachine(o)});
+    mk.on('click',function(){if(mapPositionMode)return;navigateToMachine(o)});
     bounds.push([o.lat,o.lng]);
   });
 
@@ -732,15 +731,14 @@ function finishDay(){
   toast('本日の業務を終了しました');setTimeout(function(){if(confirm('明日の予定を確認しますか？'))openTomorrow()},220)
 }
 function resetNewMachineForm(){
-  addPoint=null;
+  reverseGeocodeToken++;addPoint=null;
   $id('newName').value='';$id('newCode').value='';$id('newAddress').value='';$id('newGps').value='未指定（後からマップで設定）';$id('newCycle').value='1週間に1回';$id('newLast').value='';$id('newSales').value='';$id('newMemo').value='';
   applyMakerSelect('newMaker','newMakerCustom',activeMakerSettings()[0]&&activeMakerSettings()[0].name||'');
   document.querySelectorAll('#newDaysPicker button').forEach(function(b){b.classList.toggle('active',b.dataset.day===todayDay)});configureTimeCondition('new',null);
 }function addMachineAt(lat,lng){resetNewMachineForm();addPoint={lat:lat,lng:lng};$id('newGps').value=lat.toFixed(6)+', '+lng.toFixed(6);$id('newAddress').value='住所を取得中…';openModal('addMachineModal');reverseGeocode(lat,lng)}
 function reverseGeocode(lat,lng){
-  $id('newAddress').value='住所を取得中…';
-  clearTimeout(geoTimer);geoTimer=setTimeout(function(){fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng)+'&zoom=18&addressdetails=1&accept-language=ja').then(function(r){if(!r.ok)throw new Error('geocode '+r.status);return r.json()}).then(function(d){$id('newAddress').value=d.display_name||''}).catch(function(){$id('newAddress').value='住所を取得できませんでした。手動入力してください。'})},1100)}
-function saveNewMachine(){
+  var token=++reverseGeocodeToken,address=$id('newAddress');address.value='住所を取得中…';
+  clearTimeout(geoTimer);geoTimer=setTimeout(function(){fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng)+'&zoom=18&addressdetails=1&accept-language=ja').then(function(r){if(!r.ok)throw new Error('geocode '+r.status);return r.json()}).then(function(d){if(token!==reverseGeocodeToken||address.value!=='住所を取得中…')return;address.value=d.display_name||''}).catch(function(){if(token!==reverseGeocodeToken||address.value!=='住所を取得中…')return;address.value='住所を取得できませんでした。手動入力してください。'})},1100)}function saveNewMachine(){
 invalidateAutoTomorrowPlan();
   var id=($id('newCode').value.trim()||'M-'+Date.now().toString().slice(-6));if(state.machines.some(function(m){return m.code===id||m.id===id})){toast('管理番号が重複しています');return}
   if(!addPoint){toast('マップ上の位置を指定してください');return}
@@ -859,7 +857,7 @@ function bind(){
   $id('undoAction').onclick=undoLatestOperation;
   $id('officeAddList').onclick=startOfficeAdd;
   function startOfficeAdd(){
- officePoint=null;
+ cancelMapPositionMode();officePoint=null;
  $id('officeName').value='';
  $id('officeAddress').value='';
  $id('officeGps').value='MAPで位置指定';
@@ -893,7 +891,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   initDays();renderMap();
   toast('明日の予定だけをMAPに表示しています');
 };$id('tomorrowLater').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowSave').onclick=function(){if(state.tomorrowPlan)state.tomorrowPlan.manual=true;persist();closeModal('tomorrowModal');toast('明日の予定を保存しました')}
-  $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
+  $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('editMachinePosition').onclick=startMachinePositionEdit;$id('mapPositionCancel').onclick=cancelMapPositionMode;$id('mapPositionConfirm').onclick=confirmMapPositionMode;$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
   $id('addOrder').onclick=openOrder;
   $id('addTask').onclick=function(){refreshMakerOptions();$id('taskText').value='';openModal('taskModal')};
   $id('closeTask').onclick=function(){closeModal('taskModal')};$id('cancelTask').onclick=function(){closeModal('taskModal')};
@@ -909,9 +907,9 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   $id('mMaker').onchange=function(){var e=$id('mMakerCustom');if(this.value==='__CUSTOM__')e.classList.remove('hidden');else{e.classList.add('hidden');e.value=''}};
   $id('mTimeType').onchange=function(){syncTimeConditionFields('m')};$id('newTimeType').onchange=function(){syncTimeConditionFields('new')};
   $id('addMachine').onclick=function(){resetNewMachineForm();openModal('addMachineModal')}
-  $id('mapAdd').onclick=function(e){e.stopPropagation();addingMachine=true;$id('map').classList.add('adding');toast('登録位置をタップしてください')}
+  $id('mapAdd').onclick=function(e){e.stopPropagation();startMapPositionMode({type:'newMachine'})}
   $id('locateMe').onclick=function(){if(!navigator.geolocation){toast('この端末では現在地取得に対応していません');return}toast('現在地を取得しています…');navigator.geolocation.getCurrentPosition(function(pos){var lat=pos.coords.latitude,lng=pos.coords.longitude;currentLocationLayer.clearLayers();L.circleMarker([lat,lng],{radius:8,color:'#fff',weight:3,fillColor:'#111',fillOpacity:1}).addTo(currentLocationLayer);leafletMap.setView([lat,lng],16);toast('現在地を表示しました')},function(){toast('現在地を取得できませんでした')},{enableHighAccuracy:true,timeout:10000,maximumAge:30000})}
-  $id('closeAdd').onclick=function(){closeModal('addMachineModal');addPoint=null};$id('cancelAdd').onclick=function(){closeModal('addMachineModal');addPoint=null};$id('saveAdd').onclick=saveNewMachine
+  $id('closeAdd').onclick=function(){reverseGeocodeToken++;closeModal('addMachineModal');addPoint=null};$id('cancelAdd').onclick=function(){reverseGeocodeToken++;closeModal('addMachineModal');addPoint=null};$id('saveAdd').onclick=saveNewMachine
 
   var addrBox=$id('addressResults'),addrInput=$id('addressSearch'),addrTimer=null;
   addrInput.oninput=function(){var q=this.value.trim();clearTimeout(addrTimer);if(!q){addrBox.classList.add('hidden');addrBox.innerHTML='';return}addrTimer=setTimeout(function(){addrBox.classList.remove('hidden');addrBox.innerHTML='<div class="result"><b>住所を検索中…</b></div>';fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=ja&q='+encodeURIComponent(q)).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(items){addrBox.innerHTML='';if(!items.length){addrBox.innerHTML='<div class="result"><b>候補が見つかりません</b></div>';return}items.forEach(function(x){var e=document.createElement('div');e.className='result';e.innerHTML='<b>'+esc(x.display_name)+'</b>';e.onclick=function(){var lat=parseFloat(x.lat),lng=parseFloat(x.lon);if(!isFinite(lat)||!isFinite(lng))return;ensureMap();leafletMap.setView([lat,lng],17);resetNewMachineForm();addPoint={lat:lat,lng:lng};$id('newGps').value=lat.toFixed(6)+', '+lng.toFixed(6);$id('newAddress').value=x.display_name;addrBox.classList.add('hidden');openModal('addMachineModal')};addrBox.appendChild(e)})}).catch(function(){addrBox.innerHTML='<div class="result"><b>住所検索に失敗しました</b><small>通信状況を確認してください</small></div>'})},450)};
