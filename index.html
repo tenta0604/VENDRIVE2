@@ -94,7 +94,7 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
 <section id="tasksPage" class="page hidden">
 <div class="row"><div><div class="ey">TASKS</div><div class="title">タスク</div><div class="subtitle">完了するまで残り続ける作業</div></div><button class="primary pill" id="addTask">＋登録</button></div>
 <div class="hero" style="margin-top:11px"><div class="ey">UNFINISHED</div><div class="heroTitle"><span id="taskCount">0</span> 件</div><div class="heroSub">完了するまで本日の画面の最上部に表示されます</div></div>
-<div class="section"><div class="sectionhead"><b>未完了タスク</b><span class="muted">対象は作成時点で固定</span></div><div id="taskList"></div></div><div class="section"><div class="sectionhead"><b>完了履歴</b></div><div id="taskHistoryList"></div></div>
+<div class="section"><div class="sectionhead"><b>未完了タスク</b><span class="muted">メーカー連動</span></div><div id="taskList"></div></div>
 </section>
 
 <section id="mapPage" class="page hidden">
@@ -238,7 +238,7 @@ var WEEK=['日','月','火','水','木','金','土'];
 var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
 var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':30};
 var key='vendrive2_v7_data';
-var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
+var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
 var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null;
 
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -292,7 +292,7 @@ function normalizeLoadedState(x){
   state=x;
   if(!Array.isArray(state.offices))state.offices=[];
   if(!Array.isArray(state.history))state.history=[];
-  if(!Array.isArray(state.tasks))state.tasks=[];if(!Array.isArray(state.taskHistory))state.taskHistory=[];migrateTaskState();
+  if(!Array.isArray(state.tasks))state.tasks=[];
   if(!Array.isArray(state.makers)||!state.makers.length)state.makers=['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'];
   state.machines.forEach(function(m){m.days=Array.isArray(m.days)?m.days:[];m.makerGroup=makerGroup(m.maker);if(!m.timeCondition&&m.time==='指定なし')m.timeCondition={type:'none',start:'',end:''}});
   migrateMakerSettings();
@@ -416,15 +416,7 @@ function renderToday(){
   var box=$id('todayList');box.innerHTML='';t.forEach(function(m){var w=document.createElement('div');w.className='swipeRow';w.innerHTML='<div class="swipeAction">訪問完了</div>';var c=card(m,'today');c.classList.add('swipeCard');w.appendChild(c);box.appendChild(w);if(!m.visited)makeSwipeComplete(w,m)});
   if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">本日の訪問予定はありません。</div>';
 }
-function taskMachineIds(target){return state.machines.filter(function(m){return target==='all'||makerGroup(m.maker)===target}).map(function(m){return m.id})}
-function migrateTaskState(){if(!Array.isArray(state.taskHistory))state.taskHistory=[];(state.tasks||[]).forEach(function(t){if(!Array.isArray(t.targetMachineIds))t.targetMachineIds=taskMachineIds(t.target);if(!Object.prototype.hasOwnProperty.call(t,'completedAt'))t.completedAt=null;if(t.completed&&!state.taskHistory.some(function(h){return h.taskId===t.id}))state.taskHistory.push({id:'TH-'+t.id,taskId:t.id,text:t.text,target:t.target,targetCount:t.targetMachineIds.length,completedAt:t.completedAt||t.createdAt||Date.now()})});state.machines.forEach(function(m){if(!m.taskDone||typeof m.taskDone!=='object')m.taskDone={}})}
-function taskIncludesMachine(t,m){return Array.isArray(t.targetMachineIds)&&t.targetMachineIds.indexOf(m.id)>=0}
-function taskDoneForMachine(t,m){var done=m&&m.taskDone&&m.taskDone[t.id];return done===true||(typeof done==='object'&&done!==null)}
-function activeTasksForMachine(m){return (state.tasks||[]).filter(function(t){return !t.completed&&taskIncludesMachine(t,m)&&!taskDoneForMachine(t,m)})}
-function hasActiveTask(m){return activeTasksForMachine(m).length>0}
-function taskProgress(t){var ids=Array.isArray(t.targetMachineIds)?t.targetMachineIds:[],done=ids.filter(function(id){var m=state.machines.find(function(x){return x.id===id});return !!(m&&taskDoneForMachine(t,m))}).length;return {total:ids.length,done:done}}
-function completeMachineTask(taskId,machineId){var t=(state.tasks||[]).find(function(x){return x.id===taskId}),m=state.machines.find(function(x){return x.id===machineId});if(!t||!m||t.completed||!taskIncludesMachine(t,m)||taskDoneForMachine(t,m))return;m.taskDone=m.taskDone||{};m.taskDone[t.id]={completedAt:Date.now()};var p=taskProgress(t);if(p.total>0&&p.done===p.total){t.completed=true;t.completedAt=Date.now();if(!(state.taskHistory||[]).some(function(h){return h.taskId===t.id}))state.taskHistory.push({id:'TH-'+t.id,taskId:t.id,text:t.text,target:t.target,targetCount:p.total,completedAt:t.completedAt});persist();renderAll();toast('タスクがすべて完了しました')}else{persist();renderAll();toast('この自販機のタスクを完了しました')}if(selectedMachine&&selectedMachine.id===m.id)renderMachineTaskNotice(m)}
-function renderMachineTaskNotice(m){var tasks=activeTasksForMachine(m),box=$id('detailTask');if(!tasks.length){box.classList.add('hidden');return}box.classList.remove('hidden');$id('detailTaskText').textContent=tasks.map(function(t){return t.text}).join(' / ');$id('detailTaskMaker').textContent=tasks.map(function(t){var p=taskProgress(t);return (t.target==='all'?'全メーカー':t.target)+' ・ 完了 '+p.done+'/'+p.total+'台'}).join(' / ');$id('detailTaskActions').innerHTML=tasks.map(function(t){return '<button class="secondary taskMachineComplete" data-task-id="'+esc(t.id)+'">この自販機のタスクを完了</button>'}).join('')}
+function hasActiveTask(m){return (state.tasks||[]).some(function(t){return !t.completed&&(t.target==='all'||makerGroup(m.maker)===t.target)})}
 function markerClass(m){if(m.order){var left=86400000-(Date.now()-m.order.createdAt);return left<=0?'urgent':left<=6*3600000?'urgent':'order'}if(hasActiveTask(m))return'task';return m.visited?'done':hasTimeCondition(m)?'time':'normal'}
 function ensureMap(){
   if(leafletMap||typeof L==='undefined')return;
@@ -582,7 +574,7 @@ function confirmDeleteMachine(id){
 function deleteMachine(){
   if(!deleteMachineTargetId)return;
   var id=deleteMachineTargetId;
-  state.machines=state.machines.filter(function(m){return m.id!==id});(state.tasks||[]).forEach(function(t){if(!t.completed&&Array.isArray(t.targetMachineIds))t.targetMachineIds=t.targetMachineIds.filter(function(taskMachineId){return taskMachineId!==id})});
+  state.machines=state.machines.filter(function(m){return m.id!==id});
   if(state.tomorrowPlan&&Array.isArray(state.tomorrowPlan.ids)){
     state.tomorrowPlan.ids=state.tomorrowPlan.ids.filter(function(x){return x!==id});
   }
@@ -593,7 +585,7 @@ function deleteMachine(){
 }
 function openMachine(id,mode){
   var m=state.machines.find(function(x){return x.id===id});if(!m)return;selectedMachine=m;
-  $id('machineModalTitle').textContent=m.name;$id('detailMaker').textContent=m.maker||'メーカー未設定';document.querySelectorAll('#mDaysPicker button').forEach(function(b){b.classList.toggle('active',(m.days||[]).indexOf(b.dataset.day)>=0)});renderMachineTaskNotice(m);applyMakerSelect('mMaker','mMakerCustom',m.maker||'');$id('detailLast').textContent=m.last||'未登録';var next=nextVisitDate(m);$id('detailNext').textContent=next?next+'（'+WEEK[new Date(next+'T00:00:00').getDay()]+'）':'未定';$id('detailSales').textContent=m.sales||'販売データ未登録';if(m.order){$id('detailOrderType').textContent=m.order.type+(m.order.sub?' ＞ '+m.order.sub:'');$id('detailOrderText').textContent=(m.order.detail||'詳細なし')+' ・ '+timeLeft(m.order.createdAt);$id('detailOrder').classList.remove('hidden')}else{$id('detailOrder').classList.add('hidden')};$id('mName').value=m.name;$id('mCode').value=m.code||'';$id('mAddress').value=m.address||'';$id('mCycle').value=m.cycle||'1週間に1回';$id('mLast').value=m.last||'';configureTimeCondition('m',m);$id('mTime').value=m.time||'指定なし';$id('mSales').value=m.sales||'';$id('mMemo').value=m.memo||'';$id('machineExtra').classList.add('hidden');$id('detailMore').textContent='詳細表示';
+  $id('machineModalTitle').textContent=m.name;$id('detailMaker').textContent=m.maker||'メーカー未設定';document.querySelectorAll('#mDaysPicker button').forEach(function(b){b.classList.toggle('active',(m.days||[]).indexOf(b.dataset.day)>=0)});var activeTasks=(state.tasks||[]).filter(function(t){return !t.completed&&(t.target==='all'||makerGroup(m.maker)===t.target)});if(activeTasks.length){$id('detailTaskText').textContent=activeTasks[0].text+(activeTasks.length>1?' ほか'+(activeTasks.length-1)+'件':'');$id('detailTaskMaker').textContent=activeTasks[0].target==='all'?'全メーカー':'対象：'+activeTasks[0].target;$id('detailTask').classList.remove('hidden')}else{$id('detailTask').classList.add('hidden')}applyMakerSelect('mMaker','mMakerCustom',m.maker||'');$id('detailLast').textContent=m.last||'未登録';var next=nextVisitDate(m);$id('detailNext').textContent=next?next+'（'+WEEK[new Date(next+'T00:00:00').getDay()]+'）':'未定';$id('detailSales').textContent=m.sales||'販売データ未登録';if(m.order){$id('detailOrderType').textContent=m.order.type+(m.order.sub?' ＞ '+m.order.sub:'');$id('detailOrderText').textContent=(m.order.detail||'詳細なし')+' ・ '+timeLeft(m.order.createdAt);$id('detailOrder').classList.remove('hidden')}else{$id('detailOrder').classList.add('hidden')};$id('mName').value=m.name;$id('mCode').value=m.code||'';$id('mAddress').value=m.address||'';$id('mCycle').value=m.cycle||'1週間に1回';$id('mLast').value=m.last||'';configureTimeCondition('m',m);$id('mTime').value=m.time||'指定なし';$id('mSales').value=m.sales||'';$id('mMemo').value=m.memo||'';$id('machineExtra').classList.add('hidden');$id('detailMore').textContent='詳細表示';
   
   openModal('machineModal');
 }
@@ -771,10 +763,10 @@ function configureTimeCondition(prefix,m){var type=$id(prefix+'TimeType'),legacy
 function readTimeCondition(prefix,current){var type=$id(prefix+'TimeType').value;if(type==='legacy')return null;if(type==='none')return {type:'none',start:'',end:''};return {type:type,start:$id(prefix+'TimeStart').value||'',end:type==='avoid'?$id(prefix+'TimeEnd').value||'':''}}
 function renderTasks(){
  var active=(state.tasks||[]).filter(function(t){return !t.completed}),box=$id('taskList');if(!box)return;$id('taskCount').textContent=active.length;box.innerHTML='';
- if(!active.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';
- active.forEach(function(t){var p=taskProgress(t),e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+p.total+'台 ・ 完了 '+p.done+'/'+p.total+'台</div></div>';box.appendChild(e)});
- var hbox=$id('taskHistoryList');if(hbox){hbox.innerHTML='';var history=(state.taskHistory||[]).slice().sort(function(a,b){return b.completedAt-a.completedAt});if(!history.length)hbox.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">完了したタスクはありません。</div>';history.forEach(function(h){var e=document.createElement('div');e.className='history';e.innerHTML='<b>'+esc(h.text)+'</b><div class="meta">'+esc(h.target==='all'?'全メーカー':h.target)+' ・ '+h.targetCount+'台<br>'+new Date(h.completedAt).toLocaleString('ja-JP')+' 完了</div>';hbox.appendChild(e)})}
+ if(!active.length){box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';return}
+ active.forEach(function(t){var ms=state.machines.filter(function(m){return t.target==='all'||makerGroup(m.maker)===t.target});var done=ms.filter(function(m){return m.taskDone&&m.taskDone[t.id]}).length;var e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+ms.length+'台'+(ms.length?' ・ 完了 '+done+'/'+ms.length+'台':'')+'</div></div><button class="badge b-green">タスク完了</button>';e.querySelector('button').onclick=function(){t.completed=true;t.completedAt=Date.now();persist();renderAll()};box.appendChild(e)})
 }
+
 function makeSwipeComplete(wrapper,m){
  var card=wrapper.querySelector('.swipeCard'),sx=0,sy=0,dx=0,tracking=false;
  function reset(){card.classList.remove('swiping');wrapper.classList.remove('revealed');card.style.transform='translateX(0)';dx=0;tracking=false}
@@ -843,11 +835,11 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   initDays();renderMap();
   toast('明日の予定だけをMAPに表示しています');
 };$id('tomorrowLater').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowSave').onclick=function(){if(state.tomorrowPlan)state.tomorrowPlan.manual=true;persist();closeModal('tomorrowModal');toast('明日の予定を保存しました')}
-  $id('detailTaskActions').onclick=function(e){var b=e.target.closest('[data-task-id]');if(b&&selectedMachine)completeMachineTask(b.dataset.taskId,selectedMachine.id)};$id('closeMachine').onclick=function(){closeModal('machineModal')};$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
+  $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
   $id('addOrder').onclick=openOrder;
   $id('addTask').onclick=function(){refreshMakerOptions();$id('taskText').value='';openModal('taskModal')};
   $id('closeTask').onclick=function(){closeModal('taskModal')};$id('cancelTask').onclick=function(){closeModal('taskModal')};
-  $id('saveTask').onclick=function(){var text=$id('taskText').value.trim(),target=$id('taskTarget').value;if(!text){toast('タスク内容を入力してください');return}state.tasks.push({id:'T-'+Date.now(),text:text,target:target,targetMachineIds:taskMachineIds(target),createdAt:Date.now(),completed:false,completedAt:null});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
+  $id('saveTask').onclick=function(){var t=$id('taskText').value.trim();if(!t){toast('タスク内容を入力してください');return}state.tasks.push({id:'T-'+Date.now(),text:t,target:$id('taskTarget').value,createdAt:Date.now(),completed:false});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
   $id('manageMakers').onclick=function(){migrateMakerSettings();renderMakers();closeMakerEditor();openModal('makerModal')};$id('closeMaker').onclick=function(){closeMakerEditor();closeModal('makerModal')};$id('openMakerAdd').onclick=function(){openMakerEditor(null)};$id('cancelMakerEdit').onclick=closeMakerEditor;$id('deleteMakerAction').onclick=deleteEditingMaker;
   $id('makerPreset').onchange=function(){var p=MAKER_PRESETS.find(function(x){return x.id===$id('makerPreset').value});if(p){$id('makerName').value=p.name;$id('makerColor').value=p.color;renderMakerAddControls()}};$id('makerColorChoices').onclick=function(e){var b=e.target.closest('[data-color]');if(!b)return;$id('makerColor').value=b.dataset.color;renderMakerAddControls()};$id('makerColor').oninput=function(){renderMakerAddControls()};$id('makerList').onclick=handleMakerAction;$id('saveMaker').onclick=saveMakerSetting;$id('exportBackup').onclick=exportBackup;
   $id('closeOrder').onclick=function(){closeModal('orderModal')};$id('cancelOrder').onclick=function(){closeModal('orderModal')};$id('orderMachineSearch').oninput=orderSearch;$id('saveOrder').onclick=saveOrder
