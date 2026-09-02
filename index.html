@@ -271,8 +271,8 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-7D1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
-var versionCheckAt=0,versionCheckInFlight=false;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-QA1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
  var checkedAt=Date.now();
@@ -284,6 +284,8 @@ function checkForAppUpdate(){
   location.replace(location.pathname+'?v='+encodeURIComponent(latest));
  }).catch(function(){}).then(function(){versionCheckInFlight=false});
 }
+function startVersionCheckTimer(){if(versionCheckTimer!==null||document.visibilityState!=='visible')return;versionCheckTimer=setInterval(function(){checkForAppUpdate()},300000)}
+function stopVersionCheckTimer(){if(versionCheckTimer===null)return;clearInterval(versionCheckTimer);versionCheckTimer=null}
 function stateSnapshot(){return JSON.parse(JSON.stringify(state))}
 function exportBackup(){
   try{
@@ -448,8 +450,8 @@ function cleanupHistory(){var before=Array.isArray(state.history)?state.history:
 function cleanupTaskHistory(){var before=Array.isArray(state.taskHistory)?state.taskHistory:[],next=recentEntries(before);if(sameEntryList(before,next))return false;state.taskHistory=next;return true}
 function cleanupZeroTargetTasks(){var before=Array.isArray(state.tasks)?state.tasks:[],next=before.filter(function(task){return!task||typeof task!=='object'||task.completed||!Array.isArray(task.targetMachineIds)||task.targetMachineIds.length>0});if(sameEntryList(before,next))return false;state.tasks=next;return true}
 function addOrderHistory(entry){if(!Array.isArray(state.history))state.history=[];state.history.push(entry);cleanupHistory()}
-function isDue(m,day){
-  if(m.skip===today && !m.order)return false;
+function isDue(m,day,options){
+  if(m.skip===today && !m.order&&!(options&&options.ignoreTodaySkip))return false;
   if(m.force===today)return true;
   // 未対応オーダーは本日タブ/MAP本日に必ず表示。
   if(m.visited && day===todayDay)return true;
@@ -460,6 +462,7 @@ function isDue(m,day){
   return diff(today,m.last)>=CYCLES[m.cycle];
 }
 function targets(day,all){return state.machines.filter(function(m){return all?true:isDue(m,day)})}
+function todayProgressTargets(){return state.machines.filter(function(m){return isDue(m,todayDay,{ignoreTodaySkip:true})})}
 
 function nextVisitDate(m){
   var days=Array.isArray(m.days)?m.days:[];
@@ -524,10 +527,10 @@ function nearbyMachineWarningMessage(candidates){var lines=candidates.slice(0,3)
 function confirmNearbyMachineLocation(lat,lng,excludeMachineId){var candidates=nearbyMachineCandidates(lat,lng,excludeMachineId);return!candidates.length||confirm(nearbyMachineWarningMessage(candidates))}
 function sortedTodayMachines(machines){return machines.map(function(machine,index){var distance=null,near=false;if(!machine.visited&&runtimeCurrentPosition&&typeof machine.lat==='number'&&typeof machine.lng==='number'){distance=distanceMeters(runtimeCurrentPosition,{lat:machine.lat,lng:machine.lng});near=distance<=100}return {machine:machine,index:index,distance:distance,group:machine.visited?2:near?0:1}}).sort(function(a,b){return a.group-b.group||(a.group===0?(a.distance-b.distance||a.index-b.index):a.index-b.index)}).map(function(entry){return entry.machine})}
 function renderToday(){
-  var t=targets(todayDay,false), done=t.filter(function(m){return m.visited&&!m.order}).length, orders=state.machines.filter(function(m){return m.order}).length;
+  var t=targets(todayDay,false),progressTargets=todayProgressTargets(),done=progressTargets.filter(function(m){return m.visited&&!m.order}).length,orders=state.machines.filter(function(m){return m.order}).length;
   $id('todaySub').textContent=todayDay+'曜日の訪問予定';renderCurrentLocationSummary();renderTodayWeather();
-  $id('heroDone').textContent=done;$id('heroTotal').textContent=t.length;$id('heroText').textContent=t.length?(done===t.length?'本日の訪問がすべて完了しています':'本日の訪問を進めましょう'):'本日の訪問予定はありません';
-  $id('progressBar').style.width=(t.length?Math.round(done/t.length*100):0)+'%';
+  $id('heroDone').textContent=done;$id('heroTotal').textContent=progressTargets.length;$id('heroText').textContent=progressTargets.length?(done===progressTargets.length?'本日の訪問がすべて完了しています':'本日の訪問を進めましょう'):'本日の訪問予定はありません';
+  $id('progressBar').style.width=(progressTargets.length?Math.round(done/progressTargets.length*100):0)+'%';
   $id('todayTodo').textContent=t.filter(function(m){return !m.visited}).length;$id('todayVisited').textContent=done;$id('todayOrders').textContent=orders;$id('todayRoute').textContent=todayDay+'曜ルート';
   var box=$id('todayList');box.innerHTML='';sortedTodayMachines(t).forEach(function(m){var w=document.createElement('div');w.className='swipeRow';w.innerHTML='<div class="swipeAction">訪問完了</div>';var c=card(m,'today');c.classList.add('swipeCard');w.appendChild(c);box.appendChild(w);if(!m.visited)makeSwipeComplete(w,m)});
   if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">本日の訪問予定はありません。</div>';
@@ -648,7 +651,7 @@ function renderMap(){
   $id('mapCount').textContent=t.length+'台';
   display.forEach(function(entry){var m=entry.machine;if(typeof m.lat!=='number'||typeof m.lng!=='number')return;var allRouteDay=mode==='all'?((m.days&&m.days.length)?m.days[0]:todayDay):null,color=mode==='all'?dayRouteColor(allRouteDay):makerPinColor(m.maker),zIndexOffset=mode==='today'?(entry.outOfPlan?100:m.visited?300:1000):0;var html=machinePinHtml(m,mode,color,entry.outOfPlan,allRouteDay),icon=L.divIcon({className:'vendrive-machine-pin',html:html,iconSize:[36,43],iconAnchor:[18,42]}),mk=L.marker([m.lat,m.lng],{icon:icon,title:m.name,zIndexOffset:zIndexOffset});mk.on('click',function(){if(mapPositionMode)return;openMachine(m.id,m.order?'order':'normal')});mk.addTo(machineLayer);machineMapMarkers.push({machineId:m.id,marker:mk,lat:m.lat,lng:m.lng,zIndexOffset:zIndexOffset})});
   scheduleMachinePinFan();
-  (state.offices||[]).forEach(function(o){if(typeof o.lat!=='number'||typeof o.lng!=='number')return;var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]}),mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);mk.bindTooltip(o.name||'営業所',{direction:'top',offset:[0,-12]});mk.on('click',function(){if(mapPositionMode)return;navigateToMachine(o)})});
+  (state.offices||[]).forEach(function(o){if(typeof o.lat!=='number'||typeof o.lng!=='number')return;var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]}),mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);mk.bindTooltip(esc(o.name||'営業所'),{direction:'top',offset:[0,-12]});mk.on('click',function(){if(mapPositionMode)return;navigateToMachine(o)})});
   var box=$id('mapList');box.innerHTML='';t.forEach(function(m){box.appendChild(card(m,'map'))});if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">このルートの表示対象はありません。</div>';
 }function renderMachines(list){
   var day=$id('machineDayFilter')?$id('machineDayFilter').value:'all', maker=$id('machineMakerFilter')?$id('machineMakerFilter').value:'all';
@@ -735,11 +738,11 @@ function orderSearch(){
   box.classList.toggle('hidden',!list.length)
 }
 function saveOrder(){
-invalidateAutoTomorrowPlan();
   if(!selectedOrderMachine){toast('自販機を選択してください');return}
   if(!selectedOrderType){toast('オーダー内容を選択してください');return}
   if(selectedOrderType==='商品関連'&&!selectedProductSub){toast('商品関連の種類を選択してください');return}
   var type=selectedOrderType,sub=selectedOrderType==='商品関連'?selectedProductSub:'',detail=$id('orderDetail').value.trim();
+  invalidateAutoTomorrowPlan();
   selectedOrderMachine.order={type:type,sub:sub,detail:detail,createdAt:Date.now()};persist();closeModal('orderModal');renderAll();toast('オーダーを登録しました')
 }
 function tomorrowDate(){
@@ -995,9 +998,9 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   var addrBox=$id('addressResults'),addrInput=$id('addressSearch'),addrTimer=null;
   addrInput.oninput=function(){var rawQuery=this.value,sequence=++addressSearchSequence;clearTimeout(addrTimer);if(!rawQuery.trim()){addrBox.classList.add('hidden');addrBox.innerHTML='';return}addrTimer=setTimeout(function(){if(sequence!==addressSearchSequence)return;renderAddressSearchResults([],{title:'住所を検索中…'});searchAddressCandidates(rawQuery,sequence)},450)};  $id('zoomIn').onclick=function(){leafletMap.zoomIn()};$id('zoomOut').onclick=function(){leafletMap.zoomOut()}
 }
-load();initDays();bind();renderAll();startCurrentPositionWatch();checkForAppUpdate();
+load();initDays();bind();renderAll();startCurrentPositionWatch();checkForAppUpdate();startVersionCheckTimer();
 window.addEventListener('beforeunload',function(){persist()});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){stopCurrentPositionWatch();persist()}else if(document.visibilityState==='visible'){startCurrentPositionWatch();checkForAppUpdate()}});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){stopCurrentPositionWatch();stopVersionCheckTimer();persist()}else if(document.visibilityState==='visible'){startCurrentPositionWatch();checkForAppUpdate();startVersionCheckTimer()}});
 
 })();
 </script>
