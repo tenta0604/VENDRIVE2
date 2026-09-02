@@ -36,7 +36,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .modal{position:fixed;inset:0;background:#0008;z-index:80;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{width:min(100%,430px);max-height:90vh;overflow:auto;background:#fff;margin:auto;border-radius:24px 24px 0 0;padding:18px}.modalTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .orderTypeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}.orderType{padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;text-align:left;font-weight:850;font-size:11px}.orderType.active{border-color:#111;background:#111;color:#fff}
 .subtypes{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.subtype{border:1px solid #ddd;background:#fff;border-radius:99px;padding:8px 10px;font-size:10px;font-weight:850}.subtype.active{background:#111;color:#fff;border-color:#111}
-.history{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:7px}.history b{font-size:11px}.history .meta{font-size:9px}
+.history{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:7px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.history b{font-size:11px}.history .meta{font-size:9px}.historyDelete{flex:0 0 auto;border:1px solid #f1caca;background:#fff8f8;color:#b42318;border-radius:9px;min-height:29px;padding:0 9px;font-size:9px;font-weight:900}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:120;background:#111;color:#fff;padding:9px 13px;border-radius:99px;font-size:10px;font-weight:850;display:none}.toast.show{display:block}.undoToast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:121;display:flex;align-items:center;gap:10px;max-width:calc(100% - 28px);padding:8px 9px 8px 13px;border:1px solid #2b2b2b;background:#111;color:#fff;border-radius:14px;box-shadow:0 7px 22px #0004;font-size:10px;font-weight:850}.undoToast button{flex:0 0 auto;min-height:32px;padding:0 11px;border:0;border-radius:9px;background:#fff;color:#111;font:inherit;font-weight:900;white-space:nowrap}
 @media(max-width:360px){.tabs button{font-size:11px}.main{padding:12px}.title{font-size:23px}}
 </style>
@@ -125,7 +125,7 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
 <div class="row"><div><div class="ey">ORDER</div><div class="title">オーダー</div><div class="subtitle">24時間以内の臨時対応</div></div><button class="primary pill" id="addOrder">＋登録</button></div>
 <div class="notice">登録した自販機は通常の曜日に関係なく、本日・マップにオーダーとして表示されます。</div>
 <div class="section"><div class="sectionhead"><b>対応待ち</b><span class="muted" id="pendingCount"></span></div><div id="ordersList"></div></div>
-<div class="section"><div class="sectionhead"><b>過去30日間の対応履歴</b><span class="muted">自動保存</span></div><div id="historyList"></div></div>
+<div class="section"><div class="sectionhead"><b>直近30件の対応履歴</b><span class="muted">自動保存</span></div><div id="historyList"></div></div>
 </section>
 </main>
 </div>
@@ -266,7 +266,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-6B2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-7A1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -345,9 +345,9 @@ function initializeSampleData(){
   ];state.history=[];state.machines.forEach(function(m){m.makerGroup=makerGroup(m.maker)});
 }
 function finalizeLoadedState(){
-  var dayKey='vendrive2_last_day';
+  var dayKey='vendrive2_last_day',maintenanceChanged=false;
   try{var last=localStorage.getItem(dayKey);if(last!==today){state.machines.forEach(function(m){m.visited=false;m.skip=null;m.force=null});localStorage.setItem(dayKey,today);persist()}}catch(e){console.error('VENDRIVE2 day reset failed',e)}
-  ensureMakerColors();migrateCoordinates();cleanupHistory();
+  ensureMakerColors();migrateCoordinates();maintenanceChanged=cleanupHistory()||cleanupTaskHistory()||cleanupZeroTargetTasks();if(maintenanceChanged)persist();
 }
 function recoverIndexedDb(done){
   if(!window.indexedDB){done(false);return}
@@ -362,11 +362,12 @@ function load(){
     if(hasStoredData){console.error('VENDRIVE2 stored data retained after load failure');toast('保存データの読み込みに失敗しました');return}
     initializeSampleData();finalizeLoadedState();renderAll();
   });
-}function cleanupHistory(){
-  var cutoff=Date.now()-30*86400000;
-  state.history=(state.history||[]).filter(function(h){return h.completedAt>=cutoff});
-  persist();
-}
+}function recentEntries(list){return(Array.isArray(list)?list:[]).slice().sort(function(a,b){return Number(b&&b.completedAt||0)-Number(a&&a.completedAt||0)}).slice(0,30)}
+function sameEntryList(a,b){return a.length===b.length&&a.every(function(item,index){return item===b[index]})}
+function cleanupHistory(){var before=Array.isArray(state.history)?state.history:[],next=recentEntries(before);if(sameEntryList(before,next))return false;state.history=next;return true}
+function cleanupTaskHistory(){var before=Array.isArray(state.taskHistory)?state.taskHistory:[],next=recentEntries(before);if(sameEntryList(before,next))return false;state.taskHistory=next;return true}
+function cleanupZeroTargetTasks(){var before=Array.isArray(state.tasks)?state.tasks:[],next=before.filter(function(task){return!task||typeof task!=='object'||task.completed||!Array.isArray(task.targetMachineIds)||task.targetMachineIds.length>0});if(sameEntryList(before,next))return false;state.tasks=next;return true}
+function addOrderHistory(entry){if(!Array.isArray(state.history))state.history=[];state.history.push(entry);cleanupHistory()}
 function isDue(m,day){
   if(m.skip===today && !m.order)return false;
   if(m.force===today)return true;
@@ -448,7 +449,7 @@ function taskDoneForMachine(task,machine){var done=task&&machine&&machine.taskDo
 function taskTargetsMachine(task,machine){return !!(task&&typeof task==='object'&&!task.completed&&Array.isArray(task.targetMachineIds)&&machine&&machine.id!=null&&task.targetMachineIds.indexOf(machine.id)>=0)}
 function activeTasksForMachine(machine){return (state.tasks||[]).filter(function(task){return taskTargetsMachine(task,machine)&&!taskDoneForMachine(task,machine)})}
 function taskProgress(task){var ids=task&&Array.isArray(task.targetMachineIds)?task.targetMachineIds:[];return {total:ids.length,done:state.machines.filter(function(machine){return ids.indexOf(machine.id)>=0&&taskDoneForMachine(task,machine)}).length}}
-function addTaskHistory(task){if(!Array.isArray(state.taskHistory))state.taskHistory=[];if(state.taskHistory.some(function(item){return item&&item.taskId===task.id}))return;var progress=taskProgress(task);state.taskHistory.push({id:'TH-'+Date.now()+'-'+task.id,taskId:task.id,text:task.text||'',target:task.target||'',targetCount:progress.total,completedAt:task.completedAt})}
+function addTaskHistory(task){if(!Array.isArray(state.taskHistory))state.taskHistory=[];if(state.taskHistory.some(function(item){return item&&item.taskId===task.id}))return;var progress=taskProgress(task);state.taskHistory.push({id:'TH-'+Date.now()+'-'+task.id,taskId:task.id,text:task.text||'',target:task.target||'',targetCount:progress.total,completedAt:task.completedAt});cleanupTaskHistory()}
 function completeParentTaskIfDone(task){if(!task||typeof task!=='object'||task.completed)return false;var progress=taskProgress(task);if(progress.total<=0||progress.done!==progress.total)return false;task.completed=true;task.completedAt=Date.now();addTaskHistory(task);return true}
 function hasActiveTask(m){return activeTasksForMachine(m).length>0}
 function markerClass(m){if(m.order){var left=86400000-(Date.now()-m.order.createdAt);return left<=0?'urgent':left<=6*3600000?'urgent':'order'}if(hasActiveTask(m))return'task';return m.visited?'done':hasTimeCondition(m)?'time':'normal'}
@@ -569,10 +570,10 @@ function renderMap(){
   if(!list.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">条件に一致する自販機はありません。</div>';
 }
 function renderOrders(){
-  cleanupHistory();var pending=state.machines.filter(function(m){return m.order});$id('pendingCount').textContent=pending.length+'件';var box=$id('ordersList');box.innerHTML='';
+  var pending=state.machines.filter(function(m){return m.order});$id('pendingCount').textContent=pending.length+'件';var box=$id('ordersList');box.innerHTML='';
   pending.forEach(function(m){var o=m.order,e=document.createElement('div');e.className='item order urgent';e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="meta">'+esc(o.type)+(o.sub?' ＞ '+esc(o.sub):'')+' ・ '+esc(o.detail||'詳細なし')+' ・ '+timeLeft(o.createdAt)+'</div></div><button class="badge b-purple">対応完了</button>';e.onclick=function(){openMachine(m.id,'order')};e.querySelector('button').onclick=function(ev){ev.stopPropagation();completeOrder(m.id)};box.appendChild(e)});
   if(!pending.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">対応待ちのオーダーはありません。</div>';
-  var hbox=$id('historyList');hbox.innerHTML='';(state.history||[]).slice().sort(function(a,b){return b.completedAt-a.completedAt}).forEach(function(h){var e=document.createElement('div');e.className='history';e.innerHTML='<b>'+esc(h.machineName)+'</b><div class="meta">'+esc(h.type)+(h.sub?' ＞ '+esc(h.sub):'')+(h.detail?' ・ '+esc(h.detail):'')+'<br>'+new Date(h.completedAt).toLocaleString('ja-JP')+'</div>';hbox.appendChild(e)});if(!hbox.children.length)hbox.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">過去30日間の対応履歴はありません。</div>';
+  var hbox=$id('historyList');hbox.innerHTML='';(state.history||[]).slice().sort(function(a,b){return b.completedAt-a.completedAt}).forEach(function(h){var e=document.createElement('div');e.className='history';e.innerHTML='<div><b>'+esc(h.machineName)+'</b><div class="meta">'+esc(h.type)+(h.sub?' ＞ '+esc(h.sub):'')+(h.detail?' ・ '+esc(h.detail):'')+'<br>'+new Date(h.completedAt).toLocaleString('ja-JP')+'</div></div><button class="historyDelete" type="button">削除</button>';e.querySelector('button').onclick=function(){deleteOrderHistoryEntry(h)};hbox.appendChild(e)});if(!hbox.children.length)hbox.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">直近30件の対応履歴はありません。</div>';
 }
 function renderAll(){renderHeader();renderTodayWithTasks();renderMachines(state.machines);renderOrders();renderTasks();renderMakers();refreshMakerOptions();renderOffices();if(!document.getElementById('mapPage').classList.contains('hidden'))renderMap()}
 var deleteMachineTargetId=null;
@@ -591,6 +592,7 @@ function deleteMachine(){
     task.targetMachineIds=task.targetMachineIds.filter(function(targetId){return targetId!==id});
     if(completeParentTaskIfDone(task))autoCompleted=true;
   });
+  cleanupZeroTargetTasks();
   if(state.tomorrowPlan&&Array.isArray(state.tomorrowPlan.ids)){
     state.tomorrowPlan.ids=state.tomorrowPlan.ids.filter(function(x){return x!==id});
   }
@@ -612,7 +614,7 @@ if(!selectedMachine)return;
 var hadOrder=!!selectedMachine.order,before=hadOrder?orderUndoSnapshot(selectedMachine):visitUndoSnapshot(selectedMachine);
 if(hadOrder){
   var o=selectedMachine.order;
-  state.history.push({machineId:selectedMachine.id,machineName:selectedMachine.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});
+  addOrderHistory({machineId:selectedMachine.id,machineName:selectedMachine.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});
   selectedMachine.order=null;
   selectedMachine.visited=true;selectedMachine.last=today;
   selectedMachine.force=null;
@@ -638,7 +640,7 @@ function completeTaskForMachine(taskId){
  persist();renderAll();openMachine(selectedMachine.id);offerUndo('task',selectedMachine,before,parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました',task.id);toast(parentCompleted?'タスクがすべて完了しました':'この自販機のタスクを完了しました');
 }function skipVisit(){if(!selectedMachine)return;var before=visitUndoSnapshot(selectedMachine);selectedMachine.skip=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();offerUndo('skip',selectedMachine,before,'本日の訪問をスキップしました');toast('本日の訪問をスキップ')}
 function forceVisit(){if(!selectedMachine)return;selectedMachine.force=today;selectedMachine.visited=false;persist();closeModal('machineModal');renderAll();toast('本日の臨時訪問に追加')}
-function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var before=orderUndoSnapshot(m),o=m.order;state.history.push({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();offerUndo('order',m,before,'オーダー対応を完了しました');toast('オーダー対応完了')}
+function completeOrder(id){var m=state.machines.find(function(x){return x.id===id});if(!m||!m.order)return;var before=orderUndoSnapshot(m),o=m.order;addOrderHistory({machineId:m.id,machineName:m.name,type:o.type,sub:o.sub||'',detail:o.detail||'',completedAt:Date.now()});m.order=null;persist();renderAll();offerUndo('order',m,before,'オーダー対応を完了しました');toast('オーダー対応完了')}
 function openOrder(){selectedOrderMachine=null;selectedOrderType=null;selectedProductSub=null;$id('orderMachineSearch').value='';$id('orderResults').classList.add('hidden');$id('selectedMachine').classList.add('hidden');$id('orderDetail').value='';document.querySelectorAll('.orderType,.subtype').forEach(function(e){e.classList.remove('active')});$id('productSub').classList.add('hidden');openModal('orderModal')}
 function orderSearch(){
   var q=$id('orderMachineSearch').value.trim().toLowerCase();var box=$id('orderResults');box.innerHTML='';var list=state.machines.filter(function(m){return !q||[m.name,m.address,m.code,m.id].join(' ').toLowerCase().indexOf(q)>=0}).slice(0,12);
@@ -799,10 +801,12 @@ function migrateLegacyTaskTargets(candidate){
   task.targetMachineIds=collectTaskTargetMachineIds(candidate.machines,task.target);
  });
 }
+function deleteTaskHistoryEntry(entry){if(!confirm('このタスク履歴を削除しますか？'))return;var index=(state.taskHistory||[]).indexOf(entry);if(index<0){toast('履歴が見つかりません');return}state.taskHistory.splice(index,1);persist();renderTaskHistory();toast('タスク履歴を削除しました')}
+function deleteOrderHistoryEntry(entry){if(!confirm('このオーダー履歴を削除しますか？'))return;var index=(state.history||[]).indexOf(entry);if(index<0){toast('履歴が見つかりません');return}state.history.splice(index,1);persist();renderOrders();toast('オーダー履歴を削除しました')}
 function renderTaskHistory(){
  var box=$id('taskHistoryList');if(!box)return;box.innerHTML='';
- (state.taskHistory||[]).filter(function(item){return item&&typeof item==='object'}).slice().sort(function(a,b){return (b.completedAt||0)-(a.completedAt||0)}).forEach(function(item){var e=document.createElement('div');e.className='history';e.innerHTML='<b>'+esc(item.text||'タスク')+'</b><div class="meta">'+esc(item.target==='all'?'全メーカー':(item.target||'未設定'))+' ・ '+Number(item.targetCount||0)+'台<br>'+new Date(item.completedAt).toLocaleString('ja-JP')+' 完了</div>';box.appendChild(e)});
- if(!box.children.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">完了履歴はありません。</div>';
+ (state.taskHistory||[]).filter(function(item){return item&&typeof item==='object'}).slice().sort(function(a,b){return (b.completedAt||0)-(a.completedAt||0)}).forEach(function(item){var e=document.createElement('div');e.className='history';e.innerHTML='<div><b>'+esc(item.text||'タスク')+'</b><div class="meta">'+esc(item.target==='all'?'全メーカー':(item.target||'未設定'))+' ・ '+Number(item.targetCount||0)+'台<br>'+new Date(item.completedAt).toLocaleString('ja-JP')+' 完了</div></div><button class="historyDelete" type="button">削除</button>';e.querySelector('button').onclick=function(){deleteTaskHistoryEntry(item)};box.appendChild(e)});
+ if(!box.children.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">直近30件の完了履歴はありません。</div>';
 }
 function renderTasks(){
  var active=(state.tasks||[]).filter(function(t){return t&&typeof t==='object'&&!t.completed}),box=$id('taskList');if(!box)return;$id('taskCount').textContent=active.length;box.innerHTML='';
@@ -883,7 +887,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   $id('addOrder').onclick=openOrder;
   $id('addTask').onclick=function(){refreshMakerOptions();$id('taskText').value='';openModal('taskModal')};
   $id('closeTask').onclick=function(){closeModal('taskModal')};$id('cancelTask').onclick=function(){closeModal('taskModal')};
-  $id('saveTask').onclick=function(){var t=$id('taskText').value.trim();if(!t){toast('タスク内容を入力してください');return}var target=$id('taskTarget').value,targetMachineIds=taskTargetMachineIds(target);state.tasks.push({id:'T-'+Date.now(),text:t,target:target,targetMachineIds:targetMachineIds,createdAt:Date.now(),completed:false});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
+  $id('saveTask').onclick=function(){var t=$id('taskText').value.trim();if(!t){toast('タスク内容を入力してください');return}var target=$id('taskTarget').value,targetMachineIds=taskTargetMachineIds(target);if(!targetMachineIds.length){toast('対象の自販機がないためタスクは作成されませんでした');return}state.tasks.push({id:'T-'+Date.now(),text:t,target:target,targetMachineIds:targetMachineIds,createdAt:Date.now(),completed:false});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
   $id('manageMakers').onclick=function(){migrateMakerSettings();renderMakers();closeMakerEditor();openModal('makerModal')};$id('closeMaker').onclick=function(){closeMakerEditor();closeModal('makerModal')};$id('openMakerAdd').onclick=function(){openMakerEditor(null)};$id('cancelMakerEdit').onclick=closeMakerEditor;$id('deleteMakerAction').onclick=deleteEditingMaker;
   $id('makerPreset').onchange=function(){var p=MAKER_PRESETS.find(function(x){return x.id===$id('makerPreset').value});if(p){$id('makerName').value=p.name;$id('makerColor').value=p.color;renderMakerAddControls()}};$id('makerColorChoices').onclick=function(e){var b=e.target.closest('[data-color]');if(!b)return;$id('makerColor').value=b.dataset.color;renderMakerAddControls()};$id('makerColor').oninput=function(){renderMakerAddControls()};$id('makerList').onclick=handleMakerAction;$id('saveMaker').onclick=saveMakerSetting;$id('exportBackup').onclick=exportBackup;
   $id('closeOrder').onclick=function(){closeModal('orderModal')};$id('cancelOrder').onclick=function(){closeModal('orderModal')};$id('orderMachineSearch').oninput=orderSearch;$id('saveOrder').onclick=saveOrder
