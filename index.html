@@ -36,7 +36,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .modal{position:fixed;inset:0;background:#0008;z-index:80;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{width:min(100%,430px);max-height:90vh;overflow:auto;background:#fff;margin:auto;border-radius:24px 24px 0 0;padding:18px}.modalTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .orderTypeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}.orderType{padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;text-align:left;font-weight:850;font-size:11px}.orderType.active{border-color:#111;background:#111;color:#fff}
 .subtypes{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.subtype{border:1px solid #ddd;background:#fff;border-radius:99px;padding:8px 10px;font-size:10px;font-weight:850}.subtype.active{background:#111;color:#fff;border-color:#111}
-.history{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:7px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.history b{font-size:11px}.history .meta{font-size:9px}.historyDelete{flex:0 0 auto;border:1px solid #f1caca;background:#fff8f8;color:#b42318;border-radius:9px;min-height:29px;padding:0 9px;font-size:9px;font-weight:900}
+.history{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:7px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.history b{font-size:11px}.history .meta{font-size:9px}.historyDelete,.taskDelete{flex:0 0 auto;border:1px solid #f1caca;background:#fff8f8;color:#b42318;border-radius:9px;min-height:29px;padding:0 9px;font-size:9px;font-weight:900}.taskDelete{margin-left:4px}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:120;background:#111;color:#fff;padding:9px 13px;border-radius:99px;font-size:10px;font-weight:850;display:none}.toast.show{display:block}.undoToast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:121;display:flex;align-items:center;gap:10px;max-width:calc(100% - 28px);padding:8px 9px 8px 13px;border:1px solid #2b2b2b;background:#111;color:#fff;border-radius:14px;box-shadow:0 7px 22px #0004;font-size:10px;font-weight:850}.undoToast button{flex:0 0 auto;min-height:32px;padding:0 11px;border:0;border-radius:9px;background:#fff;color:#111;font:inherit;font-weight:900;white-space:nowrap}
 @media(max-width:360px){.tabs button{font-size:11px}.main{padding:12px}.title{font-size:23px}}
 </style>
@@ -266,7 +266,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-7A1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-7A2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -801,6 +801,7 @@ function migrateLegacyTaskTargets(candidate){
   task.targetMachineIds=collectTaskTargetMachineIds(candidate.machines,task.target);
  });
 }
+function deleteActiveTask(task){if(!task||task.completed)return;if(!confirm('「'+(task.text||'このタスク')+'」を削除しますか？'))return;var index=(state.tasks||[]).indexOf(task);if(index<0){toast('タスクが見つかりません');return}state.tasks.splice(index,1);state.machines.forEach(function(machine){if(!machine||!machine.taskDone||typeof machine.taskDone!=='object')return;if(Object.prototype.hasOwnProperty.call(machine.taskDone,task.id))delete machine.taskDone[task.id]});persist();renderAll();toast('タスクを削除しました')}
 function deleteTaskHistoryEntry(entry){if(!confirm('このタスク履歴を削除しますか？'))return;var index=(state.taskHistory||[]).indexOf(entry);if(index<0){toast('履歴が見つかりません');return}state.taskHistory.splice(index,1);persist();renderTaskHistory();toast('タスク履歴を削除しました')}
 function deleteOrderHistoryEntry(entry){if(!confirm('このオーダー履歴を削除しますか？'))return;var index=(state.history||[]).indexOf(entry);if(index<0){toast('履歴が見つかりません');return}state.history.splice(index,1);persist();renderOrders();toast('オーダー履歴を削除しました')}
 function renderTaskHistory(){
@@ -811,7 +812,7 @@ function renderTaskHistory(){
 function renderTasks(){
  var active=(state.tasks||[]).filter(function(t){return t&&typeof t==='object'&&!t.completed}),box=$id('taskList');if(!box)return;$id('taskCount').textContent=active.length;box.innerHTML='';
  if(!active.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';
- else active.forEach(function(t){var progress=taskProgress(t),e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+progress.total+'台'+(progress.total?' ・ 完了 '+progress.done+'/'+progress.total+'台':'')+'</div></div>';box.appendChild(e)});
+ else active.forEach(function(t){var progress=taskProgress(t),e=document.createElement('div');e.className='item taskItem';e.innerHTML='<div style="min-width:0"><b>'+esc(t.text)+'</b><div class="taskMeta">'+esc(t.target==='all'?'全メーカー':t.target)+' ・ 対象 '+progress.total+'台'+(progress.total?' ・ 完了 '+progress.done+'/'+progress.total+'台':'')+'</div></div><button class="taskDelete" type="button">削除</button>';e.querySelector('button').onclick=function(){deleteActiveTask(t)};box.appendChild(e)});
  renderTaskHistory();
 }
 function makeSwipeComplete(wrapper,m){
