@@ -118,7 +118,7 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
 <section id="machinesPage" class="page hidden">
 <div class="row"><div><div class="ey">MACHINES</div><div class="title">自販機</div><div class="subtitle">設備・訪問・販売データを管理</div></div><button class="primary pill" id="addMachine">＋追加</button></div>
 <div class="search"><span class="searchIcon">⌕</span><input id="machineSearch" placeholder="自販機名・住所・管理番号を検索"></div><div id="machineResults" class="results hidden"></div><div class="machineFilters"><select id="machineDayFilter"><option value="all">曜日：すべて</option><option>月</option><option>火</option><option>水</option><option>木</option><option>金</option><option>土</option><option>日</option></select><select id="machineMakerFilter"><option value="all">メーカー：すべて</option></select></div>
-<div class="section"><div class="sectionhead"><b>メーカー設定</b><button class="pill" id="manageMakers">メーカー設定</button></div><div id="makerSummary" class="muted" style="margin-top:6px"></div></div><div class="section"><div class="sectionhead"><b>データバックアップ</b><button class="secondary" id="exportBackup">バックアップを書き出す</button></div><div class="muted" style="margin-top:6px">この端末のVENDRIVE2データをJSONファイルで保存します。</div></div><div class="section" id="machineList"></div>
+<div class="section"><div class="sectionhead"><b>メーカー設定</b><button class="pill" id="manageMakers">メーカー設定</button></div><div id="makerSummary" class="muted" style="margin-top:6px"></div></div><div class="section"><div class="sectionhead"><b>データバックアップ</b><div style="display:flex;gap:6px"><button class="secondary" id="exportBackup">書き出す</button><button class="secondary" id="restoreBackup">復元</button><input id="restoreBackupFile" type="file" accept="application/json,.json" hidden></div></div><div class="muted" style="margin-top:6px">この端末のVENDRIVE2データをJSONで保存・復元できます。</div></div><div class="section" id="machineList"></div>
 </section>
 
 <section id="ordersPage" class="page hidden">
@@ -232,7 +232,12 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
 <div class="formGroup"><label>対象メーカー</label><select id="taskTarget"><option value="all">全メーカー</option></select></div>
 <div class="notice">メーカーを指定すると、そのメーカーの自販機すべてに自動で紐付きます。</div>
 <div class="actions"><button class="secondary" id="cancelTask">キャンセル</button><button class="primary" id="saveTask">タスク登録</button></div></div></div>
-<div class="modal" id="makerModal"><div class="sheet"><div class="modalTop"><div><div class="ey">MAKERS</div><div class="title">メーカー設定</div></div><button class="pill" id="closeMaker">閉じる</button></div>
+<div class="modal" id="restoreBackupModal"><div class="sheet">
+<div class="modalTop"><div><div class="ey">RESTORE BACKUP</div><div class="title">バックアップから復元</div></div><button class="pill" id="closeRestoreBackup">閉じる</button></div>
+<div class="notice" id="restoreBackupSummary" style="white-space:pre-line;margin-top:12px"></div>
+<div class="notice" style="margin-top:9px">復元前に、現在のデータを安全用checkpointとして退避します。</div>
+<div class="actions"><button class="secondary" id="cancelRestoreBackup">キャンセル</button><button class="dangerButton" id="confirmRestoreBackup">復元する</button></div>
+</div></div><div class="modal" id="makerModal"><div class="sheet"><div class="modalTop"><div><div class="ey">MAKERS</div><div class="title">メーカー設定</div></div><button class="pill" id="closeMaker">閉じる</button></div>
 <div id="makerSettingsHome"><div class="section"><div class="sectionhead"><b>使用メーカー</b></div><div id="makerList"></div></div><button class="primary" id="openMakerAdd" style="width:100%;margin-top:6px">＋メーカー追加</button></div>
 <div id="makerEditor" class="makerEditor hidden"><div class="ey">MAKER</div><div class="makerEditorTitle" id="makerEditorTitle">メーカーを追加</div><div class="formGroup"><label>標準プリセット</label><select id="makerPreset"></select></div><div class="formGroup"><label>メーカー名</label><input id="makerName" placeholder="例：サントリー"></div><div class="formGroup"><label>表示</label><select id="makerVisibility"><option value="visible">表示</option><option value="hidden">非表示</option></select></div><div class="formGroup"><label>色</label><div id="makerColorChoices" class="colorChoices"></div><div class="colorSelected" id="makerColorSelected"></div><label class="colorPickerButton">その他の色を選ぶ<input id="makerColor" type="color" value="#2563eb" aria-label="その他の色を選ぶ"></label><div class="formHint" id="makerColorWarning"></div></div><div class="actions"><button class="secondary" id="cancelMakerEdit">キャンセル</button><button class="primary" id="saveMaker">保存</button></div><button class="dangerButton makerDeleteAction hidden" id="deleteMakerAction" style="width:100%;margin-top:10px">このメーカーを削除</button></div>
 </div></div><div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
@@ -266,7 +271,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-7B2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-7C1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -290,7 +295,75 @@ function exportBackup(){
     if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});
     toast('バックアップを書き出しました');
   }catch(e){toast('バックアップの作成に失敗しました')}
-}function persist(){
+}
+var pendingBackupRestore=null;
+function validBackupLastDay(value){if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;var date=new Date(value+'T00:00:00');return!isNaN(date.getTime())&&iso(date)===value?value:null}
+function backupRestoreCreatedAt(value){var date=value?new Date(value):null;return date&&!isNaN(date.getTime())?date.toLocaleString('ja-JP'):'日時不明'}
+function prepareBackupRestore(backup){
+  if(!backup||typeof backup!=='object'||Array.isArray(backup))throw new Error('invalid backup');
+  if(backup.kind!=='VENDRIVE2_BACKUP')throw new Error('invalid backup kind');
+  var format=Number(backup.formatVersion);if(isFinite(format)&&format>BACKUP_FORMAT_VERSION)throw new Error('future backup format');
+  if(!backup.data||typeof backup.data!=='object'||Array.isArray(backup.data)||!Array.isArray(backup.data.machines))throw new Error('invalid backup data');
+  var candidate=maintainRestoredState(normalizeStateCandidate(backup.data)),runtime=backup.runtime&&typeof backup.runtime==='object'?backup.runtime:{},lastDay=validBackupLastDay(runtime.lastDay);
+  return {state:candidate,lastDay:lastDay,createdAt:backupRestoreCreatedAt(backup.createdAt),formatVersion:isFinite(format)?format:null};
+}
+function showBackupRestorePreview(prepared){
+  pendingBackupRestore=prepared;
+  var summary=$id('restoreBackupSummary');
+  summary.textContent='バックアップ：'+prepared.createdAt+'\n自販機：'+prepared.state.machines.length+'台\nタスク：'+prepared.state.tasks.length+'件\nオーダー履歴：'+prepared.state.history.length+'件\nタスク履歴：'+prepared.state.taskHistory.length+'件\n\n現在のデータをこのバックアップで置き換えます。';
+  openModal('restoreBackupModal');
+}
+function readBackupRestoreFile(file){
+  if(!file)return;
+  if(file.size>10*1024*1024){toast('バックアップファイルが大きすぎます（10MBまで）');return}
+  var reader=new FileReader();
+  reader.onerror=function(){toast('バックアップファイルを読み込めませんでした')};
+  reader.onload=function(){
+    try{var backup=JSON.parse(String(reader.result||'')),prepared=prepareBackupRestore(backup);showBackupRestorePreview(prepared)}
+    catch(error){toast(error&&error.message==='future backup format'?'このバックアップは新しいバージョンで作成されています':'バックアップファイルを読み込めませんでした')}
+  };
+  reader.readAsText(file);
+}
+function openRestoreSnapshotsDb(done){
+  if(!window.indexedDB){done(null);return}
+  try{var request=indexedDB.open('VENDRIVE2_DB',1);request.onupgradeneeded=function(){var db=request.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots')};request.onerror=function(){done(null)};request.onsuccess=function(){try{var db=request.result;if(!db.objectStoreNames.contains('snapshots')){done(null);return}done(db)}catch(e){done(null)}}}catch(e){done(null)}
+}
+function createPreRestoreCheckpoint(done){
+  var raw,lastDay;
+  try{raw=JSON.stringify(stateSnapshot());lastDay=localStorage.getItem('vendrive2_last_day')||null}catch(e){done(false);return}
+  openRestoreSnapshotsDb(function(db){
+    if(!db){done(false);return}
+    var finished=false;function finish(value){if(finished)return;finished=true;done(value)}
+    try{
+      var tx=db.transaction('snapshots','readwrite'),store=tx.objectStore('snapshots'),checkpointKey='pre-restore-'+Date.now()+'-'+Math.random().toString(36).slice(2),entries=[];
+      store.put({kind:'pre-restore',savedAt:Date.now(),appVersion:APP_VERSION,raw:raw,lastDay:lastDay},checkpointKey);
+      var cursor=store.openCursor();
+      cursor.onerror=function(){try{tx.abort()}catch(e){}};
+      cursor.onsuccess=function(){var item=cursor.result;if(item){if(typeof item.key==='string'&&item.key.indexOf('pre-restore-')===0)entries.push({key:item.key,savedAt:Number(item.value&&item.value.savedAt)||0});item.continue();return}entries.sort(function(a,b){return a.savedAt-b.savedAt});while(entries.length>3)store.delete(entries.shift().key)};
+      tx.oncomplete=function(){finish(true)};tx.onerror=function(){finish(false)};tx.onabort=function(){finish(false)};
+    }catch(e){finish(false)}
+  });
+}
+function restoreStorageValue(name,value){if(value===null)localStorage.removeItem(name);else localStorage.setItem(name,value)}
+function applyBackupRestore(){
+  var pending=pendingBackupRestore;if(!pending)return;
+  createPreRestoreCheckpoint(function(checkpointSaved){
+    if(!checkpointSaved){toast('現在データの退避に失敗したため復元を中止しました');return}
+    var previousState=state,previousRaw=null,previousVersion=null,previousLastDay=null;
+    try{
+      previousRaw=localStorage.getItem(key);previousVersion=localStorage.getItem(key+'_version');previousLastDay=localStorage.getItem('vendrive2_last_day');
+      state=pending.state;migrateMakerSettings();ensureMakerColors();
+      var raw=JSON.stringify(state);localStorage.setItem(key,raw);if(localStorage.getItem(key)!==raw)throw new Error('restore verification failed');localStorage.setItem(key+'_version',String(STORAGE_VERSION));
+      if(pending.lastDay)localStorage.setItem('vendrive2_last_day',pending.lastDay);
+    }catch(error){
+      state=previousState;
+      try{restoreStorageValue(key,previousRaw);restoreStorageValue(key+'_version',previousVersion);restoreStorageValue('vendrive2_last_day',previousLastDay)}catch(rollbackError){}
+      toast('バックアップの復元に失敗しました');return;
+    }
+    clearLatestUndo();selectedMachine=null;selectedOrderMachine=null;pendingBackupRestore=null;persist();closeModal('restoreBackupModal');$id('restoreBackupFile').value='';renderAll();toast('バックアップを復元しました');
+  });
+}
+function persist(){
   var raw=JSON.stringify(state);
   try{
     localStorage.setItem(key,raw);
@@ -317,22 +390,29 @@ function invalidateAutoTomorrowPlan(){
 }
 
 function migrateCoordinates(){state.machines.forEach(function(m){if(typeof m.lat==='number'&&typeof m.lng==='number'&&m.lat>=0&&m.lat<=100&&m.lng>=0&&m.lng<=100){m.lat=35.285+(m.lat/100)*0.06;m.lng=136.76+(m.lng/100)*0.09}});persist()}
-function normalizeLoadedState(x){
+function normalizeStateCandidate(x){
+  if(!x||typeof x!=='object'||Array.isArray(x)||!Array.isArray(x.machines))throw new Error('invalid state candidate');
+  var candidate=JSON.parse(JSON.stringify(x));
+  if(!Array.isArray(candidate.offices))candidate.offices=[];
+  if(!Array.isArray(candidate.history))candidate.history=[];
+  if(!Array.isArray(candidate.tasks))candidate.tasks=[];
+  if(!Array.isArray(candidate.taskHistory))candidate.taskHistory=[];
+  if(!Array.isArray(candidate.makers)||!candidate.makers.length)candidate.makers=['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'];
+  candidate.machines.forEach(function(m){if(!m||typeof m!=='object')throw new Error('invalid machine record');m.days=Array.isArray(m.days)?m.days:[];m.makerGroup=makerGroup(m.maker);if(!m.timeCondition&&m.time==='指定なし')m.timeCondition={type:'none',start:'',end:''}});
+  migrateLegacyTaskTargets(candidate);
+  migrateMakerSettings(candidate);
+  return candidate;
+}
+function maintainRestoredState(candidate){
+  candidate.machines.forEach(function(m){if(typeof m.lat==='number'&&typeof m.lng==='number'&&m.lat>=0&&m.lat<=100&&m.lng>=0&&m.lng<=100){m.lat=35.285+(m.lat/100)*0.06;m.lng=136.76+(m.lng/100)*0.09}});
+  candidate.history=recentEntries(candidate.history);
+  candidate.taskHistory=recentEntries(candidate.taskHistory);
+  candidate.tasks=candidate.tasks.filter(function(task){return!task||typeof task!=='object'||task.completed||!Array.isArray(task.targetMachineIds)||task.targetMachineIds.length>0});
+  return candidate;
+}function normalizeLoadedState(x){
   if(!x||!Array.isArray(x.machines))return false;
   var previous=state,candidate;
-  try{
-    candidate=JSON.parse(JSON.stringify(x));
-    if(!Array.isArray(candidate.offices))candidate.offices=[];
-    if(!Array.isArray(candidate.history))candidate.history=[];
-    if(!Array.isArray(candidate.tasks))candidate.tasks=[];
-    if(!Array.isArray(candidate.taskHistory))candidate.taskHistory=[];
-    if(!Array.isArray(candidate.makers)||!candidate.makers.length)candidate.makers=['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'];
-    candidate.machines.forEach(function(m){if(!m||typeof m!=='object')throw new Error('invalid machine record');m.days=Array.isArray(m.days)?m.days:[];m.makerGroup=makerGroup(m.maker);if(!m.timeCondition&&m.time==='指定なし')m.timeCondition={type:'none',start:'',end:''}});
-    migrateLegacyTaskTargets(candidate);
-    state=candidate;
-    migrateMakerSettings();
-    return true;
-  }catch(e){state=previous;console.error('VENDRIVE2 normalize failed',e);return false}
+  try{candidate=normalizeStateCandidate(x);state=candidate;return true}catch(e){state=previous;console.error('VENDRIVE2 normalize failed',e);return false}
 }
 function initializeSampleData(){
   state.machines=[
@@ -765,16 +845,16 @@ var MAKER_PRESETS=[
 var MAKER_COLOR_CHOICES=['#E5242A','#005BAC','#A61E3C','#334A66','#178447','#F28C28','#008C95','#168BD2','#7C3AED','#DB2777','#0891B2','#65A30D','#92400E','#4F46E5','#DC2626','#111827'];
 function makerSettingId(name){return 'maker-'+Array.from(String(name||'')).map(function(c){return c.codePointAt(0).toString(16)}).join('-')}
 function presetForMaker(name){var g=makerGroup(name);return MAKER_PRESETS.find(function(p){return p.name===g})||null}
-function migrateMakerSettings(){
- if(!state.makerColors||typeof state.makerColors!=='object')state.makerColors={};
- var firstMigration=!Array.isArray(state.makerSettings);if(firstMigration)state.makerSettings=[];
- var used={};state.machines.forEach(function(m){var g=makerGroup(m.maker);if(g&&g!=='未設定')used[g]=true});
- var legacy=(state.makers||[]).map(makerGroup).filter(function(n){return n&&n!=='未設定'&&n!=='その他（手入力）'&&(STANDARD_MAKERS.indexOf(n)<0||used[n])});
- if(firstMigration)MAKER_PRESETS.forEach(function(p){state.makerSettings.push({id:'preset-'+p.id,name:p.name,color:state.makerColors[p.name]||p.color,active:!!used[p.name],hidden:false,availableOnly:!used[p.name],order:state.makerSettings.length,presetId:p.id})});
- legacy.forEach(function(name){if(!state.makerSettings.some(function(s){return makerGroup(s.name)===name})){var p=presetForMaker(name);state.makerSettings.push({id:p?'preset-'+p.id:makerSettingId(name),name:p?p.name:name,color:state.makerColors[name]||(p?p.color:MAKER_COLOR_CHOICES[state.makerSettings.length%MAKER_COLOR_CHOICES.length]),active:true,hidden:false,availableOnly:false,order:state.makerSettings.length,presetId:p&&p.id})}});
- Object.keys(used).forEach(function(name){var s=state.makerSettings.find(function(x){return makerGroup(x.name)===name});if(!s){var p=presetForMaker(name);s={id:p?'preset-'+p.id:makerSettingId(name),name:p?p.name:name,color:state.makerColors[name]||(p?p.color:MAKER_COLOR_CHOICES[state.makerSettings.length%MAKER_COLOR_CHOICES.length]),active:true,hidden:false,availableOnly:false,order:state.makerSettings.length,presetId:p&&p.id};state.makerSettings.push(s)}});
- state.makerSettings.forEach(function(s,i){s.id=s.id||makerSettingId(s.name);s.order=Number.isFinite(s.order)?s.order:i;s.active=s.active===true;s.hidden=s.hidden===true;s.availableOnly=s.availableOnly===true;if(s.color)state.makerColors[makerGroup(s.name)]=s.color});
- state.makerSettingsInitialized=true;
+function migrateMakerSettings(targetState){var dataState=targetState||state;
+ if(!dataState.makerColors||typeof dataState.makerColors!=='object')dataState.makerColors={};
+ var firstMigration=!Array.isArray(dataState.makerSettings);if(firstMigration)dataState.makerSettings=[];
+ var used={};dataState.machines.forEach(function(m){var g=makerGroup(m.maker);if(g&&g!=='未設定')used[g]=true});
+ var legacy=(dataState.makers||[]).map(makerGroup).filter(function(n){return n&&n!=='未設定'&&n!=='その他（手入力）'&&(STANDARD_MAKERS.indexOf(n)<0||used[n])});
+ if(firstMigration)MAKER_PRESETS.forEach(function(p){dataState.makerSettings.push({id:'preset-'+p.id,name:p.name,color:dataState.makerColors[p.name]||p.color,active:!!used[p.name],hidden:false,availableOnly:!used[p.name],order:dataState.makerSettings.length,presetId:p.id})});
+ legacy.forEach(function(name){if(!dataState.makerSettings.some(function(s){return makerGroup(s.name)===name})){var p=presetForMaker(name);dataState.makerSettings.push({id:p?'preset-'+p.id:makerSettingId(name),name:p?p.name:name,color:dataState.makerColors[name]||(p?p.color:MAKER_COLOR_CHOICES[dataState.makerSettings.length%MAKER_COLOR_CHOICES.length]),active:true,hidden:false,availableOnly:false,order:dataState.makerSettings.length,presetId:p&&p.id})}});
+ Object.keys(used).forEach(function(name){var s=dataState.makerSettings.find(function(x){return makerGroup(x.name)===name});if(!s){var p=presetForMaker(name);s={id:p?'preset-'+p.id:makerSettingId(name),name:p?p.name:name,color:dataState.makerColors[name]||(p?p.color:MAKER_COLOR_CHOICES[dataState.makerSettings.length%MAKER_COLOR_CHOICES.length]),active:true,hidden:false,availableOnly:false,order:dataState.makerSettings.length,presetId:p&&p.id};dataState.makerSettings.push(s)}});
+ dataState.makerSettings.forEach(function(s,i){s.id=s.id||makerSettingId(s.name);s.order=Number.isFinite(s.order)?s.order:i;s.active=s.active===true;s.hidden=s.hidden===true;s.availableOnly=s.availableOnly===true;if(s.color)dataState.makerColors[makerGroup(s.name)]=s.color});
+ dataState.makerSettingsInitialized=true;
 }function activeMakerSettings(){migrateMakerSettings();return state.makerSettings.filter(function(s){return s.active&&!s.hidden&&!s.availableOnly}).sort(function(a,b){return a.order-b.order})}
 function makerOptions(includeName){var names=activeMakerSettings().map(function(s){return s.name});var g=makerGroup(includeName);if(g&&g!=='未設定'&&names.indexOf(g)<0&&includeName)names.push(g);return names}
 function makerSelectHtml(selected){var opts=makerOptions(selected),html=opts.map(function(m){return'<option value="'+esc(m)+'">'+esc(m)+'</option>'}).join('');return html+'<option value="__CUSTOM__">その他（手入力）</option>'}
@@ -898,7 +978,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   $id('closeTask').onclick=function(){closeModal('taskModal')};$id('cancelTask').onclick=function(){closeModal('taskModal')};
   $id('saveTask').onclick=function(){var t=$id('taskText').value.trim();if(!t){toast('タスク内容を入力してください');return}var target=$id('taskTarget').value,targetMachineIds=taskTargetMachineIds(target);if(!targetMachineIds.length){toast('対象の自販機がないためタスクは作成されませんでした');return}state.tasks.push({id:'T-'+Date.now(),text:t,target:target,targetMachineIds:targetMachineIds,createdAt:Date.now(),completed:false});persist();closeModal('taskModal');renderAll();toast('タスクを登録しました')};
   $id('manageMakers').onclick=function(){migrateMakerSettings();renderMakers();closeMakerEditor();openModal('makerModal')};$id('closeMaker').onclick=function(){closeMakerEditor();closeModal('makerModal')};$id('openMakerAdd').onclick=function(){openMakerEditor(null)};$id('cancelMakerEdit').onclick=closeMakerEditor;$id('deleteMakerAction').onclick=deleteEditingMaker;
-  $id('makerPreset').onchange=function(){var p=MAKER_PRESETS.find(function(x){return x.id===$id('makerPreset').value});if(p){$id('makerName').value=p.name;$id('makerColor').value=p.color;renderMakerAddControls()}};$id('makerColorChoices').onclick=function(e){var b=e.target.closest('[data-color]');if(!b)return;$id('makerColor').value=b.dataset.color;renderMakerAddControls()};$id('makerColor').oninput=function(){renderMakerAddControls()};$id('makerList').onclick=handleMakerAction;$id('saveMaker').onclick=saveMakerSetting;$id('exportBackup').onclick=exportBackup;
+  $id('makerPreset').onchange=function(){var p=MAKER_PRESETS.find(function(x){return x.id===$id('makerPreset').value});if(p){$id('makerName').value=p.name;$id('makerColor').value=p.color;renderMakerAddControls()}};$id('makerColorChoices').onclick=function(e){var b=e.target.closest('[data-color]');if(!b)return;$id('makerColor').value=b.dataset.color;renderMakerAddControls()};$id('makerColor').oninput=function(){renderMakerAddControls()};$id('makerList').onclick=handleMakerAction;$id('saveMaker').onclick=saveMakerSetting;$id('exportBackup').onclick=exportBackup;$id('restoreBackup').onclick=function(){$id('restoreBackupFile').click()};$id('restoreBackupFile').onchange=function(){readBackupRestoreFile(this.files&&this.files[0])};$id('closeRestoreBackup').onclick=function(){pendingBackupRestore=null;$id('restoreBackupFile').value='';closeModal('restoreBackupModal')};$id('cancelRestoreBackup').onclick=function(){pendingBackupRestore=null;$id('restoreBackupFile').value='';closeModal('restoreBackupModal')};$id('confirmRestoreBackup').onclick=applyBackupRestore;
   $id('closeOrder').onclick=function(){closeModal('orderModal')};$id('cancelOrder').onclick=function(){closeModal('orderModal')};$id('orderMachineSearch').oninput=orderSearch;$id('saveOrder').onclick=saveOrder
   document.querySelectorAll('.orderType').forEach(function(b){b.onclick=function(){document.querySelectorAll('.orderType').forEach(function(x){x.classList.remove('active')});b.classList.add('active');selectedOrderType=b.dataset.type;selectedProductSub=null;$id('productSub').classList.toggle('hidden',selectedOrderType!=='商品関連');document.querySelectorAll('.subtype').forEach(function(x){x.classList.remove('active')})}})
   document.querySelectorAll('.subtype').forEach(function(b){b.onclick=function(){document.querySelectorAll('.subtype').forEach(function(x){x.classList.remove('active')});b.classList.add('active');selectedProductSub=b.dataset.sub}})
