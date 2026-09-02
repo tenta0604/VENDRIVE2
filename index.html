@@ -347,7 +347,7 @@ function initializeSampleData(){
 function finalizeLoadedState(){
   var dayKey='vendrive2_last_day',maintenanceChanged=false;
   try{var last=localStorage.getItem(dayKey);if(last!==today){state.machines.forEach(function(m){m.visited=false;m.skip=null;m.force=null});localStorage.setItem(dayKey,today);persist()}}catch(e){console.error('VENDRIVE2 day reset failed',e)}
-  ensureMakerColors();migrateCoordinates();maintenanceChanged=cleanupHistory()||cleanupTaskHistory()||cleanupZeroTargetTasks();if(maintenanceChanged)persist();
+  ensureMakerColors();migrateCoordinates();var historyChanged=cleanupHistory(),taskHistoryChanged=cleanupTaskHistory(),zeroTaskChanged=cleanupZeroTargetTasks();maintenanceChanged=historyChanged||taskHistoryChanged||zeroTaskChanged;if(maintenanceChanged)persist();
 }
 function recoverIndexedDb(done){
   if(!window.indexedDB){done(false);return}
