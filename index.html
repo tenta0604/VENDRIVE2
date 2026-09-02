@@ -74,6 +74,9 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea,select{-webkit-user-select:text;user-select:text}#map,#map .leaflet-container{touch-action:none}
 </style><style>.days .day{border-color:var(--day-color);}.days .day.active{background:var(--day-color);border-color:var(--day-color);color:#fff!important}</style><style>.mapSlashPin{width:25px;height:25px;border:2px solid #d8d8d8;border-radius:50%;display:grid;place-items:center;color:#c9c9c9;font-size:18px;font-weight:900;opacity:.38;background:#f7f7f7}.todayDonePin{opacity:.38!important;filter:grayscale(1)}</style><style>.danger{background:#dc2626!important;color:#fff!important;border:0}</style><style>
 .vendrive-machine-pin{background:transparent!important;border:0!important;pointer-events:none!important}.machineMapPin{position:relative;width:36px;height:43px;pointer-events:none}.machineMapPinFan{position:absolute;inset:0;transform-origin:18px 42px;transform:rotate(var(--fan-angle,0deg));pointer-events:none}.machineMapPinBody{position:absolute;left:4px;top:8px;width:28px;height:28px;border:3px solid #fff;border-radius:50% 50% 50% 0;background:var(--machine-pin-color);box-shadow:0 2px 8px #0006;transform:rotate(-45deg);display:grid;place-items:center;pointer-events:auto}.machineMapPinLabel{display:block;transform:rotate(calc(45deg + var(--fan-counter-angle,0deg)));color:#fff;font-size:10px;font-weight:950;line-height:1;text-shadow:0 1px 2px #0007}.machineMapStatus{position:absolute;z-index:2;left:50%;top:0;transform:translateX(-50%) rotate(var(--fan-counter-angle,0deg));display:flex;align-items:center;justify-content:center;gap:2px;min-height:13px;padding:1px 3px;border:1px solid #ffffffc9;border-radius:99px;background:#111e;color:#fff;box-shadow:0 1px 4px #0004;font-size:8px;font-weight:950;line-height:1;white-space:nowrap;pointer-events:none}.machineMapStatus i{font:inherit;font-style:normal}.machineMapPin.visited{opacity:.64}.machineMapUrgentHalo{position:absolute;z-index:0;left:2px;top:6px;width:32px;height:32px;border:2px solid #dc2626;border-radius:50%;opacity:.55;animation:machineUrgentPulse 1.7s ease-out infinite;pointer-events:none}@keyframes machineUrgentPulse{0%{transform:scale(.82);opacity:.5}70%{transform:scale(1.45);opacity:0}100%{transform:scale(1.45);opacity:0}}
+<style>
+.machineMapPin.outOfPlan{opacity:.26}.machineMapPin.outOfPlan .machineMapPinLabel{font-size:14px}
+body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{overflow:hidden;overscroll-behavior:contain}.sheet{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 </style></head>
 <body>
 <div class="app">
@@ -242,7 +245,7 @@ var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
 var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':30};
 var key='vendrive2_v7_data';
 var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
-var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null,mapPositionMode=null,reverseGeocodeToken=0,machineMapMarkers=[],machinePinFanFrame=null,addressSearchSequence=0;
+var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null,mapPositionMode=null,reverseGeocodeToken=0,machineMapMarkers=[],machinePinFanFrame=null,addressSearchSequence=0,lockedPageScrollY=null;
 
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function diff(a,b){return Math.floor((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000)}
@@ -258,9 +261,11 @@ function restoreVisitUndo(machine,before){Object.keys(before).forEach(function(f
 function clearLatestUndo(){if(undoTimer){clearTimeout(undoTimer);undoTimer=null}latestUndoTransaction=null;var box=$id('undoToast');if(box)box.classList.add('hidden')}
 function offerUndo(type,machine,before,message,taskId){clearLatestUndo();latestUndoTransaction={type:type,machineId:machine.id,taskId:taskId||null,before:before,expiresAt:Date.now()+6000};$id('undoMessage').textContent=message;$id('undoToast').classList.remove('hidden');undoTimer=setTimeout(function(){clearLatestUndo()},6000)}
 function undoLatestOperation(){var tx=latestUndoTransaction;clearLatestUndo();if(!tx||Date.now()>tx.expiresAt){toast('元に戻せませんでした');return}var machine=state.machines.find(function(item){return item&&item.id===tx.machineId});if(!machine){toast('元に戻せませんでした');return}var refreshDetail=false;if(tx.type==='task'){var task=(state.tasks||[]).find(function(item){return item&&item.id===tx.taskId});if(!task){toast('元に戻せませんでした');return}restoreUndoProperty(machine,'taskDone',tx.before.taskDone);restoreUndoProperty(task,'completed',tx.before.parent.completed);restoreUndoProperty(task,'completedAt',tx.before.parent.completedAt);restoreUndoProperty(state,'taskHistory',tx.before.taskHistory);refreshDetail=true}else if(tx.type==='order'||tx.type==='order-visit-keep'||tx.type==='order-visit-done'){restoreVisitUndo(machine,tx.before.machine);restoreUndoProperty(machine,'order',tx.before.order);restoreUndoProperty(state,'history',tx.before.history)}else restoreVisitUndo(machine,tx.before);persist();renderAll();if(refreshDetail&&$id('machineModal').classList.contains('open')){selectedMachine=machine;openMachine(machine.id)}toast('元に戻しました')}function $id(x){return document.getElementById(x)}
-function openModal(id){$id(id).classList.add('open')}
-function closeModal(id){$id(id).classList.remove('open')}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.02-5B1',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScrollY=window.scrollY||window.pageYOffset||0;var body=document.body;body.classList.add('modalOpen');body.style.top='-'+lockedPageScrollY+'px';body.style.left='0';body.style.right='0';body.style.width='100%'}
+function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
+function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
+function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
+var STORAGE_VERSION=1,APP_VERSION='2026.09.02-5B2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -390,21 +395,21 @@ function nextVisitDate(m){
   }
   return null;
 }
+function memoPreview(value){var text=String(value||'').replace(/\s+/g,' ').trim(),chars=Array.from(text);if(!chars.length)return'';return chars.length>30?chars.slice(0,30).join('')+'…':text}
 function card(m,context){
   var order=m.order, status=order?'オーダー':m.visited?'訪問済':'未訪問';
   var badge=order?'b-purple':m.visited?'b-gray':'b-red';
   var cls='item '+(m.visited&&!order?'done ':'')+(order?'order ':'')+(order?'urgent':'');
-  var detail=order?(order.type+(order.sub?' ＞ '+order.sub:'')+' ・ '+timeLeft(order.createdAt)):m.cycle+' ・ '+timeConditionSummary(m);
+  var detail=order?(order.type+(order.sub?' ＞ '+order.sub:'')+' ・ '+timeLeft(order.createdAt)):m.cycle+' ・ '+timeConditionSummary(m),memo=memoPreview(m.memo);
   var e=document.createElement('div');e.className=cls;
   var right=context==='machines'?('<button class="pill machineDeleteBtn" type="button" title="この自販機を削除">削除</button>'):('<span class="badge '+badge+'">'+status+'</span>');
-  e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="makerChip" style="'+makerTagStyle(m.maker)+'">'+esc(m.maker||'メーカー未設定')+'</div><div class="meta">'+esc(detail)+'</div></div>'+right;
+  e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="makerChip" style="'+makerTagStyle(m.maker)+'">'+esc(m.maker||'メーカー未設定')+'</div><div class="meta">'+esc(detail)+'</div>'+(memo?'<div class="meta">メモ：'+esc(memo)+'</div>':'')+'</div>'+right;
   e.onclick=function(){openMachine(m.id,order?'order':'normal')};
   if(context==='machines'){
     e.querySelector('.machineDeleteBtn').onclick=function(ev){ev.stopPropagation();confirmDeleteMachine(m.id)};
   }
   return e;
-}
-function timeLeft(ts){
+}function timeLeft(ts){
   var left=86400000-(Date.now()-ts), h=Math.ceil(left/3600000);
   if(h<=0)return'期限超過';if(h<24)return'残り'+h+'時間';return'期限内';
 }
@@ -510,58 +515,25 @@ function makerPinHtml(name){
 function makerPinLabel(name){var labels={'コカ・コーラ':'コ','サントリー':'サ','KIRIN':'K','アサヒ':'ア','伊藤園':'伊','DyDo':'D','ポッカサッポロ':'ポ','大塚製薬':'大'},group=makerGroup(name);if(labels[group])return labels[group];var chars=Array.from(String(group||'未設定').replace(/\s/g,''));return chars.length?chars[0]:'未'}
 function isUrgentOrder(machine){if(!machine||!machine.order)return false;return 86400000-(Date.now()-machine.order.createdAt)<=6*3600000}
 function machinePinStatuses(machine,mode){if(mode!=='today'&&mode!=='tomorrow')return[];var statuses=[];if(machine.order)statuses.push('!');if(hasActiveTask(machine))statuses.push('T');if(hasTimeCondition(machine))statuses.push('◷');if(mode==='today'&&machine.visited)statuses.push('✓');return statuses}
-function machinePinHtml(machine,mode,color){var statuses=machinePinStatuses(machine,mode),urgent=isUrgentOrder(machine),classes='machineMapPin'+(machine.visited&&mode==='today'?' visited':'')+(urgent?' urgent':'');return '<div class="'+classes+'" style="--machine-pin-color:'+esc(color)+';--fan-angle:0deg;--fan-counter-angle:0deg"><div class="machineMapPinFan">'+(urgent?'<i class="machineMapUrgentHalo"></i>':'')+(statuses.length?'<div class="machineMapStatus">'+statuses.map(function(status){return '<i>'+status+'</i>'}).join('')+'</div>':'')+'<div class="machineMapPinBody"><span class="machineMapPinLabel">'+esc(makerPinLabel(machine.maker))+'</span></div></div></div>'}
-function machinePinFanGroups(entries){var points=entries.map(function(entry){return leafletMap.latLngToLayerPoint([entry.lat,entry.lng])}),visited=entries.map(function(){return false}),groups=[],threshold=26;for(var start=0;start<entries.length;start++){if(visited[start])continue;var queue=[start],group=[];visited[start]=true;while(queue.length){var index=queue.shift();group.push(entries[index]);for(var other=0;other<entries.length;other++){if(visited[other])continue;var dx=points[index].x-points[other].x,dy=points[index].y-points[other].y;if(dx*dx+dy*dy<=threshold*threshold){visited[other]=true;queue.push(other)}}}groups.push(group)}return groups}
+function machinePinHtml(machine,mode,color,outOfPlan){var statuses=outOfPlan?[]:machinePinStatuses(machine,mode),urgent=!outOfPlan&&isUrgentOrder(machine),classes='machineMapPin'+(machine.visited&&mode==='today'&&!outOfPlan?' visited':'')+(urgent?' urgent':'')+(outOfPlan?' outOfPlan':'');return '<div class="'+classes+'" style="--machine-pin-color:'+esc(color)+';--fan-angle:0deg;--fan-counter-angle:0deg"><div class="machineMapPinFan">'+(urgent?'<i class="machineMapUrgentHalo"></i>':'')+(statuses.length?'<div class="machineMapStatus">'+statuses.map(function(status){return '<i>'+status+'</i>'}).join('')+'</div>':'')+'<div class="machineMapPinBody"><span class="machineMapPinLabel">'+esc(outOfPlan?'／':makerPinLabel(machine.maker))+'</span></div></div></div>'}function machinePinFanGroups(entries){var points=entries.map(function(entry){return leafletMap.latLngToLayerPoint([entry.lat,entry.lng])}),visited=entries.map(function(){return false}),groups=[],threshold=26;for(var start=0;start<entries.length;start++){if(visited[start])continue;var queue=[start],group=[];visited[start]=true;while(queue.length){var index=queue.shift();group.push(entries[index]);for(var other=0;other<entries.length;other++){if(visited[other])continue;var dx=points[index].x-points[other].x,dy=points[index].y-points[other].y;if(dx*dx+dy*dy<=threshold*threshold){visited[other]=true;queue.push(other)}}}groups.push(group)}return groups}
 function machinePinFanAngle(index,count){if(count<2)return 0;var max=count===2?14:count===3?22:count===4?27:Math.min(32,30+(count-5));return -max+(max*2*index/(count-1))}
 function applyMachinePinFan(){machinePinFanFrame=null;if(!leafletMap||!machineMapMarkers.length)return;machinePinFanGroups(machineMapMarkers).forEach(function(group){group.sort(function(a,b){var ap=leafletMap.latLngToLayerPoint([a.lat,a.lng]),bp=leafletMap.latLngToLayerPoint([b.lat,b.lng]);return ap.x-bp.x||ap.y-bp.y||String(a.machineId).localeCompare(String(b.machineId))});group.forEach(function(entry,index){var angle=machinePinFanAngle(index,group.length),element=entry.marker.getElement&&entry.marker.getElement();entry.marker.setZIndexOffset(group.length>1?100+index:0);if(!element)return;var pin=element.querySelector('.machineMapPin');if(!pin)return;pin.style.setProperty('--fan-angle',angle+'deg');pin.style.setProperty('--fan-counter-angle',-angle+'deg')})})}
-function scheduleMachinePinFan(){if(machinePinFanFrame!==null)return;var run=function(){applyMachinePinFan()};machinePinFanFrame=typeof requestAnimationFrame==='function'?requestAnimationFrame(run):setTimeout(run,0)}function renderMap(){
+function scheduleMachinePinFan(){if(machinePinFanFrame!==null)return;var run=function(){applyMachinePinFan()};machinePinFanFrame=typeof requestAnimationFrame==='function'?requestAnimationFrame(run):setTimeout(run,0)}function currentMapMode(){return allRoutes?'all':(mapTomorrowMode?'tomorrow':(mapTodayMode?'today':'weekday'))}
+function mapMachinesForMode(mode){if(mode==='all')return state.machines.slice();if(mode==='tomorrow'){var td=tomorrowDate(),tt=iso(td),plan=state.tomorrowPlan&&state.tomorrowPlan.date===tt?state.tomorrowPlan:null,ids=plan?plan.ids:state.machines.filter(eligibleTomorrow).map(function(m){return m.id});return state.machines.filter(function(m){return ids.indexOf(m.id)>=0})}if(mode==='today')return state.machines.filter(function(m){return isDue(m,todayDay)||m.force===today||!!m.order});return state.machines.filter(function(m){return Array.isArray(m.days)&&m.days.indexOf(selectedMapDay)>=0})}
+function fitMapToMachines(machines){if(!leafletMap||mapPositionMode)return;var points=(machines||[]).filter(function(m){return typeof m.lat==='number'&&typeof m.lng==='number'}).map(function(m){return [m.lat,m.lng]});if(!points.length)return;if(points.length===1){leafletMap.setView(points[0],Math.max(leafletMap.getZoom(),17));return}leafletMap.fitBounds(L.latLngBounds(points),{padding:[30,30],maxZoom:17})}
+function renderMap(){
   ensureMap();if(!leafletMap)return;
   machineLayer.clearLayers();routeLayer.clearLayers();machineMapMarkers=[];
-  var mode=allRoutes?'all':(mapTomorrowMode?'tomorrow':(mapTodayMode?'today':'weekday'));
+  var mode=currentMapMode();
   $id('mapTag').textContent=mode==='all'?'MAP · 全ルート':mode==='today'?'MAP · 本日':mode==='tomorrow'?'MAP · 明日の予定':'MAP · '+selectedMapDay+'曜';
-
-  var t;
-  if(mode==='all'){
-    t=state.machines.slice();
-  }else if(mode==='tomorrow'){
-    var td=tomorrowDate(),tt=iso(td);
-    var plan=state.tomorrowPlan&&state.tomorrowPlan.date===tt?state.tomorrowPlan:null;
-    var ids=plan?plan.ids:state.machines.filter(eligibleTomorrow).map(function(m){return m.id});
-    t=state.machines.filter(function(m){return ids.indexOf(m.id)>=0});
-  }else if(mode==='today'){
-    t=state.machines.filter(function(m){
-      return isDue(m,todayDay)||m.force===today||!!m.order;
-    });
-  }else{
-    t=state.machines.filter(function(m){return Array.isArray(m.days)&&m.days.indexOf(selectedMapDay)>=0});
-  }
-
+  var t=mapMachinesForMode(mode),display=t.map(function(machine){return {machine:machine,outOfPlan:false}});
+  if(mode==='today'){var scheduledIds={};t.forEach(function(machine){scheduledIds[machine.id]=true});state.machines.forEach(function(machine){if(!scheduledIds[machine.id])display.push({machine:machine,outOfPlan:true})})}
   $id('mapCount').textContent=t.length+'台';
-  var bounds=[];
-  t.forEach(function(m){
-    if(typeof m.lat!=='number'||typeof m.lng!=='number')return;
-    var color=mode==='all'?dayRouteColor((m.days&&m.days.length)?m.days[0]:todayDay):makerPinColor(m.maker);
-    var html=machinePinHtml(m,mode,color),icon=L.divIcon({className:'vendrive-machine-pin',html:html,iconSize:[36,43],iconAnchor:[18,42]});    var mk=L.marker([m.lat,m.lng],{icon:icon,title:m.name});
-    mk.on('click',function(){if(mapPositionMode)return;openMachine(m.id,m.order?'order':'normal')});
-    mk.addTo(machineLayer);machineMapMarkers.push({machineId:m.id,marker:mk,lat:m.lat,lng:m.lng});bounds.push([m.lat,m.lng]);
-  });
-
+  display.forEach(function(entry){var m=entry.machine;if(typeof m.lat!=='number'||typeof m.lng!=='number')return;var color=mode==='all'?dayRouteColor((m.days&&m.days.length)?m.days[0]:todayDay):makerPinColor(m.maker);var html=machinePinHtml(m,mode,color,entry.outOfPlan),icon=L.divIcon({className:'vendrive-machine-pin',html:html,iconSize:[36,43],iconAnchor:[18,42]}),mk=L.marker([m.lat,m.lng],{icon:icon,title:m.name});mk.on('click',function(){if(mapPositionMode)return;openMachine(m.id,m.order?'order':'normal')});mk.addTo(machineLayer);machineMapMarkers.push({machineId:m.id,marker:mk,lat:m.lat,lng:m.lng})});
   scheduleMachinePinFan();
-  (state.offices||[]).forEach(function(o){
-    if(typeof o.lat!=='number'||typeof o.lng!=='number')return;
-    var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]});
-    var mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);
-    mk.bindTooltip(o.name||'営業所',{direction:'top',offset:[0,-12]});
-    mk.on('click',function(){if(mapPositionMode)return;navigateToMachine(o)});
-    bounds.push([o.lat,o.lng]);
-  });
-
-  var box=$id('mapList');box.innerHTML='';
-  t.forEach(function(m){box.appendChild(card(m,'map'))});
-  if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">このルートの表示対象はありません。</div>';
-}
-
-function renderMachines(list){
+  (state.offices||[]).forEach(function(o){if(typeof o.lat!=='number'||typeof o.lng!=='number')return;var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]}),mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);mk.bindTooltip(o.name||'営業所',{direction:'top',offset:[0,-12]});mk.on('click',function(){if(mapPositionMode)return;navigateToMachine(o)})});
+  var box=$id('mapList');box.innerHTML='';t.forEach(function(m){box.appendChild(card(m,'map'))});if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">このルートの表示対象はありません。</div>';
+}function renderMachines(list){
   var day=$id('machineDayFilter')?$id('machineDayFilter').value:'all', maker=$id('machineMakerFilter')?$id('machineMakerFilter').value:'all';
   list=list.filter(function(m){return day==='all'||(m.days||[]).indexOf(day)>=0}).filter(function(m){return maker==='all'||makerGroup(m.maker)===maker});
   var box=$id('machineList');box.innerHTML='';list.forEach(function(m){box.appendChild(card(m,'machines'))});
@@ -836,7 +808,7 @@ function initDays(){
     e.onclick=function(){
       if(e.dataset.day==='本日'){mapTodayMode=true;mapTomorrowMode=false;allRoutes=false}
       else{mapTodayMode=false;mapTomorrowMode=false;selectedMapDay=e.dataset.day;allRoutes=false}
-      $id('allRoutes').textContent='全ルート';initDays();renderMap()
+      $id('allRoutes').textContent='全ルート';initDays();renderMap();fitMapToMachines(mapMachinesForMode(currentMapMode()))
     }
   })
 }
@@ -861,7 +833,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   document.querySelectorAll('#mDaysPicker button').forEach(function(b){b.onclick=function(){b.classList.toggle('active')}});
   document.querySelectorAll('#newDaysPicker button').forEach(function(b){b.onclick=function(){b.classList.toggle('active')}});
   document.querySelectorAll('.tabs button').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('active')});b.classList.add('active');document.querySelectorAll('.page').forEach(function(p){p.classList.add('hidden')});$id(b.dataset.page).classList.remove('hidden');if(b.dataset.page==='mapPage'){ensureMap();setTimeout(function(){if(leafletMap){leafletMap.invalidateSize();renderMap()}},50)}}})
-  $id('allRoutes').onclick=function(){allRoutes=!allRoutes;mapTodayMode=false;mapTomorrowMode=false;$id('allRoutes').textContent=allRoutes?'曜日ルート':'全ルート';initDays();renderMap()}
+  $id('allRoutes').onclick=function(){allRoutes=!allRoutes;mapTodayMode=false;mapTomorrowMode=false;$id('allRoutes').textContent=allRoutes?'曜日ルート':'全ルート';initDays();renderMap();fitMapToMachines(mapMachinesForMode(currentMapMode()))}
   $id('finishDay').onclick=finishDay;$id('todayTodo').parentNode.onclick=function(){showTodayStat('todo')};$id('todayVisited').parentNode.onclick=function(){showTodayStat('done')};$id('todayOrders').parentNode.onclick=function(){showTodayStat('order')};$id('closeStats').onclick=function(){closeModal('statsModal')};$id('orderVisitDone').onclick=finishVisitCore;$id('orderVisitKeep').onclick=function(){if(selectedMachine&&selectedMachine.order){var before=orderUndoSnapshot(selectedMachine);selectedMachine.visited=true;selectedMachine.last=today;selectedMachine.force=null;selectedMachine.skip=null;persist();closeModal('orderVisitConfirm');renderAll();offerUndo('order-visit-keep',selectedMachine,before,'訪問だけ完了しました');toast('訪問完了')}}
   $id('closeTomorrow').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowAdd').onclick=openTomorrowAdd;$id('closeTomorrowAdd').onclick=function(){closeModal('tomorrowAddModal')};$id('tomorrowAddSearch').oninput=renderTomorrowAddList;$id('tomorrowMap').onclick=function(){
   closeModal('tomorrowModal');
@@ -875,7 +847,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
   $id('allRoutes').textContent='全ルート';
   var mapTab=document.querySelector('.tabs button[data-page="mapPage"]');
   if(mapTab)mapTab.click();
-  initDays();renderMap();
+  initDays();renderMap();setTimeout(function(){fitMapToMachines(mapMachinesForMode(currentMapMode()))},70);
   toast('明日の予定だけをMAPに表示しています');
 };$id('tomorrowLater').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowSave').onclick=function(){if(state.tomorrowPlan)state.tomorrowPlan.manual=true;persist();closeModal('tomorrowModal');toast('明日の予定を保存しました')}
   $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('editMachinePosition').onclick=startMachinePositionEdit;$id('mapPositionCancel').onclick=cancelMapPositionMode;$id('mapPositionConfirm').onclick=confirmMapPositionMode;$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
