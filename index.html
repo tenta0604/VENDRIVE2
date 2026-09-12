@@ -272,7 +272,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.12-AN4.2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.12-AN5',BACKUP_FORMAT_VERSION=1,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -1088,7 +1088,7 @@ load();initDays();bind();updateMapFollowButton();restDaysSummary();periodSummary
 window.addEventListener('beforeunload',function(){abortActiveMachineSortDrag();persist()});window.addEventListener('pagehide',abortActiveMachineSortDrag);window.addEventListener('blur',abortActiveMachineSortDrag);
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){abortActiveMachineSortDrag();stopCurrentPositionWatch();stopVersionCheckTimer();persist()}else if(document.visibilityState==='visible'){startCurrentPositionWatch();checkForAppUpdate();startVersionCheckTimer()}});
 
-})();
+try{window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:function(value){return managementCodeKey(value)},getMachinesSnapshot:function(){return state.machines.map(function(m){var code=String(m.code||'').trim(),lat=Number(m.lat),lng=Number(m.lng);return {id:String(m.id||''),name:String(m.name||''),managementCode:code,managementCodeKey:managementCodeKey(m.code),maker:String(m.maker||''),makerKey:makerGroup(m.maker),address:String(m.address||''),lat:isFinite(lat)?lat:null,lng:isFinite(lng)?lng:null,days:Array.isArray(m.days)?m.days.slice():[],cycle:typeof m.cycle==='string'?m.cycle:null,weeklyCount:Number.isInteger(m.weeklyCount)&&m.weeklyCount>0?m.weeklyCount:null,timeCondition:m.timeCondition===undefined||m.timeCondition===null?null:JSON.parse(JSON.stringify(m.timeCondition))}})},getMachineSnapshot:function(id){var rows=this.getMachinesSnapshot();for(var i=0;i<rows.length;i++)if(rows[i].id===String(id))return rows[i];return null}})}catch(error){if(window.console&&console.warn)console.warn('VENDRIVE2 read bridge unavailable',error)}})();
 </script>
 <script src="analytics.js"></script>
 </body>
