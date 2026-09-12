@@ -1,6 +1,6 @@
 (function(global){
 "use strict";
-var DB_NAME="VENDRIVE2_ANALYTICS_DB",DB_VERSION=3,META_STORE="meta",SCHEMA_VERSION=3,ENGINE_VERSION="AN6";
+var DB_NAME="VENDRIVE2_ANALYTICS_DB",DB_VERSION=3,META_STORE="meta",SCHEMA_VERSION=3,ENGINE_VERSION="AN6.2";
 var STORE_NAMES=["meta","products","machineLinks","visits","reports","inventoryEvents"];
 var REPORT_TYPES=["sales","input","recovery","input_recovery"],REPORT_STATUSES=["draft","needs_review","confirmed"],VISIT_STATUSES=["open","complete","incomplete"],SOURCE_METHODS=["manual_test","ocr","manual"];
 var db=null,initializing=null,lastError=null,connectionEpoch=0;
