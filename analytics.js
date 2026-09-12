@@ -1,0 +1,12 @@
+(function(global){
+"use strict";
+var DB_NAME="VENDRIVE2_ANALYTICS_DB",DB_VERSION=1,META_STORE="meta",SCHEMA_VERSION=1,ENGINE_VERSION="AN1";
+var db=null,initializing=null,lastError=null;
+function health(){return {dbName:DB_NAME,schemaVersion:SCHEMA_VERSION,engineVersion:ENGINE_VERSION,ready:!!db,error:lastError?String(lastError.message||lastError):null}}
+function open(){if(db)return Promise.resolve(db);if(initializing)return initializing;if(!global.indexedDB){lastError=new Error("IndexedDB is unavailable");return Promise.reject(lastError)}initializing=new Promise(function(resolve,reject){var request;try{request=global.indexedDB.open(DB_NAME,DB_VERSION)}catch(error){lastError=error;reject(error);return}request.onupgradeneeded=function(){var database=request.result;if(!database.objectStoreNames.contains(META_STORE))database.createObjectStore(META_STORE,{keyPath:"key"})};request.onsuccess=function(){db=request.result;db.onversionchange=function(){if(db){db.close();db=null}};var tx=db.transaction(META_STORE,"readwrite"),store=tx.objectStore(META_STORE);store.put({key:"engine",schemaVersion:SCHEMA_VERSION,engineVersion:ENGINE_VERSION,initializedAt:new Date().toISOString()});tx.oncomplete=function(){resolve(db)};tx.onerror=function(){lastError=tx.error||new Error("Analytics meta initialization failed");reject(lastError)}};request.onerror=function(){lastError=request.error||new Error("Analytics database open failed");reject(lastError)}}).catch(function(error){lastError=error;throw error});return initializing}
+function ready(){return open().then(function(){return health()})}
+function exportSnapshot(){return open().then(function(database){return new Promise(function(resolve,reject){var tx=database.transaction(META_STORE,"readonly"),request=tx.objectStore(META_STORE).getAll();request.onsuccess=function(){resolve({kind:"VENDRIVE2_ANALYTICS_BACKUP",formatVersion:1,schemaVersion:SCHEMA_VERSION,engineVersion:ENGINE_VERSION,createdAt:new Date().toISOString(),stores:{meta:request.result||[]}})};request.onerror=function(){reject(request.error||new Error("Analytics export failed"))}})})}
+function close(){if(db){db.close();db=null}initializing=null}
+global.VENDRIVE2Analytics={ready:ready,getHealth:health,exportSnapshot:exportSnapshot,close:close};
+ready().catch(function(error){lastError=error;if(global.console&&global.console.warn)global.console.warn("VENDRIVE2 analytics sidecar initialization failed",error)});
+})(window);
