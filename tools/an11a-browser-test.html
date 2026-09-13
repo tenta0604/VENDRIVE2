@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AN11A_BROWSER_RUNNING</title></head>
+<body>
+<pre id="result">AN11A_BROWSER_RUNNING</pre>
+<script>
+(function(){
+  const machines=[
+    {id:"M1",name:"Machine 1",managementCode:"001",managementCodeKey:"1",maker:"Maker",makerKey:"MK",address:"A",lat:35.1,lng:136.1,days:["月"],cycle:"1週間に1回",weeklyCount:null,timeCondition:{type:"range",start:"09:00",end:"12:00"}},
+    {id:"M2",name:"Machine 2",managementCode:"002",managementCodeKey:"2",maker:"Maker",makerKey:"MK",address:"B",lat:null,lng:null,days:["月"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+    {id:"M3",name:"Machine 3",managementCode:"003",managementCodeKey:"3",maker:"Maker",makerKey:"MK",address:"C",lat:35.3,lng:136.3,days:["火"],cycle:"1週間に1回",weeklyCount:null,timeCondition:{type:"none",start:"",end:""}}
+  ];
+  const planning={
+    version:1,
+    today:"2026-09-14",
+    todayDay:"月",
+    restDays:["日"],
+    todayIds:["M2","M1"],
+    tomorrow:{date:"2026-09-15",day:"火",ids:["M3","M1"],manual:true},
+    machines:[
+      {id:"M1",last:"2026-09-07",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-14"},
+      {id:"M2",last:"2026-09-07",visited:false,skip:null,force:null,orderPending:true,nextScheduledVisitDate:"2026-09-14"},
+      {id:"M3",last:"2026-09-08",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-15"}
+    ]
+  };
+  window.VENDRIVE2ReadBridge=Object.freeze({
+    version:1,
+    normalizeManagementCode:value=>String(value||"").replace(/\D/g,"").replace(/^0+/,"")||"0",
+    getMachinesSnapshot:()=>JSON.parse(JSON.stringify(machines)),
+    getMachineSnapshot:id=>JSON.parse(JSON.stringify(machines.find(x=>x.id===String(id))||null)),
+    getPlanningSnapshot:()=>JSON.parse(JSON.stringify(planning))
+  });
+})();
+</script>
+<script src="../analytics.js"></script>
+<script type="module">
+const result=document.getElementById("result");
+const api=window.VENDRIVE2Analytics;
+function assert(condition,message){if(!condition)throw new Error(message)}
+function observed(day){return `2026-09-${String(day).padStart(2,"0")}T00:00:00+09:00`}
+function payload(productCode,at,qty,options={}){
+  return {
+    previousClearAt:new Date(Date.parse(at)-86400000).toISOString(),
+    elapsedHours:24,totalQty:qty,totalAmount:qty*100,
+    products:[{productCode,printedName:productCode,temperature:"COLD",column:1,price:100,salesQty:qty}],
+    soldOuts:options.soldOut?[{productCode,column:1,temperature:"COLD",soldOutElapsedHours:12}]:[],
+    specialCircumstance:null
+  };
+}
+async function addSales(id,machineId,productCode,day,qty,soldOut=false){
+  const at=observed(day),current=payload(productCode,at,qty,{soldOut});
+  await api.data.reports.create({id,type:"sales",machineId,makerKey:"MK",vendorNumber:machineId.slice(1),occurredAt:at,original:current,current,source:{method:"manual",imageStored:false}});
+  const confirmed=await api.data.reports.confirm(id);
+  assert(confirmed.confirmed,"Report did not confirm: "+id);
+}
+try{
+  localStorage.setItem("vendrive2_v7_data","AN11A_LEGACY_SENTINEL");
+  localStorage.setItem("vendrive2_last_day","AN11A_DAY_SENTINEL");
+  await api.ready();
+  const health=api.getHealth();
+  assert(health.engineVersion==="AN11A","ENGINE_VERSION mismatch");
+  assert(health.dbVersion===4&&health.schemaVersion===4,"DB/schema changed.");
+
+  for(let i=1;i<=10;i++)await addSales("m1-"+i,"M1","P1",i,8,i===10);
+  for(let i=1;i<=10;i++)await addSales("m2-"+i,"M2","P2",i,5,false);
+  for(let i=1;i<=3;i++)await addSales("m3-"+i,"M3","P3",i,6,false);
+
+  const bridgeBefore=await api.bridge.getPlanningSnapshot();
+  bridgeBefore.todayIds.push("TAMPER");
+  const bridgeAgain=await api.bridge.getPlanningSnapshot();
+  assert(!bridgeAgain.todayIds.includes("TAMPER"),"Planning bridge is not defensive.");
+
+  const before=await api.exportSnapshot();
+  const today=await api.analysis.planning.listVisitRecommendations({horizon:"today"});
+  const tomorrow=await api.analysis.planning.listVisitRecommendations({horizon:"next_workday"});
+  const after=await api.exportSnapshot();
+
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"Visit planning mutated analytics stores.");
+  assert(localStorage.getItem("vendrive2_v7_data")==="AN11A_LEGACY_SENTINEL","Visit planning changed legacy state.");
+  assert(localStorage.getItem("vendrive2_last_day")==="AN11A_DAY_SENTINEL","Visit planning changed legacy day state.");
+
+  assert(today.length===2&&today[0].subject.machineId==="M2"&&today[1].subject.machineId==="M1","Today host plan order was not preserved.");
+  assert(today[0].route.sequence===1&&today[1].route.sequence===2,"Today route sequence mismatch.");
+  assert(today[0].priority==="high"&&today[0].rationaleCodes.includes("pending_order"),"Pending order priority/rationale mismatch.");
+  assert(today[1].priority==="high"&&today[1].rationaleCodes.includes("sales_attention_high"),"Sold-out sales attention was not surfaced.");
+  assert(today[1].schedule.timeCondition.start==="09:00","Time condition was not preserved.");
+
+  for(const rec of today){
+    assert(rec.action==="visit_as_planned"&&rec.recommendationType==="visit"&&rec.status==="proposal","Visit recommendation contract mismatch.");
+    assert(rec.route.optimizationApplied===false&&rec.route.travelMinutes===null&&rec.route.distanceKm===null,"AN11A must not invent route metrics.");
+    assert(rec.route.optimizationReason==="travel_time_evidence_unavailable","Route non-optimization reason missing.");
+    assert(rec.policy.autoApply===false&&rec.policy.requiresUserConfirmation===true,"Visit recommendation policy mismatch.");
+    assert(rec.policy.writesLegacyState===false&&rec.policy.writesAnalyticsState===false,"Visit recommendation write policy mismatch.");
+    assert(rec.proposedChange===null&&rec.effects.length===0,"AN11A must not create write effects.");
+  }
+
+  assert(tomorrow.length===2&&tomorrow[0].subject.machineId==="M3"&&tomorrow[1].subject.machineId==="M1","Manual next-workday order was not preserved.");
+  assert(tomorrow.every(x=>x.schedule.manual===true&&x.schedule.source==="host_manual_next_workday_plan"),"Manual next-workday source mismatch.");
+  assert(tomorrow[0].priority==="medium"&&tomorrow[0].rationaleCodes.includes("sales_attention_medium"),"Limited-history sales attention mismatch.");
+
+  const filtered=await api.analysis.planning.listVisitRecommendations({horizon:"today",machineId:"M1"});
+  assert(filtered.length===1&&filtered[0].subject.machineId==="M1"&&filtered[0].route.sequence===2,"Machine filter must preserve original sequence.");
+
+  let rejected=false;
+  try{await api.analysis.planning.listVisitRecommendations({horizon:"whenever"})}catch(error){rejected=true}
+  assert(rejected,"Invalid horizon must reject.");
+
+  today[0].route.sequence=99;
+  today[0].rationaleCodes.push("tampered");
+  const reread=await api.analysis.planning.listVisitRecommendations({horizon:"today"});
+  assert(reread[0].route.sequence===1&&!reread[0].rationaleCodes.includes("tampered"),"Visit recommendations are not defensive copies.");
+
+  const an10=await api.analysis.recommendations.list({machineId:"M1"});
+  assert(an10.length===1&&an10[0].action==="review_stock_capacity","AN10 recommendation behavior regressed.");
+
+  result.textContent="AN11A_BROWSER_PASS\n"+JSON.stringify({
+    today:today.map(x=>({machine:x.subject.machineId,priority:x.priority,sequence:x.route.sequence,source:x.schedule.source,rationale:x.rationaleCodes})),
+    tomorrow:tomorrow.map(x=>({machine:x.subject.machineId,priority:x.priority,sequence:x.route.sequence,source:x.schedule.source,manual:x.schedule.manual})),
+    bridge:{todayIds:bridgeAgain.todayIds,tomorrow:bridgeAgain.tomorrow}
+  });
+  document.title="AN11A_BROWSER_PASS";
+  document.documentElement.dataset.test="pass";
+}catch(error){
+  result.textContent="AN11A_BROWSER_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN11A_BROWSER_FAIL";
+  document.documentElement.dataset.test="fail";
+}
+</script>
+</body>
+</html>
