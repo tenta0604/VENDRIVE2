@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN13A",
+  "phase": "AN13B",
   "status": "PASS",
   "base": {
-    "head": "4d895681197c9497d84ae07b445a77d33743d87a",
-    "safetyTag": "backup-pre-AN13A-AN12-20260914",
-    "safetyTagTarget": "4d895681197c9497d84ae07b445a77d33743d87a"
+    "head": "6953321bd583096d6d87d483c20c15cdcf3cc562",
+    "safetyTag": "backup-pre-AN13B-AN13A-20260914",
+    "safetyTagTarget": "6953321bd583096d6d87d483c20c15cdcf3cc562"
   },
   "versions": {
-    "app": "2026.09.14-AN13A",
-    "engine": "AN13A",
+    "app": "2026.09.14-AN13B",
+    "engine": "AN13B",
     "db": 4,
     "schema": 4
   },
@@ -26,15 +26,16 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34786974518,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, real index.html iframe integration, stubbed read-only analysis API, and 390px/320px mobile layout checks",
+      "runId": 34787851317,
+      "jobId": 103806493046,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, real index.html iframe integration, 390px/320px mobile checks, partial API failure simulation, empty-state fixtures, long-name fixtures, and EOD failure retry simulation",
       "coverage": [
-        "analysis tab is the sixth main tab and remains one row at 390px and 320px widths",
-        "default sections are 提案 / 販売 / 在庫 / 効率化 in the required order",
-        "recommendations, next-workday visits, bring-from-vehicle candidates, sales forecasts, vehicle inventory, and efficiency views render",
-        "end-of-day loading proposal runs only from an explicit UI action using businessEnded:true",
-        "lower-bound demand and read-only status are visible",
-        "analysis interactions do not modify legacy localStorage state"
+        "analysis main/sub tabs retain usable touch targets and one-row layout on 390px and 320px widths",
+        "long machine/product names wrap safely without horizontal overflow",
+        "partial API failures preserve healthy analysis panels and show a retryable warning",
+        "sales, inventory, and efficiency empty states remain explicit and non-destructive",
+        "end-of-day loading failure shows an inline retry path",
+        "analysis UI remains read-only and does not mutate legacy localStorage state"
       ]
     }
   },
