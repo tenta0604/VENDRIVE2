@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN11A",
+  "phase": "AN11B",
   "status": "PASS",
   "base": {
-    "head": "fbdc7f658a8f3dfd0a9bf1622aef2824f8ff5f08",
-    "safetyTag": "backup-pre-AN11A-AN10-20260914",
-    "safetyTagTarget": "fbdc7f658a8f3dfd0a9bf1622aef2824f8ff5f08"
+    "head": "bc381b62a180c653929dbbdcd1566abc116a52b5",
+    "safetyTag": "backup-pre-AN11B-AN11A-20260914",
+    "safetyTagTarget": "bc381b62a180c653929dbbdcd1566abc116a52b5"
   },
   "versions": {
-    "app": "2026.09.14-AN11A",
-    "engine": "AN11A",
+    "app": "2026.09.14-AN11B",
+    "engine": "AN11B",
     "db": 4,
     "schema": 4
   },
@@ -25,17 +25,17 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34785443561,
-      "jobId": 103799967576,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, fake host planning bridge, IndexedDB fixtures, and legacy localStorage sentinels",
+      "runId": 34785952190,
+      "jobId": 103801347387,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, fake host planning bridge, IndexedDB inventory fixtures, and legacy localStorage sentinels",
       "coverage": [
-        "read-only planning bridge extension while preserving bridge version 1",
-        "today and next-workday host plan order preservation",
-        "manual next-workday plan preservation",
-        "pending-order and AN10 sales-attention priority surfacing",
-        "time-condition preservation without route reordering",
-        "no invented distance or travel-time metrics",
-        "no legacy or analytics writes, defensive copies, invalid-horizon rejection, and AN10 regression guard"
+        "planned-visit machine filtering and host visit sequence preservation",
+        "machine/product aggregation across multiple forecast series",
+        "available, empty, unknown, and untracked vehicle stock handling",
+        "sold-out lower-bound and limited-confidence demand propagation",
+        "insufficient-history demand data handling",
+        "explicit null bring quantity when machine stock/capacity evidence is unavailable",
+        "filters, defensive copies, no legacy or analytics writes, and AN11A regression guard"
       ]
     }
   },
