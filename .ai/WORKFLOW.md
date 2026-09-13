@@ -11,6 +11,7 @@ When the user says 「次進めて」, execute this workflow for exactly one pha
    - require `HEAD` to equal `origin/main` and `main...origin/main` = `0 0`;
    - require STATE `appVersion`, `engineVersion`, `dbVersion`, and `schemaVersion` to match the production code;
    - require ROADMAP completed/next phase to match STATE `completedPhase` / `nextPhase`.
+   Before editing a phase that changes production code, create an immutable annotated safety tag at the verified pre-edit `HEAD`. If the selected name already exists, continue only when its dereferenced target is that exact SHA; otherwise `SAFE STOP`. Never move, delete, recreate over, or force-update an existing tag.
    On any mismatch, do not repair automatically; `SAFE STOP`.
 5. Identify `STATE.nextPhase`.
 6. Read that phase's purpose and boundary from the roadmap, inspect the current code, and turn the boundary into a necessary and sufficient implementation specification. Do not implement later phases.

@@ -30,6 +30,9 @@ Before editing, verify the repository root, `main` branch, `HEAD`, `origin/main`
 
 ## Git safety and commit policy
 
+- Before editing production code in any phase, create an immutable annotated safety tag at the verified pre-edit `HEAD`.
+- If the chosen tag name already exists, dereference it and continue only when it points to that exact `HEAD`; a same-name tag at another SHA requires `SAFE STOP`.
+- Never move, delete, recreate over, or force-update an existing safety tag.
 - Never use `git reset --hard`, destructive `git restore`, `git checkout -- .`, `git clean`, stash to hide changes, rebase, force push, history rewriting, or moving/deleting an existing safety tag.
 - Preserve unrelated user changes.
 - Commit and push only when every required gate passes.
