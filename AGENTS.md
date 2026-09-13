@@ -44,6 +44,10 @@ Before editing, verify the repository root, `main` branch, `HEAD`, `origin/main`
 - Browser/IndexedDB phases that require real Edge evidence cannot pass on mocks alone.
 - Reuse the proven Microsoft Edge + localhost + dedicated TEMP profile + CDP approach.
 - Never perform test database operations in a normal Edge profile.
+- Before every successful phase commit, write actual machine-readable gate evidence to `.ai/LAST_RUN.json`.
+- Evidence must identify the phase, pre-edit base SHA and immutable safety tag, versions, gate results, changed files, and unresolved issues.
+- Mark a gate `NOT_REQUIRED` only with a reason. Never record planned, assumed, or unexecuted checks as `PASS`.
+- `.ai/LAST_RUN.json` must not store the current commit SHA; Git `HEAD` / `origin/main` remains authoritative.
 
 ## Data and operational safety
 

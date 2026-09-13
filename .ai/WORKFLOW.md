@@ -25,11 +25,18 @@ When the user says 「次進めて」, execute this workflow for exactly one pha
    - factual input that cannot be derived safely.
 9. Implement the selected phase with minimal scoped changes.
 10. Run every required gate, including syntax, diff-check, build, functional tests, and real Edge verification when browser/IndexedDB behavior requires it.
-11. Commit and push only if all gates pass. Never commit a failing or unresolved phase.
-12. In the same successful phase commit:
+11. Before a successful commit, update `.ai/LAST_RUN.json` with actual evidence from this run:
+    - phase and `PASS` status;
+    - pre-edit base SHA and immutable safety tag plus its dereferenced target;
+    - application, engine, database, and schema versions;
+    - each gate result, using `NOT_REQUIRED` only with a reason;
+    - exact changed files and unresolved issues.
+    Do not write planned or assumed checks as `PASS`, and do not store the current commit SHA in this file.
+12. Commit and push only if all gates pass and `.ai/LAST_RUN.json` is valid. Never commit a failing or unresolved phase.
+13. In the same successful phase commit:
     - update `.ai/STATE.json` fields `completedPhase`, `nextPhase`, versions, and `status` to the new state;
     - move the completed roadmap phase into the completed section and identify the next phase.
-13. On `SAFE STOP`, do not advance state or mark the phase completed. Do not commit failure state to make progress appear complete.
-14. Return a concise PASS or SAFE STOP report and stop. Wait for the next user instruction.
+14. On `SAFE STOP`, do not advance state, mark the phase completed, or commit failure evidence merely to make progress appear complete.
+15. Return a concise PASS or SAFE STOP report and stop. Wait for the next user instruction.
 
 The workflow exists so phase execution is reproducible from repository evidence. GitHub history, diffs, tags, and workflow runs—not a copied chat transcript—are the durable review record.
