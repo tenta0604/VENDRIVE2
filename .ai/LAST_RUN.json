@@ -1,38 +1,48 @@
 {
   "evidenceVersion": 1,
-  "phase": "AI-RUNNER-WINDOWS-FIX",
+  "phase": "AN8B",
   "status": "PASS",
   "base": {
-    "head": "192357146ca1b713269686fffb66e1a8140f58d2",
-    "safetyTag": "backup-pre-AI-RUNNER-FIX-AN8A3-20260914",
-    "safetyTagTarget": "192357146ca1b713269686fffb66e1a8140f58d2"
+    "head": "603cc808c5055d004d71f4a5be43d4a17e2ae321",
+    "safetyTag": "backup-pre-AN8B-AN8A3-20260914",
+    "safetyTagTarget": "603cc808c5055d004d71f4a5be43d4a17e2ae321"
   },
   "versions": {
-    "app": "2026.09.13-AN8A3",
-    "engine": "AN8A3",
+    "app": "2026.09.14-AN8B",
+    "engine": "AN8B",
     "db": 4,
     "schema": 4
   },
   "gates": {
     "preflight": "PASS",
-    "syntax": "PASS",
-    "codexCmdDiscovery": "PASS",
-    "codexExecHelp": "PASS",
-    "smokeTest": "PASS",
+    "safetyTag": "PASS",
+    "versionState": "PASS",
     "diffCheck": "PASS",
-    "productionBlobs": "PASS",
-    "build": "NOT_REQUIRED",
-    "buildReason": "Production application files are unchanged.",
+    "syntax": "PASS",
     "functional": "PASS",
+    "build": "NOT_REQUIRED",
+    "buildReason": "Direct HTML/JavaScript application; no build step is required.",
     "realEdge": {
-      "required": false,
-      "status": "NOT_REQUIRED",
-      "reason": "Runner bootstrap has no browser or IndexedDB behavior."
+      "required": true,
+      "status": "PASS",
+      "runId": 34770909336,
+      "jobId": 103760211222,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, and IndexedDB test fixtures",
+      "coverage": [
+        "nearest prior-year visit within configurable day tolerance",
+        "exact-date-only maxDayDistance=0 behavior",
+        "cross-year Dec/Jan nearest-date matching",
+        "AN8A3 previous-period API regression guard"
+      ]
     }
   },
   "changedFiles": [
     ".ai/LAST_RUN.json",
-    "tools/ai-runner.ps1"
+    ".ai/STATE.json",
+    "AI_ROADMAP.md",
+    "analytics.js",
+    "index.html",
+    "version.json"
   ],
   "unresolved": []
 }
