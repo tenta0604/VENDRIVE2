@@ -67,11 +67,27 @@ jobs:
           try {
             Start-Sleep -Seconds 2
             $profile = Join-Path $env:RUNNER_TEMP ("vendrive-an8b-edge-" + $env:GITHUB_RUN_ID)
-            $output = & $edge '--headless=new' '--disable-gpu' '--no-first-run' '--no-default-browser-check' '--virtual-time-budget=15000' "--user-data-dir=$profile" '--dump-dom' "http://127.0.0.1:$port/tools/an8b-browser-test.html" 2>&1
-            $exit = $LASTEXITCODE
-            $text = ($output | Out-String)
+            $stdout = Join-Path $env:RUNNER_TEMP 'an8b-edge-stdout.txt'
+            $stderr = Join-Path $env:RUNNER_TEMP 'an8b-edge-stderr.txt'
+            $edgeArgs = @(
+              '--headless=new',
+              '--disable-gpu',
+              '--no-first-run',
+              '--no-default-browser-check',
+              '--virtual-time-budget=15000',
+              "--user-data-dir=$profile",
+              '--dump-dom',
+              "http://127.0.0.1:$port/tools/an8b-browser-test.html"
+            )
+            $edgeProcess = Start-Process -FilePath $edge -ArgumentList $edgeArgs -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            $text = if (Test-Path $stdout) { Get-Content -Raw $stdout } else { '' }
+            $errorText = if (Test-Path $stderr) { Get-Content -Raw $stderr } else { '' }
             Write-Host $text
-            if ($exit -ne 0) { throw "Edge exited with code $exit" }
+            if ($errorText) {
+              Write-Host "EDGE_STDERR"
+              Write-Host $errorText
+            }
+            if ($edgeProcess.ExitCode -ne 0) { throw "Edge exited with code $($edgeProcess.ExitCode)" }
             if ($text -notmatch 'AN8B_BROWSER_PASS') { throw 'AN8B_BROWSER_PASS token was not found in Edge DOM output.' }
             Write-Host "AN8B_REAL_EDGE_PASS"
           }
