@@ -101,7 +101,7 @@ try{
 
   assert(proposal.proposalType==="end_of_day_vehicle_loading"&&proposal.status==="proposal","Proposal contract mismatch.");
   assert(proposal.target.date==="2026-09-15"&&proposal.target.day==="火"&&proposal.target.manual===true,"Target next-workday context mismatch.");
-  assert(proposal.policy.businessEnded===true&&proposal.policy.reserveDays===0.25&&proposal.policy.reserveMethod==="fractional_daily_forecast","EOD policy mismatch.");
+  assert(proposal.policy.businessEnded===true&&proposal.policy.reserveDays===0.25&&proposal.policy.reserveMethod==="fractional_daily_forecast","EOD policy mismatch.");\n  assert(proposal.policy.serviceDemandBasis==="forecast_units_per_day_x_calendar_days_since_last_visit"&&proposal.policy.machineOnHandConsidered===false&&proposal.policy.machineCapacityConsidered===false&&proposal.policy.interpretation==="vehicle_loading_estimate_not_machine_fill_instruction","EOD estimate assumptions are not explicit.");
   assert(proposal.policy.autoApply===false&&proposal.policy.requiresUserConfirmation===true,"EOD confirmation policy mismatch.");
   assert(proposal.coverage.uncoveredVisitMachineIds.length===1&&proposal.coverage.uncoveredVisitMachineIds[0]==="M4"&&proposal.coverage.requiresReview===true,"Uncovered visit coverage mismatch.");
 
