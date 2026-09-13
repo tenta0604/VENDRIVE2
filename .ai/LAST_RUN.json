@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN12",
+  "phase": "AN13A",
   "status": "PASS",
   "base": {
-    "head": "1978de7d2d0e0555eedd53c5828e3bf655e072c3",
-    "safetyTag": "backup-pre-AN12-AN11B-20260914",
-    "safetyTagTarget": "1978de7d2d0e0555eedd53c5828e3bf655e072c3"
+    "head": "4d895681197c9497d84ae07b445a77d33743d87a",
+    "safetyTag": "backup-pre-AN13A-AN12-20260914",
+    "safetyTagTarget": "4d895681197c9497d84ae07b445a77d33743d87a"
   },
   "versions": {
-    "app": "2026.09.14-AN12",
-    "engine": "AN12",
+    "app": "2026.09.14-AN13A",
+    "engine": "AN13A",
     "db": 4,
     "schema": 4
   },
@@ -17,6 +17,7 @@
     "preflight": "PASS",
     "safetyTag": "PASS",
     "versionState": "PASS",
+    "uiContract": "PASS",
     "diffCheck": "PASS",
     "syntax": "PASS",
     "functional": "PASS",
@@ -25,17 +26,15 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34786581428,
-      "jobId": 103803058226,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, fake host planning bridge, IndexedDB inventory fixtures, and legacy localStorage sentinels",
+      "runId": 34786974518,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, real index.html iframe integration, stubbed read-only analysis API, and 390px/320px mobile layout checks",
       "coverage": [
-        "explicit business-ended gate before EOD proposal generation",
-        "next-workday service-demand estimate from forecast units/day multiplied by calendar days since last visit",
-        "0.25-day default reserve with configurable 0..1 reserveDays and ceil target rounding",
-        "vehicle stock subtraction and case-plus-loose conversion when evidence is complete",
-        "lower-bound demand produces minimum quantities only and never a formal recommended load",
-        "unknown demand, missing visit history, unknown/untracked vehicle stock, and uncovered visits force review paths",
-        "explicit machine-on-hand/capacity-not-considered policy, defensive copies, no legacy or analytics writes, and AN11B regression guard"
+        "analysis tab is the sixth main tab and remains one row at 390px and 320px widths",
+        "default sections are 提案 / 販売 / 在庫 / 効率化 in the required order",
+        "recommendations, next-workday visits, bring-from-vehicle candidates, sales forecasts, vehicle inventory, and efficiency views render",
+        "end-of-day loading proposal runs only from an explicit UI action using businessEnded:true",
+        "lower-bound demand and read-only status are visible",
+        "analysis interactions do not modify legacy localStorage state"
       ]
     }
   },
@@ -43,6 +42,7 @@
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
     "AI_ROADMAP.md",
+    "analytics.css",
     "analytics.js",
     "index.html",
     "version.json"
