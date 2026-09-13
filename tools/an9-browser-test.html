@@ -53,6 +53,10 @@ try{
   for(let i=1;i<=2;i++)await addReport("p4"+i,"P4",day(2026,6,i),3,{column:4});
   for(let i=1;i<=3;i++)await addReport("p5"+i,"P5",day(2026,5,i,6),0,{column:5,temperature:null,zeroDuration:true});
 
+  for(let i=1;i<=3;i++)await addReport("p6h"+i,"P6",day(2025,1,i),4,{column:6});
+  for(let i=1;i<=3;i++)await addReport("p6jan"+i,"P6",day(2026,1,i),8,{column:6});
+  for(let i=1;i<=3;i++)await addReport("p6mar"+i,"P6",day(2026,3,i),9,{column:6});
+
   const before=await api.exportSnapshot();
   const forecasts=await api.analysis.sales.listForecasts({machineId:"M1",makerKey:"MK",vendorNumber:"1"});
   const after=await api.exportSnapshot();
@@ -63,7 +67,8 @@ try{
   const p3=forecasts.find(x=>x.productCode==="P3");
   const p4=forecasts.find(x=>x.productCode==="P4");
   const p5=forecasts.find(x=>x.productCode==="P5");
-  assert(p1&&p2&&p3&&p4&&p5,"Expected forecast rows missing.");
+  const p6=forecasts.find(x=>x.productCode==="P6");
+  assert(p1&&p2&&p3&&p4&&p5&&p6,"Expected forecast rows missing.");
 
   assert(p1.forecastKnown===true,"P1 forecast should be known.");
   assert(Math.abs(p1.forecastUnitsPerDay-9.4)<1e-9,"P1 weighted units/day mismatch: "+p1.forecastUnitsPerDay);
@@ -90,6 +95,7 @@ try{
 
   assert(p5.forecastKnown===false&&p5.forecastUnitsPerDay===null,"P5 zero-duration forecast must be unknown.");
   assert(p5.confidence.reasons.includes("rate_unknown"),"P5 rate_unknown reason missing.");
+  assert(p6.asOf===day(2026,3,3)&&p6.context.historical.available===false,"Stale historical comparison must not attach to latest forecast.");
 
   ["estimatedDemand","estimatedLostUnits","lostUnits","lostRevenue","weatherAdjustment"].forEach(key=>{
     assert(!(key in p2),"AN9 must not invent unsupported forecast fields: "+key);
