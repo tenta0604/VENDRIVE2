@@ -1,0 +1,112 @@
+name: AN8C temporary verification
+
+on:
+  push:
+    branches:
+      - chatgpt/an8c-demand-evidence
+
+permissions:
+  contents: read
+
+jobs:
+  verify-an8c:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify baseline and immutable safety tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $base = '40b5a1c2ba8960014a54f4d1c11fa9454de5da4a'
+          $tag = 'backup-pre-AN8C-AN8B-20260914'
+          git fetch origin main --tags
+          $remoteMain = (git rev-parse origin/main).Trim()
+          if ($remoteMain -ne $base) { throw "origin/main moved from expected AN8C base: $remoteMain" }
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          $kind = (git cat-file -t $tag).Trim()
+          if ($kind -ne 'tag') { throw "Safety ref is not an annotated tag: $kind" }
+          $target = (git rev-parse "$tag^{}").Trim()
+          if ($target -ne $base) { throw "Safety tag target mismatch: $target" }
+          Write-Host "AN8C_SAFETY_TAG_PASS tag=$tag target=$target"
+
+      - name: Version and state consistency gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $state = Get-Content '.ai/STATE.json' -Raw | ConvertFrom-Json
+          $version = Get-Content 'version.json' -Raw | ConvertFrom-Json
+          $index = Get-Content 'index.html' -Raw
+          $analytics = Get-Content 'analytics.js' -Raw
+          $roadmap = Get-Content 'AI_ROADMAP.md' -Raw
+          if ($state.completedPhase -ne 'AN8C' -or $state.nextPhase -ne 'AN9' -or $state.status -ne 'ready') { throw 'STATE phase mismatch.' }
+          if ($state.appVersion -ne '2026.09.14-AN8C' -or $state.engineVersion -ne 'AN8C' -or $state.dbVersion -ne 4 -or $state.schemaVersion -ne 4) { throw 'STATE version mismatch.' }
+          if ($version.version -ne '2026.09.14-AN8C') { throw 'version.json mismatch.' }
+          if ($index -notmatch "APP_VERSION='2026\.09\.14-AN8C'") { throw 'index APP_VERSION mismatch.' }
+          if ($analytics -notmatch 'ENGINE_VERSION="AN8C"') { throw 'analytics ENGINE_VERSION mismatch.' }
+          if ($roadmap -notmatch 'Latest completed phase: \*\*AN8C — Sold-out-aware Demand Evidence / Confidence Layer\*\*') { throw 'ROADMAP completed phase mismatch.' }
+          if ($roadmap -notmatch 'Next phase: \*\*AN9 — Demand Forecast Foundation\*\*') { throw 'ROADMAP next phase mismatch.' }
+          Write-Host "AN8C_VERSION_STATE_PASS"
+
+      - name: Diff check
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          Write-Host "AN8C_DIFF_CHECK_PASS"
+
+      - name: JavaScript syntax gate
+        shell: pwsh
+        run: |
+          node --check analytics.js
+          Write-Host "AN8C_SYNTAX_PASS"
+
+      - name: Real Edge browser and IndexedDB gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $edgeCandidates = @(
+            "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+            "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe"
+          )
+          $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $edge) { throw 'Microsoft Edge executable was not found on windows-latest.' }
+          $port = 8124
+          $server = Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try {
+            $ready = $false
+            for ($attempt = 1; $attempt -le 20; $attempt++) {
+              try {
+                $response = Invoke-WebRequest -Uri "http://127.0.0.1:$port/tools/an8c-browser-test.html" -UseBasicParsing -TimeoutSec 2
+                if ($response.StatusCode -eq 200) { $ready = $true; break }
+              } catch { Start-Sleep -Milliseconds 500 }
+            }
+            if (-not $ready) { throw 'Local AN8C test server did not become ready.' }
+            $profile = Join-Path $env:RUNNER_TEMP ("vendrive-an8c-edge-" + $env:GITHUB_RUN_ID)
+            $stdout = Join-Path $env:RUNNER_TEMP 'an8c-edge-stdout.txt'
+            $stderr = Join-Path $env:RUNNER_TEMP 'an8c-edge-stderr.txt'
+            $edgeArgs = @(
+              '--headless=new',
+              '--disable-gpu',
+              '--no-first-run',
+              '--no-default-browser-check',
+              '--virtual-time-budget=20000',
+              "--user-data-dir=$profile",
+              '--dump-dom',
+              "http://127.0.0.1:$port/tools/an8c-browser-test.html"
+            )
+            $edgeProcess = Start-Process -FilePath $edge -ArgumentList $edgeArgs -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            $text = if (Test-Path $stdout) { Get-Content -Raw $stdout } else { '' }
+            $errorText = if (Test-Path $stderr) { Get-Content -Raw $stderr } else { '' }
+            Write-Host $text
+            if ($errorText) { Write-Host "EDGE_STDERR"; Write-Host $errorText }
+            if ($edgeProcess.ExitCode -ne 0) { throw "Edge exited with code $($edgeProcess.ExitCode)" }
+            if ($text -notmatch 'AN8C_BROWSER_PASS') { throw 'AN8C_BROWSER_PASS token was not found in Edge DOM output.' }
+            Write-Host "AN8C_REAL_EDGE_PASS"
+          }
+          finally {
+            if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force }
+          }

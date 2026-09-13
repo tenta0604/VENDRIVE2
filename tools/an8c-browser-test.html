@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AN8C_BROWSER_RUNNING</title></head>
+<body>
+<pre id="result">AN8C_BROWSER_RUNNING</pre>
+<script src="../analytics.js"></script>
+<script type="module">
+const result=document.getElementById("result");
+const api=window.VENDRIVE2Analytics;
+function payload(productCode,observedAt,qty,options={}){
+  const zero=options.zeroDuration===true;
+  const previousClearAt=zero?observedAt:new Date(Date.parse(observedAt)-86400000).toISOString();
+  return {
+    previousClearAt,
+    elapsedHours:zero?0:24,
+    totalQty:qty,
+    totalAmount:qty*100,
+    products:[{productCode,printedName:productCode,temperature:options.temperature??"COLD",column:options.column??1,price:100,salesQty:qty}],
+    soldOuts:options.soldOuts||[],
+    specialCircumstance:options.specialCircumstance||null
+  };
+}
+async function addReport(id,productCode,observedAt,qty,options={}){
+  const current=payload(productCode,observedAt,qty,options);
+  await api.data.reports.create({
+    id,
+    type:"sales",
+    machineId:"M1",
+    makerKey:"MK",
+    vendorNumber:"1",
+    occurredAt:observedAt,
+    original:current,
+    current,
+    source:{method:"manual",imageStored:false}
+  });
+  const confirmed=await api.data.reports.confirm(id);
+  if(!confirmed.confirmed)throw new Error("Report did not confirm: "+id);
+}
+function assert(condition,message){if(!condition)throw new Error(message)}
+try{
+  await api.ready();
+  const health=api.getHealth();
+  assert(health.engineVersion==="AN8C","ENGINE_VERSION mismatch");
+  assert(health.dbVersion===4&&health.schemaVersion===4,"DB/schema changed unexpectedly");
+
+  for(let i=1;i<=3;i++)await addReport("clean"+i,"P1",`2026-09-1${i}T00:00:00+09:00`,10,{column:1,temperature:"COLD"});
+
+  await addReport("sold1","P2","2026-09-11T00:00:00+09:00",8,{column:2,temperature:"COLD"});
+  await addReport("sold2","P2","2026-09-12T00:00:00+09:00",8,{column:2,temperature:"COLD"});
+  await addReport("sold3","P2","2026-09-13T00:00:00+09:00",8,{
+    column:2,
+    temperature:"COLD",
+    soldOuts:[
+      {productCode:"P2",column:2,temperature:"COLD",soldOutElapsedHours:12},
+      {productCode:"P2",column:99,temperature:"COLD",soldOutElapsedHours:12}
+    ]
+  });
+
+  await addReport("special1","P3","2026-09-11T00:00:00+09:00",6,{column:3,temperature:"HOT"});
+  await addReport("special2","P3","2026-09-12T00:00:00+09:00",6,{column:3,temperature:"HOT",specialCircumstance:{code:"event",note:"festival"}});
+  await addReport("special3","P3","2026-09-13T00:00:00+09:00",6,{column:3,temperature:"HOT"});
+
+  for(let i=1;i<=3;i++)await addReport("zero"+i,"P4",`2026-09-1${i}T06:00:00+09:00`,0,{column:4,temperature:null,zeroDuration:true});
+
+  const before=await api.exportSnapshot();
+  const all=await api.analysis.sales.listDemandEvidence({machineId:"M1",makerKey:"MK",vendorNumber:"1",windowSize:3});
+  const after=await api.exportSnapshot();
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"Demand evidence API mutated analytics stores.");
+
+  const clean=all.find(x=>x.productCode==="P1");
+  const sold=all.find(x=>x.productCode==="P2");
+  const special=all.find(x=>x.productCode==="P3");
+  const zero=all.find(x=>x.productCode==="P4");
+  assert(clean&&sold&&special&&zero,"Expected demand evidence rows were not produced.");
+
+  assert(clean.rateKnown===true&&clean.observedUnitsPerDay===10,"Clean observed rate mismatch.");
+  assert(clean.rateInterpretation==="observed_rate"&&clean.lowerBound===false&&clean.censored===false,"Clean interpretation mismatch.");
+  assert(clean.confidence.level==="high"&&clean.confidence.reasons.length===0,"Clean confidence mismatch.");
+
+  assert(sold.rateKnown===true&&sold.observedUnitsPerDay===8,"Censored observed rate must remain actual sales rate.");
+  assert(sold.rateInterpretation==="censored_lower_bound"&&sold.lowerBound===true&&sold.censored===true,"Censored lower-bound interpretation mismatch.");
+  assert(sold.censoring.observationCount===3&&sold.censoring.censoredObservationCount===1&&sold.censoring.uncensoredObservationCount===2,"Censoring counts mismatch.");
+  assert(sold.censoring.soldOutEventCount===1,"Only exact product/column/temperature sold-out events may count.");
+  assert(sold.censoring.censoredObservationIds.length===1&&sold.censoring.censoredObservationIds[0].includes("sold3"),"Censored observation IDs mismatch.");
+  assert(sold.confidence.level==="limited"&&sold.confidence.reasons.includes("sold_out_censored"),"Sold-out confidence reason missing.");
+
+  assert(special.rateInterpretation==="observed_rate"&&special.lowerBound===false,"Special circumstance must not invent censoring.");
+  assert(special.confidence.level==="limited"&&special.confidence.reasons.includes("special_circumstance"),"Special circumstance confidence qualifier missing.");
+
+  assert(zero.rateKnown===false&&zero.observedUnitsPerDay===null&&zero.observedYenPerDay===null,"Zero-duration rate must remain unknown.");
+  assert(zero.rateInterpretation==="unknown"&&zero.lowerBound===false&&zero.confidence.level==="unknown"&&zero.confidence.reasons.includes("rate_unknown"),"Unknown-rate confidence mismatch.");
+
+  ["estimatedDemand","estimatedLostUnits","lostUnits","lostRevenue"].forEach(key=>{
+    assert(!(key in sold),"AN8C must not expose lost-demand estimates: "+key);
+  });
+
+  const filtered=await api.analysis.sales.listDemandEvidence({machineId:"M1",makerKey:"MK",vendorNumber:"1",productCode:"P2",windowSize:3});
+  assert(filtered.length===1&&filtered[0].productCode==="P2","Demand evidence filter mismatch.");
+
+  filtered[0].confidence.level="tampered";
+  filtered[0].censoring.censoredObservationIds.push("tampered");
+  const reread=await api.analysis.sales.listDemandEvidence({machineId:"M1",makerKey:"MK",vendorNumber:"1",productCode:"P2",windowSize:3});
+  assert(reread[0].confidence.level==="limited"&&!reread[0].censoring.censoredObservationIds.includes("tampered"),"Demand evidence results are not defensive copies.");
+
+  assert(typeof api.analysis.sales.listObservationWindows==="function","AN8A2 API regressed.");
+  assert(typeof api.analysis.sales.listPreviousPeriodComparisons==="function","AN8A3 API regressed.");
+  assert(typeof api.analysis.sales.listHistoricalComparisons==="function","AN8B API regressed.");
+
+  const evidence={
+    total:all.length,
+    clean:{rate:clean.observedUnitsPerDay,interpretation:clean.rateInterpretation,confidence:clean.confidence},
+    soldOut:{rate:sold.observedUnitsPerDay,interpretation:sold.rateInterpretation,lowerBound:sold.lowerBound,censoring:sold.censoring,confidence:sold.confidence},
+    special:{interpretation:special.rateInterpretation,confidence:special.confidence},
+    unknown:{rateKnown:zero.rateKnown,interpretation:zero.rateInterpretation,confidence:zero.confidence}
+  };
+  result.textContent="AN8C_BROWSER_PASS\n"+JSON.stringify(evidence);
+  document.title="AN8C_BROWSER_PASS";
+  document.documentElement.dataset.test="pass";
+}catch(error){
+  result.textContent="AN8C_BROWSER_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN8C_BROWSER_FAIL";
+  document.documentElement.dataset.test="fail";
+}
+</script>
+</body>
+</html>
