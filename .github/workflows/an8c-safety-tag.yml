@@ -1,0 +1,53 @@
+name: AN8C Safety Tag
+
+on:
+  push:
+    branches:
+      - chatgpt/an8c-safety-20260914
+
+permissions:
+  contents: write
+
+jobs:
+  create-safety-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or verify immutable annotated safety tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="40b5a1c2ba8960014a54f4d1c11fa9454de5da4a"
+          TAG="backup-pre-AN8C-AN8B-20260914"
+
+          git fetch origin --tags --force
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            TYPE="$(git cat-file -t "refs/tags/$TAG")"
+            if [ "$TYPE" != "tag" ]; then
+              echo "Existing safety tag is not annotated."
+              exit 1
+            fi
+            ACTUAL="$(git rev-parse "refs/tags/$TAG^{}")"
+            if [ "$ACTUAL" != "$TARGET" ]; then
+              echo "Safety tag target mismatch: $ACTUAL"
+              exit 1
+            fi
+            echo "Existing annotated safety tag verified at $TARGET"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" "$TARGET" -m "Safety snapshot before AN8C"
+            git push origin "refs/tags/$TAG"
+          fi
+
+          git fetch origin --tags --force
+          TYPE="$(git cat-file -t "refs/tags/$TAG")"
+          ACTUAL="$(git rev-parse "refs/tags/$TAG^{}")"
+          test "$TYPE" = "tag"
+          test "$ACTUAL" = "$TARGET"
+          echo "AN8C safety tag PASS: $TAG -> $ACTUAL"
