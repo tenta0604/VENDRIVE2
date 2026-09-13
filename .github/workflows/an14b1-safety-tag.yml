@@ -1,0 +1,36 @@
+name: AN14B1 Safety Tag
+
+on:
+  push:
+    branches:
+      - chatgpt/an14b1-safety-20260914
+
+permissions:
+  contents: write
+
+jobs:
+  create-safety-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create or verify immutable annotated safety tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="7c25776748b547fed28d847d9fb911a9cb59f7f2"
+          TAG="backup-pre-AN14B1-AN14A-20260914"
+          git fetch origin --tags --force
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            test "$(git cat-file -t "refs/tags/$TAG")" = "tag"
+            test "$(git rev-parse "refs/tags/$TAG^{}")" = "$TARGET"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" "$TARGET" -m "Safety snapshot before AN14B1"
+            git push origin "refs/tags/$TAG"
+          fi
+          git fetch origin --tags --force
+          test "$(git cat-file -t "refs/tags/$TAG")" = "tag"
+          test "$(git rev-parse "refs/tags/$TAG^{}")" = "$TARGET"
