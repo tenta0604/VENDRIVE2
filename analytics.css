@@ -93,3 +93,10 @@
  .reportCapturePreviewWrap{min-height:125px;max-height:240px}
  .reportCapturePreviewWrap img{max-height:240px}
 }
+
+/* Secure OCR adapter / classification — AN14B1 */
+.reportOcrControls{display:flex;align-items:center;gap:9px;margin-top:9px}
+.reportOcrButton{flex:0 0 auto;min-height:44px}
+.reportOcrStatus{min-width:0;color:#7f858b;font-size:9px;font-weight:800;line-height:1.4}
+.reportOcrCard{margin-top:9px;padding:10px 11px;border:1px solid #e2e4e7;border-radius:14px;background:#fafafa}
+@media(max-width:380px){.reportOcrControls{align-items:stretch;flex-direction:column}.reportOcrButton{width:100%}}

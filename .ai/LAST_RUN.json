@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN14A",
+  "phase": "AN14B1",
   "status": "PASS",
   "base": {
-    "head": "e8b405a0ea6af8a9b5c0d4b558c5e7613426a8d3",
-    "safetyTag": "backup-pre-AN14A-AN13B-20260914",
-    "safetyTagTarget": "e8b405a0ea6af8a9b5c0d4b558c5e7613426a8d3"
+    "head": "7c25776748b547fed28d847d9fb911a9cb59f7f2",
+    "safetyTag": "backup-pre-AN14B1-AN14A-20260914",
+    "safetyTagTarget": "7c25776748b547fed28d847d9fb911a9cb59f7f2"
   },
   "versions": {
-    "app": "2026.09.14-AN14A",
-    "engine": "AN14A",
+    "app": "2026.09.14-AN14B1",
+    "engine": "AN14B1",
     "db": 4,
     "schema": 4
   },
@@ -17,7 +17,7 @@
     "preflight": "PASS",
     "safetyTag": "PASS",
     "versionState": "PASS",
-    "captureSafety": "PASS",
+    "security": "PASS",
     "diffCheck": "PASS",
     "syntax": "PASS",
     "functional": "PASS",
@@ -26,16 +26,15 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34788225184,
-      "jobId": 103807518802,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, real index.html iframe integration, real analytics IndexedDB, synthetic browser File/DataTransfer capture, and 320px mobile check",
+      "runId": 34789682130,
+      "jobId": 103811474852,
       "coverage": [
-        "Today screen exposes a single report-capture entry with image/* and rear-camera capture hint",
-        "selected image is temporary browser preview only and capture review rejects embedded image bytes/base64/data URLs",
-        "AN14A rejects raw OCR text persistence and non-image capture inputs",
-        "capture.prepareReview produces review-only metadata requiring user review and explicit save",
-        "capture review creates no report and leaves all analytics stores byte-equivalent before/after",
-        "legacy localStorage is unchanged and capture modal clears its file input on close"
+        "OCR upload starts only from the explicit user OCR action",
+        "runtime adapter contract receives browser File without static endpoint or credential",
+        "structured OCR candidate normalization and report-type classification review",
+        "nested rawText/base64/Data URL-like unsafe OCR fields are rejected",
+        "OCR review creates no report and does not change analytics or legacy state",
+        "missing adapter and unsafe adapter responses fail closed"
       ]
     }
   },
@@ -43,6 +42,7 @@
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
     "AI_ROADMAP.md",
+    "OCR_ADAPTER.md",
     "analytics.css",
     "analytics.js",
     "index.html",
