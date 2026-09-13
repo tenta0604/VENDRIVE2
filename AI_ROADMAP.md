@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN14B1 — Secure OCR Adapter / Classification Review**
+- Latest completed phase: **AN14B2 — Reviewed OCR Candidate → Draft Report**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN14B2 — Reviewed OCR Candidate → Draft Report**
+- Next phase: **AN14B3 — Production OCR Provider / Real-paper Review UI Calibration**
 
 ## Completed
 
@@ -41,12 +41,13 @@
 - AN13B — Analysis UI Polish / Mobile / Empty-state Hardening
 - AN14A — Report Capture / Review Pipeline Foundation
 - AN14B1 — Secure OCR Adapter / Classification Review
+- AN14B2 — Reviewed OCR Candidate → Draft Report
 
 ## Next roadmap
 
 ### AN14 — Report Capture / OCR Integration
 
-- **AN14B2 — Reviewed OCR Candidate → Draft Report**
+- **AN14B3 — Production OCR Provider / Real-paper Review UI Calibration**
 
 ### Later major phases
 - **FINAL — Full Regression / Mobile / Backup / Release Gate**

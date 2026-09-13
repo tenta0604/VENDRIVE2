@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><title>AN14B2_RUNNING</title></head><body><pre id="r">AN14B2_RUNNING</pre><script src="../analytics.js"></script><script>
+(async()=>{const out=document.getElementById("r"),api=window.VENDRIVE2Analytics;function A(c,m){if(!c)throw new Error(m)}
+try{await api.ready();A(api.getHealth().engineVersion==="AN14B2","engine");
+const image={name:"x.jpg",mime:"image/jpeg",size:100,lastModified:1};
+const payload={previousClearAt:"2026-09-13T12:00:00+09:00",elapsedHours:24,totalQty:2,totalAmount:200,products:[{productCode:"P1",printedName:"P1",temperature:"COLD",column:1,price:100,salesQty:2}],soldOuts:[],specialCircumstance:null};
+const ocr={provider:"mock",requestId:"REQ1",detectedType:"sales",typeConfidence:.9,occurredAt:"2026-09-14T12:00:00+09:00",makerKey:"MK",vendorNumber:"1",machineId:"M1",candidatePayload:payload,warnings:[]};
+const review=await api.capture.prepareOcrReview({image,ocrResult:ocr});
+let blocked=false;try{await api.capture.createDraftFromReview({review,userApproved:false})}catch(e){blocked=true}A(blocked,"approval gate");
+const before=await api.exportSnapshot();
+const created=await api.capture.createDraftFromReview({review,userApproved:true});
+A(created.created===true&&created.confirmed===false&&created.inventoryMovementApplied===false,"result contract");
+A(created.report.status==="draft"&&created.report.source.method==="ocr"&&created.report.source.imageStored===false,"saved report");
+A(created.report.type==="sales"&&created.report.machineId==="M1","identity");
+A(!("payloadVersion" in created.report),"draft must not be payloadVersion 1");
+const reports=await api.data.reports.list();A(reports.length===1,"one report");
+const after=await api.exportSnapshot();
+for(const k of Object.keys(before.stores)){if(k==="reports")continue;A(JSON.stringify(before.stores[k])===JSON.stringify(after.stores[k]),"store changed "+k)}
+A(after.stores.reports.length===before.stores.reports.length+1,"report count");
+let confirmed=await api.data.reports.confirm(created.report.id);A(confirmed.confirmed===true,"existing confirm must work");
+// second candidate with mismatch should save as needs_review, not confirm
+const badPayload={...payload,totalQty:99};
+const badReview=await api.capture.prepareOcrReview({image,ocrResult:{...ocr,requestId:"REQ2",occurredAt:"2026-09-14T13:00:00+09:00",candidatePayload:badPayload}});
+const bad=await api.capture.createDraftFromReview({review:badReview,userApproved:true});A(bad.report.status==="needs_review"&&bad.confirmed===false,"mismatch status");
+const badConfirm=await api.data.reports.confirm(bad.report.id);A(badConfirm.confirmed===false&&badConfirm.report.status==="needs_review","mismatch must not confirm");
+let unsafe=false;const tampered=JSON.parse(JSON.stringify(review));tampered.ocr.rawTextStored=true;try{await api.capture.createDraftFromReview({review:tampered,userApproved:true})}catch(e){unsafe=true}A(unsafe,"unsafe retention accepted");
+out.textContent="AN14B2_PASS\n"+JSON.stringify({approvalGate:true,draftOnly:true,noInventoryMovement:true,revalidation:true,existingConfirmBoundary:true});document.title="AN14B2_PASS";
+}catch(e){out.textContent="AN14B2_FAIL\n"+String(e&&e.stack||e);document.title="AN14B2_FAIL"}})();
+</script></body></html>

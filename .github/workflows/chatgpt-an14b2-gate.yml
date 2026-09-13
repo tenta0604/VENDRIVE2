@@ -1,0 +1,37 @@
+name: AN14B2 temporary verification
+on:
+  push:
+    branches: [chatgpt/an14b2-draft-report]
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - shell: pwsh
+        run: |
+          $base='d369ee6617395a7f729560e15da6859b8f4d3092';$tag='backup-pre-AN14B2-AN14B1-20260914';git fetch origin main --tags
+          if((git rev-parse origin/main).Trim() -ne $base){throw 'main moved'}
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          if((git cat-file -t $tag).Trim() -ne 'tag' -or (git rev-parse "$tag^{}").Trim() -ne $base){throw 'tag mismatch'}
+      - shell: pwsh
+        run: |
+          $s=Get-Content '.ai/STATE.json' -Raw|ConvertFrom-Json;$v=Get-Content 'version.json' -Raw|ConvertFrom-Json;$a=Get-Content 'analytics.js' -Raw
+          if($s.completedPhase -ne 'AN14B2' -or $s.nextPhase -ne 'AN14B3' -or $s.dbVersion -ne 4 -or $s.schemaVersion -ne 4){throw 'state'}
+          if($v.version -ne '2026.09.14-AN14B2' -or $a -notmatch 'ENGINE_VERSION="AN14B2"'){throw 'version'}
+          if($a -notmatch 'userApproved must be true' -or $a -notmatch 'autoConfirm:false' -or $a -notmatch 'inventoryMovementApplied:false'){throw 'safety boundary'}
+      - shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          node --check analytics.js
+      - name: Real Edge
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop';$edge=@("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe","${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe")|?{Test-Path $_}|select -First 1
+          $port=8134;$server=Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try{Start-Sleep 1;$o=Join-Path $env:RUNNER_TEMP 'o.txt';$e=Join-Path $env:RUNNER_TEMP 'e.txt';$profile=Join-Path $env:RUNNER_TEMP ("an14b2-"+$env:GITHUB_RUN_ID)
+            $p=Start-Process $edge -ArgumentList @('--headless=new','--disable-gpu','--virtual-time-budget=30000',"--user-data-dir=$profile",'--dump-dom',"http://127.0.0.1:$port/tools/an14b2-test.html") -Wait -PassThru -RedirectStandardOutput $o -RedirectStandardError $e
+            $t=Get-Content $o -Raw;Write-Host $t;if($p.ExitCode -ne 0 -or $t -notmatch 'AN14B2_PASS'){if(Test-Path $e){Write-Host(Get-Content $e -Raw)};throw 'edge'}
+          }finally{if($server -and -not $server.HasExited){Stop-Process $server.Id -Force}}
