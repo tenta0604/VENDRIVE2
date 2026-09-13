@@ -46,6 +46,31 @@ jobs:
           }
           Write-Host "SAFETY_TAG_PASS tag=$tag target=$base"
 
+      - name: Version and state consistency gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expectedApp = '2026.09.14-AN8B'
+          $state = Get-Content '.ai/STATE.json' -Raw | ConvertFrom-Json
+          $version = Get-Content 'version.json' -Raw | ConvertFrom-Json
+          $index = Get-Content 'index.html' -Raw
+          $analytics = Get-Content 'analytics.js' -Raw
+          $roadmap = Get-Content 'AI_ROADMAP.md' -Raw
+          if ($state.completedPhase -ne 'AN8B' -or $state.nextPhase -ne 'AN8C') { throw 'STATE phase mismatch.' }
+          if ($state.appVersion -ne $expectedApp -or $state.engineVersion -ne 'AN8B' -or $state.dbVersion -ne 4 -or $state.schemaVersion -ne 4) { throw 'STATE version mismatch.' }
+          if ($version.version -ne $expectedApp) { throw 'version.json mismatch.' }
+          if ($index -notmatch "APP_VERSION='2026\.09\.14-AN8B'") { throw 'index APP_VERSION mismatch.' }
+          if ($analytics -notmatch 'ENGINE_VERSION="AN8B"') { throw 'analytics ENGINE_VERSION mismatch.' }
+          if ($roadmap -notmatch 'Latest completed phase: \*\*AN8B — YoY / Historical Comparison Foundation\*\*') { throw 'ROADMAP completed phase mismatch.' }
+          if ($roadmap -notmatch 'Next phase: \*\*AN8C — Sold-out-aware Demand Evidence / Confidence Layer\*\*') { throw 'ROADMAP next phase mismatch.' }
+          Write-Host "AN8B_VERSION_STATE_PASS"
+
+      - name: Diff check
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          Write-Host "AN8B_DIFF_CHECK_PASS"
+
       - name: JavaScript syntax gate
         shell: pwsh
         run: |
