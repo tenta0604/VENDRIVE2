@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN13B",
+  "phase": "AN14A",
   "status": "PASS",
   "base": {
-    "head": "6953321bd583096d6d87d483c20c15cdcf3cc562",
-    "safetyTag": "backup-pre-AN13B-AN13A-20260914",
-    "safetyTagTarget": "6953321bd583096d6d87d483c20c15cdcf3cc562"
+    "head": "e8b405a0ea6af8a9b5c0d4b558c5e7613426a8d3",
+    "safetyTag": "backup-pre-AN14A-AN13B-20260914",
+    "safetyTagTarget": "e8b405a0ea6af8a9b5c0d4b558c5e7613426a8d3"
   },
   "versions": {
-    "app": "2026.09.14-AN13B",
-    "engine": "AN13B",
+    "app": "2026.09.14-AN14A",
+    "engine": "AN14A",
     "db": 4,
     "schema": 4
   },
@@ -17,7 +17,7 @@
     "preflight": "PASS",
     "safetyTag": "PASS",
     "versionState": "PASS",
-    "uiContract": "PASS",
+    "captureSafety": "PASS",
     "diffCheck": "PASS",
     "syntax": "PASS",
     "functional": "PASS",
@@ -26,16 +26,16 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34787851317,
-      "jobId": 103806493046,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, real index.html iframe integration, 390px/320px mobile checks, partial API failure simulation, empty-state fixtures, long-name fixtures, and EOD failure retry simulation",
+      "runId": 34788225184,
+      "jobId": 103807518802,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, real index.html iframe integration, real analytics IndexedDB, synthetic browser File/DataTransfer capture, and 320px mobile check",
       "coverage": [
-        "analysis main/sub tabs retain usable touch targets and one-row layout on 390px and 320px widths",
-        "long machine/product names wrap safely without horizontal overflow",
-        "partial API failures preserve healthy analysis panels and show a retryable warning",
-        "sales, inventory, and efficiency empty states remain explicit and non-destructive",
-        "end-of-day loading failure shows an inline retry path",
-        "analysis UI remains read-only and does not mutate legacy localStorage state"
+        "Today screen exposes a single report-capture entry with image/* and rear-camera capture hint",
+        "selected image is temporary browser preview only and capture review rejects embedded image bytes/base64/data URLs",
+        "AN14A rejects raw OCR text persistence and non-image capture inputs",
+        "capture.prepareReview produces review-only metadata requiring user review and explicit save",
+        "capture review creates no report and leaves all analytics stores byte-equivalent before/after",
+        "legacy localStorage is unchanged and capture modal clears its file input on close"
       ]
     }
   },

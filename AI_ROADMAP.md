@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN13B — Analysis UI Polish / Mobile / Empty-state Hardening**
+- Latest completed phase: **AN14A — Report Capture / Review Pipeline Foundation**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN14 — Report Capture / OCR Integration**
+- Next phase: **AN14B — Secure OCR Adapter / Classification Integration**
 
 ## Completed
 
@@ -39,12 +39,13 @@
 - AN12 — Vehicle Inventory / End-of-day Loading Proposal
 - AN13A — Analysis UI Foundation
 - AN13B — Analysis UI Polish / Mobile / Empty-state Hardening
+- AN14A — Report Capture / Review Pipeline Foundation
 
 ## Next roadmap
 
-### Next major phase
+### AN14 — Report Capture / OCR Integration
 
-- **AN14 — Report Capture / OCR Integration**
+- **AN14B — Secure OCR Adapter / Classification Integration**
 
 ### Later major phases
 - **FINAL — Full Regression / Mobile / Backup / Release Gate**
