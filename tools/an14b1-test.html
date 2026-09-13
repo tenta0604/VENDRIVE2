@@ -1,0 +1,51 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>AN14B1_RUNNING</title></head><body>
+<pre id="result">AN14B1_RUNNING</pre><iframe id="app" style="width:390px;height:844px;border:0"></iframe>
+<script type="module">
+const result=document.getElementById("result"),frame=document.getElementById("app");
+const delay=ms=>new Promise(r=>setTimeout(r,ms));function assert(c,m){if(!c)throw new Error(m)}
+async function waitFor(fn,msg,t=10000){const s=Date.now();while(Date.now()-s<t){if(fn())return;await delay(50)}throw new Error(msg)}
+try{
+ frame.src="../index.html?an14b1=1";await new Promise((res,rej)=>{frame.onload=res;setTimeout(()=>rej(new Error("iframe timeout")),12000)});
+ const w=frame.contentWindow,d=w.document,api=w.VENDRIVE2Analytics;await api.ready();
+ assert(api.getHealth().engineVersion==="AN14B1","engine mismatch");
+ assert(typeof api.capture.normalizeOcrResult==="function"&&typeof api.capture.prepareOcrReview==="function","OCR APIs missing");
+ const payload={previousClearAt:"2026-09-13T12:00:00+09:00",elapsedHours:24,totalQty:2,totalAmount:200,products:[{productCode:"P1",printedName:"P1",temperature:"COLD",column:1,price:100,salesQty:2}],soldOuts:[],specialCircumstance:null};
+ const normalized=await api.capture.normalizeOcrResult({provider:"mock-secure-relay",requestId:"REQ1",detectedType:"sales",typeConfidence:.93,occurredAt:"2026-09-14T12:00:00+09:00",makerKey:"MK",vendorNumber:"1",machineId:"M1",candidatePayload:payload,warnings:[]});
+ assert(normalized.retention.imageStored===false&&normalized.retention.rawTextStored===false,"retention mismatch");
+ const review=await api.capture.prepareOcrReview({image:{name:"report.jpg",mime:"image/jpeg",size:100,lastModified:1},ocrResult:normalized});
+ assert(review.classification.effectiveType==="sales"&&review.candidateValidation.structureReady===true&&review.candidateValidation.readyToConfirm===true,"candidate validation mismatch");
+ let unsafe=false;try{await api.capture.normalizeOcrResult({provider:"x",requestId:"1",detectedType:"sales",rawText:"SECRET"})}catch(e){unsafe=true}assert(unsafe,"rawText was accepted");
+ unsafe=false;try{await api.capture.normalizeOcrResult({provider:"x",requestId:"1",candidatePayload:{nested:{dataUrl:"data:image/jpeg;base64,AA=="}}})}catch(e){unsafe=true}assert(unsafe,"nested data URL was accepted");
+
+ const before=await api.exportSnapshot(),legacy=w.localStorage.getItem("vendrive2_v7_data");
+ const input=d.getElementById("reportCaptureFile"),file=new w.File([new Uint8Array([1,2,3,4])],"ocr-paper.jpg",{type:"image/jpeg",lastModified:1});
+ const dt=new w.DataTransfer();dt.items.add(file);input.files=dt.files;input.dispatchEvent(new w.Event("change",{bubbles:true}));
+ await waitFor(()=>!d.getElementById("reportCaptureModal").classList.contains("hidden"),"modal not opened");
+ let calls=0,fileWasFile=false;
+ w.VENDRIVE2OCRAdapter={version:1,analyze:async req=>{calls++;fileWasFile=req.file instanceof w.File;return {provider:"mock-secure-relay",requestId:"REQ2",detectedType:"sales",typeConfidence:.93,occurredAt:"2026-09-14T12:00:00+09:00",makerKey:"MK",vendorNumber:"1",machineId:"M1",candidatePayload:payload,warnings:[]}}};
+ w.updateReportOcrAvailability();
+ assert(calls===0,"OCR uploaded before explicit action");
+ d.getElementById("runReportOcr").click();
+ await waitFor(()=>d.getElementById("reportOcrStatus").textContent.includes("候補を取得"),"OCR result not shown");
+ assert(calls===1&&fileWasFile,"adapter call contract mismatch");
+ assert(d.getElementById("reportCaptureType").value==="sales","detected type was not applied");
+ assert(d.getElementById("reportOcrResult").textContent.includes("93%"),"confidence missing");
+ d.getElementById("prepareReportCaptureReview").click();
+ await waitFor(()=>d.getElementById("reportCaptureReviewResult").textContent.includes("OCR"),"review not rendered");
+ assert((await api.data.reports.list()).length===0,"OCR review created report");
+ const after=await api.exportSnapshot();assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"OCR review mutated DB");assert(w.localStorage.getItem("vendrive2_v7_data")===legacy,"legacy changed");
+
+ // unsafe adapter response must be blocked
+ w.VENDRIVE2OCRAdapter={version:1,analyze:async()=>({provider:"bad",requestId:"BAD1",detectedType:"sales",rawText:"must not pass"})};
+ w.updateReportOcrAvailability();d.getElementById("runReportOcr").click();
+ await waitFor(()=>d.getElementById("reportOcrResult").textContent.includes("利用できません"),"unsafe response not blocked");
+ assert((await api.data.reports.list()).length===0,"unsafe OCR created report");
+
+ // no adapter: explicit action must not send
+ delete w.VENDRIVE2OCRAdapter;w.updateReportOcrAvailability();d.getElementById("runReportOcr").click();
+ assert(d.getElementById("reportOcrResult").textContent.includes("OCR接続待ち"),"missing adapter state wrong");
+
+ frame.style.width="320px";assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,"320px overflow");
+ result.textContent="AN14B1_PASS\n"+JSON.stringify({explicitOnly:true,structuredOnly:true,unsafeBlocked:true,reviewOnly:true,dbUnchanged:true,mobile320:true});document.title="AN14B1_PASS";
+}catch(e){result.textContent="AN14B1_FAIL\n"+String(e&&e.stack||e);document.title="AN14B1_FAIL"}
+</script></body></html>
