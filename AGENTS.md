@@ -10,6 +10,16 @@
 - Avoid large refactors unless a phase explicitly requires one.
 - Never modify the old `tenta0604/VENDRIVE` repository.
 
+## Execution ownership and tool routing
+
+- ChatGPT is the default lead and executor for VENDRIVE2 development. Prefer direct execution through ChatGPT's connected GitHub capabilities, GitHub Actions, and other available tools when they can complete the work safely at comparable or better quality.
+- Do not ask the user to copy prompts, patches, logs, or handoff messages to Codex as the normal development workflow. Human relay between ChatGPT and Codex is not a standard step.
+- Before assigning any development step to the user, first determine whether ChatGPT, GitHub, GitHub Actions, another connected tool, or an available automation can perform it directly.
+- Ask the user to act only when explicit consent, credentials/security action, production or user-data risk, materially different product/UX judgment, factual input that cannot be derived safely, or genuinely local/physical interaction is required.
+- Escalate to Codex only when the selected phase materially benefits from capabilities unavailable or impractical in the direct ChatGPT workflow, such as substantial local-only execution, very large multi-file migration, or a difficult local build/debug loop.
+- If Codex is needed, explain the specific reason first and minimize the scope of the handoff. Do not silently revert to the old `ChatGPT -> user copy/paste -> Codex -> user copy/paste -> ChatGPT` workflow.
+- Codex availability or usage limits must not block work that ChatGPT and connected tools can safely complete themselves.
+
 ## Development philosophy
 
 - Keep Analytics layers separate: `RAW` → `COMPUTED` → `RECOMMENDATION`.
