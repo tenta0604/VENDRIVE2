@@ -5,7 +5,13 @@ When the user says 「次進めて」, execute this workflow for exactly one pha
 1. Read `AGENTS.md` completely.
 2. Read `AI_ROADMAP.md` completely.
 3. Read `.ai/STATE.json` completely and validate it as JSON.
-4. Run Git preflight after fetching origin. Verify root and production branch, require a clean tree and `main...origin/main` = `0 0`, and confirm that `STATE.stableCommit` matches the actual stable `main` baseline. On an unexpected baseline, do not repair automatically; `SAFE STOP`.
+4. Fetch origin, then run Git and state preflight:
+   - verify the repository root and require branch `main`;
+   - require a clean working tree;
+   - require `HEAD` to equal `origin/main` and `main...origin/main` = `0 0`;
+   - require STATE `appVersion`, `engineVersion`, `dbVersion`, and `schemaVersion` to match the production code;
+   - require ROADMAP completed/next phase to match STATE `completedPhase` / `nextPhase`.
+   On any mismatch, do not repair automatically; `SAFE STOP`.
 5. Identify `STATE.nextPhase`.
 6. Read that phase's purpose and boundary from the roadmap, inspect the current code, and turn the boundary into a necessary and sufficient implementation specification. Do not implement later phases.
 7. Resolve ambiguity autonomously when existing design and safety principles determine a reasonable answer.
@@ -20,7 +26,7 @@ When the user says 「次進めて」, execute this workflow for exactly one pha
 10. Run every required gate, including syntax, diff-check, build, functional tests, and real Edge verification when browser/IndexedDB behavior requires it.
 11. Commit and push only if all gates pass. Never commit a failing or unresolved phase.
 12. In the same successful phase commit:
-    - update `.ai/STATE.json` fields `completedPhase`, `nextPhase`, `stableCommit`, versions, and `status` to the new state;
+    - update `.ai/STATE.json` fields `completedPhase`, `nextPhase`, versions, and `status` to the new state;
     - move the completed roadmap phase into the completed section and identify the next phase.
 13. On `SAFE STOP`, do not advance state or mark the phase completed. Do not commit failure state to make progress appear complete.
 14. Return a concise PASS or SAFE STOP report and stop. Wait for the next user instruction.

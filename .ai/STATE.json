@@ -1,10 +1,9 @@
 {
-  "workflowVersion": 1,
+  "workflowVersion": 2,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN8A1",
   "nextPhase": "AN8A2",
-  "stableCommit": "e30008add96b0194592534edd6a52171ede4f93f",
   "appVersion": "2026.09.13-AN8A1",
   "engineVersion": "AN8A1",
   "dbVersion": 4,

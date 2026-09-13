@@ -3,7 +3,7 @@
 ## Current state
 
 - Latest completed phase: **AN8A1 — Sales Observation Analysis Foundation**
-- Current stable commit: `e30008add96b0194592534edd6a52171ede4f93f`
+- Git revision authority: synchronized `HEAD` / `origin/main`
 - Next phase: **AN8A2 — Observation Window Aggregation Foundation**
 
 ## Completed

@@ -53,6 +53,9 @@ Before editing, verify the repository root, `main` branch, `HEAD`, `origin/main`
 - Change `APP_VERSION` or `ENGINE_VERSION` only when the phase explicitly requires it.
 - Change `DB_VERSION` or `SCHEMA_VERSION` only for a phase that requires a schema migration.
 - Do not rename or remove existing public APIs without an explicit breaking-change specification.
+- Do not store the current commit SHA inside `.ai/STATE.json` or another state file contained by that commit.
+- The current synchronized `HEAD` / `origin/main` pair is authoritative for Git revision identity.
+- Track phase state with `completedPhase`, `nextPhase`, application/engine/database/schema versions, and status.
 
 ## Result reporting
 
