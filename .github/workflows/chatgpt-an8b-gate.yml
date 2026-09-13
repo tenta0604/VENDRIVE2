@@ -90,7 +90,20 @@ jobs:
           $port = 8123
           $server = Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
           try {
-            Start-Sleep -Seconds 2
+            $ready = $false
+            for ($attempt = 1; $attempt -le 20; $attempt++) {
+              try {
+                $response = Invoke-WebRequest -Uri "http://127.0.0.1:$port/tools/an8b-browser-test.html" -UseBasicParsing -TimeoutSec 2
+                if ($response.StatusCode -eq 200) {
+                  $ready = $true
+                  break
+                }
+              }
+              catch {
+                Start-Sleep -Milliseconds 500
+              }
+            }
+            if (-not $ready) { throw 'Local AN8B test server did not become ready.' }
             $profile = Join-Path $env:RUNNER_TEMP ("vendrive-an8b-edge-" + $env:GITHUB_RUN_ID)
             $stdout = Join-Path $env:RUNNER_TEMP 'an8b-edge-stdout.txt'
             $stderr = Join-Path $env:RUNNER_TEMP 'an8b-edge-stderr.txt'
