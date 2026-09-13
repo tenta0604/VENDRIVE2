@@ -33,7 +33,7 @@
 
 ### AN8 — Sales / Demand Analysis
 
-- **AN8A2 — Observation Window Aggregation Foundation**  
+- **AN8A2 — Observation Window Aggregation Foundation**
   Build the foundation for 3 / 5 / 10-observation window aggregation from confirmed sales observations. Do not add forecasting, recommendations, or UI.
 - **AN8A3 — Previous-period Comparison Foundation**
 - **AN8B — YoY / Historical Comparison Foundation**
