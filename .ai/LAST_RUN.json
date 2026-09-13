@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN11B",
+  "phase": "AN12",
   "status": "PASS",
   "base": {
-    "head": "bc381b62a180c653929dbbdcd1566abc116a52b5",
-    "safetyTag": "backup-pre-AN11B-AN11A-20260914",
-    "safetyTagTarget": "bc381b62a180c653929dbbdcd1566abc116a52b5"
+    "head": "1978de7d2d0e0555eedd53c5828e3bf655e072c3",
+    "safetyTag": "backup-pre-AN12-AN11B-20260914",
+    "safetyTagTarget": "1978de7d2d0e0555eedd53c5828e3bf655e072c3"
   },
   "versions": {
-    "app": "2026.09.14-AN11B",
-    "engine": "AN11B",
+    "app": "2026.09.14-AN12",
+    "engine": "AN12",
     "db": 4,
     "schema": 4
   },
@@ -25,17 +25,17 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34785952190,
-      "jobId": 103801347387,
+      "runId": 34786581428,
+      "jobId": 103803058226,
       "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, fake host planning bridge, IndexedDB inventory fixtures, and legacy localStorage sentinels",
       "coverage": [
-        "planned-visit machine filtering and host visit sequence preservation",
-        "machine/product aggregation across multiple forecast series",
-        "available, empty, unknown, and untracked vehicle stock handling",
-        "sold-out lower-bound and limited-confidence demand propagation",
-        "insufficient-history demand data handling",
-        "explicit null bring quantity when machine stock/capacity evidence is unavailable",
-        "filters, defensive copies, no legacy or analytics writes, and AN11A regression guard"
+        "explicit business-ended gate before EOD proposal generation",
+        "next-workday service-demand estimate from forecast units/day multiplied by calendar days since last visit",
+        "0.25-day default reserve with configurable 0..1 reserveDays and ceil target rounding",
+        "vehicle stock subtraction and case-plus-loose conversion when evidence is complete",
+        "lower-bound demand produces minimum quantities only and never a formal recommended load",
+        "unknown demand, missing visit history, unknown/untracked vehicle stock, and uncovered visits force review paths",
+        "explicit machine-on-hand/capacity-not-considered policy, defensive copies, no legacy or analytics writes, and AN11B regression guard"
       ]
     }
   },

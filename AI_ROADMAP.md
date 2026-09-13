@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN11B — Machine Bring-from-vehicle Recommendation Foundation**
+- Latest completed phase: **AN12 — Vehicle Inventory / End-of-day Loading Proposal**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN12 — Vehicle Inventory / End-of-day Loading Proposal**
+- Next phase: **AN13 — Analysis UI**
 
 ## Completed
 
@@ -36,15 +36,15 @@
 - AN10 — Recommendation Engine Foundation
 - AN11A — Visit Planning / Route Constraint Foundation
 - AN11B — Machine Bring-from-vehicle Recommendation Foundation
+- AN12 — Vehicle Inventory / End-of-day Loading Proposal
 
 ## Next roadmap
 
 ### Next major phase
 
-- **AN12 — Vehicle Inventory / End-of-day Loading Proposal**
+- **AN13 — Analysis UI**
 
 ### Later major phases
-- **AN13 — Analysis UI**
 - **AN14 — Report Capture / OCR Integration**
 - **FINAL — Full Regression / Mobile / Backup / Release Gate**
 
