@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN8A1 — Sales Observation Analysis Foundation**
+- Latest completed phase: **AN8A2 — Observation Window Aggregation Foundation**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN8A2 — Observation Window Aggregation Foundation**
+- Next phase: **AN8A3 — Previous-period Comparison Foundation**
 
 ## Completed
 
@@ -28,13 +28,12 @@
 - AN7B2
 - AN7 browser verification
 - AN8A1 — Sales Observation Analysis Foundation
+- AN8A2 — Observation Window Aggregation Foundation
 
 ## Next roadmap
 
 ### AN8 — Sales / Demand Analysis
 
-- **AN8A2 — Observation Window Aggregation Foundation**
-  Build the foundation for 3 / 5 / 10-observation window aggregation from confirmed sales observations. Do not add forecasting, recommendations, or UI.
 - **AN8A3 — Previous-period Comparison Foundation**
 - **AN8B — YoY / Historical Comparison Foundation**
 - **AN8C — Sold-out-aware Demand Evidence / Confidence Layer**
