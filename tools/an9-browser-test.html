@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AN9_BROWSER_RUNNING</title></head>
+<body>
+<pre id="result">AN9_BROWSER_RUNNING</pre>
+<script src="../analytics.js"></script>
+<script type="module">
+const result=document.getElementById("result");
+const api=window.VENDRIVE2Analytics;
+function assert(condition,message){if(!condition)throw new Error(message)}
+function day(year,month,day,hour=0){return `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}T${String(hour).padStart(2,"0")}:00:00+09:00`}
+function payload(productCode,observedAt,qty,options={}){
+  const zero=options.zeroDuration===true;
+  const previousClearAt=zero?observedAt:new Date(Date.parse(observedAt)-86400000).toISOString();
+  return {
+    previousClearAt,
+    elapsedHours:zero?0:24,
+    totalQty:qty,
+    totalAmount:qty*100,
+    products:[{productCode,printedName:productCode,temperature:options.temperature??"COLD",column:options.column??1,price:100,salesQty:qty}],
+    soldOuts:options.soldOuts||[],
+    specialCircumstance:options.specialCircumstance||null
+  };
+}
+async function addReport(id,productCode,observedAt,qty,options={}){
+  const current=payload(productCode,observedAt,qty,options);
+  await api.data.reports.create({
+    id,type:"sales",machineId:"M1",makerKey:"MK",vendorNumber:"1",occurredAt:observedAt,
+    original:current,current,source:{method:"manual",imageStored:false}
+  });
+  const confirmed=await api.data.reports.confirm(id);
+  assert(confirmed.confirmed,"Report did not confirm: "+id);
+}
+try{
+  await api.ready();
+  const health=api.getHealth();
+  assert(health.engineVersion==="AN9","ENGINE_VERSION mismatch");
+  assert(health.dbVersion===4&&health.schemaVersion===4,"DB/schema changed unexpectedly");
+
+  for(let i=1;i<=10;i++)await addReport("p1h"+i,"P1",day(2025,9,i),5,{column:1});
+  for(let i=1;i<=10;i++)await addReport("p1c"+i,"P1",day(2026,9,i),i<=5?4:10,{column:1});
+
+  for(let i=1;i<=10;i++)await addReport("p2"+i,"P2",day(2026,8,i),8,{
+    column:2,
+    soldOuts:i===10?[{productCode:"P2",column:2,temperature:"COLD",soldOutElapsedHours:12}]:[]
+  });
+
+  for(let i=1;i<=10;i++)await addReport("p3"+i,"P3",day(2026,7,i),6,{
+    column:3,temperature:"HOT",
+    specialCircumstance:i===10?{code:"event",note:"festival"}:null
+  });
+
+  for(let i=1;i<=2;i++)await addReport("p4"+i,"P4",day(2026,6,i),3,{column:4});
+  for(let i=1;i<=3;i++)await addReport("p5"+i,"P5",day(2026,5,i,6),0,{column:5,temperature:null,zeroDuration:true});
+
+  const before=await api.exportSnapshot();
+  const forecasts=await api.analysis.sales.listForecasts({machineId:"M1",makerKey:"MK",vendorNumber:"1"});
+  const after=await api.exportSnapshot();
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"Forecast API mutated analytics stores.");
+
+  const p1=forecasts.find(x=>x.productCode==="P1");
+  const p2=forecasts.find(x=>x.productCode==="P2");
+  const p3=forecasts.find(x=>x.productCode==="P3");
+  const p4=forecasts.find(x=>x.productCode==="P4");
+  const p5=forecasts.find(x=>x.productCode==="P5");
+  assert(p1&&p2&&p3&&p4&&p5,"Expected forecast rows missing.");
+
+  assert(p1.forecastKnown===true,"P1 forecast should be known.");
+  assert(Math.abs(p1.forecastUnitsPerDay-9.4)<1e-9,"P1 weighted units/day mismatch: "+p1.forecastUnitsPerDay);
+  assert(Math.abs(p1.forecastYenPerDay-940)<1e-9,"P1 weighted yen/day mismatch.");
+  assert(p1.forecastInterpretation==="recent_weighted_point_baseline"&&p1.lowerBound===false,"P1 interpretation mismatch.");
+  assert(p1.confidence.level==="high"&&p1.confidence.reasons.length===0,"P1 confidence mismatch.");
+  assert(p1.components.length===3,"P1 should expose 3/5/10 components.");
+  const weights=Object.fromEntries(p1.components.map(x=>[x.windowSize,x.weight]));
+  assert(Math.abs(weights[3]-.5)<1e-12&&Math.abs(weights[5]-.3)<1e-12&&Math.abs(weights[10]-.2)<1e-12,"P1 component weights mismatch.");
+  assert(p1.context.historical.available===true&&p1.context.historical.calendarMatch==="exact_date","P1 historical context missing.");
+  assert(p1.context.historical.historicalObservedUnitsPerDay===5&&p1.context.historical.currentObservedUnitsPerDay===10,"P1 YoY context rates mismatch.");
+  assert(p1.historicalAdjustmentApplied===false,"YoY must not be silently blended into v1 forecast.");
+  assert(Math.abs(p1.forecastUnitsPerDay-9.4)<1e-9,"Historical context unexpectedly changed forecast.");
+
+  assert(p2.forecastKnown===true&&p2.forecastUnitsPerDay===8,"P2 forecast rate mismatch.");
+  assert(p2.forecastInterpretation==="recent_weighted_lower_bound"&&p2.lowerBound===true,"P2 sold-out forecast must be lower-bound.");
+  assert(p2.confidence.level==="limited"&&p2.confidence.reasons.includes("sold_out_censored"),"P2 censoring confidence mismatch.");
+
+  assert(p3.forecastKnown===true&&p3.forecastUnitsPerDay===6&&p3.lowerBound===false,"P3 forecast mismatch.");
+  assert(p3.confidence.level==="limited"&&p3.confidence.reasons.includes("special_circumstance"),"P3 special circumstance qualifier missing.");
+
+  assert(p4.forecastKnown===false&&p4.forecastUnitsPerDay===null&&p4.forecastInterpretation==="unknown","P4 insufficient-history forecast mismatch.");
+  assert(p4.confidence.level==="unknown"&&p4.confidence.reasons.includes("insufficient_history"),"P4 insufficient-history reason missing.");
+
+  assert(p5.forecastKnown===false&&p5.forecastUnitsPerDay===null,"P5 zero-duration forecast must be unknown.");
+  assert(p5.confidence.reasons.includes("rate_unknown"),"P5 rate_unknown reason missing.");
+
+  ["estimatedDemand","estimatedLostUnits","lostUnits","lostRevenue","weatherAdjustment"].forEach(key=>{
+    assert(!(key in p2),"AN9 must not invent unsupported forecast fields: "+key);
+  });
+
+  const filtered=await api.analysis.sales.listForecasts({machineId:"M1",makerKey:"MK",vendorNumber:"1",productCode:"P1"});
+  assert(filtered.length===1&&filtered[0].productCode==="P1","Forecast product filter mismatch.");
+  filtered[0].confidence.level="tampered";
+  filtered[0].components[0].weight=99;
+  const reread=await api.analysis.sales.listForecasts({machineId:"M1",makerKey:"MK",vendorNumber:"1",productCode:"P1"});
+  assert(reread[0].confidence.level==="high"&&reread[0].components[0].weight!==99,"Forecast results are not defensive copies.");
+
+  assert(typeof api.analysis.sales.listObservations==="function","AN8A1 API regressed.");
+  assert(typeof api.analysis.sales.listObservationWindows==="function","AN8A2 API regressed.");
+  assert(typeof api.analysis.sales.listPreviousPeriodComparisons==="function","AN8A3 API regressed.");
+  assert(typeof api.analysis.sales.listHistoricalComparisons==="function","AN8B API regressed.");
+  assert(typeof api.analysis.sales.listDemandEvidence==="function","AN8C API regressed.");
+
+  result.textContent="AN9_BROWSER_PASS\n"+JSON.stringify({
+    p1:{forecastUnitsPerDay:p1.forecastUnitsPerDay,forecastYenPerDay:p1.forecastYenPerDay,weights:p1.components.map(x=>({size:x.windowSize,weight:x.weight})),confidence:p1.confidence,historical:p1.context.historical},
+    p2:{forecastUnitsPerDay:p2.forecastUnitsPerDay,interpretation:p2.forecastInterpretation,lowerBound:p2.lowerBound,confidence:p2.confidence},
+    p4:{known:p4.forecastKnown,confidence:p4.confidence},
+    p5:{known:p5.forecastKnown,confidence:p5.confidence}
+  });
+  document.title="AN9_BROWSER_PASS";
+  document.documentElement.dataset.test="pass";
+}catch(error){
+  result.textContent="AN9_BROWSER_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN9_BROWSER_FAIL";
+  document.documentElement.dataset.test="fail";
+}
+</script>
+</body>
+</html>
