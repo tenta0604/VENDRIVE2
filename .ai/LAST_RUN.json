@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN8C",
+  "phase": "AN9",
   "status": "PASS",
   "base": {
-    "head": "40b5a1c2ba8960014a54f4d1c11fa9454de5da4a",
-    "safetyTag": "backup-pre-AN8C-AN8B-20260914",
-    "safetyTagTarget": "40b5a1c2ba8960014a54f4d1c11fa9454de5da4a"
+    "head": "adb7ec72ecf4e618e4616859037f45782c36c2ab",
+    "safetyTag": "backup-pre-AN9-AN8C-20260914",
+    "safetyTagTarget": "adb7ec72ecf4e618e4616859037f45782c36c2ab"
   },
   "versions": {
-    "app": "2026.09.14-AN8C",
-    "engine": "AN8C",
+    "app": "2026.09.14-AN9",
+    "engine": "AN9",
     "db": 4,
     "schema": 4
   },
@@ -25,14 +25,16 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34771891317,
-      "jobId": 103762867800,
+      "runId": 34784556794,
+      "jobId": 103797415373,
       "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, and IndexedDB test fixtures",
       "coverage": [
-        "clean uncensored demand evidence classified as observed_rate with high confidence",
-        "exact sold-out matching classified as censored_lower_bound without lost-demand estimation",
-        "special-circumstance confidence qualification and zero-duration unknown-rate handling",
-        "read-only stores, defensive copies, filters, and AN8A2/A3/B API regression guards"
+        "transparent recent 3/5/10 weighted baseline with normalized component weights",
+        "sold-out-aware lower-bound forecast without lost-demand estimation",
+        "insufficient-history and zero-duration unknown forecasts",
+        "YoY context retained without silent forecast adjustment",
+        "stale historical comparison excluded when it does not match the latest forecast asOf",
+        "read-only stores, defensive copies, filters, and AN8A1 through AN8C API regression guards"
       ]
     }
   },
