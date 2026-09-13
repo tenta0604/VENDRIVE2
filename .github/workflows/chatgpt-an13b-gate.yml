@@ -1,0 +1,109 @@
+name: AN13B temporary verification
+
+on:
+  push:
+    branches:
+      - chatgpt/an13b-analysis-ui-polish
+
+permissions:
+  contents: read
+
+jobs:
+  verify-an13b:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify baseline and immutable safety tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $base='6953321bd583096d6d87d483c20c15cdcf3cc562'
+          $tag='backup-pre-AN13B-AN13A-20260914'
+          git fetch origin main --tags
+          if((git rev-parse origin/main).Trim() -ne $base){throw 'origin/main moved from AN13B base.'}
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          if((git cat-file -t $tag).Trim() -ne 'tag'){throw 'Safety ref is not annotated.'}
+          if((git rev-parse "$tag^{}").Trim() -ne $base){throw 'Safety tag target mismatch.'}
+          Write-Host 'AN13B_SAFETY_PASS'
+      - name: Version and state gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $state=Get-Content '.ai/STATE.json' -Raw | ConvertFrom-Json
+          $version=Get-Content 'version.json' -Raw | ConvertFrom-Json
+          $index=Get-Content 'index.html' -Raw
+          $analytics=Get-Content 'analytics.js' -Raw
+          $roadmap=Get-Content 'AI_ROADMAP.md' -Raw
+          if($state.completedPhase -ne 'AN13B' -or $state.nextPhase -ne 'AN14' -or $state.status -ne 'ready'){throw 'STATE phase mismatch.'}
+          if($state.appVersion -ne '2026.09.14-AN13B' -or $state.engineVersion -ne 'AN13B' -or $state.dbVersion -ne 4 -or $state.schemaVersion -ne 4){throw 'STATE version mismatch.'}
+          if($version.version -ne '2026.09.14-AN13B'){throw 'version mismatch.'}
+          if($index -notmatch "APP_VERSION='2026\.09\.14-AN13B'"){throw 'APP_VERSION mismatch.'}
+          if($analytics -notmatch 'ENGINE_VERSION="AN13B"'){throw 'ENGINE_VERSION mismatch.'}
+          if($roadmap -notmatch 'Latest completed phase: \*\*AN13B — Analysis UI Polish / Mobile / Empty-state Hardening\*\*'){throw 'ROADMAP completed mismatch.'}
+          if($roadmap -notmatch 'Next phase: \*\*AN14 — Report Capture / OCR Integration\*\*'){throw 'ROADMAP next mismatch.'}
+          Write-Host 'AN13B_VERSION_STATE_PASS'
+      - name: Static UI hardening gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $index=Get-Content 'index.html' -Raw
+          $css=Get-Content 'analytics.css' -Raw
+          foreach($token in @('analysisSettled','analysisPartialWarning','data-analysis-retry','analysisEodRetry')){
+            if($index -notmatch $token){throw "Missing UI hardening token: $token"}
+          }
+          if($css -notmatch 'min-height:44px'){throw '44px touch targets missing.'}
+          if($css -notmatch '-webkit-line-clamp:2'){throw 'Long-name clamp missing.'}
+          Write-Host 'AN13B_UI_STATIC_PASS'
+      - name: Diff check
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          Write-Host 'AN13B_DIFF_PASS'
+      - name: JavaScript syntax gates
+        shell: pwsh
+        run: |
+          node --check analytics.js
+          @'
+          import re, pathlib
+          text=pathlib.Path("index.html").read_text(encoding="utf-8")
+          scripts=[]
+          for m in re.finditer(r"<script([^>]*)>(.*?)</script>", text, re.S|re.I):
+              if "src=" not in m.group(1).lower() and m.group(2).strip():
+                  scripts.append(m.group(2))
+          pathlib.Path("index-inline-check.js").write_text("\n".join(scripts),encoding="utf-8")
+          '@ | python -
+          node --check index-inline-check.js
+          Remove-Item index-inline-check.js
+          Write-Host 'AN13B_SYNTAX_PASS'
+      - name: Real Edge UI hardening gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $edgeCandidates=@("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe","${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe")
+          $edge=$edgeCandidates|Where-Object{Test-Path $_}|Select-Object -First 1
+          if(-not $edge){throw 'Microsoft Edge not found.'}
+          $port=8131
+          $server=Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try{
+            $ready=$false
+            for($attempt=1;$attempt -le 20;$attempt++){
+              try{$response=Invoke-WebRequest -Uri "http://127.0.0.1:$port/tools/an13b-ui-test.html" -UseBasicParsing -TimeoutSec 2;if($response.StatusCode -eq 200){$ready=$true;break}}catch{Start-Sleep -Milliseconds 500}
+            }
+            if(-not $ready){throw 'AN13B test server not ready.'}
+            $profile=Join-Path $env:RUNNER_TEMP ("vendrive-an13b-edge-"+$env:GITHUB_RUN_ID)
+            $stdout=Join-Path $env:RUNNER_TEMP 'an13b-edge-stdout.txt'
+            $stderr=Join-Path $env:RUNNER_TEMP 'an13b-edge-stderr.txt'
+            $args=@('--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check','--window-size=430,980','--virtual-time-budget=45000',"--user-data-dir=$profile",'--dump-dom',"http://127.0.0.1:$port/tools/an13b-ui-test.html")
+            $p=Start-Process -FilePath $edge -ArgumentList $args -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            $text=if(Test-Path $stdout){Get-Content -Raw $stdout}else{''}
+            $err=if(Test-Path $stderr){Get-Content -Raw $stderr}else{''}
+            Write-Host $text
+            if($err){Write-Host 'EDGE_STDERR';Write-Host $err}
+            if($p.ExitCode -ne 0){throw "Edge exited with $($p.ExitCode)"}
+            if($text -notmatch 'AN13B_UI_PASS'){throw 'AN13B_UI_PASS token not found.'}
+            Write-Host 'AN13B_REAL_EDGE_PASS'
+          }finally{if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}}

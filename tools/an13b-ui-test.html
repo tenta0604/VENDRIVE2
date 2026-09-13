@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><title>AN13B_UI_RUNNING</title></head>
+<body>
+<pre id="result">AN13B_UI_RUNNING</pre>
+<iframe id="app" style="width:390px;height:844px;border:0;display:block"></iframe>
+<script type="module">
+const result=document.getElementById("result"),frame=document.getElementById("app");
+function assert(condition,message){if(!condition)throw new Error(message)}
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function waitFor(test,message,timeout=8000){const start=Date.now();while(Date.now()-start<timeout){if(test())return;await delay(50)}throw new Error(message)}
+const longName="とても長い自販機名称テスト株式会社第一営業所正面玄関横休憩スペース自動販売機";
+const state={mode:"normal",eodFail:false};
+const stub={
+  ready:()=>Promise.resolve({engineVersion:"AN13B",dbVersion:4,schemaVersion:4}),
+  analysis:{
+    recommendations:{list:()=>state.mode==="partial"?Promise.reject(new Error("recommendations unavailable")):state.mode==="empty"?Promise.resolve([]):Promise.resolve([{recommendationId:"R1",action:"review_stock_capacity",priority:"high",subject:{machineId:"M1",name:longName,productCode:"P1"},rationaleCodes:["sold_out_lower_bound"]}])},
+    sales:{listForecasts:()=>state.mode==="empty"?Promise.resolve([]):Promise.resolve([{forecastId:"F1",machineId:longName,productCode:"SUPER-LONG-PRODUCT-CODE-1234567890",forecastKnown:true,forecastUnitsPerDay:8.5,lowerBound:true,method:"recent_weighted_baseline_v1",confidence:{level:"limited",reasons:["sold_out_censored"]}}])},
+    planning:{
+      listVisitRecommendations:({horizon})=>state.mode==="empty"?Promise.resolve([]):Promise.resolve([{recommendationId:"V-"+horizon,priority:"medium",subject:{machineId:"M1",name:longName},schedule:{date:"2026-09-15",manual:true,timeCondition:null},route:{sequence:1}}]),
+      listBringFromVehicleRecommendations:()=>state.mode==="empty"?Promise.resolve([]):Promise.resolve([{recommendationId:"B1",action:"bring_candidate",priority:"medium",subject:{machineId:"M1",machineName:longName,productCode:"VERY-LONG-PRODUCT-NAME-ABCDEFGHIJK"},demand:{forecastKnown:true,forecastUnitsPerDay:6.2},vehicleStock:{known:true,availableUnits:12,availability:"available"}}]),
+      getEndOfDayLoadingProposal:()=>state.eodFail?Promise.reject(new Error("eod unavailable")):Promise.resolve({target:{date:"2026-09-15"},coverage:{requiresReview:false},items:[]})
+    }
+  },
+  data:{
+    inventory:{listStock:()=>state.mode==="empty"?Promise.resolve([]):Promise.resolve([{productId:'["MK","P1"]',productCode:"P1",known:true,quantity:12,confidence:"confirmed",caseDisplay:{cases:0,loose:12,caseQuantity:24},anomalies:[]}])},
+    products:{list:()=>Promise.resolve([{id:'["MK","P1"]',productCode:"P1",displayName:longName+" 商品名"}])}
+  }
+};
+try{
+  frame.src="../index.html?an13b-ui-test=1";
+  await new Promise((resolve,reject)=>{frame.onload=resolve;setTimeout(()=>reject(new Error("index iframe load timeout")),12000)});
+  const w=frame.contentWindow,d=w.document;
+  const beforeLegacy=w.localStorage.getItem("vendrive2_v7_data");
+  const beforeDay=w.localStorage.getItem("vendrive2_last_day");
+  w.VENDRIVE2Analytics=stub;
+  const analysisTab=[...d.querySelectorAll(".tabs button")].find(x=>x.dataset.page==="analysisPage");
+  analysisTab.click();
+  await waitFor(()=>d.getElementById("analysisStatus").textContent.includes("読み取り専用"),"Normal analysis did not render.");
+
+  function assertMobile(width){
+    frame.style.width=width+"px";
+    const tops=[...d.querySelectorAll(".tabs button")].map(x=>Math.round(x.getBoundingClientRect().top));
+    assert(new Set(tops).size===1,"Main tabs wrapped at "+width);
+    [...d.querySelectorAll(".tabs button,#analysisPage [data-analysis-section],#analysisEodButton")].forEach(el=>assert(el.getBoundingClientRect().height>=40,"Tap target too short at "+width+": "+el.textContent));
+    assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,"Horizontal overflow at "+width);
+  }
+  assertMobile(390);
+  assertMobile(320);
+  const longCard=d.querySelector(".analysisCardTop b");
+  assert(longCard&&longCard.getBoundingClientRect().width>0,"Long-name card missing.");
+  assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,"Long name caused overflow.");
+
+  state.mode="partial";
+  w.analysisSetSection("proposals");
+  await waitFor(()=>d.getElementById("analysisStatus").textContent.includes("一部のデータ"),"Partial failure status missing.");
+  assert(d.getElementById("analysisBody").textContent.includes("一部の分析データを取得できませんでした"),"Partial warning missing.");
+  assert(d.getElementById("analysisBody").textContent.includes("次の出勤日の訪問"),"Healthy visit data disappeared during partial failure.");
+  assert(d.querySelector("[data-analysis-retry]"),"Partial retry button missing.");
+
+  state.mode="empty";
+  w.analysisSetSection("sales");
+  await waitFor(()=>d.getElementById("analysisBody").textContent.includes("販売データがありません"),"Sales empty state missing.");
+  w.analysisSetSection("inventory");
+  await waitFor(()=>d.getElementById("analysisBody").textContent.includes("車載在庫は未登録です"),"Inventory empty state missing.");
+  w.analysisSetSection("efficiency");
+  await waitFor(()=>d.getElementById("analysisBody").textContent.includes("本日の訪問はありません"),"Efficiency empty state missing.");
+
+  state.mode="normal";
+  w.analysisSetSection("proposals");
+  await waitFor(()=>d.getElementById("analysisEodButton"),"EOD button missing after recovery.");
+  state.eodFail=true;
+  d.getElementById("analysisEodButton").click();
+  await waitFor(()=>d.getElementById("analysisEodResult").textContent.includes("もう一度試す"),"EOD retry UI missing.");
+
+  assert(w.localStorage.getItem("vendrive2_v7_data")===beforeLegacy,"Analysis polish changed legacy state.");
+  assert(w.localStorage.getItem("vendrive2_last_day")===beforeDay,"Analysis polish changed legacy day state.");
+
+  result.textContent="AN13B_UI_PASS\n"+JSON.stringify({mobile:[390,320],partialRecovery:true,emptyStates:true,longNames:true,eodRetry:true,readOnly:true});
+  document.title="AN13B_UI_PASS";
+}catch(error){
+  result.textContent="AN13B_UI_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN13B_UI_FAIL";
+}
+</script>
+</body>
+</html>

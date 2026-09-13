@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN13A — Analysis UI Foundation**
+- Latest completed phase: **AN13B — Analysis UI Polish / Mobile / Empty-state Hardening**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN13B — Analysis UI Polish / Mobile / Empty-state Hardening**
+- Next phase: **AN14 — Report Capture / OCR Integration**
 
 ## Completed
 
@@ -38,15 +38,15 @@
 - AN11B — Machine Bring-from-vehicle Recommendation Foundation
 - AN12 — Vehicle Inventory / End-of-day Loading Proposal
 - AN13A — Analysis UI Foundation
+- AN13B — Analysis UI Polish / Mobile / Empty-state Hardening
 
 ## Next roadmap
 
-### AN13 — Analysis UI
+### Next major phase
 
-- **AN13B — Analysis UI Polish / Mobile / Empty-state Hardening**
+- **AN14 — Report Capture / OCR Integration**
 
 ### Later major phases
-- **AN14 — Report Capture / OCR Integration**
 - **FINAL — Full Regression / Mobile / Backup / Release Gate**
 
 Phase numbers may be split further when safety or implementation size requires it, but do not skip the major-category order without an explicit roadmap decision.
