@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><title>AN13A_UI_RUNNING</title></head>
+<body>
+<pre id="result">AN13A_UI_RUNNING</pre>
+<iframe id="app" style="width:390px;height:844px;border:0;display:block"></iframe>
+<script type="module">
+const result=document.getElementById("result"),frame=document.getElementById("app");
+function assert(condition,message){if(!condition)throw new Error(message)}
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function waitFor(test,message,timeout=8000){const start=Date.now();while(Date.now()-start<timeout){if(test())return;await delay(50)}throw new Error(message)}
+const stub={
+  ready:()=>Promise.resolve({engineVersion:"AN13A",dbVersion:4,schemaVersion:4}),
+  analysis:{
+    recommendations:{list:()=>Promise.resolve([
+      {recommendationId:"R1",recommendationType:"sales_demand",status:"proposal",action:"review_stock_capacity",priority:"high",subject:{machineId:"M1",productCode:"P1"},rationaleCodes:["sold_out_lower_bound"]},
+      {recommendationId:"R2",recommendationType:"sales_demand",status:"proposal",action:"review_forecast",priority:"medium",subject:{machineId:"M2",productCode:"P2"},rationaleCodes:["limited_history"]},
+      {recommendationId:"R3",recommendationType:"sales_demand",status:"proposal",action:"monitor",priority:"low",subject:{machineId:"M3",productCode:"P3"},rationaleCodes:["forecast_available"]}
+    ])},
+    sales:{listForecasts:()=>Promise.resolve([
+      {forecastId:"F1",machineId:"M1",productCode:"P1",forecastKnown:true,forecastUnitsPerDay:8.5,lowerBound:true,method:"recent_weighted_baseline_v1",confidence:{level:"limited",reasons:["sold_out_censored"]}},
+      {forecastId:"F2",machineId:"M2",productCode:"P2",forecastKnown:true,forecastUnitsPerDay:4,lowerBound:false,method:"recent_weighted_baseline_v1",confidence:{level:"high",reasons:[]}},
+      {forecastId:"F3",machineId:"M3",productCode:"P3",forecastKnown:false,forecastUnitsPerDay:null,lowerBound:false,method:"recent_weighted_baseline_v1",confidence:{level:"unknown",reasons:["insufficient_history"]}}
+    ])},
+    planning:{
+      listVisitRecommendations:({horizon})=>Promise.resolve(horizon==="today"?[
+        {recommendationId:"VT1",priority:"low",subject:{machineId:"M1",name:"本日1号機"},schedule:{date:"2026-09-14",manual:false,timeCondition:null},route:{sequence:1}}
+      ]:[
+        {recommendationId:"VN1",priority:"high",subject:{machineId:"M2",name:"次回1号機"},schedule:{date:"2026-09-15",manual:true,timeCondition:{type:"range",start:"09:00",end:"12:00"}},route:{sequence:1}},
+        {recommendationId:"VN2",priority:"low",subject:{machineId:"M3",name:"次回2号機"},schedule:{date:"2026-09-15",manual:true,timeCondition:null},route:{sequence:2}}
+      ]),
+      listBringFromVehicleRecommendations:()=>Promise.resolve([
+        {recommendationId:"B1",action:"bring_candidate",priority:"high",subject:{machineId:"M2",machineName:"次回1号機",productCode:"P1"},demand:{forecastKnown:true,forecastUnitsPerDay:8.5},vehicleStock:{known:true,availableUnits:12,availability:"available"}}
+      ]),
+      getEndOfDayLoadingProposal:()=>Promise.resolve({
+        target:{date:"2026-09-15",day:"火",manual:true},
+        coverage:{requiresReview:false},
+        items:[{productCode:"P1",displayName:"商品P1",action:"load",loading:{recommendedAdditionalUnits:10,recommendedCaseUnits:{cases:1,loose:4,caseQuantity:6},minimumAdditionalUnits:null,minimumCaseUnits:null}}]
+      })
+    }
+  },
+  data:{
+    inventory:{listStock:()=>Promise.resolve([
+      {productId:'["MK","P1"]',productCode:"P1",known:true,quantity:12,confidence:"confirmed",caseDisplay:{cases:2,loose:0,caseQuantity:6},anomalies:[]},
+      {productId:'["MK","P2"]',productCode:"P2",known:false,quantity:null,confidence:"unknown",caseDisplay:null,anomalies:[]}
+    ])},
+    products:{list:()=>Promise.resolve([
+      {id:'["MK","P1"]',productCode:"P1",displayName:"商品P1"},
+      {id:'["MK","P2"]',productCode:"P2",displayName:"商品P2"}
+    ])}
+  }
+};
+try{
+  frame.src="../index.html?an13a-ui-test=1";
+  await new Promise((resolve,reject)=>{frame.onload=resolve;setTimeout(()=>reject(new Error("index iframe load timeout")),12000)});
+  const w=frame.contentWindow,d=w.document;
+  const beforeLegacy=w.localStorage.getItem("vendrive2_v7_data");
+  const beforeDay=w.localStorage.getItem("vendrive2_last_day");
+  w.VENDRIVE2Analytics=stub;
+  const mainTabs=[...d.querySelectorAll(".tabs button")];
+  assert(mainTabs.length===6,"Expected six main tabs.");
+  assert(mainTabs[5].textContent.trim()==="分析"&&mainTabs[5].dataset.page==="analysisPage","Analysis tab must be sixth.");
+  mainTabs[5].click();
+  await waitFor(()=>d.getElementById("analysisStatus").textContent.includes("読み取り専用"),"Analysis proposals did not render.");
+  const subTabs=[...d.querySelectorAll("#analysisPage [data-analysis-section]")];
+  assert(subTabs.length===4,"Expected four analysis sections.");
+  assert(subTabs.map(x=>x.textContent.trim()).join(",")==="提案,販売,在庫,効率化","Analysis section order mismatch.");
+  assert(subTabs[0].classList.contains("active"),"Proposals must be default.");
+  assert(d.getElementById("analysisBody").textContent.includes("優先提案"),"Proposal panel missing.");
+  assert(d.getElementById("analysisBody").textContent.includes("次の出勤日の訪問"),"Next visit panel missing.");
+  assert(d.getElementById("analysisBody").textContent.includes("車から持っていく候補"),"Bring-from-vehicle panel missing.");
+  const eod=d.getElementById("analysisEodButton");
+  assert(eod,"EOD loading button missing.");
+  eod.click();
+  await waitFor(()=>d.getElementById("analysisEodResult").textContent.includes("+10本"),"EOD loading UI did not render.");
+
+  subTabs[1].click();
+  await waitFor(()=>d.getElementById("analysisBody").textContent.includes("8.5本/日"),"Sales forecast section did not render.");
+  assert(d.getElementById("analysisBody").textContent.includes("売切れを含む下限値"),"Lower-bound sales label missing.");
+
+  subTabs[2].click();
+  await waitFor(()=>d.getElementById("analysisBody").textContent.includes("商品P1"),"Inventory section did not render.");
+  assert(d.getElementById("analysisBody").textContent.includes("12本"),"Inventory quantity missing.");
+
+  subTabs[3].click();
+  await waitFor(()=>d.getElementById("analysisBody").textContent.includes("ルート最適化"),"Efficiency section did not render.");
+  assert(d.getElementById("analysisBody").textContent.includes("移動時間の根拠なし"),"No-fake-route message missing.");
+
+  assert(w.localStorage.getItem("vendrive2_v7_data")===beforeLegacy,"Analysis UI changed legacy state.");
+  assert(w.localStorage.getItem("vendrive2_last_day")===beforeDay,"Analysis UI changed legacy day state.");
+
+  function assertOneRow(width){
+    frame.style.width=width+"px";
+    const tops=[...d.querySelectorAll(".tabs button")].map(x=>Math.round(x.getBoundingClientRect().top));
+    assert(new Set(tops).size===1,"Main tabs wrapped at width "+width);
+    const page=d.documentElement;
+    assert(page.scrollWidth<=page.clientWidth+1,"Horizontal page overflow at width "+width+": "+page.scrollWidth+" > "+page.clientWidth);
+  }
+  assertOneRow(390);
+  assertOneRow(320);
+
+  result.textContent="AN13A_UI_PASS\n"+JSON.stringify({
+    mainTabs:mainTabs.map(x=>x.textContent.trim()),
+    sections:subTabs.map(x=>x.textContent.trim()),
+    mobile320:{scrollWidth:d.documentElement.scrollWidth,clientWidth:d.documentElement.clientWidth},
+    readOnly:true,
+    eodExplicitAction:true
+  });
+  document.title="AN13A_UI_PASS";
+}catch(error){
+  result.textContent="AN13A_UI_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN13A_UI_FAIL";
+}
+</script>
+</body>
+</html>

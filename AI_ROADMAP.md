@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN12 — Vehicle Inventory / End-of-day Loading Proposal**
+- Latest completed phase: **AN13A — Analysis UI Foundation**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN13 — Analysis UI**
+- Next phase: **AN13B — Analysis UI Polish / Mobile / Empty-state Hardening**
 
 ## Completed
 
@@ -37,12 +37,13 @@
 - AN11A — Visit Planning / Route Constraint Foundation
 - AN11B — Machine Bring-from-vehicle Recommendation Foundation
 - AN12 — Vehicle Inventory / End-of-day Loading Proposal
+- AN13A — Analysis UI Foundation
 
 ## Next roadmap
 
-### Next major phase
+### AN13 — Analysis UI
 
-- **AN13 — Analysis UI**
+- **AN13B — Analysis UI Polish / Mobile / Empty-state Hardening**
 
 ### Later major phases
 - **AN14 — Report Capture / OCR Integration**
