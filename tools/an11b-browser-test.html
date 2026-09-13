@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AN11B_BROWSER_RUNNING</title></head>
+<body>
+<pre id="result">AN11B_BROWSER_RUNNING</pre>
+<script>
+(function(){
+  const machines=[
+    {id:"M1",name:"Machine 1",managementCode:"001",managementCodeKey:"1",maker:"Maker",makerKey:"MK",address:"A",lat:35.1,lng:136.1,days:["月"],cycle:"1週間に1回",weeklyCount:null,timeCondition:{type:"range",start:"09:00",end:"12:00"}},
+    {id:"M2",name:"Machine 2",managementCode:"002",managementCodeKey:"2",maker:"Maker",makerKey:"MK",address:"B",lat:35.2,lng:136.2,days:["月"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+    {id:"M3",name:"Machine 3",managementCode:"003",managementCodeKey:"3",maker:"Maker",makerKey:"MK",address:"C",lat:35.3,lng:136.3,days:["火"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+    {id:"M4",name:"Machine 4",managementCode:"004",managementCodeKey:"4",maker:"Maker",makerKey:"MK",address:"D",lat:35.4,lng:136.4,days:["水"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null}
+  ];
+  const planning={
+    version:1,today:"2026-09-14",todayDay:"月",restDays:["日"],todayIds:["M2","M1"],
+    tomorrow:{date:"2026-09-15",day:"火",ids:["M3","M1"],manual:true},
+    machines:[
+      {id:"M1",last:"2026-09-07",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-14"},
+      {id:"M2",last:"2026-09-07",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-14"},
+      {id:"M3",last:"2026-09-08",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-15"},
+      {id:"M4",last:"2026-09-09",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-16"}
+    ]
+  };
+  window.VENDRIVE2ReadBridge=Object.freeze({
+    version:1,
+    normalizeManagementCode:value=>String(value||"").replace(/\D/g,"").replace(/^0+/,"")||"0",
+    getMachinesSnapshot:()=>JSON.parse(JSON.stringify(machines)),
+    getMachineSnapshot:id=>JSON.parse(JSON.stringify(machines.find(x=>x.id===String(id))||null)),
+    getPlanningSnapshot:()=>JSON.parse(JSON.stringify(planning))
+  });
+})();
+</script>
+<script src="../analytics.js"></script>
+<script type="module">
+const result=document.getElementById("result");
+const api=window.VENDRIVE2Analytics;
+function assert(condition,message){if(!condition)throw new Error(message)}
+function at(day,hour=0){return `2026-09-${String(day).padStart(2,"0")}T${String(hour).padStart(2,"0")}:00:00+09:00`}
+function makePayload(lines,occurredAt,options={}){
+  const previousClearAt=new Date(Date.parse(occurredAt)-86400000).toISOString();
+  const totalQty=lines.reduce((n,x)=>n+x.salesQty,0);
+  const totalAmount=lines.reduce((n,x)=>n+x.salesQty*x.price,0);
+  return {previousClearAt,elapsedHours:24,totalQty,totalAmount,products:lines,soldOuts:options.soldOuts||[],specialCircumstance:options.specialCircumstance||null};
+}
+async function addSales(id,machineId,day,lines,options={}){
+  const occurredAt=at(day,options.hour||0),current=makePayload(lines,occurredAt,options);
+  await api.data.reports.create({id,type:"sales",machineId,makerKey:"MK",vendorNumber:machineId.slice(1),occurredAt,original:current,current,source:{method:"manual",imageStored:false}});
+  const confirmed=await api.data.reports.confirm(id);
+  assert(confirmed.confirmed,"Report did not confirm: "+id);
+}
+async function putProduct(code,caseQuantity=24){
+  await api.data.products.put({makerKey:"MK",productCode:code,displayName:code,receiptAliases:[],caseQuantity,category:null,temperatureModes:["COLD"],active:true});
+}
+async function baseline(code,quantity){
+  await api.data.inventory.setBaseline({makerKey:"MK",productCode:code,occurredAt:"2026-09-01T00:00:00+09:00",quantity});
+}
+try{
+  localStorage.setItem("vendrive2_v7_data","AN11B_LEGACY_SENTINEL");
+  localStorage.setItem("vendrive2_last_day","AN11B_DAY_SENTINEL");
+  await api.ready();
+  const health=api.getHealth();
+  assert(health.engineVersion==="AN11B","ENGINE_VERSION mismatch");
+  assert(health.dbVersion===4&&health.schemaVersion===4,"DB/schema changed.");
+
+  for(const code of ["P1","P2","P3","P4","P5","P7","P8"])await putProduct(code);
+  await baseline("P1",20);
+  await baseline("P2",4);
+  await baseline("P4",0);
+  await baseline("P5",10);
+  await baseline("P7",12);
+  await baseline("P8",30);
+
+  for(let d=1;d<=10;d++){
+    await addSales("m1-p1a-"+d,"M1",d,[{productCode:"P1",printedName:"P1",temperature:"COLD",column:1,price:100,salesQty:5}],{hour:0});
+    await addSales("m1-p1b-"+d,"M1",d,[{productCode:"P1",printedName:"P1",temperature:"COLD",column:2,price:100,salesQty:3}],{hour:1});
+    await addSales("m1-p3-"+d,"M1",d,[{productCode:"P3",printedName:"P3",temperature:"COLD",column:3,price:100,salesQty:6}],{hour:2});
+    await addSales("m1-p6-"+d,"M1",d,[{productCode:"P6",printedName:"P6",temperature:"COLD",column:6,price:100,salesQty:7}],{hour:3});
+    await addSales("m2-p2-"+d,"M2",d,[{productCode:"P2",printedName:"P2",temperature:"COLD",column:1,price:100,salesQty:8}],{
+      hour:4,
+      soldOuts:d===10?[{productCode:"P2",column:1,temperature:"COLD",soldOutElapsedHours:12}]:[]
+    });
+    await addSales("m2-p4-"+d,"M2",d,[{productCode:"P4",printedName:"P4",temperature:"COLD",column:4,price:100,salesQty:4}],{hour:5});
+    await addSales("m3-p7-"+d,"M3",d,[{productCode:"P7",printedName:"P7",temperature:"COLD",column:7,price:100,salesQty:6}],{
+      hour:6,
+      specialCircumstance:d===10?{code:"event",note:"festival"}:null
+    });
+    await addSales("m4-p8-"+d,"M4",d,[{productCode:"P8",printedName:"P8",temperature:"COLD",column:8,price:100,salesQty:9}],{hour:7});
+  }
+  for(let d=1;d<=2;d++)await addSales("m3-p5-"+d,"M3",d,[{productCode:"P5",printedName:"P5",temperature:"COLD",column:5,price:100,salesQty:3}],{hour:8});
+
+  const before=await api.exportSnapshot();
+  const today=await api.analysis.planning.listBringFromVehicleRecommendations({horizon:"today"});
+  const tomorrow=await api.analysis.planning.listBringFromVehicleRecommendations({horizon:"next_workday"});
+  const after=await api.exportSnapshot();
+
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"Bring recommendations mutated analytics stores.");
+  assert(localStorage.getItem("vendrive2_v7_data")==="AN11B_LEGACY_SENTINEL","Bring recommendations changed legacy state.");
+  assert(localStorage.getItem("vendrive2_last_day")==="AN11B_DAY_SENTINEL","Bring recommendations changed legacy day state.");
+
+  assert(today.every(x=>["M2","M1"].includes(x.subject.machineId)),"Non-visit machine leaked into today bring recommendations.");
+  assert(!today.some(x=>x.subject.productCode==="P8"),"Unplanned M4 product leaked into today recommendations.");
+
+  const byKey=Object.fromEntries(today.map(x=>[x.subject.machineId+":"+x.subject.productCode,x]));
+  const p1=byKey["M1:P1"],p2=byKey["M2:P2"],p3=byKey["M1:P3"],p4=byKey["M2:P4"],p6=byKey["M1:P6"];
+  assert(p1&&p2&&p3&&p4&&p6,"Expected today bring recommendations missing.");
+
+  assert(p1.action==="bring_candidate"&&p1.vehicleStock.availability==="available"&&p1.vehicleStock.availableUnits===20,"P1 available-stock candidate mismatch.");
+  assert(p1.demand.seriesCount===2&&p1.demand.knownSeriesCount===2&&p1.demand.coverage==="complete","P1 multi-series aggregation mismatch.");
+  assert(Math.abs(p1.demand.forecastUnitsPerDay-8)<1e-9,"P1 aggregated forecast units/day mismatch.");
+  assert(p1.bringQuantity.known===false&&p1.bringQuantity.recommendedUnits===null&&p1.bringQuantity.reason==="machine_stock_or_capacity_required","P1 must not invent bring quantity.");
+
+  assert(p2.action==="bring_candidate"&&p2.priority==="high"&&p2.demand.lowerBound===true,"P2 sold-out lower-bound candidate mismatch.");
+  assert(p2.rationaleCodes.includes("demand_lower_bound")&&p2.rationaleCodes.includes("sales_attention_high"),"P2 lower-bound rationale missing.");
+
+  assert(p3.action==="verify_vehicle_stock"&&p3.vehicleStock.tracked===true&&p3.vehicleStock.known===false&&p3.vehicleStock.availability==="unknown","P3 unknown stock handling mismatch.");
+  assert(p3.rationaleCodes.includes("vehicle_stock_unknown"),"P3 vehicle stock rationale missing.");
+
+  assert(p4.action==="vehicle_stock_unavailable"&&p4.vehicleStock.availableUnits===0&&p4.vehicleStock.availability==="empty","P4 empty-stock handling mismatch.");
+
+  assert(p6.action==="verify_vehicle_stock"&&p6.vehicleStock.tracked===false&&p6.vehicleStock.availability==="untracked","P6 untracked product handling mismatch.");
+  assert(p6.rationaleCodes.includes("vehicle_product_untracked"),"P6 untracked rationale missing.");
+
+  const tKey=Object.fromEntries(tomorrow.map(x=>[x.subject.machineId+":"+x.subject.productCode,x]));
+  const p5=tKey["M3:P5"],p7=tKey["M3:P7"];
+  assert(p5&&p7,"Expected next-workday bring recommendations missing.");
+  assert(p5.action==="collect_demand_data"&&p5.demand.forecastKnown===false&&p5.priority==="medium","P5 insufficient-demand-data handling mismatch.");
+  assert(p7.action==="bring_candidate"&&p7.priority==="medium"&&p7.rationaleCodes.includes("sales_attention_medium"),"P7 limited-confidence candidate mismatch.");
+  assert(tomorrow.filter(x=>x.subject.machineId==="M3").every(x=>x.visit.sequence===1&&x.visit.manual===true&&x.visit.source==="host_manual_next_workday_plan"),"Tomorrow visit context mismatch.");
+
+  const p1Filtered=await api.analysis.planning.listBringFromVehicleRecommendations({horizon:"today",machineId:"M1",productCode:"P1"});
+  assert(p1Filtered.length===1&&p1Filtered[0].subject.productCode==="P1","Machine/product filter mismatch.");
+  const verifyOnly=await api.analysis.planning.listBringFromVehicleRecommendations({horizon:"today",action:"verify_vehicle_stock"});
+  assert(verifyOnly.length===2&&verifyOnly.every(x=>x.action==="verify_vehicle_stock"),"Action filter mismatch.");
+
+  let rejected=false;
+  try{await api.analysis.planning.listBringFromVehicleRecommendations({action:"teleport_stock"})}catch(error){rejected=true}
+  assert(rejected,"Unsupported bring action must reject.");
+
+  p1.rationaleCodes.push("tampered");
+  p1.vehicleStock.availableUnits=999;
+  p1.bringQuantity.recommendedUnits=999;
+  const reread=await api.analysis.planning.listBringFromVehicleRecommendations({horizon:"today",machineId:"M1",productCode:"P1"});
+  assert(!reread[0].rationaleCodes.includes("tampered")&&reread[0].vehicleStock.availableUnits===20&&reread[0].bringQuantity.recommendedUnits===null,"Bring recommendations are not defensive copies.");
+
+  const an11a=await api.analysis.planning.listVisitRecommendations({horizon:"today"});
+  assert(an11a.length===2&&an11a[0].subject.machineId==="M2"&&an11a[1].subject.machineId==="M1","AN11A visit planning regressed.");
+
+  for(const rec of today.concat(tomorrow)){
+    assert(rec.recommendationType==="machine_bring_from_vehicle"&&rec.status==="proposal","Bring recommendation contract mismatch.");
+    assert(rec.policy.autoApply===false&&rec.policy.requiresUserConfirmation===true,"Bring recommendation confirmation policy mismatch.");
+    assert(rec.policy.writesLegacyState===false&&rec.policy.writesAnalyticsState===false,"Bring recommendation write policy mismatch.");
+    assert(rec.proposedChange===null&&rec.effects.length===0,"AN11B must not create write effects.");
+    assert(rec.bringQuantity.recommendedUnits===null,"AN11B must never invent recommended units.");
+  }
+
+  result.textContent="AN11B_BROWSER_PASS\n"+JSON.stringify({
+    today:today.map(x=>({machine:x.subject.machineId,product:x.subject.productCode,action:x.action,priority:x.priority,vehicle:x.vehicleStock.availability,availableUnits:x.vehicleStock.availableUnits,forecast:x.demand.forecastUnitsPerDay,bringUnits:x.bringQuantity.recommendedUnits,sequence:x.visit.sequence})),
+    tomorrow:tomorrow.map(x=>({machine:x.subject.machineId,product:x.subject.productCode,action:x.action,priority:x.priority,vehicle:x.vehicleStock.availability,forecastKnown:x.demand.forecastKnown,sequence:x.visit.sequence,manual:x.visit.manual}))
+  });
+  document.title="AN11B_BROWSER_PASS";
+  document.documentElement.dataset.test="pass";
+}catch(error){
+  result.textContent="AN11B_BROWSER_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN11B_BROWSER_FAIL";
+  document.documentElement.dataset.test="fail";
+}
+</script>
+</body>
+</html>
