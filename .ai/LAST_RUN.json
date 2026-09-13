@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN10",
+  "phase": "AN11A",
   "status": "PASS",
   "base": {
-    "head": "0e472aa793068aca480e7bad7990ba9b3fb5f3af",
-    "safetyTag": "backup-pre-AN10-AN9-20260914",
-    "safetyTagTarget": "0e472aa793068aca480e7bad7990ba9b3fb5f3af"
+    "head": "fbdc7f658a8f3dfd0a9bf1622aef2824f8ff5f08",
+    "safetyTag": "backup-pre-AN11A-AN10-20260914",
+    "safetyTagTarget": "fbdc7f658a8f3dfd0a9bf1622aef2824f8ff5f08"
   },
   "versions": {
-    "app": "2026.09.14-AN10",
-    "engine": "AN10",
+    "app": "2026.09.14-AN11A",
+    "engine": "AN11A",
     "db": 4,
     "schema": 4
   },
@@ -25,16 +25,17 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34785065662,
-      "jobId": 103798921644,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, IndexedDB fixtures, and legacy localStorage sentinels",
+      "runId": 34785443561,
+      "jobId": 103799967576,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, fake host planning bridge, IndexedDB fixtures, and legacy localStorage sentinels",
       "coverage": [
-        "generic analysis.recommendations.list proposal contract and deterministic priority ordering",
-        "sold-out lower-bound forecast mapped to high-priority stock-capacity review without quantity invention",
-        "unknown forecasts mapped to data collection and limited-confidence forecasts mapped to review",
-        "high-confidence forecast mapped to monitor-only proposal",
-        "auto-apply disabled, explicit user confirmation required, no legacy or analytics writes",
-        "filters, defensive copies, and AN9 forecast regression guard"
+        "read-only planning bridge extension while preserving bridge version 1",
+        "today and next-workday host plan order preservation",
+        "manual next-workday plan preservation",
+        "pending-order and AN10 sales-attention priority surfacing",
+        "time-condition preservation without route reordering",
+        "no invented distance or travel-time metrics",
+        "no legacy or analytics writes, defensive copies, invalid-horizon rejection, and AN10 regression guard"
       ]
     }
   },
