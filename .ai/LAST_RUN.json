@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN14B1",
+  "phase": "AN14B2",
   "status": "PASS",
   "base": {
-    "head": "7c25776748b547fed28d847d9fb911a9cb59f7f2",
-    "safetyTag": "backup-pre-AN14B1-AN14A-20260914",
-    "safetyTagTarget": "7c25776748b547fed28d847d9fb911a9cb59f7f2"
+    "head": "d369ee6617395a7f729560e15da6859b8f4d3092",
+    "safetyTag": "backup-pre-AN14B2-AN14B1-20260914",
+    "safetyTagTarget": "d369ee6617395a7f729560e15da6859b8f4d3092"
   },
   "versions": {
-    "app": "2026.09.14-AN14B1",
-    "engine": "AN14B1",
+    "app": "2026.09.14-AN14B2",
+    "engine": "AN14B2",
     "db": 4,
     "schema": 4
   },
@@ -17,7 +17,6 @@
     "preflight": "PASS",
     "safetyTag": "PASS",
     "versionState": "PASS",
-    "security": "PASS",
     "diffCheck": "PASS",
     "syntax": "PASS",
     "functional": "PASS",
@@ -26,15 +25,14 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34789682130,
-      "jobId": 103811474852,
+      "runId": 34789946262,
       "coverage": [
-        "OCR upload starts only from the explicit user OCR action",
-        "runtime adapter contract receives browser File without static endpoint or credential",
-        "structured OCR candidate normalization and report-type classification review",
-        "nested rawText/base64/Data URL-like unsafe OCR fields are rejected",
-        "OCR review creates no report and does not change analytics or legacy state",
-        "missing adapter and unsafe adapter responses fail closed"
+        "explicit user approval is required before draft creation",
+        "review is revalidated using the existing report payload validator",
+        "valid OCR candidate creates only an unconfirmed draft report with source method ocr",
+        "validation mismatch remains needs_review and existing confirm refuses confirmation",
+        "no inventory movement is applied by draft creation",
+        "unsafe OCR retention flags are rejected"
       ]
     }
   },
@@ -43,7 +41,6 @@
     ".ai/STATE.json",
     "AI_ROADMAP.md",
     "OCR_ADAPTER.md",
-    "analytics.css",
     "analytics.js",
     "index.html",
     "version.json"
