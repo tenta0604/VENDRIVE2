@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><title>AN14A_CAPTURE_RUNNING</title></head>
+<body>
+<pre id="result">AN14A_CAPTURE_RUNNING</pre>
+<iframe id="app" style="width:390px;height:844px;border:0;display:block"></iframe>
+<script type="module">
+const result=document.getElementById("result"),frame=document.getElementById("app");
+function assert(condition,message){if(!condition)throw new Error(message)}
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function waitFor(test,message,timeout=10000){const start=Date.now();while(Date.now()-start<timeout){if(test())return;await delay(50)}throw new Error(message)}
+try{
+  frame.src="../index.html?an14a-capture-test=1";
+  await new Promise((resolve,reject)=>{frame.onload=resolve;setTimeout(()=>reject(new Error("index iframe timeout")),12000)});
+  const w=frame.contentWindow,d=w.document,api=w.VENDRIVE2Analytics;
+  await api.ready();
+  assert(api.getHealth().engineVersion==="AN14A","ENGINE_VERSION mismatch");
+  assert(api.getHealth().dbVersion===4&&api.getHealth().schemaVersion===4,"DB/schema changed.");
+  assert(api.capture&&typeof api.capture.prepareReview==="function","Capture review API missing.");
+
+  const direct=await api.capture.prepareReview({
+    image:{name:"sales-report.jpg",mime:"image/jpeg",size:2048,lastModified:1700000000000},
+    selectedType:"sales",detectedType:null,typeConfidence:null,candidatePayload:null,provider:null
+  });
+  assert(direct.reviewVersion===1&&direct.status==="needs_review","Review contract mismatch.");
+  assert(direct.image.stored===false&&direct.ocr.imageStored===false&&direct.ocr.rawTextStored===false,"Image/raw OCR retention policy mismatch.");
+  assert(direct.persistence.reportCreated===false&&direct.persistence.analyticsWrite===false&&direct.persistence.legacyWrite===false&&direct.persistence.allowed===false,"AN14A must be review-only.");
+  assert(direct.policy.requiresUserReview===true&&direct.policy.requiresExplicitSave===true,"Explicit review/save policy missing.");
+
+  let rejectedBytes=false;
+  try{await api.capture.prepareReview({image:{name:"x.jpg",mime:"image/jpeg",size:10,dataUrl:"data:image/jpeg;base64,AA=="}})}catch(error){rejectedBytes=true}
+  assert(rejectedBytes,"Embedded image bytes must reject.");
+  let rejectedRaw=false;
+  try{await api.capture.prepareReview({image:{name:"x.jpg",mime:"image/jpeg",size:10},rawText:"secret OCR text"})}catch(error){rejectedRaw=true}
+  assert(rejectedRaw,"Raw OCR text must reject in AN14A.");
+  let rejectedNonImage=false;
+  try{await api.capture.prepareReview({image:{name:"x.pdf",mime:"application/pdf",size:10}})}catch(error){rejectedNonImage=true}
+  assert(rejectedNonImage,"Non-image capture must reject.");
+
+  const before=await api.exportSnapshot();
+  const beforeLegacy=w.localStorage.getItem("vendrive2_v7_data");
+  const beforeDay=w.localStorage.getItem("vendrive2_last_day");
+
+  const captureButton=d.getElementById("reportCapture");
+  const input=d.getElementById("reportCaptureFile");
+  assert(captureButton&&input,"Capture controls missing.");
+  assert(input.getAttribute("accept")==="image/*","Capture accept mismatch.");
+  assert(input.getAttribute("capture")==="environment","Rear-camera capture hint missing.");
+  assert(captureButton.getBoundingClientRect().height>=44,"Capture button tap target too small.");
+
+  const file=new w.File([new Uint8Array([255,216,255,224,0,16,74,70,73,70])],"paper-sales.jpg",{type:"image/jpeg",lastModified:1700000000000});
+  const transfer=new w.DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new w.Event("change",{bubbles:true}));
+  await waitFor(()=>!d.getElementById("reportCaptureModal").classList.contains("hidden")&&d.getElementById("reportCaptureFileMeta").textContent.includes("paper-sales.jpg"),"Capture modal did not open.");
+  d.getElementById("reportCaptureType").value="sales";
+  d.getElementById("prepareReportCaptureReview").click();
+  await waitFor(()=>d.getElementById("reportCaptureReviewResult").textContent.includes("DB書き込み"),"Review result did not render.");
+  assert(d.getElementById("reportCaptureReviewResult").textContent.includes("なし"),"Review must show no DB write.");
+  assert(d.getElementById("reportCaptureReviewResult").textContent.includes("画像保存"),"Image retention status missing.");
+  assert(d.getElementById("reportCaptureReviewResult").textContent.includes("しない"),"Image storage must be disabled.");
+
+  const reports=await api.data.reports.list();
+  assert(reports.length===0,"Capture review created a report unexpectedly.");
+  const after=await api.exportSnapshot();
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"Capture review mutated analytics stores.");
+  assert(w.localStorage.getItem("vendrive2_v7_data")===beforeLegacy,"Capture review changed legacy state.");
+  assert(w.localStorage.getItem("vendrive2_last_day")===beforeDay,"Capture review changed legacy day state.");
+
+  frame.style.width="320px";
+  assert(d.documentElement.scrollWidth<=d.documentElement.clientWidth+1,"Capture UI caused horizontal overflow at 320px.");
+  assert(d.getElementById("prepareReportCaptureReview").getBoundingClientRect().height>=44,"Review button tap target too small.");
+
+  d.getElementById("closeReportCapture").click();
+  await delay(100);
+  assert(d.getElementById("reportCaptureModal").classList.contains("hidden"),"Capture modal did not close.");
+  assert(d.getElementById("reportCaptureFile").value==="","Capture file input was not cleared.");
+
+  result.textContent="AN14A_CAPTURE_PASS\n"+JSON.stringify({reviewOnly:true,imageStored:false,rawTextStored:false,reportCreated:false,dbUnchanged:true,legacyUnchanged:true,mobile320:true});
+  document.title="AN14A_CAPTURE_PASS";
+}catch(error){
+  result.textContent="AN14A_CAPTURE_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN14A_CAPTURE_FAIL";
+}
+</script>
+</body>
+</html>
