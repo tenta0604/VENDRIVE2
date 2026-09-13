@@ -1,0 +1,121 @@
+name: AN8B temporary verification
+
+on:
+  push:
+    branches:
+      - chatgpt/an8b-historical-comparison
+
+permissions:
+  contents: write
+
+jobs:
+  verify-an8b:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify baseline and create immutable safety tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $base = '603cc808c5055d004d71f4a5be43d4a17e2ae321'
+          $tag = 'backup-pre-AN8B-AN8A3-20260914'
+          git fetch origin main --tags
+          $remoteMain = (git rev-parse origin/main).Trim()
+          if ($remoteMain -ne $base) {
+            throw "origin/main moved from expected AN8B base: $remoteMain"
+          }
+          $existing = git ls-remote --tags origin "refs/tags/$tag" "refs/tags/$tag^{}"
+          if ($existing) {
+            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            $kind = (git cat-file -t $tag).Trim()
+            if ($kind -ne 'tag') { throw "Existing safety ref is not an annotated tag: $kind" }
+            $target = (git rev-parse "$tag^{}").Trim()
+            if ($target -ne $base) { throw "Existing safety tag points to unexpected SHA: $target" }
+          } else {
+            git config user.name "VENDRIVE2 AI Gate"
+            git config user.email "actions@users.noreply.github.com"
+            git tag -a $tag $base -m "Safety backup before AN8B"
+            git push origin "refs/tags/$tag"
+            $target = (git rev-parse "$tag^{}").Trim()
+            if ($target -ne $base) { throw "Created safety tag points to unexpected SHA: $target" }
+          }
+          Write-Host "SAFETY_TAG_PASS tag=$tag target=$base"
+
+      - name: Version and state consistency gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expectedApp = '2026.09.14-AN8B'
+          $state = Get-Content '.ai/STATE.json' -Raw | ConvertFrom-Json
+          $version = Get-Content 'version.json' -Raw | ConvertFrom-Json
+          $index = Get-Content 'index.html' -Raw
+          $analytics = Get-Content 'analytics.js' -Raw
+          $roadmap = Get-Content 'AI_ROADMAP.md' -Raw
+          if ($state.completedPhase -ne 'AN8B' -or $state.nextPhase -ne 'AN8C') { throw 'STATE phase mismatch.' }
+          if ($state.appVersion -ne $expectedApp -or $state.engineVersion -ne 'AN8B' -or $state.dbVersion -ne 4 -or $state.schemaVersion -ne 4) { throw 'STATE version mismatch.' }
+          if ($version.version -ne $expectedApp) { throw 'version.json mismatch.' }
+          if ($index -notmatch "APP_VERSION='2026\.09\.14-AN8B'") { throw 'index APP_VERSION mismatch.' }
+          if ($analytics -notmatch 'ENGINE_VERSION="AN8B"') { throw 'analytics ENGINE_VERSION mismatch.' }
+          if ($roadmap -notmatch 'Latest completed phase: \*\*AN8B — YoY / Historical Comparison Foundation\*\*') { throw 'ROADMAP completed phase mismatch.' }
+          if ($roadmap -notmatch 'Next phase: \*\*AN8C — Sold-out-aware Demand Evidence / Confidence Layer\*\*') { throw 'ROADMAP next phase mismatch.' }
+          Write-Host "AN8B_VERSION_STATE_PASS"
+
+      - name: Diff check
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          Write-Host "AN8B_DIFF_CHECK_PASS"
+
+      - name: JavaScript syntax gate
+        shell: pwsh
+        run: |
+          node --check analytics.js
+          Write-Host "AN8B_SYNTAX_PASS"
+
+      - name: Real Edge browser and IndexedDB gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $edgeCandidates = @(
+            "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+            "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe"
+          )
+          $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $edge) { throw 'Microsoft Edge executable was not found on windows-latest.' }
+          $port = 8123
+          $server = Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try {
+            Start-Sleep -Seconds 2
+            $profile = Join-Path $env:RUNNER_TEMP ("vendrive-an8b-edge-" + $env:GITHUB_RUN_ID)
+            $stdout = Join-Path $env:RUNNER_TEMP 'an8b-edge-stdout.txt'
+            $stderr = Join-Path $env:RUNNER_TEMP 'an8b-edge-stderr.txt'
+            $edgeArgs = @(
+              '--headless=new',
+              '--disable-gpu',
+              '--no-first-run',
+              '--no-default-browser-check',
+              '--virtual-time-budget=15000',
+              "--user-data-dir=$profile",
+              '--dump-dom',
+              "http://127.0.0.1:$port/tools/an8b-browser-test.html"
+            )
+            $edgeProcess = Start-Process -FilePath $edge -ArgumentList $edgeArgs -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            $text = if (Test-Path $stdout) { Get-Content -Raw $stdout } else { '' }
+            $errorText = if (Test-Path $stderr) { Get-Content -Raw $stderr } else { '' }
+            Write-Host $text
+            if ($errorText) {
+              Write-Host "EDGE_STDERR"
+              Write-Host $errorText
+            }
+            if ($edgeProcess.ExitCode -ne 0) { throw "Edge exited with code $($edgeProcess.ExitCode)" }
+            if ($text -notmatch 'AN8B_BROWSER_PASS') { throw 'AN8B_BROWSER_PASS token was not found in Edge DOM output.' }
+            Write-Host "AN8B_REAL_EDGE_PASS"
+          }
+          finally {
+            if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force }
+          }
