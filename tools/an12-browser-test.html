@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AN12_BROWSER_RUNNING</title></head>
+<body>
+<pre id="result">AN12_BROWSER_RUNNING</pre>
+<script>
+(function(){
+  const machines=[
+    {id:"M1",name:"Machine 1",managementCode:"001",managementCodeKey:"1",maker:"Maker",makerKey:"MK",address:"A",lat:35.1,lng:136.1,days:["火"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+    {id:"M2",name:"Machine 2",managementCode:"002",managementCodeKey:"2",maker:"Maker",makerKey:"MK",address:"B",lat:35.2,lng:136.2,days:["火"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+    {id:"M3",name:"Machine 3",managementCode:"003",managementCodeKey:"3",maker:"Maker",makerKey:"MK",address:"C",lat:35.3,lng:136.3,days:["火"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+    {id:"M4",name:"Machine 4",managementCode:"004",managementCodeKey:"4",maker:"Maker",makerKey:"MK",address:"D",lat:35.4,lng:136.4,days:["火"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null}
+  ];
+  const planning={
+    version:1,today:"2026-09-14",todayDay:"月",restDays:["日"],todayIds:[],
+    tomorrow:{date:"2026-09-15",day:"火",ids:["M1","M2","M3","M4"],manual:true},
+    machines:[
+      {id:"M1",last:"2026-09-08",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-15"},
+      {id:"M2",last:"2026-09-13",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-15"},
+      {id:"M3",last:null,visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-15"},
+      {id:"M4",last:"2026-09-08",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-15"}
+    ]
+  };
+  window.VENDRIVE2ReadBridge=Object.freeze({
+    version:1,
+    normalizeManagementCode:value=>String(value||"").replace(/\D/g,"").replace(/^0+/,"")||"0",
+    getMachinesSnapshot:()=>JSON.parse(JSON.stringify(machines)),
+    getMachineSnapshot:id=>JSON.parse(JSON.stringify(machines.find(x=>x.id===String(id))||null)),
+    getPlanningSnapshot:()=>JSON.parse(JSON.stringify(planning))
+  });
+})();
+</script>
+<script src="../analytics.js"></script>
+<script type="module">
+const result=document.getElementById("result");
+const api=window.VENDRIVE2Analytics;
+function assert(condition,message){if(!condition)throw new Error(message)}
+function at(day,hour=0){return `2026-09-${String(day).padStart(2,"0")}T${String(hour).padStart(2,"0")}:00:00+09:00`}
+function makePayload(productCode,occurredAt,qty,column,options={}){
+  return {
+    previousClearAt:new Date(Date.parse(occurredAt)-86400000).toISOString(),
+    elapsedHours:24,totalQty:qty,totalAmount:qty*100,
+    products:[{productCode,printedName:productCode,temperature:"COLD",column,price:100,salesQty:qty}],
+    soldOuts:options.soldOut?[{productCode,column,temperature:"COLD",soldOutElapsedHours:12}]:[],
+    specialCircumstance:null
+  };
+}
+async function addSales(id,machineId,productCode,day,qty,column,hour=0,soldOut=false){
+  const occurredAt=at(day,hour),current=makePayload(productCode,occurredAt,qty,column,{soldOut});
+  await api.data.reports.create({id,type:"sales",machineId,makerKey:"MK",vendorNumber:machineId.slice(1),occurredAt,original:current,current,source:{method:"manual",imageStored:false}});
+  const confirmed=await api.data.reports.confirm(id);
+  assert(confirmed.confirmed,"Report did not confirm: "+id);
+}
+async function putProduct(code,caseQuantity){
+  await api.data.products.put({makerKey:"MK",productCode:code,displayName:code,receiptAliases:[],caseQuantity,category:null,temperatureModes:["COLD"],active:true});
+}
+async function baseline(code,quantity){
+  await api.data.inventory.setBaseline({makerKey:"MK",productCode:code,occurredAt:"2026-09-01T00:00:00+09:00",quantity});
+}
+try{
+  localStorage.setItem("vendrive2_v7_data","AN12_LEGACY_SENTINEL");
+  localStorage.setItem("vendrive2_last_day","AN12_DAY_SENTINEL");
+  await api.ready();
+  const health=api.getHealth();
+  assert(health.engineVersion==="AN12","ENGINE_VERSION mismatch");
+  assert(health.dbVersion===4&&health.schemaVersion===4,"DB/schema changed.");
+
+  let blocked=false;
+  try{await api.analysis.planning.getEndOfDayLoadingProposal({businessEnded:false})}catch(error){blocked=true}
+  assert(blocked,"EOD proposal must require explicit businessEnded:true.");
+
+  await putProduct("P1",6);
+  await putProduct("P2",10);
+  await putProduct("P3",12);
+  await putProduct("P4",24);
+  await putProduct("P5",24);
+  await putProduct("P6",24);
+  await baseline("P1",5);
+  await baseline("P2",10);
+  await baseline("P3",0);
+  await baseline("P4",10);
+  await baseline("P5",10);
+
+  for(let d=1;d<=10;d++){
+    await addSales("m1-p1-"+d,"M1","P1",d,2,1,0,false);
+    await addSales("m1-p3-"+d,"M1","P3",d,4,3,1,d===10);
+    await addSales("m2-p2-"+d,"M2","P2",d,3,2,2,false);
+    await addSales("m2-p6-"+d,"M2","P6",d,2,6,3,false);
+    await addSales("m2-p7-"+d,"M2","P7",d,2,7,4,false);
+    await addSales("m3-p5-"+d,"M3","P5",d,1,5,5,false);
+  }
+  for(let d=1;d<=2;d++)await addSales("m2-p4-"+d,"M2","P4",d,3,4,6,false);
+
+  const before=await api.exportSnapshot();
+  const proposal=await api.analysis.planning.getEndOfDayLoadingProposal({businessEnded:true});
+  const after=await api.exportSnapshot();
+
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"EOD loading proposal mutated analytics stores.");
+  assert(localStorage.getItem("vendrive2_v7_data")==="AN12_LEGACY_SENTINEL","EOD proposal changed legacy state.");
+  assert(localStorage.getItem("vendrive2_last_day")==="AN12_DAY_SENTINEL","EOD proposal changed legacy day state.");
+
+  assert(proposal.proposalType==="end_of_day_vehicle_loading"&&proposal.status==="proposal","Proposal contract mismatch.");
+  assert(proposal.target.date==="2026-09-15"&&proposal.target.day==="火"&&proposal.target.manual===true,"Target next-workday context mismatch.");
+  assert(proposal.policy.businessEnded===true&&proposal.policy.reserveDays===0.25&&proposal.policy.reserveMethod==="fractional_daily_forecast","EOD policy mismatch.");
+  assert(proposal.policy.autoApply===false&&proposal.policy.requiresUserConfirmation===true,"EOD confirmation policy mismatch.");
+  assert(proposal.coverage.uncoveredVisitMachineIds.length===1&&proposal.coverage.uncoveredVisitMachineIds[0]==="M4"&&proposal.coverage.requiresReview===true,"Uncovered visit coverage mismatch.");
+
+  const byCode=Object.fromEntries(proposal.items.map(x=>[x.productCode,x]));
+  const p1=byCode.P1,p2=byCode.P2,p3=byCode.P3,p4=byCode.P4,p5=byCode.P5,p6=byCode.P6,p7=byCode.P7;
+  assert(p1&&p2&&p3&&p4&&p5&&p6&&p7,"Expected loading items missing.");
+
+  assert(p1.action==="load"&&p1.coverage.forecastComplete===true&&p1.coverage.visitHistoryComplete===true,"P1 load action mismatch.");
+  assert(Math.abs(p1.demand.estimatedServiceDemandUnits-14)<1e-9,"P1 service demand mismatch.");
+  assert(Math.abs(p1.demand.reserveDemandUnits-0.5)<1e-9,"P1 reserve demand mismatch.");
+  assert(p1.demand.targetVehicleUnits===15&&p1.loading.recommendedAdditionalUnits===10,"P1 target/additional units mismatch.");
+  assert(p1.loading.recommendedCaseUnits.cases===1&&p1.loading.recommendedCaseUnits.loose===4&&p1.loading.recommendedCaseUnits.caseQuantity===6,"P1 case conversion mismatch.");
+
+  assert(p2.action==="no_load_needed"&&p2.demand.targetVehicleUnits===7&&p2.vehicleStock.availableUnits===10&&p2.loading.recommendedAdditionalUnits===0,"P2 no-load calculation mismatch.");
+
+  assert(p3.action==="review_lower_bound_demand"&&p3.coverage.lowerBound===true,"P3 lower-bound action mismatch.");
+  assert(p3.demand.targetVehicleUnits===null&&p3.demand.minimumTargetVehicleUnits===29,"P3 lower-bound target mismatch.");
+  assert(p3.loading.recommendedAdditionalUnits===null&&p3.loading.minimumAdditionalUnits===29,"P3 minimum loading mismatch.");
+  assert(p3.loading.minimumCaseUnits.cases===2&&p3.loading.minimumCaseUnits.loose===5,"P3 minimum case conversion mismatch.");
+
+  assert(p4.action==="collect_demand_data"&&p4.coverage.forecastComplete===false&&p4.loading.recommendedAdditionalUnits===null,"P4 unknown forecast handling mismatch.");
+  assert(p5.action==="verify_visit_history"&&p5.coverage.visitHistoryComplete===false&&p5.loading.recommendedAdditionalUnits===null,"P5 missing visit history handling mismatch.");
+  assert(p6.action==="verify_vehicle_stock"&&p6.vehicleStock.availability==="unknown"&&p6.loading.recommendedAdditionalUnits===null,"P6 unknown vehicle stock handling mismatch.");
+  assert(p7.action==="verify_vehicle_stock"&&p7.vehicleStock.availability==="untracked"&&p7.loading.recommendedAdditionalUnits===null,"P7 untracked vehicle product handling mismatch.");
+
+  const noReserve=await api.analysis.planning.getEndOfDayLoadingProposal({businessEnded:true,reserveDays:0,productCode:"P1"});
+  assert(noReserve.items.length===1&&noReserve.items[0].demand.targetVehicleUnits===14&&noReserve.items[0].loading.recommendedAdditionalUnits===9,"Custom zero-reserve calculation mismatch.");
+
+  let badReserve=false;
+  try{await api.analysis.planning.getEndOfDayLoadingProposal({businessEnded:true,reserveDays:1.5})}catch(error){badReserve=true}
+  assert(badReserve,"Out-of-range reserveDays must reject.");
+
+  p1.loading.recommendedAdditionalUnits=999;
+  p1.components[0].serviceIntervalDays=999;
+  const reread=await api.analysis.planning.getEndOfDayLoadingProposal({businessEnded:true,productCode:"P1"});
+  assert(reread.items[0].loading.recommendedAdditionalUnits===10&&reread.items[0].components[0].serviceIntervalDays===7,"EOD proposal is not a defensive copy.");
+
+  const an11b=await api.analysis.planning.listBringFromVehicleRecommendations({horizon:"next_workday",machineId:"M1",productCode:"P1"});
+  assert(an11b.length===1&&an11b[0].bringQuantity.recommendedUnits===null,"AN11B boundary regressed.");
+
+  result.textContent="AN12_BROWSER_PASS\n"+JSON.stringify({
+    target:proposal.target,
+    coverage:proposal.coverage,
+    items:proposal.items.map(x=>({product:x.productCode,action:x.action,service:x.demand.estimatedServiceDemandUnits,reserve:x.demand.reserveDemandUnits,target:x.demand.targetVehicleUnits,minimumTarget:x.demand.minimumTargetVehicleUnits,vehicle:x.vehicleStock.availability,current:x.vehicleStock.availableUnits,recommended:x.loading.recommendedAdditionalUnits,minimum:x.loading.minimumAdditionalUnits,cases:x.loading.recommendedCaseUnits}))
+  });
+  document.title="AN12_BROWSER_PASS";
+  document.documentElement.dataset.test="pass";
+}catch(error){
+  result.textContent="AN12_BROWSER_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN12_BROWSER_FAIL";
+  document.documentElement.dataset.test="fail";
+}
+</script>
+</body>
+</html>

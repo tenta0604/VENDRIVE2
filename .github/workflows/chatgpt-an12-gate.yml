@@ -1,0 +1,118 @@
+name: AN12 temporary verification
+
+on:
+  push:
+    branches:
+      - chatgpt/an12-eod-loading
+
+permissions:
+  contents: read
+
+jobs:
+  verify-an12:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify baseline and immutable safety tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $base = '1978de7d2d0e0555eedd53c5828e3bf655e072c3'
+          $tag = 'backup-pre-AN12-AN11B-20260914'
+          git fetch origin main --tags
+          $remoteMain = (git rev-parse origin/main).Trim()
+          if ($remoteMain -ne $base) { throw "origin/main moved from expected AN12 base: $remoteMain" }
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          if ((git cat-file -t $tag).Trim() -ne 'tag') { throw 'Safety ref is not annotated.' }
+          if ((git rev-parse "$tag^{}").Trim() -ne $base) { throw 'Safety tag target mismatch.' }
+          Write-Host "AN12_SAFETY_TAG_PASS"
+
+      - name: Version and state consistency gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $state = Get-Content '.ai/STATE.json' -Raw | ConvertFrom-Json
+          $version = Get-Content 'version.json' -Raw | ConvertFrom-Json
+          $index = Get-Content 'index.html' -Raw
+          $analytics = Get-Content 'analytics.js' -Raw
+          $roadmap = Get-Content 'AI_ROADMAP.md' -Raw
+          if ($state.completedPhase -ne 'AN12' -or $state.nextPhase -ne 'AN13' -or $state.status -ne 'ready') { throw 'STATE phase mismatch.' }
+          if ($state.appVersion -ne '2026.09.14-AN12' -or $state.engineVersion -ne 'AN12' -or $state.dbVersion -ne 4 -or $state.schemaVersion -ne 4) { throw 'STATE version mismatch.' }
+          if ($version.version -ne '2026.09.14-AN12') { throw 'version.json mismatch.' }
+          if ($index -notmatch "APP_VERSION='2026\.09\.14-AN12'") { throw 'index APP_VERSION mismatch.' }
+          if ($analytics -notmatch 'ENGINE_VERSION="AN12"') { throw 'analytics ENGINE_VERSION mismatch.' }
+          if ($roadmap -notmatch 'Latest completed phase: \*\*AN12 — Vehicle Inventory / End-of-day Loading Proposal\*\*') { throw 'ROADMAP completed mismatch.' }
+          if ($roadmap -notmatch 'Next phase: \*\*AN13 — Analysis UI\*\*') { throw 'ROADMAP next mismatch.' }
+          Write-Host "AN12_VERSION_STATE_PASS"
+
+      - name: Diff check
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          Write-Host "AN12_DIFF_CHECK_PASS"
+
+      - name: JavaScript syntax gates
+        shell: pwsh
+        run: |
+          node --check analytics.js
+          @'
+          import re, pathlib
+          text=pathlib.Path("index.html").read_text(encoding="utf-8")
+          scripts=[]
+          for m in re.finditer(r"<script([^>]*)>(.*?)</script>", text, re.S|re.I):
+              attrs=m.group(1)
+              body=m.group(2)
+              if "src=" not in attrs.lower() and body.strip():
+                  scripts.append(body)
+          pathlib.Path("index-inline-check.js").write_text("\n".join(scripts),encoding="utf-8")
+          '@ | python -
+          node --check index-inline-check.js
+          Remove-Item index-inline-check.js
+          Write-Host "AN12_SYNTAX_PASS"
+
+      - name: Real Edge browser and IndexedDB gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $edgeCandidates = @(
+            "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+            "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe"
+          )
+          $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $edge) { throw 'Microsoft Edge executable was not found.' }
+          $port = 8129
+          $server = Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try {
+            $ready=$false
+            for($attempt=1;$attempt -le 20;$attempt++){
+              try{
+                $response=Invoke-WebRequest -Uri "http://127.0.0.1:$port/tools/an12-browser-test.html" -UseBasicParsing -TimeoutSec 2
+                if($response.StatusCode -eq 200){$ready=$true;break}
+              }catch{Start-Sleep -Milliseconds 500}
+            }
+            if(-not $ready){throw 'Local AN12 test server did not become ready.'}
+            $profile=Join-Path $env:RUNNER_TEMP ("vendrive-an12-edge-"+$env:GITHUB_RUN_ID)
+            $stdout=Join-Path $env:RUNNER_TEMP 'an12-edge-stdout.txt'
+            $stderr=Join-Path $env:RUNNER_TEMP 'an12-edge-stderr.txt'
+            $edgeArgs=@(
+              '--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check',
+              '--virtual-time-budget=45000',"--user-data-dir=$profile",'--dump-dom',
+              "http://127.0.0.1:$port/tools/an12-browser-test.html"
+            )
+            $p=Start-Process -FilePath $edge -ArgumentList $edgeArgs -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            $text=if(Test-Path $stdout){Get-Content -Raw $stdout}else{''}
+            $err=if(Test-Path $stderr){Get-Content -Raw $stderr}else{''}
+            Write-Host $text
+            if($err){Write-Host "EDGE_STDERR";Write-Host $err}
+            if($p.ExitCode -ne 0){throw "Edge exited with code $($p.ExitCode)"}
+            if($text -notmatch 'AN12_BROWSER_PASS'){throw 'AN12_BROWSER_PASS token not found.'}
+            Write-Host "AN12_REAL_EDGE_PASS"
+          }
+          finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
