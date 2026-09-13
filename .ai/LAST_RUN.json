@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN9",
+  "phase": "AN10",
   "status": "PASS",
   "base": {
-    "head": "adb7ec72ecf4e618e4616859037f45782c36c2ab",
-    "safetyTag": "backup-pre-AN9-AN8C-20260914",
-    "safetyTagTarget": "adb7ec72ecf4e618e4616859037f45782c36c2ab"
+    "head": "0e472aa793068aca480e7bad7990ba9b3fb5f3af",
+    "safetyTag": "backup-pre-AN10-AN9-20260914",
+    "safetyTagTarget": "0e472aa793068aca480e7bad7990ba9b3fb5f3af"
   },
   "versions": {
-    "app": "2026.09.14-AN9",
-    "engine": "AN9",
+    "app": "2026.09.14-AN10",
+    "engine": "AN10",
     "db": 4,
     "schema": 4
   },
@@ -25,16 +25,16 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34784556794,
-      "jobId": 103797415373,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, and IndexedDB test fixtures",
+      "runId": 34785065662,
+      "jobId": 103798921644,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, IndexedDB fixtures, and legacy localStorage sentinels",
       "coverage": [
-        "transparent recent 3/5/10 weighted baseline with normalized component weights",
-        "sold-out-aware lower-bound forecast without lost-demand estimation",
-        "insufficient-history and zero-duration unknown forecasts",
-        "YoY context retained without silent forecast adjustment",
-        "stale historical comparison excluded when it does not match the latest forecast asOf",
-        "read-only stores, defensive copies, filters, and AN8A1 through AN8C API regression guards"
+        "generic analysis.recommendations.list proposal contract and deterministic priority ordering",
+        "sold-out lower-bound forecast mapped to high-priority stock-capacity review without quantity invention",
+        "unknown forecasts mapped to data collection and limited-confidence forecasts mapped to review",
+        "high-confidence forecast mapped to monitor-only proposal",
+        "auto-apply disabled, explicit user confirmation required, no legacy or analytics writes",
+        "filters, defensive copies, and AN9 forecast regression guard"
       ]
     }
   },

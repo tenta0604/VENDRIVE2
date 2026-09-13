@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Latest completed phase: **AN9 — Demand Forecast Foundation**
+- Latest completed phase: **AN10 — Recommendation Engine Foundation**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN10 — Recommendation Engine Foundation**
+- Next phase: **AN11 — Visit / Route / Machine Bring-from-vehicle Recommendations**
 
 ## Completed
 
@@ -33,15 +33,15 @@
 - AN8B — YoY / Historical Comparison Foundation
 - AN8C — Sold-out-aware Demand Evidence / Confidence Layer
 - AN9 — Demand Forecast Foundation
+- AN10 — Recommendation Engine Foundation
 
 ## Next roadmap
 
 ### Next major phase
 
-- **AN10 — Recommendation Engine Foundation**
+- **AN11 — Visit / Route / Machine Bring-from-vehicle Recommendations**
 
 ### Later major phases
-- **AN11 — Visit / Route / Machine Bring-from-vehicle Recommendations**
 - **AN12 — Vehicle Inventory / End-of-day Loading Proposal**
 - **AN13 — Analysis UI**
 - **AN14 — Report Capture / OCR Integration**
