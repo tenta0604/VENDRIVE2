@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AN10_BROWSER_RUNNING</title></head>
+<body>
+<pre id="result">AN10_BROWSER_RUNNING</pre>
+<script src="../analytics.js"></script>
+<script type="module">
+const result=document.getElementById("result");
+const api=window.VENDRIVE2Analytics;
+function assert(condition,message){if(!condition)throw new Error(message)}
+function day(month,day,hour=0){return `2026-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}T${String(hour).padStart(2,"0")}:00:00+09:00`}
+function payload(productCode,observedAt,qty,options={}){
+  const zero=options.zeroDuration===true;
+  const previousClearAt=zero?observedAt:new Date(Date.parse(observedAt)-86400000).toISOString();
+  return {
+    previousClearAt,
+    elapsedHours:zero?0:24,
+    totalQty:qty,
+    totalAmount:qty*100,
+    products:[{productCode,printedName:productCode,temperature:options.temperature??"COLD",column:options.column??1,price:100,salesQty:qty}],
+    soldOuts:options.soldOuts||[],
+    specialCircumstance:options.specialCircumstance||null
+  };
+}
+async function addReport(id,productCode,observedAt,qty,options={}){
+  const current=payload(productCode,observedAt,qty,options);
+  await api.data.reports.create({
+    id,type:"sales",machineId:"M1",makerKey:"MK",vendorNumber:"1",occurredAt:observedAt,
+    original:current,current,source:{method:"manual",imageStored:false}
+  });
+  const confirmed=await api.data.reports.confirm(id);
+  assert(confirmed.confirmed,"Report did not confirm: "+id);
+}
+try{
+  localStorage.setItem("vendrive2_v7_data","AN10_LEGACY_SENTINEL");
+  localStorage.setItem("vendrive2_last_day","AN10_DAY_SENTINEL");
+  await api.ready();
+  const health=api.getHealth();
+  assert(health.engineVersion==="AN10","ENGINE_VERSION mismatch");
+  assert(health.dbVersion===4&&health.schemaVersion===4,"DB/schema changed unexpectedly");
+
+  for(let i=1;i<=10;i++)await addReport("clean"+i,"P1",day(9,i),10,{column:1});
+  for(let i=1;i<=10;i++)await addReport("sold"+i,"P2",day(8,i),8,{
+    column:2,
+    soldOuts:i===10?[{productCode:"P2",column:2,temperature:"COLD",soldOutElapsedHours:12}]:[]
+  });
+  for(let i=1;i<=10;i++)await addReport("special"+i,"P3",day(7,i),6,{
+    column:3,temperature:"HOT",
+    specialCircumstance:i===10?{code:"event",note:"festival"}:null
+  });
+  for(let i=1;i<=2;i++)await addReport("short"+i,"P4",day(6,i),3,{column:4});
+  for(let i=1;i<=3;i++)await addReport("limited"+i,"P5",day(5,i),7,{column:5});
+  for(let i=1;i<=3;i++)await addReport("zero"+i,"P6",day(4,i,6),0,{column:6,temperature:null,zeroDuration:true});
+
+  const before=await api.exportSnapshot();
+  const recs=await api.analysis.recommendations.list({machineId:"M1",makerKey:"MK",vendorNumber:"1"});
+  const after=await api.exportSnapshot();
+  assert(JSON.stringify(before.stores)===JSON.stringify(after.stores),"Recommendation API mutated analytics stores.");
+  assert(localStorage.getItem("vendrive2_v7_data")==="AN10_LEGACY_SENTINEL","Recommendation API changed legacy state.");
+  assert(localStorage.getItem("vendrive2_last_day")==="AN10_DAY_SENTINEL","Recommendation API changed legacy day state.");
+
+  const byProduct=Object.fromEntries(recs.map(x=>[x.subject.productCode,x]));
+  const p1=byProduct.P1,p2=byProduct.P2,p3=byProduct.P3,p4=byProduct.P4,p5=byProduct.P5,p6=byProduct.P6;
+  assert(p1&&p2&&p3&&p4&&p5&&p6,"Expected recommendations missing.");
+
+  assert(p2.action==="review_stock_capacity"&&p2.priority==="high"&&p2.decisionArea==="stock_level","Sold-out recommendation mismatch.");
+  assert(p2.forecast.lowerBound===true&&p2.forecast.forecastInterpretation==="recent_weighted_lower_bound","Sold-out forecast evidence mismatch.");
+  assert(p2.rationaleCodes.includes("sold_out_lower_bound")&&p2.rationaleCodes.includes("sold_out_censored"),"Sold-out rationale missing.");
+
+  assert(p4.action==="collect_more_data"&&p4.priority==="medium"&&p4.decisionArea==="data_quality","Insufficient-history action mismatch.");
+  assert(p4.forecast.forecastKnown===false&&p4.rationaleCodes.includes("forecast_unknown")&&p4.rationaleCodes.includes("insufficient_history"),"Unknown forecast rationale mismatch.");
+
+  assert(p6.action==="collect_more_data"&&p6.forecast.forecastKnown===false&&p6.rationaleCodes.includes("rate_unknown"),"Zero-duration recommendation mismatch.");
+
+  assert(p3.action==="review_forecast"&&p3.priority==="medium"&&p3.rationaleCodes.includes("special_circumstance"),"Special-circumstance recommendation mismatch.");
+  assert(p5.action==="review_forecast"&&p5.priority==="medium"&&p5.rationaleCodes.includes("limited_history"),"Limited-history recommendation mismatch.");
+
+  assert(p1.action==="monitor"&&p1.priority==="low"&&p1.confidence.level==="high","High-confidence monitor recommendation mismatch.");
+  for(const rec of recs){
+    assert(rec.recommendationVersion===1&&rec.recommendationType==="sales_demand"&&rec.status==="proposal","Recommendation contract mismatch.");
+    assert(rec.policy.autoApply===false&&rec.policy.requiresUserConfirmation===true,"Recommendation confirmation policy mismatch.");
+    assert(rec.policy.writesLegacyState===false&&rec.policy.writesAnalyticsState===false,"Recommendation write policy mismatch.");
+    assert(rec.proposedChange===null&&Array.isArray(rec.effects)&&rec.effects.length===0,"AN10 must not create concrete write effects.");
+    assert(!("recommendedUnits" in rec)&&!("recommendedVisitAt" in rec)&&!("routeChange" in rec),"AN10 crossed later-phase boundary.");
+  }
+
+  assert(recs[0].priority==="high"&&recs[0].subject.productCode==="P2","Priority ordering mismatch.");
+  const highs=await api.analysis.recommendations.list({machineId:"M1",makerKey:"MK",vendorNumber:"1",priority:"high"});
+  assert(highs.length===1&&highs[0].subject.productCode==="P2","Priority filter mismatch.");
+  const stockReviews=await api.analysis.recommendations.list({machineId:"M1",makerKey:"MK",vendorNumber:"1",action:"review_stock_capacity"});
+  assert(stockReviews.length===1&&stockReviews[0].subject.productCode==="P2","Action filter mismatch.");
+  const typed=await api.analysis.recommendations.list({machineId:"M1",makerKey:"MK",vendorNumber:"1",type:"sales_demand",productCode:"P1"});
+  assert(typed.length===1&&typed[0].action==="monitor","Type/product filter mismatch.");
+
+  let rejected=false;
+  try{await api.analysis.recommendations.list({action:"delete_everything"})}catch(error){rejected=true}
+  assert(rejected,"Unsupported recommendation action must reject.");
+
+  p2.rationaleCodes.push("tampered");
+  p2.policy.autoApply=true;
+  const reread=await api.analysis.recommendations.list({machineId:"M1",makerKey:"MK",vendorNumber:"1",productCode:"P2"});
+  assert(!reread[0].rationaleCodes.includes("tampered")&&reread[0].policy.autoApply===false,"Recommendation results are not defensive copies.");
+
+  assert(typeof api.analysis.sales.listForecasts==="function","AN9 forecast API regressed.");
+  const forecasts=await api.analysis.sales.listForecasts({machineId:"M1",makerKey:"MK",vendorNumber:"1",productCode:"P2"});
+  assert(forecasts.length===1&&forecasts[0].lowerBound===true,"AN9 forecast behavior regressed.");
+
+  result.textContent="AN10_BROWSER_PASS\n"+JSON.stringify({
+    ordered:recs.map(x=>({product:x.subject.productCode,action:x.action,priority:x.priority,confidence:x.confidence.level})),
+    policy:p2.policy,
+    soldOut:{action:p2.action,forecast:p2.forecast,rationale:p2.rationaleCodes},
+    unknown:{action:p4.action,forecast:p4.forecast,rationale:p4.rationaleCodes}
+  });
+  document.title="AN10_BROWSER_PASS";
+  document.documentElement.dataset.test="pass";
+}catch(error){
+  result.textContent="AN10_BROWSER_FAIL\n"+String(error&&error.stack||error);
+  document.title="AN10_BROWSER_FAIL";
+  document.documentElement.dataset.test="fail";
+}
+</script>
+</body>
+</html>

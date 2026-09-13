@@ -1,0 +1,105 @@
+name: AN10 temporary verification
+
+on:
+  push:
+    branches:
+      - chatgpt/an10-recommendation-engine
+
+permissions:
+  contents: read
+
+jobs:
+  verify-an10:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify baseline and immutable safety tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $base = '0e472aa793068aca480e7bad7990ba9b3fb5f3af'
+          $tag = 'backup-pre-AN10-AN9-20260914'
+          git fetch origin main --tags
+          $remoteMain = (git rev-parse origin/main).Trim()
+          if ($remoteMain -ne $base) { throw "origin/main moved from expected AN10 base: $remoteMain" }
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          if ((git cat-file -t $tag).Trim() -ne 'tag') { throw 'Safety ref is not an annotated tag.' }
+          if ((git rev-parse "$tag^{}").Trim() -ne $base) { throw 'Safety tag target mismatch.' }
+          Write-Host "AN10_SAFETY_TAG_PASS"
+
+      - name: Version and state consistency gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $state = Get-Content '.ai/STATE.json' -Raw | ConvertFrom-Json
+          $version = Get-Content 'version.json' -Raw | ConvertFrom-Json
+          $index = Get-Content 'index.html' -Raw
+          $analytics = Get-Content 'analytics.js' -Raw
+          $roadmap = Get-Content 'AI_ROADMAP.md' -Raw
+          if ($state.completedPhase -ne 'AN10' -or $state.nextPhase -ne 'AN11' -or $state.status -ne 'ready') { throw 'STATE phase mismatch.' }
+          if ($state.appVersion -ne '2026.09.14-AN10' -or $state.engineVersion -ne 'AN10' -or $state.dbVersion -ne 4 -or $state.schemaVersion -ne 4) { throw 'STATE version mismatch.' }
+          if ($version.version -ne '2026.09.14-AN10') { throw 'version.json mismatch.' }
+          if ($index -notmatch "APP_VERSION='2026\.09\.14-AN10'") { throw 'index APP_VERSION mismatch.' }
+          if ($analytics -notmatch 'ENGINE_VERSION="AN10"') { throw 'analytics ENGINE_VERSION mismatch.' }
+          if ($roadmap -notmatch 'Latest completed phase: \*\*AN10 — Recommendation Engine Foundation\*\*') { throw 'ROADMAP completed mismatch.' }
+          if ($roadmap -notmatch 'Next phase: \*\*AN11 — Visit / Route / Machine Bring-from-vehicle Recommendations\*\*') { throw 'ROADMAP next mismatch.' }
+          Write-Host "AN10_VERSION_STATE_PASS"
+
+      - name: Diff check
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          Write-Host "AN10_DIFF_CHECK_PASS"
+
+      - name: JavaScript syntax gate
+        shell: pwsh
+        run: |
+          node --check analytics.js
+          Write-Host "AN10_SYNTAX_PASS"
+
+      - name: Real Edge browser and IndexedDB gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $edgeCandidates = @(
+            "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+            "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe"
+          )
+          $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $edge) { throw 'Microsoft Edge executable was not found.' }
+          $port = 8126
+          $server = Start-Process python -ArgumentList @('-m','http.server',"$port",'--bind','127.0.0.1') -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try {
+            $ready=$false
+            for($attempt=1;$attempt -le 20;$attempt++){
+              try{
+                $response=Invoke-WebRequest -Uri "http://127.0.0.1:$port/tools/an10-browser-test.html" -UseBasicParsing -TimeoutSec 2
+                if($response.StatusCode -eq 200){$ready=$true;break}
+              }catch{Start-Sleep -Milliseconds 500}
+            }
+            if(-not $ready){throw 'Local AN10 test server did not become ready.'}
+            $profile=Join-Path $env:RUNNER_TEMP ("vendrive-an10-edge-"+$env:GITHUB_RUN_ID)
+            $stdout=Join-Path $env:RUNNER_TEMP 'an10-edge-stdout.txt'
+            $stderr=Join-Path $env:RUNNER_TEMP 'an10-edge-stderr.txt'
+            $edgeArgs=@(
+              '--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check',
+              '--virtual-time-budget=30000',"--user-data-dir=$profile",'--dump-dom',
+              "http://127.0.0.1:$port/tools/an10-browser-test.html"
+            )
+            $p=Start-Process -FilePath $edge -ArgumentList $edgeArgs -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            $text=if(Test-Path $stdout){Get-Content -Raw $stdout}else{''}
+            $err=if(Test-Path $stderr){Get-Content -Raw $stderr}else{''}
+            Write-Host $text
+            if($err){Write-Host "EDGE_STDERR";Write-Host $err}
+            if($p.ExitCode -ne 0){throw "Edge exited with code $($p.ExitCode)"}
+            if($text -notmatch 'AN10_BROWSER_PASS'){throw 'AN10_BROWSER_PASS token not found.'}
+            Write-Host "AN10_REAL_EDGE_PASS"
+          }
+          finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
