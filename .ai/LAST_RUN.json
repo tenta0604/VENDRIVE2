@@ -1,11 +1,11 @@
 {
   "evidenceVersion": 1,
-  "phase": "AI-RUNNER-BOOTSTRAP",
+  "phase": "AI-RUNNER-WINDOWS-FIX",
   "status": "PASS",
   "base": {
-    "head": "d5d699df8c4a56700bd123e7a3f3cc817371b899",
-    "safetyTag": "backup-pre-AI-RUNNER-AN8A3-20260913",
-    "safetyTagTarget": "d5d699df8c4a56700bd123e7a3f3cc817371b899"
+    "head": "192357146ca1b713269686fffb66e1a8140f58d2",
+    "safetyTag": "backup-pre-AI-RUNNER-FIX-AN8A3-20260914",
+    "safetyTagTarget": "192357146ca1b713269686fffb66e1a8140f58d2"
   },
   "versions": {
     "app": "2026.09.13-AN8A3",
@@ -16,10 +16,11 @@
   "gates": {
     "preflight": "PASS",
     "syntax": "PASS",
-    "dryRun": "PASS",
-    "codexCli": "PASS",
-    "concurrencyLock": "PASS",
+    "codexCmdDiscovery": "PASS",
+    "codexExecHelp": "PASS",
+    "smokeTest": "PASS",
     "diffCheck": "PASS",
+    "productionBlobs": "PASS",
     "build": "NOT_REQUIRED",
     "buildReason": "Production application files are unchanged.",
     "functional": "PASS",
@@ -31,9 +32,6 @@
   },
   "changedFiles": [
     ".ai/LAST_RUN.json",
-    ".ai/WORKFLOW.md",
-    "AGENTS.md",
-    "tools/ai-runner.cmd",
     "tools/ai-runner.ps1"
   ],
   "unresolved": []

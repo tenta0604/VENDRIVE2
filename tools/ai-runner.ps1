@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$SmokeTest
 )
 
 Set-StrictMode -Version Latest
@@ -19,10 +20,15 @@ $MetadataPath = Join-Path $LogDirectory ($RunId + '.metadata.json')
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $LockStream = $null
 $ExitCode = 1
+$RunMode = 'Phase'
+if ($DryRun) { $RunMode = 'DryRun' }
+if ($SmokeTest) { $RunMode = 'SmokeTest' }
 $Metadata = [ordered]@{
     evidenceVersion = 1
     runId = $RunId
     dryRun = [bool]$DryRun
+    smokeTest = [bool]$SmokeTest
+    runMode = $RunMode
     repository = $RepoRoot
     startedAt = $StartedAt
     finishedAt = $null
@@ -122,22 +128,25 @@ function Invoke-Preflight {
 }
 
 function Get-CodexDiscovery {
-    $Command = Get-Command codex -ErrorAction Stop
+    $Command = Get-Command codex.cmd -CommandType Application -ErrorAction Stop
+    if ([IO.Path]::GetExtension($Command.Source) -ne '.cmd') {
+        throw 'Codex discovery did not resolve codex.cmd.'
+    }
     $VersionOutput = & $Command.Source --version 2>&1
-    if ($LASTEXITCODE -ne 0) { throw 'codex --version failed.' }
+    if ($LASTEXITCODE -ne 0) { throw 'codex.cmd --version failed.' }
     $HelpOutput = & $Command.Source exec --help 2>&1
-    if ($LASTEXITCODE -ne 0 -or (($HelpOutput | Out-String) -notmatch 'Run Codex non-interactively') -or (($HelpOutput | Out-String) -notmatch '--ephemeral')) {
-        throw 'codex exec is unavailable or incompatible.'
+    $HelpText = $HelpOutput | Out-String
+    if ($LASTEXITCODE -ne 0 -or $HelpText -notmatch 'Run Codex non-interactively' -or $HelpText -notmatch '--sandbox' -or $HelpText -notmatch '--ephemeral' -or $HelpText -notmatch '--cd') {
+        throw 'codex.cmd exec is unavailable or incompatible.'
     }
     return [ordered]@{ path = $Command.Source; version = (($VersionOutput | ForEach-Object { [string]$_ }) -join ' ').Trim() }
 }
 
-function Invoke-CodexPhase {
-    param([string]$CodexPath)
-    $Prompt = 'Advance exactly one phase. Follow AGENTS.md, AI_ROADMAP.md, .ai/STATE.json, and .ai/WORKFLOW.md strictly. Before a successful commit, write actual gate evidence to .ai/LAST_RUN.json. Do not output credentials or secrets.'
+function Invoke-CodexProcess {
+    param([string]$CodexPath, [string]$Prompt)
     $StartInfo = New-Object Diagnostics.ProcessStartInfo
-    $StartInfo.FileName = $CodexPath
-    $StartInfo.Arguments = '--approve-for-me -s workspace-write -C "' + $RepoRoot + '" exec --ephemeral --color never -'
+    $StartInfo.FileName = $env:ComSpec
+    $StartInfo.Arguments = '/d /s /c ""' + $CodexPath + '" exec --sandbox workspace-write --ephemeral -C "' + $RepoRoot + '" --color never -"'
     $StartInfo.WorkingDirectory = $RepoRoot
     $StartInfo.UseShellExecute = $false
     $StartInfo.CreateNoWindow = $true
@@ -156,7 +165,16 @@ function Invoke-CodexPhase {
     $Stderr = $StderrTask.GetAwaiter().GetResult()
     Write-Utf8File -Path $StdoutPath -Content $Stdout
     Write-Utf8File -Path $StderrPath -Content $Stderr
-    return $Process.ExitCode
+    return [ordered]@{ exitCode = $Process.ExitCode; stdout = $Stdout; stderr = $Stderr }
+}
+
+function Get-SmokeProtectedHashes {
+    $Paths = @('analytics.js', 'analytics.css', 'index.html', 'version.json', 'manifest.webmanifest', '.ai\STATE.json', '.ai\LAST_RUN.json')
+    $Hashes = [ordered]@{}
+    foreach ($Path in $Paths) {
+        $Hashes[$Path] = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $RepoRoot $Path)).Hash
+    }
+    return $Hashes
 }
 
 function Assert-LastRunEvidence {
@@ -200,6 +218,9 @@ function Invoke-PostRunVerification {
 }
 
 try {
+    if ($DryRun -and $SmokeTest) {
+        throw 'DryRun and SmokeTest cannot be used together.'
+    }
     New-Item -ItemType Directory -Path $LogDirectory -Force | Out-Null
     try {
         $LockStream = [IO.File]::Open($LockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
@@ -230,10 +251,30 @@ try {
         $ExitCode = 0
         Write-Output "DRY_RUN PASS: preflight, STATE, versions, ROADMAP, lock, logs, and Codex CLI discovery are valid."
     }
+    elseif ($SmokeTest) {
+        $ProtectedBefore = Get-SmokeProtectedHashes
+        $SmokePrompt = 'Return exactly WORKSPACE_WRITE_SMOKE_OK. Do not modify files, repository state, STATE, or LAST_RUN. Do not run Git commands, commit, push, or implement AN8B.'
+        $CodexResult = Invoke-CodexProcess -CodexPath ([string]$Discovery.path) -Prompt $SmokePrompt
+        $Metadata.codexExitCode = [int]$CodexResult.exitCode
+        if ([int]$CodexResult.exitCode -ne 0) { throw "Codex smoke test exited with code $($CodexResult.exitCode). No retry was attempted." }
+        if ([string]$CodexResult.stdout -notmatch 'WORKSPACE_WRITE_SMOKE_OK') { throw 'Codex smoke test response token was not found.' }
+        $AfterSmoke = Invoke-Preflight
+        if ($AfterSmoke.head -ne $Before.head) { throw 'Smoke test changed Git HEAD.' }
+        $ProtectedAfter = Get-SmokeProtectedHashes
+        foreach ($Path in $ProtectedBefore.Keys) {
+            if ($ProtectedAfter[$Path] -ne $ProtectedBefore[$Path]) { throw ('Smoke test changed protected file: ' + $Path) }
+        }
+        $Metadata.status = 'PASS'
+        $Metadata.phaseAfter = [string]$Before.state.nextPhase
+        $Metadata.headAfter = [string]$Before.head
+        $ExitCode = 0
+        Write-Output 'SMOKE_TEST PASS: codex.cmd completed in workspace-write without repository or protected-file changes.'
+    }
     else {
-        $CodexExit = Invoke-CodexPhase -CodexPath ([string]$Discovery.path)
-        $Metadata.codexExitCode = $CodexExit
-        if ($CodexExit -ne 0) { throw "Codex exited with code $CodexExit. No retry was attempted." }
+        $PhasePrompt = 'Advance exactly one phase. Follow AGENTS.md, AI_ROADMAP.md, .ai/STATE.json, and .ai/WORKFLOW.md strictly. Before a successful commit, write actual gate evidence to .ai/LAST_RUN.json. Do not output credentials or secrets.'
+        $CodexResult = Invoke-CodexProcess -CodexPath ([string]$Discovery.path) -Prompt $PhasePrompt
+        $Metadata.codexExitCode = [int]$CodexResult.exitCode
+        if ([int]$CodexResult.exitCode -ne 0) { throw "Codex exited with code $($CodexResult.exitCode). No retry was attempted." }
         $After = Invoke-PostRunVerification -Before $Before
         $Metadata.status = 'PASS'
         $Metadata.phaseAfter = [string]$After.state.completedPhase
@@ -245,7 +286,7 @@ try {
 catch {
     $Metadata.status = 'FAIL'
     $Metadata.error = $_.Exception.Message
-    try { Write-Utf8File -Path $StderrPath -Content ($_.Exception.ToString() + [Environment]::NewLine) } catch {}
+    try { [IO.File]::AppendAllText($StderrPath, ($_.Exception.ToString() + [Environment]::NewLine), $Utf8NoBom) } catch {}
     [Console]::Error.WriteLine('AI runner FAIL: ' + $_.Exception.Message)
     $ExitCode = 1
 }
