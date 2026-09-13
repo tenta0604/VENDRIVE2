@@ -25,9 +25,15 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34770702870,
-      "jobId": 103759651488,
-      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost, dedicated ephemeral user-data-dir, and IndexedDB test fixtures"
+      "runId": 34770909336,
+      "jobId": 103760211222,
+      "environment": "GitHub Actions windows-latest with Microsoft Edge, localhost readiness check, dedicated ephemeral user-data-dir, and IndexedDB test fixtures",
+      "coverage": [
+        "nearest prior-year visit within configurable day tolerance",
+        "exact-date-only maxDayDistance=0 behavior",
+        "cross-year Dec/Jan nearest-date matching",
+        "AN8A3 previous-period API regression guard"
+      ]
     }
   },
   "changedFiles": [
