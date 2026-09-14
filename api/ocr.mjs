@@ -32,11 +32,11 @@ function safeSupportedTypes(raw){
   return values.length?Array.from(new Set(values)):REPORT_TYPES.slice();
 }
 function getGatewayToken(request){
-  const apiKey=process.env.AI_GATEWAY_API_KEY;
-  if(apiKey)return apiKey;
+  const requestOidc=request.headers.get("x-vercel-oidc-token");
+  if(requestOidc)return requestOidc;
   const envOidc=process.env.VERCEL_OIDC_TOKEN;
   if(envOidc)return envOidc;
-  return request.headers.get("x-vercel-oidc-token")||"";
+  return process.env.AI_GATEWAY_API_KEY||"";
 }
 
 export default {
