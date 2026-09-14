@@ -39,9 +39,10 @@ jobs:
           node --check analytics.js
           node --check ocr-config.js
           node --check ocr-relay-adapter.js
+          node --check api/ocr.mjs
           grep -F '<script src="ocr-config.js"></script>' index.html
           grep -F '<script src="ocr-relay-adapter.js"></script>' index.html
-          ! grep -REn '(sk-proj-|OPENAI_API_KEY[[:space:]]*=|api[_-]?key[[:space:]]*[:=][[:space:]]*["'\'' ][A-Za-z0-9_-]{16,})' -- index.html analytics.js ocr-config.js ocr-relay-adapter.js
+          ! grep -REn '(sk-proj-|OPENAI_API_KEY[[:space:]]*=|api[_-]?key[[:space:]]*[:=][[:space:]]*["'\'' ][A-Za-z0-9_-]{16,})' -- index.html analytics.js ocr-config.js ocr-relay-adapter.js api/ocr.mjs
           git diff --check
       - name: Adapter behavior checks
         shell: bash
@@ -58,7 +59,23 @@ jobs:
           let a=context('');if(a.ctx.window.VENDRIVE2OCRAdapter)throw new Error('adapter must stay disabled without endpoint');
           let b=context('http://example.com/ocr');if(b.ctx.window.VENDRIVE2OCRAdapter)throw new Error('insecure remote endpoint must be rejected');
           let c=context('https://ocr.example.com/api');if(!c.ctx.window.VENDRIVE2OCRAdapter||c.ctx.window.VENDRIVE2OCRAdapter.version!==1)throw new Error('https relay adapter should install');
+          if(c.ctx.window.VENDRIVE2OCRAdapter.maxUploadBytes!==4*1024*1024)throw new Error('relay upload limit mismatch');
           c.ctx.window.VENDRIVE2OCRAdapter.analyze({file:new Blob(['x'],{type:'text/plain'}),supportedReportTypes:['sales']}).then(()=>{throw new Error('non-image accepted')}).catch(e=>{if(!/image/.test(String(e.message)))throw e});
+          NODE
+      - name: Relay behavior checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const mod=await import('./api/ocr.mjs');
+          const handler=mod.default.fetch;
+          let r=await handler(new Request('https://relay.example/api/ocr',{method:'POST',headers:{origin:'https://evil.example'}}));
+          if(r.status!==403)throw new Error('unapproved origin was not rejected');
+          r=await handler(new Request('https://relay.example/api/ocr',{method:'GET',headers:{origin:'https://tenta0604.github.io'}}));
+          if(r.status!==405)throw new Error('non-POST request was not rejected');
+          delete process.env.OPENAI_API_KEY;
+          r=await handler(new Request('https://relay.example/api/ocr',{method:'POST',headers:{origin:'https://tenta0604.github.io'}}));
+          if(r.status!==503)throw new Error('missing secret was not fail-closed');
           NODE
       - name: Commit work branch patch
         shell: bash
