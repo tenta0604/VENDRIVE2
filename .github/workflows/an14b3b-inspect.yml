@@ -1,0 +1,24 @@
+name: AN14B3B Inspect
+
+on:
+  push:
+    branches: [chatgpt/an14b3b-sales-review-current-20260914]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect capture implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== capture variables/functions ==='
+          grep -n -E -C 12 'reportCapture|captureOcr|runReportOcr|prepareReportCaptureReview|confirmCaptureReview|renderCapture' index.html || true
+          echo '=== report capture css ==='
+          grep -n -E -C 5 'reportCapture|reportOcr' index.html | head -n 240 || true
+          echo '=== script includes ==='
+          tail -n 25 index.html
