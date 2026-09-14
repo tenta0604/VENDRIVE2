@@ -43,10 +43,10 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git tag -a "$TAG" "$EXPECTED" -m 'Safety backup before AN14B3B real-paper review UI calibration'
           test "$(git cat-file -t "$TAG")" = 'tag'
-          test "$(git rev-parse "$TAG^{})")" = "$EXPECTED"
+          test "$(git rev-parse "$TAG^{}")" = "$EXPECTED"
           git push origin "refs/tags/$TAG"
 
           git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
           test "$(git cat-file -t "$TAG")" = 'tag'
-          test "$(git rev-parse "$TAG^{})")" = "$EXPECTED"
+          test "$(git rev-parse "$TAG^{}")" = "$EXPECTED"
           echo "AN14B3B annotated safety tag verified: $TAG -> $EXPECTED"
