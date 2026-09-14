@@ -193,7 +193,7 @@ function mount(container,review){
     validationBox.textContent="要確認："+messages.join(" / ");
     return false;
   }
-  function updateSaveState(){save.disabled=saved||!approval.checked||!validate()}
+  function updateSaveState(){var valid=validate();save.disabled=saved||!approval.checked||!valid}
   function changed(){if(approval){approval.checked=false}updateSaveState()}
   save.addEventListener("click",function(){
     if(saved||!approval.checked||!validate())return;
