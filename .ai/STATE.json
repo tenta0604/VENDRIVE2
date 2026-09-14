@@ -2,30 +2,34 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "AN14B3A",
-  "activePhase": "AN14B3B",
-  "nextPhase": "AN14B3B",
-  "appVersion": "2026.09.14-AN14B3A",
-  "engineVersion": "AN14B3A",
+  "completedPhase": "AN14B3B1",
+  "activePhase": "AN14B3B2",
+  "nextPhase": "AN14B3B2",
+  "appVersion": "2026.09.14-AN14B3B1",
+  "engineVersion": "AN14B3B1",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "in_progress_partial_evidence",
+  "status": "waiting_user_input",
   "currentWork": {
-    "title": "AN14B3B — Real-paper Review UI Calibration",
-    "productionCodeOnMain": "not_started",
-    "preEditSafetyTag": "backup-pre-AN14B3B-AN14B3A-20260914",
-    "preEditSafetyTagTarget": "9cbb69850bae04ac7f7a9bd9b645cd7d80259c6d",
-    "progress": [
-      "AN14B3A production OCR provider connection is complete and deployed",
-      "AN14B3B immutable annotated pre-edit safety tag has been created and verified",
-      "A real sales-journal sample has been inspected and is sufficient to begin sales-side review calibration",
-      "No AN14B3B production implementation has been committed to main"
+    "title": "AN14B3B2 — Input / Recovery Real-paper Review UI Calibration",
+    "productionCodeOnMain": "sales_review_complete",
+    "completedSalesScope": [
+      "Real sales-journal field-level OCR review/correction UI",
+      "Editable header, totals, product rows, and sold-out rows",
+      "Visible quantity and amount consistency validation",
+      "Explicit paper-comparison approval before Analytics draft creation",
+      "No automatic confirmation, inventory movement, or legacy write",
+      "Real Microsoft Edge verification at 320px and 390px"
     ],
+    "lastSafetyTag": "backup-pre-AN14B3B-canonical-main-20260914",
+    "lastSafetyTagTarget": "c107298c3f08196de2ac97bc51d596aea403f310",
+    "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
-      "Implement sales-journal field-level OCR review/correction UI using the real-paper structure",
-      "Preserve explicit human review, no auto-confirm, no inventory movement, and no legacy write",
-      "Calibrate input/recovery layouts only after real input-confirmation and recovery paper samples are available",
-      "Run syntax, diff, functional, and real Edge 320px/390px regression before completing AN14B3B"
+      "Receive and inspect real input-confirmation and recovery paper photos",
+      "If a joined input/recovery paper exists, inspect a real sample rather than guessing its layout",
+      "Run fresh main preflight and create a new immutable annotated Safety Tag at the then-current main",
+      "Implement input/recovery review UI using only evidence from real papers",
+      "Run syntax, diff, functional, and real Edge 320px/390px regression before completing AN14B3B2"
     ]
   },
   "requiredUserInput": [
@@ -38,6 +42,11 @@
       "item": "回収票の実紙写真",
       "requiredFor": "recovery report layout calibration",
       "status": "pending"
+    },
+    {
+      "item": "投入＋回収が一体の実紙写真（現場にある場合）",
+      "requiredFor": "joined input_recovery layout calibration",
+      "status": "optional_pending"
     }
   ],
   "unresolved": [

@@ -1,61 +1,82 @@
 {
   "evidenceVersion": 2,
-  "runType": "continuity_maintenance",
-  "run": "LONG_TERM_PROJECT_STATE_BOOTSTRAP",
-  "productPhase": "AN14B3B",
+  "runType": "product_phase",
+  "phase": "AN14B3B1",
   "status": "PASS",
   "base": {
-    "head": "9cbb69850bae04ac7f7a9bd9b645cd7d80259c6d",
-    "productionSafetyTag": "NOT_REQUIRED",
-    "productionSafetyTagReason": "This run changes only canonical project-state and recovery documentation; production code is untouched.",
-    "activePhasePreEditSafetyTag": "backup-pre-AN14B3B-AN14B3A-20260914",
-    "activePhasePreEditSafetyTagTarget": "9cbb69850bae04ac7f7a9bd9b645cd7d80259c6d"
+    "head": "c107298c3f08196de2ac97bc51d596aea403f310",
+    "safetyTag": "backup-pre-AN14B3B-canonical-main-20260914",
+    "safetyTagTarget": "c107298c3f08196de2ac97bc51d596aea403f310"
   },
   "versions": {
-    "app": "2026.09.14-AN14B3A",
-    "engine": "AN14B3A",
+    "app": "2026.09.14-AN14B3B1",
+    "engine": "AN14B3B1",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Established GitHub-main canonical project memory so VENDRIVE2 can recover across chat migrations without a long handoff prompt.",
+    "summary": "Calibrated the sales-journal OCR review UI from a real paper sample while preserving the explicit-review and draft-only safety boundary.",
     "completed": [
-      "Verified latest main and existing STATE, ROADMAP, LAST_RUN, AGENTS, and WORKFLOW",
-      "Added canonical DECISIONS file",
-      "Expanded STATE to include active work, progress, required user input, unresolved items, and recovery order",
-      "Added new-chat bootstrap and proactive migration rules to AGENTS and WORKFLOW",
-      "Refined ROADMAP with real-paper AN14B3B calibration boundaries without changing phase order",
-      "Preserved all application/engine/database/schema versions and production behavior"
+      "Added field-level sales-journal review/correction UI",
+      "Made sales header, totals, product rows, and sold-out fields editable",
+      "Added visible quantity/amount consistency checks using the existing report validator",
+      "Required explicit paper-comparison approval before draft creation",
+      "Created only an Analytics OCR draft after approval; no automatic confirmation",
+      "Kept input/recovery layouts generic and unimplemented until real paper samples are available"
     ]
   },
   "gates": {
     "preflight": "PASS",
-    "mainBaseline": "PASS",
-    "productionCodeChanged": false,
-    "versionChange": "NOT_REQUIRED",
-    "versionChangeReason": "Continuity-only maintenance does not change production behavior or release version.",
-    "safetyTag": "NOT_REQUIRED",
-    "safetyTagReason": "No production code edit in this run.",
-    "jsonValidation": "PASS",
-    "canonicalStateConsistency": "PASS",
-    "roadmapOrderPreserved": "PASS",
+    "safetyTag": "PASS",
+    "diffCheck": "PASS",
+    "syntax": "PASS",
+    "functional": "PASS",
+    "dataSafety": {
+      "status": "PASS",
+      "coverage": [
+        "save remains disabled until validation passes and explicit paper approval is checked",
+        "draft creation uses the existing reviewed OCR boundary",
+        "no automatic report confirmation",
+        "no inventory movement",
+        "legacy vendrive2_v7_data remains unchanged"
+      ]
+    },
+    "realEdge": {
+      "required": true,
+      "status": "PASS",
+      "runId": 34858193854,
+      "coverage": [
+        "real Microsoft Edge",
+        "320px mobile viewport",
+        "390px mobile viewport",
+        "field editing and mismatch detection",
+        "corrected totals return to valid state",
+        "explicit approval gate",
+        "edited values persisted to one OCR draft",
+        "zero inventory movement",
+        "no legacy write",
+        "no horizontal overflow"
+      ]
+    },
     "build": "NOT_REQUIRED",
-    "buildReason": "Documentation/state-only maintenance.",
-    "realEdge": "NOT_REQUIRED",
-    "realEdgeReason": "No UI/runtime/browser behavior changed."
+    "buildReason": "The production application is direct HTML/JavaScript with no build step; syntax and real Edge gates passed."
   },
   "changedFiles": [
-    "AGENTS.md",
-    ".ai/STATE.json",
-    ".ai/LAST_RUN.json",
     ".ai/DECISIONS.md",
-    ".ai/WORKFLOW.md",
-    "AI_ROADMAP.md"
+    ".ai/LAST_RUN.json",
+    ".ai/STATE.json",
+    "AI_ROADMAP.md",
+    "OCR_ADAPTER.md",
+    "analytics.js",
+    "index.html",
+    "sales-review.js",
+    "version.json"
   ],
   "openItems": [
-    "Real input-confirmation paper sample is still required for input layout calibration",
-    "Real recovery paper sample is still required for recovery layout calibration"
+    "Real input-confirmation paper sample is required for AN14B3B2 input calibration",
+    "Real recovery paper sample is required for AN14B3B2 recovery calibration",
+    "Joined input/recovery layout will be calibrated only if a real combined-paper sample is available"
   ],
-  "nextAction": "Resume AN14B3B from main: implement sales-journal field-level review/correction UI from the inspected real sales sample while preserving the existing no-auto-confirm/no-write safety boundary; incorporate input/recovery layouts only after their real-paper samples arrive.",
+  "nextAction": "Wait for the real input-confirmation and recovery paper photos. When they arrive, start AN14B3B2 with a fresh main preflight and new immutable annotated Safety Tag, then calibrate only from those real samples.",
   "unresolved": []
 }
