@@ -4,6 +4,6 @@
   if(existing&&typeof existing==="object")return;
   window.VENDRIVE2OCRRelayConfig=Object.freeze({
     version:1,
-    endpoint:""
+    endpoint:"https://vendrive2-ocr-relay.vercel.app/api/ocr"
   });
 })();
