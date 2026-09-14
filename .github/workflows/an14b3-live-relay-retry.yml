@@ -12,13 +12,17 @@ jobs:
   gateway-diagnostic:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Vercel AI Gateway auth/model path
+      - name: Check minimal Vercel function and OIDC exposure
         shell: bash
         run: |
           set -euo pipefail
-          sleep 5
-          curl -sS -X POST \
+          sleep 12
+          code=$(curl -sS -L --post302 --post301 -o response.json -w '%{http_code}' \
+            -X POST \
             -H 'Origin: https://tenta0604.github.io' \
-            https://vendrive2-ocr-relay.vercel.app/api/gateway-check
-
-# Git connection trigger: 2026-09-14T14:28+09:00
+            https://vendrive2-ocr-relay-git-chatgpt-an14-a1f2b0-nekotokikanjyu-5172.vercel.app/api/ping)
+          echo "HTTP $code"
+          cat response.json
+          echo
+          test "$code" = "200"
+          node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync("response.json","utf8"));if(x.ok!==true)throw new Error("ping failed");console.log("minimal Vercel function PASS",x)'
