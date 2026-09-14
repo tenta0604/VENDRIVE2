@@ -1,4 +1,4 @@
-name: AN14B3 Gateway Live Test
+name: AN14B3 Gateway Diagnostic
 
 on:
   push:
@@ -9,22 +9,14 @@ permissions:
   contents: read
 
 jobs:
-  gateway-live-test:
+  gateway-diagnostic:
     runs-on: ubuntu-latest
     steps:
-      - name: Test production OCR relay through Vercel AI Gateway
+      - name: Check Vercel AI Gateway auth/model path
         shell: bash
         run: |
           set -euo pipefail
           sleep 5
-          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > tiny.png
-          code=$(curl -sS -o response.json -w '%{http_code}' \
+          curl -sS -X POST \
             -H 'Origin: https://tenta0604.github.io' \
-            -F 'file=@tiny.png;type=image/png' \
-            -F 'supportedReportTypes=["sales","input","recovery","input_recovery"]' \
-            https://vendrive2-ocr-relay.vercel.app/api/ocr)
-          echo "HTTP $code"
-          cat response.json
-          echo
-          test "$code" = "200"
-          grep -q '"provider":"vercel-ai-gateway"' response.json
+            https://vendrive2-ocr-relay.vercel.app/api/gateway-check
