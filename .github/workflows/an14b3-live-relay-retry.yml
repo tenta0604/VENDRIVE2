@@ -20,3 +20,5 @@ jobs:
           curl -sS -X POST \
             -H 'Origin: https://tenta0604.github.io' \
             https://vendrive2-ocr-relay.vercel.app/api/gateway-check
+
+# Git connection trigger: 2026-09-14T14:28+09:00
