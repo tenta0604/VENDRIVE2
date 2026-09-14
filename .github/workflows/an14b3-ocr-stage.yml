@@ -1,0 +1,27 @@
+name: AN14B3 OCR Stage Diagnostic
+
+on:
+  push:
+    branches:
+      - chatgpt/an14b3-work-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  stage-diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe OCR runtime stages
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 12
+          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > tiny.png
+          code=$(curl -sS -L --post302 --post301 -o response.json -w '%{http_code}' \
+            -H 'Origin: https://tenta0604.github.io' \
+            -F 'file=@tiny.png;type=image/png' \
+            https://vendrive2-ocr-relay-git-chatgpt-an14-a1f2b0-nekotokikanjyu-5172.vercel.app/api/ocr-stage-diagnostic)
+          echo "HTTP $code"
+          cat response.json
+          echo
