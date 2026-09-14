@@ -2,7 +2,7 @@
   "use strict";
   var config=window.VENDRIVE2OCRRelayConfig;
   if(!config||config.version!==1||typeof config.endpoint!=="string"||!config.endpoint.trim())return;
-  var endpoint=config.endpoint.trim();
+  var endpoint=config.endpoint.trim(),MAX_RELAY_BYTES=4*1024*1024;
   function validEndpoint(value){
     try{
       var url=new URL(value,window.location.href);
@@ -20,7 +20,8 @@
     var file=input.file;
     if(!(file instanceof Blob))fail("OCR image file is required");
     if(!file.type||file.type.indexOf("image/")!==0)fail("OCR file must be an image");
-    if(typeof file.size!=="number"||file.size<1||file.size>20*1024*1024)fail("OCR image must be 20MB or less");
+    if(typeof file.size!=="number"||file.size<1)fail("OCR image is empty");
+    if(file.size>MAX_RELAY_BYTES)fail("OCR送信用画像は4MB以下にしてください。選択画像自体は保存されていません。");
     if(!Array.isArray(input.supportedReportTypes)||!input.supportedReportTypes.length)fail("supportedReportTypes is required");
     return file;
   }
@@ -44,5 +45,5 @@
       throw error;
     }finally{clearTimeout(timer)}
   }
-  window.VENDRIVE2OCRAdapter=Object.freeze({version:1,transport:"secure-relay",analyze:analyze});
+  window.VENDRIVE2OCRAdapter=Object.freeze({version:1,transport:"secure-relay",maxUploadBytes:MAX_RELAY_BYTES,analyze:analyze});
 })();
