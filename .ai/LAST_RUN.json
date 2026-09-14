@@ -1,15 +1,15 @@
 {
   "evidenceVersion": 1,
-  "phase": "AN14B2",
+  "phase": "AN14B3A",
   "status": "PASS",
   "base": {
-    "head": "d369ee6617395a7f729560e15da6859b8f4d3092",
-    "safetyTag": "backup-pre-AN14B2-AN14B1-20260914",
-    "safetyTagTarget": "d369ee6617395a7f729560e15da6859b8f4d3092"
+    "head": "4e744ad2de682faded22029914b67e0d3ec4b598",
+    "safetyTag": "backup-pre-AN14B3-repaired-main-20260914",
+    "safetyTagTarget": "4e744ad2de682faded22029914b67e0d3ec4b598"
   },
   "versions": {
-    "app": "2026.09.14-AN14B2",
-    "engine": "AN14B2",
+    "app": "2026.09.14-AN14B3A",
+    "engine": "AN14B3A",
     "db": 4,
     "schema": 4
   },
@@ -20,21 +20,64 @@
     "diffCheck": "PASS",
     "syntax": "PASS",
     "functional": "PASS",
-    "build": "NOT_REQUIRED",
-    "buildReason": "Direct HTML/JavaScript application; no build step is required.",
+    "security": {
+      "status": "PASS",
+      "coverage": [
+        "Gemini API key remains server-side in Vercel Secret storage",
+        "final production tree contains no diagnostic endpoints or temporary validation workflows",
+        "final production code contains no embedded Gemini/OpenAI API-key pattern",
+        "OCR response contract excludes raw OCR text, image bytes, base64/Data URLs, and credentials"
+      ]
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "coverage": [
+        "OCR relay and adapter do not write legacy storage",
+        "OCR relay and adapter do not write analytics state",
+        "existing reviewed-draft boundary still requires explicit user approval",
+        "no automatic report confirmation or inventory movement"
+      ]
+    },
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34789946262,
+      "runIds": [
+        34834173574,
+        34834173585
+      ],
       "coverage": [
-        "explicit user approval is required before draft creation",
-        "review is revalidated using the existing report payload validator",
-        "valid OCR candidate creates only an unconfirmed draft report with source method ocr",
-        "validation mismatch remains needs_review and existing confirm refuses confirmation",
-        "no inventory movement is applied by draft creation",
-        "unsafe OCR retention flags are rejected"
+        "Microsoft Edge real-browser regression",
+        "320px mobile viewport",
+        "390px mobile viewport",
+        "no horizontal overflow or page errors",
+        "OCR modal/review wiring remains available"
       ]
-    }
+    },
+    "relayPreview": {
+      "status": "PASS",
+      "deploymentId": "dpl_A9DXEJ7rVcvLRmbCF7ijXbM2qnkn",
+      "evidence": "clean zero-config Preview deployment READY after temporary diagnostics were removed"
+    },
+    "productionDeployment": {
+      "status": "PASS",
+      "deploymentId": "dpl_EzesiM2VVcch2DWQGojdas4ZGsET",
+      "evidence": "main deployment READY and production alias resolved to the same Git SHA"
+    },
+    "productionRealImageOcr": {
+      "status": "PASS",
+      "runId": 34834507894,
+      "evidence": {
+        "httpStatus": 200,
+        "provider": "google-gemini-api",
+        "detectedType": "sales",
+        "totalQty": 3,
+        "totalAmount": 430,
+        "productCount": 2,
+        "warnings": 0
+      }
+    },
+    "build": "NOT_REQUIRED",
+    "buildReason": "The GitHub Pages application is direct HTML/JavaScript; the Vercel relay is zero-config serverless and its production deployment gate passed."
   },
   "changedFiles": [
     ".ai/LAST_RUN.json",
@@ -42,7 +85,10 @@
     "AI_ROADMAP.md",
     "OCR_ADAPTER.md",
     "analytics.js",
+    "api/ocr.mjs",
     "index.html",
+    "ocr-config.js",
+    "ocr-relay-adapter.js",
     "version.json"
   ],
   "unresolved": []
