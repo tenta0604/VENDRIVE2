@@ -7,19 +7,30 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   live-relay:
     runs-on: ubuntu-latest
     steps:
-      - name: Call preview OCR relay with synthetic image
+      - uses: actions/github-script@v7
+        id: oidc
+        with:
+          script: |
+            const token = await core.getIDToken();
+            core.setSecret(token);
+            core.setOutput('token', token);
+      - name: Call protected preview OCR relay with synthetic image
         shell: bash
+        env:
+          VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
           sleep 12
           printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > tiny.png
-          code=$(curl -sS -L --post302 --post301 -o response.json -w '%{http_code}' \
+          code=$(curl -sS -o response.json -w '%{http_code}' \
             -H 'Origin: https://tenta0604.github.io' \
+            -H "x-vercel-trusted-oidc-idp-token: $VERCEL_TRUSTED_OIDC_TOKEN" \
             -F 'file=@tiny.png;type=image/png' \
             -F 'supportedReportTypes=["sales","input","recovery","input_recovery"]' \
             https://vendrive2-ocr-relay-git-chatgpt-an14-a1f2b0-nekotokikanjyu-5172.vercel.app/api/ocr)
