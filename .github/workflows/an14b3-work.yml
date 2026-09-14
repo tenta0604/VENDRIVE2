@@ -1,0 +1,72 @@
+name: AN14B3 Work Validation
+
+on:
+  push:
+    branches:
+      - chatgpt/an14b3-work-20260914
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Wire relay adapter into capture page
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='<script src="analytics.js"></script>'
+          new='<script src="ocr-config.js"></script>\n<script src="ocr-relay-adapter.js"></script>\n<script src="analytics.js"></script>'
+          if new not in s:
+              if old not in s:
+                  raise SystemExit('analytics script marker not found')
+              s=s.replace(old,new,1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Syntax and static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check analytics.js
+          node --check ocr-config.js
+          node --check ocr-relay-adapter.js
+          grep -F '<script src="ocr-config.js"></script>' index.html
+          grep -F '<script src="ocr-relay-adapter.js"></script>' index.html
+          ! grep -REn '(sk-proj-|OPENAI_API_KEY[[:space:]]*=|api[_-]?key[[:space:]]*[:=][[:space:]]*["'\'' ][A-Za-z0-9_-]{16,})' -- index.html analytics.js ocr-config.js ocr-relay-adapter.js
+          git diff --check
+      - name: Adapter behavior checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const code=fs.readFileSync('ocr-relay-adapter.js','utf8');
+          function context(endpoint){
+            let calls=0;
+            const ctx={console,URL,Blob,FormData,AbortController,setTimeout,clearTimeout,window:{location:{href:'https://tenta0604.github.io/VENDRIVE2/'},VENDRIVE2OCRRelayConfig:{version:1,endpoint}},fetch:async()=>{calls++;throw new Error('network should not be reached in static test')}};
+            vm.createContext(ctx);vm.runInContext(code,ctx);return {ctx,calls:()=>calls};
+          }
+          let a=context('');if(a.ctx.window.VENDRIVE2OCRAdapter)throw new Error('adapter must stay disabled without endpoint');
+          let b=context('http://example.com/ocr');if(b.ctx.window.VENDRIVE2OCRAdapter)throw new Error('insecure remote endpoint must be rejected');
+          let c=context('https://ocr.example.com/api');if(!c.ctx.window.VENDRIVE2OCRAdapter||c.ctx.window.VENDRIVE2OCRAdapter.version!==1)throw new Error('https relay adapter should install');
+          c.ctx.window.VENDRIVE2OCRAdapter.analyze({file:new Blob(['x'],{type:'text/plain'}),supportedReportTypes:['sales']}).then(()=>{throw new Error('non-image accepted')}).catch(e=>{if(!/image/.test(String(e.message)))throw e});
+          NODE
+      - name: Commit work branch patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "feat: wire secure OCR relay adapter"
+          git push origin HEAD
