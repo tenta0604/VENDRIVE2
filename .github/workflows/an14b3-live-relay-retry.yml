@@ -1,0 +1,29 @@
+name: AN14B3 Live Relay Retry
+
+on:
+  push:
+    branches:
+      - chatgpt/an14b3-work-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retry production OCR relay
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 5
+          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > tiny.png
+          code=$(curl -sS -o response.json -w '%{http_code}' \
+            -H 'Origin: https://tenta0604.github.io' \
+            -F 'file=@tiny.png;type=image/png' \
+            -F 'supportedReportTypes=["sales","input","recovery","input_recovery"]' \
+            https://vendrive2-ocr-relay.vercel.app/api/ocr)
+          echo "HTTP $code"
+          cat response.json
+          echo
+          test "$code" = "200"
