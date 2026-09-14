@@ -1,0 +1,29 @@
+name: AN14B3 Live Relay Check
+
+on:
+  push:
+    branches:
+      - chatgpt/an14b3-work-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  live-relay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call production OCR relay with synthetic image
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > tiny.png
+          code=$(curl -sS -o response.json -w '%{http_code}' \
+            -H 'Origin: https://tenta0604.github.io' \
+            -F 'file=@tiny.png;type=image/png' \
+            -F 'supportedReportTypes=["sales","input","recovery","input_recovery"]' \
+            https://vendrive2-ocr-relay.vercel.app/api/ocr)
+          echo "HTTP $code"
+          cat response.json
+          echo
+          test "$code" = "200"
+          node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync("response.json","utf8"));if(x.provider!=="openai")throw new Error("provider mismatch");if(!Array.isArray(x.warnings))throw new Error("warnings missing");if("rawText" in x||"rawOcrText" in x||"imageData" in x||"base64" in x)throw new Error("unsafe field returned");console.log("live relay structured response PASS")'
