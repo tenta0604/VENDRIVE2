@@ -48,7 +48,7 @@ async function handle(request){
   let form;
   try{form=await request.formData()}catch(error){return json(400,{error:"Invalid OCR upload"},origin)}
   const file=form.get("file");
-  if(!(file instanceof File)||!file.type.startsWith("image/")||file.size<1)return json(400,{error:"A valid image file is required"},origin);
+  if(!file||typeof file!=="object"||typeof file.arrayBuffer!=="function"||typeof file.type!=="string"||typeof file.size!=="number"||!file.type.startsWith("image/")||file.size<1)return json(400,{error:"A valid image file is required"},origin);
   if(file.size>MAX_IMAGE_BYTES)return json(413,{error:"OCR image must be 4MB or less"},origin);
   const supported=safeSupportedTypes(String(form.get("supportedReportTypes")||"[]"));
   const bytes=new Uint8Array(await file.arrayBuffer());
