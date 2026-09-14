@@ -174,8 +174,8 @@ function mount(container,review){
     calcAmount.textContent=calc.valid?calc.amount.toLocaleString("ja-JP")+" 円":"—";
     var api=global.VENDRIVE2Analytics,official=null,error=null;
     try{
-      if(!api||!api.reports||typeof api.reports.validatePayload!=="function")throw new Error("validator unavailable");
-      official=api.reports.validatePayload("sales",review.identity&&review.identity.occurredAt,p);
+      if(!api||!api.data||!api.data.reports||typeof api.data.reports.validatePayload!=="function")throw new Error("validator unavailable");
+      official=api.data.reports.validatePayload("sales",review.identity&&review.identity.occurredAt,p);
     }catch(e){error=e}
     if(official&&official.readyToConfirm===true){
       validationBox.className="vdrSalesValidation ok";
