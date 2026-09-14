@@ -17,12 +17,12 @@ function inputSchema(minTotal){return {type:"object",additionalProperties:false,
 function salesSchema(){return {type:"object",additionalProperties:false,properties:{previousClearAt:{type:"string"},elapsedHours:{type:"number",minimum:0},totalQty:{type:"integer",minimum:0},totalAmount:{type:"integer",minimum:0},products:{type:"array",items:lineSalesSchema()},soldOuts:{type:"array",items:{type:"object",additionalProperties:false,properties:{productCode:{type:"string"},column:{anyOf:[{type:"integer",minimum:1},{type:"null"}]},temperature:{anyOf:[{type:"string",enum:["HOT","COLD"]},{type:"null"}]},soldOutElapsedHours:{type:"number",minimum:0}},required:["productCode","column","temperature","soldOutElapsedHours"]}},specialCircumstance:{anyOf:[{type:"object",additionalProperties:false,properties:{code:{type:"string"},note:{type:"string"}},required:["code","note"]},{type:"null"}]}},required:["previousClearAt","elapsedHours","totalQty","totalAmount","products","soldOuts","specialCircumstance"]}}
 function resultSchema(){
   const input=inputSchema(0),recovery=inputSchema(1);
-  return {type:"object",additionalProperties:false,properties:{provider:{type:"string",enum:["openai"]},requestId:{type:"string"},detectedType:{anyOf:[{type:"string",enum:REPORT_TYPES},{type:"null"}]},typeConfidence:{anyOf:[{type:"number",minimum:0,maximum:1},{type:"null"}]},occurredAt:{anyOf:[{type:"string"},{type:"null"}]},makerKey:{anyOf:[{type:"string"},{type:"null"}]},vendorNumber:{anyOf:[{type:"string"},{type:"null"}]},machineId:{anyOf:[{type:"string"},{type:"null"}]},candidatePayload:{anyOf:[salesSchema(),input,recovery,{type:"object",additionalProperties:false,properties:{input:input,recovery:recovery},required:["input","recovery"]},{type:"null"}]},warnings:{type:"array",maxItems:20,items:{type:"string",maxLength:160}}},required:["provider","requestId","detectedType","typeConfidence","occurredAt","makerKey","vendorNumber","machineId","candidatePayload","warnings"]};
+  return {type:"object",additionalProperties:false,properties:{provider:{type:"string",enum:["vercel-ai-gateway"]},requestId:{type:"string"},detectedType:{anyOf:[{type:"string",enum:REPORT_TYPES},{type:"null"}]},typeConfidence:{anyOf:[{type:"number",minimum:0,maximum:1},{type:"null"}]},occurredAt:{anyOf:[{type:"string"},{type:"null"}]},makerKey:{anyOf:[{type:"string"},{type:"null"}]},vendorNumber:{anyOf:[{type:"string"},{type:"null"}]},machineId:{anyOf:[{type:"string"},{type:"null"}]},candidatePayload:{anyOf:[salesSchema(),input,recovery,{type:"object",additionalProperties:false,properties:{input:input,recovery:recovery},required:["input","recovery"]},{type:"null"}]},warnings:{type:"array",maxItems:20,items:{type:"string",maxLength:160}}},required:["provider","requestId","detectedType","typeConfidence","occurredAt","makerKey","vendorNumber","machineId","candidatePayload","warnings"]};
 }
 function extractOutputText(data){
   if(data&&typeof data.output_text==="string")return data.output_text;
   if(data&&Array.isArray(data.output))for(const item of data.output){if(item&&Array.isArray(item.content))for(const part of item.content){if(part&&typeof part.text==="string")return part.text}}
-  throw new Error("OpenAI response did not contain structured text");
+  throw new Error("Gateway response did not contain structured text");
 }
 function safeSupportedTypes(raw){
   let values;
@@ -30,6 +30,13 @@ function safeSupportedTypes(raw){
   if(!Array.isArray(values))return REPORT_TYPES.slice();
   values=values.filter(value=>REPORT_TYPES.includes(value));
   return values.length?Array.from(new Set(values)):REPORT_TYPES.slice();
+}
+function getGatewayToken(request){
+  const apiKey=process.env.AI_GATEWAY_API_KEY;
+  if(apiKey)return apiKey;
+  const envOidc=process.env.VERCEL_OIDC_TOKEN;
+  if(envOidc)return envOidc;
+  return request.headers.get("x-vercel-oidc-token")||"";
 }
 
 export default {
@@ -41,7 +48,8 @@ export default {
     }
     if(request.method!=="POST")return json(405,{error:"Method not allowed"},origin);
     if(!ALLOWED_ORIGINS.has(origin))return json(403,{error:"Origin is not allowed"},origin);
-    if(!process.env.OPENAI_API_KEY)return json(503,{error:"OCR service is not configured"},origin);
+    const gatewayToken=getGatewayToken(request);
+    if(!gatewayToken)return json(503,{error:"OCR gateway authentication is unavailable"},origin);
     const contentLength=Number(request.headers.get("content-length")||0);
     if(contentLength&&contentLength>4.45*1024*1024)return json(413,{error:"OCR image payload is too large"},origin);
     let form;
@@ -65,18 +73,18 @@ export default {
       "machineId is normally null unless the page explicitly contains an application machine ID.",
       "For candidatePayload, choose the shape matching detectedType. If the report cannot be safely structured, return null.",
       "For date-times use ISO 8601 with +09:00 when the printed report provides enough information; otherwise null.",
-      "provider must be openai and requestId should be a short opaque identifier you generate for this extraction."
+      "provider must be vercel-ai-gateway and requestId should be a short opaque identifier you generate for this extraction."
     ].join("\n");
     let upstream;
     try{
-      upstream=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":`Bearer ${process.env.OPENAI_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OPENAI_OCR_MODEL||"gpt-5.4-mini",store:false,input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:imageUrl,detail:"high"}]}],text:{format:{type:"json_schema",name:"vendrive_ocr_candidate",strict:true,schema}}})});
-    }catch(error){return json(502,{error:"OCR upstream connection failed"},origin)}
+      upstream=await fetch("https://ai-gateway.vercel.sh/v1/responses",{method:"POST",headers:{"Authorization":`Bearer ${gatewayToken}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OCR_GATEWAY_MODEL||"google/gemini-2.5-flash",input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:imageUrl,detail:"high"}]}],text:{format:{type:"json_schema",name:"vendrive_ocr_candidate",strict:true,schema}},providerOptions:{gateway:{disallowPromptTraining:true}}})});
+    }catch(error){return json(502,{error:"OCR gateway connection failed"},origin)}
     let data;
-    try{data=await upstream.json()}catch(error){return json(502,{error:"OCR upstream returned invalid data"},origin)}
-    if(!upstream.ok)return json(upstream.status===429?429:502,{error:"OCR upstream request failed"},origin);
+    try{data=await upstream.json()}catch(error){return json(502,{error:"OCR gateway returned invalid data"},origin)}
+    if(!upstream.ok)return json(upstream.status===429?429:502,{error:"OCR gateway request failed"},origin);
     let parsed;
     try{parsed=JSON.parse(extractOutputText(data))}catch(error){return json(502,{error:"OCR structured result could not be parsed"},origin)}
-    parsed.provider="openai";
+    parsed.provider="vercel-ai-gateway";
     if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=data.id||crypto.randomUUID();
     return json(200,parsed,origin);
   }
