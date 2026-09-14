@@ -108,29 +108,40 @@ jobs:
               await openSalesReview(page);
 
               const validation=page.locator('.vdrSalesValidation');
-              await page.waitForFunction(()=>document.querySelector('.vdrSalesValidation')?.textContent.includes('照合OK'));
+              const initialValidation=await validation.innerText();
+              const validatorDebug=await page.evaluate(()=>{
+                try{
+                  return {result:window.VENDRIVE2Analytics.data.reports.validatePayload('sales',window.reportCaptureReview.identity.occurredAt,window.reportCaptureReview.candidatePayload),identity:window.reportCaptureReview.identity,payload:window.reportCaptureReview.candidatePayload};
+                }catch(error){return {error:String(error),identity:window.reportCaptureReview&&window.reportCaptureReview.identity,payload:window.reportCaptureReview&&window.reportCaptureReview.candidatePayload}}
+              });
+              console.log('INITIAL_VALIDATION',initialValidation,JSON.stringify(validatorDebug));
+              if(!initialValidation.includes('照合OK'))throw new Error('initial validation mismatch: '+initialValidation);
               const save=page.locator('.vdrSalesSave');
               if(!(await save.isDisabled()))throw new Error('save must be disabled before explicit paper approval');
 
               const salesQtyField=page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^売上数$/})}).locator('input').first();
               await salesQtyField.fill('1');
-              await page.waitForFunction(()=>document.querySelector('.vdrSalesValidation')?.textContent.includes('要確認'));
+              const mismatchText=await validation.innerText();
+              if(!mismatchText.includes('要確認'))throw new Error('expected mismatch after salesQty edit: '+mismatchText);
 
               const totalQtyField=page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^売上数合計$/})}).locator('input').first();
               const totalAmountField=page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^売上金額$/})}).locator('input').first();
               await totalQtyField.fill('1');
               await totalAmountField.fill('150');
-              await page.waitForFunction(()=>document.querySelector('.vdrSalesValidation')?.textContent.includes('照合OK'));
+              const correctedText=await validation.innerText();
+              if(!correctedText.includes('照合OK'))throw new Error('expected valid state after total correction: '+correctedText);
 
               const legacyBefore=await page.evaluate(()=>localStorage.getItem('vendrive2_v7_data'));
               await page.locator('.vdrSalesApproval input').check();
               if(await save.isDisabled())throw new Error('save should enable only after validation and explicit approval');
               await save.click();
-              await page.waitForFunction(()=>document.querySelector('.vdrSalesStatus:last-child')?.textContent.includes('下書きを作成しました'));
+              await page.waitForTimeout(300);
+              const saveStatus=await page.locator('.vdrSalesReview > .vdrSalesStatus').last().innerText();
+              if(!saveStatus.includes('下書きを作成しました'))throw new Error('draft save failed: '+saveStatus);
 
               const evidence=await page.evaluate(async()=>{
-                const reports=await window.VENDRIVE2Analytics.reports.list();
-                const inventory=await window.VENDRIVE2Analytics.inventory.listEvents();
+                const reports=await window.VENDRIVE2Analytics.data.reports.list();
+                const inventory=await window.VENDRIVE2Analytics.data.inventory.listEvents();
                 return {
                   reports:reports.map(r=>({status:r.status,type:r.type,source:r.source&&r.source.method,current:r.current})),
                   inventoryCount:inventory.length,
