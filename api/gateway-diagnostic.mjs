@@ -15,7 +15,7 @@ function safeError(data){
 
 export async function GET(){
   const apiKey=process.env.GEMINI_API_KEY||"";
-  const model=process.env.OCR_GEMINI_MODEL||"gemini-2.5-flash";
+  const model=process.env.OCR_GEMINI_MODEL||"gemini-3.6-flash";
   const result={
     ok:false,
     provider:"google-gemini-api",
