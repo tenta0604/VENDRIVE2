@@ -1,4 +1,4 @@
-name: AN14B3 Live Relay Retry
+name: AN14B3 Gateway Live Test
 
 on:
   push:
@@ -9,10 +9,10 @@ permissions:
   contents: read
 
 jobs:
-  retry:
+  gateway-live-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Retry production OCR relay
+      - name: Test production OCR relay through Vercel AI Gateway
         shell: bash
         run: |
           set -euo pipefail
@@ -27,3 +27,4 @@ jobs:
           cat response.json
           echo
           test "$code" = "200"
+          grep -q '"provider":"vercel-ai-gateway"' response.json
