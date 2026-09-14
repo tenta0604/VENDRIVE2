@@ -1,0 +1,36 @@
+name: AN14B3B Apply Sales Review
+
+on:
+  push:
+    branches: [chatgpt/an14b3b-sales-review-current-20260914]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.head_commit.message == 'chore: add AN14B3B patch script'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/an14b3b-sales-review-current-20260914
+          fetch-depth: 0
+      - name: Apply scoped patch
+        run: python .github/scripts/an14b3b_patch.py
+      - name: Verify patch
+        run: |
+          set -euo pipefail
+          grep -q 'renderSalesCaptureReview' index.html
+          grep -q 'saveSalesReviewDraft' index.html
+          grep -q 'OCR結果は必ず確認してください' index.html
+          git diff --check
+      - name: Commit implementation
+        run: |
+          set -euo pipefail
+          git config user.name 'VENDRIVE2 AI Workflow'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git diff --cached --check
+          git commit -m 'feat: add real-paper sales OCR review editor'
+          git push origin HEAD:chatgpt/an14b3b-sales-review-current-20260914
