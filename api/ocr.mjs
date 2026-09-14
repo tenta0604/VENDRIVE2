@@ -1,6 +1,7 @@
 const ALLOWED_ORIGINS=new Set(["https://tenta0604.github.io","http://localhost:8000","http://127.0.0.1:8000"]);
 const REPORT_TYPES=["sales","input","recovery","input_recovery"];
 const MAX_IMAGE_BYTES=4*1024*1024;
+const DEFAULT_MODEL="gemini-2.5-flash";
 
 function cors(origin){
   const headers={"Vary":"Origin","Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8"};
@@ -17,12 +18,7 @@ function inputSchema(minTotal){return {type:"object",additionalProperties:false,
 function salesSchema(){return {type:"object",additionalProperties:false,properties:{previousClearAt:{type:"string"},elapsedHours:{type:"number",minimum:0},totalQty:{type:"integer",minimum:0},totalAmount:{type:"integer",minimum:0},products:{type:"array",items:lineSalesSchema()},soldOuts:{type:"array",items:{type:"object",additionalProperties:false,properties:{productCode:{type:"string"},column:{anyOf:[{type:"integer",minimum:1},{type:"null"}]},temperature:{anyOf:[{type:"string",enum:["HOT","COLD"]},{type:"null"}]},soldOutElapsedHours:{type:"number",minimum:0}},required:["productCode","column","temperature","soldOutElapsedHours"]}},specialCircumstance:{anyOf:[{type:"object",additionalProperties:false,properties:{code:{type:"string"},note:{type:"string"}},required:["code","note"]},{type:"null"}]}},required:["previousClearAt","elapsedHours","totalQty","totalAmount","products","soldOuts","specialCircumstance"]}}
 function resultSchema(){
   const input=inputSchema(0),recovery=inputSchema(1);
-  return {type:"object",additionalProperties:false,properties:{provider:{type:"string",enum:["vercel-ai-gateway"]},requestId:{type:"string"},detectedType:{anyOf:[{type:"string",enum:REPORT_TYPES},{type:"null"}]},typeConfidence:{anyOf:[{type:"number",minimum:0,maximum:1},{type:"null"}]},occurredAt:{anyOf:[{type:"string"},{type:"null"}]},makerKey:{anyOf:[{type:"string"},{type:"null"}]},vendorNumber:{anyOf:[{type:"string"},{type:"null"}]},machineId:{anyOf:[{type:"string"},{type:"null"}]},candidatePayload:{anyOf:[salesSchema(),input,recovery,{type:"object",additionalProperties:false,properties:{input:input,recovery:recovery},required:["input","recovery"]},{type:"null"}]},warnings:{type:"array",maxItems:20,items:{type:"string",maxLength:160}}},required:["provider","requestId","detectedType","typeConfidence","occurredAt","makerKey","vendorNumber","machineId","candidatePayload","warnings"]};
-}
-function extractOutputText(data){
-  if(data&&typeof data.output_text==="string")return data.output_text;
-  if(data&&Array.isArray(data.output))for(const item of data.output){if(item&&Array.isArray(item.content))for(const part of item.content){if(part&&typeof part.text==="string")return part.text}}
-  throw new Error("Gateway response did not contain structured text");
+  return {type:"object",additionalProperties:false,properties:{provider:{type:"string",enum:["google-gemini-api"]},requestId:{type:"string"},detectedType:{anyOf:[{type:"string",enum:REPORT_TYPES},{type:"null"}]},typeConfidence:{anyOf:[{type:"number",minimum:0,maximum:1},{type:"null"}]},occurredAt:{anyOf:[{type:"string"},{type:"null"}]},makerKey:{anyOf:[{type:"string"},{type:"null"}]},vendorNumber:{anyOf:[{type:"string"},{type:"null"}]},machineId:{anyOf:[{type:"string"},{type:"null"}]},candidatePayload:{anyOf:[salesSchema(),input,recovery,{type:"object",additionalProperties:false,properties:{input:input,recovery:recovery},required:["input","recovery"]},{type:"null"}]},warnings:{type:"array",maxItems:20,items:{type:"string",maxLength:160}}},required:["provider","requestId","detectedType","typeConfidence","occurredAt","makerKey","vendorNumber","machineId","candidatePayload","warnings"]};
 }
 function safeSupportedTypes(raw){
   let values;
@@ -31,12 +27,10 @@ function safeSupportedTypes(raw){
   values=values.filter(value=>REPORT_TYPES.includes(value));
   return values.length?Array.from(new Set(values)):REPORT_TYPES.slice();
 }
-function getGatewayToken(request){
-  const requestOidc=request.headers.get("x-vercel-oidc-token");
-  if(requestOidc)return requestOidc;
-  const envOidc=process.env.VERCEL_OIDC_TOKEN;
-  if(envOidc)return envOidc;
-  return process.env.AI_GATEWAY_API_KEY||"";
+function extractGeminiText(data){
+  const parts=data&&data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts;
+  if(Array.isArray(parts))for(const part of parts){if(part&&typeof part.text==="string")return part.text}
+  throw new Error("Gemini response did not contain structured text");
 }
 
 async function handle(request){
@@ -47,8 +41,8 @@ async function handle(request){
   }
   if(request.method!=="POST")return json(405,{error:"Method not allowed"},origin);
   if(!ALLOWED_ORIGINS.has(origin))return json(403,{error:"Origin is not allowed"},origin);
-  const gatewayToken=getGatewayToken(request);
-  if(!gatewayToken)return json(503,{error:"OCR gateway authentication is unavailable"},origin);
+  const apiKey=process.env.GEMINI_API_KEY||"";
+  if(!apiKey)return json(503,{error:"OCR provider authentication is unavailable"},origin);
   const contentLength=Number(request.headers.get("content-length")||0);
   if(contentLength&&contentLength>4.45*1024*1024)return json(413,{error:"OCR image payload is too large"},origin);
   let form;
@@ -60,31 +54,39 @@ async function handle(request){
   const bytes=new Uint8Array(await file.arrayBuffer());
   let binary="";
   for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
-  const imageUrl=`data:${file.type};base64,${btoa(binary)}`;
+  const base64=btoa(binary);
   const schema=resultSchema();
   const prompt=[
     "You extract structured data from Japanese vending-machine operational report images for VENDRIVE2.",
     `Allowed report types: ${supported.join(", ")}.`,
     "Return only fields visible or safely inferable from the image. Never invent missing values.",
     "If identity, timestamps, report type, totals, or lines are uncertain, use null where the schema permits and add a short warning.",
-    "Do not return raw OCR text, full transcription, image bytes, data URLs, secrets, tokens, or credentials.",
+    "Do not return raw OCR text, full transcription, image bytes, base64, data URLs, secrets, tokens, or credentials.",
     "makerKey should be a short normalized maker identifier only when clearly supported by the page; otherwise null.",
     "machineId is normally null unless the page explicitly contains an application machine ID.",
     "For candidatePayload, choose the shape matching detectedType. If the report cannot be safely structured, return null.",
     "For date-times use ISO 8601 with +09:00 when the printed report provides enough information; otherwise null.",
-    "provider must be vercel-ai-gateway and requestId should be a short opaque identifier you generate for this extraction."
+    "provider must be google-gemini-api and requestId should be a short opaque identifier you generate for this extraction."
   ].join("\n");
+  const model=process.env.OCR_GEMINI_MODEL||DEFAULT_MODEL;
   let upstream;
   try{
-    upstream=await fetch("https://ai-gateway.vercel.sh/v1/responses",{method:"POST",headers:{"Authorization":`Bearer ${gatewayToken}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OCR_GATEWAY_MODEL||"google/gemini-2.5-flash",input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:imageUrl,detail:"high"}]}],text:{format:{type:"json_schema",name:"vendrive_ocr_candidate",strict:true,schema}},providerOptions:{gateway:{disallowPromptTraining:true}}})});
-  }catch(error){return json(502,{error:"OCR gateway connection failed"},origin)}
+    upstream=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
+      method:"POST",
+      headers:{"x-goog-api-key":apiKey,"Content-Type":"application/json"},
+      body:JSON.stringify({
+        contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:file.type,data:base64}}]}],
+        generationConfig:{responseMimeType:"application/json",responseJsonSchema:schema}
+      })
+    });
+  }catch(error){return json(502,{error:"OCR provider connection failed"},origin)}
   let data;
-  try{data=await upstream.json()}catch(error){return json(502,{error:"OCR gateway returned invalid data"},origin)}
-  if(!upstream.ok)return json(upstream.status===429?429:502,{error:"OCR gateway request failed"},origin);
+  try{data=await upstream.json()}catch(error){return json(502,{error:"OCR provider returned invalid data"},origin)}
+  if(!upstream.ok)return json(upstream.status===429?429:502,{error:"OCR provider request failed"},origin);
   let parsed;
-  try{parsed=JSON.parse(extractOutputText(data))}catch(error){return json(502,{error:"OCR structured result could not be parsed"},origin)}
-  parsed.provider="vercel-ai-gateway";
-  if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=data.id||crypto.randomUUID();
+  try{parsed=JSON.parse(extractGeminiText(data))}catch(error){return json(502,{error:"OCR structured result could not be parsed"},origin)}
+  parsed.provider="google-gemini-api";
+  if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=crypto.randomUUID();
   return json(200,parsed,origin);
 }
 
