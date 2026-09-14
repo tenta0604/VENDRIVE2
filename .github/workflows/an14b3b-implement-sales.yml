@@ -1,0 +1,99 @@
+name: AN14B3B Implement Sales Review
+
+on:
+  push:
+    branches: [chatgpt/an14b3b-sales-review-current-20260914]
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    if: github.event.head_commit.message == 'chore: add temporary AN14B3B implementation workflow'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/an14b3b-sales-review-current-20260914
+          fetch-depth: 0
+      - name: Apply scoped sales-journal review patch
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          def once(old,new,label):
+              global s
+              count=s.count(old)
+              if count!=1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, got {count}')
+              s=s.replace(old,new,1)
+
+          once(
+            '<div class="muted reportCaptureHint">販売・投入・回収の帳票を撮影してレビューします。OCR接続前のため、現在は安全なレビュー準備までです。</div>',
+            '<div class="muted reportCaptureHint">販売・投入・回収の帳票をOCRで読み取り、保存前に内容を確認・修正します。画像自体は保存しません。</div>',
+            'today capture hint')
+
+          once(
+            '<div class="notice reportCaptureNotice"><b>AN14A：レビュー準備段階</b><div>まだOCRサービスには送信しません。reportデータも作成しません。次フェーズで自動判定・読み取り結果をここへ差し込みます。</div></div>',
+            '<div class="notice reportCaptureNotice"><b>OCR結果は必ず確認してください</b><div>OCRの値は候補です。自動確定・在庫移動・既存運用データへの書き込みは行いません。売上票は実紙に合わせて項目ごとに修正できます。</div></div>',
+            'capture notice')
+
+          css='''\n/* AN14B3B real-paper sales review */\n.salesReview{margin-top:12px;display:grid;gap:10px}.salesReviewSection{border:1px solid var(--line);border-radius:15px;background:#fff;padding:12px}.salesReviewSectionHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}.salesReviewSectionHead b{font-size:12px}.salesReviewSectionHead span{font-size:9px;color:var(--muted)}.salesReviewGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.salesReviewField{min-width:0}.salesReviewField.full{grid-column:1/-1}.salesReviewField label{display:block;margin-bottom:4px;color:#777;font-size:9px;font-weight:900}.salesReviewField input,.salesReviewField select{width:100%;min-width:0;border:1px solid #ddd;border-radius:10px;background:#fafafa;padding:9px;font-size:11px;outline:none}.salesProductList,.salesSoldOutList{display:grid;gap:8px}.salesProductRow,.salesSoldOutRow{border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;padding:10px}.salesProductTop,.salesSoldOutTop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.salesProductTop b,.salesSoldOutTop b{font-size:10px}.salesRowDelete{border:0;background:transparent;color:#b42318;font-size:9px;font-weight:900;padding:4px}.salesProductFields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.salesProductFields .wide{grid-column:1/-1}.salesReviewCheck{display:grid;grid-template-columns:1fr 1fr;gap:7px}.salesReviewCheck>div{border:1px solid #e5e7eb;border-radius:11px;padding:9px;background:#fafafa}.salesReviewCheck span{display:block;color:#777;font-size:9px}.salesReviewCheck b{display:block;margin-top:2px;font-size:11px}.salesReviewCheck .ok{color:#166534}.salesReviewCheck .bad{color:#b42318}.salesReviewWarning{margin-top:8px;border-radius:11px;padding:9px 10px;background:#fff7ed;color:#9a3412;font-size:10px;font-weight:800;line-height:1.45}.salesReviewAction{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;background:#111;color:#fff;font-size:12px;font-weight:900}.salesReviewAction:disabled{opacity:.45;cursor:not-allowed}.salesReviewAdd{width:100%;margin-top:8px;border:1px dashed #cfd2d6;border-radius:10px;background:#fff;padding:9px;color:#555;font-size:10px;font-weight:850}.salesDraftSuccess{border:1px solid #bbf7d0;border-radius:13px;background:#f0fdf4;padding:11px;color:#166534;font-size:10px;font-weight:800;line-height:1.5}@media(max-width:350px){.salesReviewGrid,.salesReviewCheck,.salesProductFields{grid-template-columns:1fr}.salesReviewField.full,.salesProductFields .wide{grid-column:auto}}\n'''
+          once('</style>',css+'</style>','review css')
+
+          marker='function runReportOcr(){'
+          if s.count(marker)!=1:
+              raise SystemExit('runReportOcr marker mismatch')
+          helpers=r'''function reportLocalDateTime(value){if(!value)return'';var d=new Date(value);if(isNaN(d.getTime()))return'';var local=new Date(d.getTime()+9*3600000);return local.toISOString().slice(0,16)}
+function reportIsoFromLocal(value){if(!value)return null;return value.length===16?value+':00+09:00':value}
+function salesReviewNumber(value,fallback){var n=Number(value);return isFinite(n)?n:fallback}
+function salesReviewInt(value,fallback){var n=Number(value);return Number.isInteger(n)?n:fallback}
+function salesReviewProductHtml(item,index){item=item||{};return'<div class="salesProductRow" data-sales-product="'+index+'"><div class="salesProductTop"><b>商品 '+(index+1)+'</b><button class="salesRowDelete" type="button" data-sales-delete-product="'+index+'">削除</button></div><div class="salesProductFields"><div class="salesReviewField"><label>商品コード</label><input data-sales-field="productCode" value="'+analysisEscape(item.productCode||'')+'"></div><div class="salesReviewField"><label>売価</label><input data-sales-field="price" type="number" min="1" inputmode="numeric" value="'+analysisEscape(item.price==null?'':item.price)+'"></div><div class="salesReviewField wide"><label>商品名</label><input data-sales-field="printedName" value="'+analysisEscape(item.printedName||'')+'"></div><div class="salesReviewField"><label>売上数</label><input data-sales-field="salesQty" type="number" min="0" inputmode="numeric" value="'+analysisEscape(item.salesQty==null?'':item.salesQty)+'"></div></div></div>'}
+function salesReviewSoldOutHtml(item,index){item=item||{};var temp=item.temperature||'';return'<div class="salesSoldOutRow" data-sales-soldout="'+index+'"><div class="salesSoldOutTop"><b>売切 '+(index+1)+'</b><button class="salesRowDelete" type="button" data-sales-delete-soldout="'+index+'">削除</button></div><div class="salesProductFields"><div class="salesReviewField"><label>コラム</label><input data-soldout-field="column" type="number" min="1" inputmode="numeric" value="'+analysisEscape(item.column==null?'':item.column)+'"></div><div class="salesReviewField"><label>商品コード</label><input data-soldout-field="productCode" value="'+analysisEscape(item.productCode||'')+'"></div><div class="salesReviewField"><label>温度</label><select data-soldout-field="temperature"><option value=""'+(!temp?' selected':'')+'>未判定</option><option value="COLD"'+(temp==='COLD'?' selected':'')+'>冷</option><option value="HOT"'+(temp==='HOT'?' selected':'')+'>温</option></select></div><div class="salesReviewField"><label>売切時間</label><input data-soldout-field="soldOutElapsedHours" type="number" min="0" step="0.1" inputmode="decimal" value="'+analysisEscape(item.soldOutElapsedHours==null?'':item.soldOutElapsedHours)+'"></div></div></div>'}
+function salesReviewRenderRows(){if(!reportCaptureReview||!reportCaptureReview.candidatePayload)return;var payload=reportCaptureReview.candidatePayload,products=$id('salesReviewProducts'),sold=$id('salesReviewSoldOuts');if(products)products.innerHTML=(payload.products||[]).map(salesReviewProductHtml).join('');if(sold)sold.innerHTML=(payload.soldOuts||[]).map(salesReviewSoldOutHtml).join('');salesReviewUpdateChecks()}
+function salesReviewCollect(){if(!reportCaptureReview)return null;var review=JSON.parse(JSON.stringify(reportCaptureReview)),payload=review.candidatePayload||{};review.identity=review.identity||{};review.identity.occurredAt=reportIsoFromLocal($id('salesReviewOccurredAt').value);review.identity.makerKey=$id('salesReviewMakerKey').value.trim();review.identity.vendorNumber=$id('salesReviewVendorNumber').value.trim();payload.previousClearAt=reportIsoFromLocal($id('salesReviewPreviousClearAt').value);payload.elapsedHours=salesReviewNumber($id('salesReviewElapsedHours').value,-1);payload.totalQty=salesReviewInt($id('salesReviewTotalQty').value,-1);payload.totalAmount=salesReviewInt($id('salesReviewTotalAmount').value,-1);payload.products=Array.from(document.querySelectorAll('[data-sales-product]')).map(function(row,index){var original=(reportCaptureReview.candidatePayload.products||[])[index]||{};return {productCode:row.querySelector('[data-sales-field="productCode"]').value.trim(),printedName:row.querySelector('[data-sales-field="printedName"]').value.trim(),temperature:original.temperature===undefined?null:original.temperature,column:original.column===undefined?null:original.column,price:salesReviewInt(row.querySelector('[data-sales-field="price"]').value,-1),salesQty:salesReviewInt(row.querySelector('[data-sales-field="salesQty"]').value,-1)}});payload.soldOuts=Array.from(document.querySelectorAll('[data-sales-soldout]')).map(function(row){var temp=row.querySelector('[data-soldout-field="temperature"]').value;var columnValue=row.querySelector('[data-soldout-field="column"]').value;return {productCode:row.querySelector('[data-soldout-field="productCode"]').value.trim(),column:columnValue===''?null:salesReviewInt(columnValue,null),temperature:temp||null,soldOutElapsedHours:salesReviewNumber(row.querySelector('[data-soldout-field="soldOutElapsedHours"]').value,-1)}});review.candidatePayload=payload;return review}
+function salesReviewLocalValidation(review){var p=review&&review.candidatePayload||{},products=Array.isArray(p.products)?p.products:[],qty=products.reduce(function(sum,item){return sum+(Number.isInteger(item.salesQty)&&item.salesQty>=0?item.salesQty:0)},0),amount=products.reduce(function(sum,item){return sum+(Number.isInteger(item.salesQty)&&item.salesQty>=0&&Number.isInteger(item.price)&&item.price>0?item.salesQty*item.price:0)},0),required=!!(review&&review.identity&&review.identity.occurredAt&&review.identity.makerKey&&review.identity.vendorNumber&&p.previousClearAt&&p.elapsedHours>=0&&Number.isInteger(p.totalQty)&&p.totalQty>=0&&Number.isInteger(p.totalAmount)&&p.totalAmount>=0&&products.length&&products.every(function(item){return item.productCode&&Number.isInteger(item.price)&&item.price>0&&Number.isInteger(item.salesQty)&&item.salesQty>=0}));return {qty:qty,amount:amount,qtyMatch:qty===p.totalQty,amountMatch:amount===p.totalAmount,required:required}}
+function salesReviewUpdateChecks(){var review=salesReviewCollect();if(!review)return;var v=salesReviewLocalValidation(review),qty=$id('salesReviewQtyCheck'),amount=$id('salesReviewAmountCheck'),warning=$id('salesReviewWarning'),save=$id('salesReviewSave');if(qty)qty.innerHTML='<span>商品行の売上数</span><b class="'+(v.qtyMatch?'ok':'bad')+'">'+v.qty+' / 帳票 '+review.candidatePayload.totalQty+(v.qtyMatch?' ✓':' 不一致')+'</b>';if(amount)amount.innerHTML='<span>商品行の金額計</span><b class="'+(v.amountMatch?'ok':'bad')+'">¥'+v.amount.toLocaleString('ja-JP')+' / 帳票 ¥'+Math.max(0,review.candidatePayload.totalAmount).toLocaleString('ja-JP')+(v.amountMatch?' ✓':' 不一致')+'</b>';if(warning){var problems=[];if(!v.qtyMatch)problems.push('売上数合計が一致していません');if(!v.amountMatch)problems.push('売上金額が一致していません');if(!v.required)problems.push('必須項目に未入力・不正な値があります');warning.textContent=problems.join('。');warning.classList.toggle('hidden',!problems.length)}if(save)save.disabled=!(v.required&&v.qtyMatch&&v.amountMatch)}
+function salesReviewAddProduct(){var review=salesReviewCollect();if(!review)return;review.candidatePayload.products.push({productCode:'',printedName:'',temperature:null,column:null,price:1,salesQty:0});reportCaptureReview=review;salesReviewRenderRows()}
+function salesReviewAddSoldOut(){var review=salesReviewCollect();if(!review)return;review.candidatePayload.soldOuts.push({productCode:'',column:null,temperature:null,soldOutElapsedHours:0});reportCaptureReview=review;salesReviewRenderRows()}
+function salesReviewDeleteProduct(index){var review=salesReviewCollect();if(!review)return;review.candidatePayload.products.splice(index,1);reportCaptureReview=review;salesReviewRenderRows()}
+function salesReviewDeleteSoldOut(index){var review=salesReviewCollect();if(!review)return;review.candidatePayload.soldOuts.splice(index,1);reportCaptureReview=review;salesReviewRenderRows()}
+function saveSalesReviewDraft(){var api=window.VENDRIVE2Analytics,button=$id('salesReviewSave'),result=$id('salesReviewSaveResult'),review=salesReviewCollect();if(!api||!api.capture||typeof api.capture.createDraftFromReview!=='function'||!review)return;var local=salesReviewLocalValidation(review);if(!(local.required&&local.qtyMatch&&local.amountMatch)){salesReviewUpdateChecks();toast('不一致または未入力を確認してください');return}reportCaptureReview=review;button.disabled=true;button.textContent='下書きを作成中…';api.capture.createDraftFromReview({review:review,userApproved:true}).then(function(created){button.textContent='下書き作成済み';button.disabled=true;if(result)result.innerHTML='<div class="salesDraftSuccess"><b>下書きを作成しました</b><br>まだ確定していません。在庫移動・既存運用データへの書き込みも行っていません。</div>'}).catch(function(error){console.error('Sales review draft creation failed',error);button.textContent='確認して下書きを作成';button.disabled=false;if(result)result.innerHTML='<div class="salesReviewWarning">下書きを作成できませんでした。入力内容を確認してください。</div>'})}
+function bindSalesReviewEditor(){var root=$id('salesReviewEditor');if(!root)return;root.oninput=salesReviewUpdateChecks;root.onchange=salesReviewUpdateChecks;root.onclick=function(event){var product=event.target.closest('[data-sales-delete-product]'),sold=event.target.closest('[data-sales-delete-soldout]');if(product){salesReviewDeleteProduct(Number(product.dataset.salesDeleteProduct));return}if(sold){salesReviewDeleteSoldOut(Number(sold.dataset.salesDeleteSoldout));return}};var addProduct=$id('salesReviewAddProduct'),addSold=$id('salesReviewAddSoldOut'),save=$id('salesReviewSave');if(addProduct)addProduct.onclick=salesReviewAddProduct;if(addSold)addSold.onclick=salesReviewAddSoldOut;if(save)save.onclick=saveSalesReviewDraft}
+function renderSalesCaptureReview(review,result){var p=review.candidatePayload||{},identity=review.identity||{};result.innerHTML='<div id="salesReviewEditor" class="salesReview"><div class="salesReviewSection"><div class="salesReviewSectionHead"><b>帳票情報</b><span>実紙を見ながら確認</span></div><div class="salesReviewGrid"><div class="salesReviewField full"><label>帳票日時</label><input id="salesReviewOccurredAt" type="datetime-local" value="'+analysisEscape(reportLocalDateTime(identity.occurredAt))+'"></div><div class="salesReviewField"><label>メーカー</label><input id="salesReviewMakerKey" value="'+analysisEscape(identity.makerKey||'')+'"></div><div class="salesReviewField"><label>ベンダー番号</label><input id="salesReviewVendorNumber" value="'+analysisEscape(identity.vendorNumber||'')+'"></div><div class="salesReviewField full"><label>前回クリア日時</label><input id="salesReviewPreviousClearAt" type="datetime-local" value="'+analysisEscape(reportLocalDateTime(p.previousClearAt))+'"></div><div class="salesReviewField"><label>経過時間（H）</label><input id="salesReviewElapsedHours" type="number" min="0" step="0.1" inputmode="decimal" value="'+analysisEscape(p.elapsedHours==null?'':p.elapsedHours)+'"></div><div class="salesReviewField"><label>売上数合計</label><input id="salesReviewTotalQty" type="number" min="0" inputmode="numeric" value="'+analysisEscape(p.totalQty==null?'':p.totalQty)+'"></div><div class="salesReviewField full"><label>売上金額</label><input id="salesReviewTotalAmount" type="number" min="0" inputmode="numeric" value="'+analysisEscape(p.totalAmount==null?'':p.totalAmount)+'"></div></div></div><div class="salesReviewSection"><div class="salesReviewSectionHead"><b>商品別売上</b><span>コード・商品名・売価・売上数</span></div><div id="salesReviewProducts" class="salesProductList"></div><button id="salesReviewAddProduct" class="salesReviewAdd" type="button">＋ 商品行を追加</button></div><div class="salesReviewSection"><div class="salesReviewSectionHead"><b>合計照合</b><span>商品行と帳票合計</span></div><div class="salesReviewCheck"><div id="salesReviewQtyCheck"></div><div id="salesReviewAmountCheck"></div></div><div id="salesReviewWarning" class="salesReviewWarning hidden"></div></div><div class="salesReviewSection"><div class="salesReviewSectionHead"><b>売切情報</b><span>コラム・商品コード・温度・売切時間</span></div><div id="salesReviewSoldOuts" class="salesSoldOutList"></div><button id="salesReviewAddSoldOut" class="salesReviewAdd" type="button">＋ 売切行を追加</button></div><div class="analysisNote">このボタンで作るのは確認済みの下書きだけです。自動確定・在庫移動・legacy書き込みは行いません。</div><button id="salesReviewSave" class="salesReviewAction" type="button">確認して下書きを作成</button><div id="salesReviewSaveResult"></div></div>';salesReviewRenderRows();bindSalesReviewEditor()}
+'''
+          s=s.replace(marker,helpers+marker,1)
+
+          old="reviewPromise.then(function(review){reportCaptureReview=review;var effective=review.classification?review.classification.effectiveType:review.selectedType,ocrConnected=review.ocr&&review.ocr.connected===true;result.innerHTML='<div class=\"reportCaptureReviewCard\"><div class=\"reportCaptureReviewRow\"><span>帳票種別</span><b>'+analysisEscape(reportCaptureTypeLabel(effective))+'</b></div><div class=\"reportCaptureReviewRow\"><span>OCR</span><b>'+(ocrConnected?'候補あり':'未接続')+'</b></div><div class=\"reportCaptureReviewRow\"><span>画像保存</span><b>しない</b></div><div class=\"reportCaptureReviewRow\"><span>DB書き込み</span><b>なし</b></div><div class=\"analysisNote\">レビュー準備ができました。まだ帳票データは保存されていません。</div></div>'})"
+          new="reviewPromise.then(function(review){reportCaptureReview=review;var effective=review.classification?review.classification.effectiveType:review.selectedType,ocrConnected=review.ocr&&review.ocr.connected===true;if(effective==='sales'&&review.candidatePayload&&Array.isArray(review.candidatePayload.products)){renderSalesCaptureReview(review,result);return}result.innerHTML='<div class=\"reportCaptureReviewCard\"><div class=\"reportCaptureReviewRow\"><span>帳票種別</span><b>'+analysisEscape(reportCaptureTypeLabel(effective))+'</b></div><div class=\"reportCaptureReviewRow\"><span>OCR</span><b>'+(ocrConnected?'候補あり':'未接続')+'</b></div><div class=\"reportCaptureReviewRow\"><span>画像保存</span><b>しない</b></div><div class=\"reportCaptureReviewRow\"><span>DB書き込み</span><b>なし</b></div><div class=\"analysisNote\">投入・回収は実紙レイアウト確認後に項目別レビューへ拡張します。現在は候補確認のみです。</div></div>'})"
+          once(old,new,'prepare review sales branch')
+
+          p.write_text(s,encoding='utf-8')
+      - name: Basic static checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'renderSalesCaptureReview' index.html
+          grep -q 'saveSalesReviewDraft' index.html
+          grep -q 'OCR結果は必ず確認してください' index.html
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert s.count('id="salesReviewEditor"') == 1
+          assert '自動確定・在庫移動・legacy書き込みは行いません' in s
+          assert '.salesReview{' in s
+          print('AN14B3B sales patch static assertions PASS')
+          PY
+      - name: Commit implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'VENDRIVE2 AI Workflow'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git diff --cached --check
+          git commit -m 'feat: add real-paper sales OCR review editor'
+          git push origin HEAD:chatgpt/an14b3b-sales-review-current-20260914
