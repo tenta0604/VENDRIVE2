@@ -2,10 +2,10 @@
 
 ## Current state
 
-- Latest completed phase: **AN14B3A — Production OCR Provider Connection**
-- Active / next phase: **AN14B3B — Real-paper Review UI Calibration**
+- Latest completed phase: **AN14B3B1 — Sales-journal Real-paper Review UI Calibration**
+- Active / next phase: **AN14B3B2 — Input / Recovery Real-paper Review UI Calibration**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Current real-paper evidence: sales journal available; input-confirmation and recovery paper layouts pending real samples.
+- Current real-paper evidence: sales journal calibrated and validated; input-confirmation and recovery paper layouts are waiting for real samples.
 
 ## Completed
 
@@ -44,23 +44,24 @@
 - AN14B1 — Secure OCR Adapter / Classification Review
 - AN14B2 — Reviewed OCR Candidate → Draft Report
 - AN14B3A — Production OCR Provider Connection
+- AN14B3B1 — Sales-journal Real-paper Review UI Calibration
 
 ## Next roadmap
 
 ### AN14 — Report Capture / OCR Integration
 
-- **AN14B3B — Real-paper Review UI Calibration**
-  - Calibrate the sales-journal review/correction UI from the inspected real sales sample.
-  - Preserve the existing explicit-review boundary: no automatic report confirmation, Analytics write, inventory movement, or legacy write.
-  - Use the existing quantity/amount validation as visible review evidence where appropriate.
-  - Do not guess input/recovery paper layouts. Calibrate `input`, `recovery`, and joined `input_recovery` only after their real paper samples are available.
-  - Before completion, run required syntax/diff/functional gates and real Microsoft Edge checks at mobile widths including 320px and 390px.
+- **AN14B3B2 — Input / Recovery Real-paper Review UI Calibration**
+  - Inspect real input-confirmation and recovery paper samples before defining their field-level UI.
+  - If a joined `input_recovery` paper exists, calibrate it from a real sample rather than assumptions.
+  - Preserve the explicit-review boundary: no automatic report confirmation, inventory movement, or legacy write.
+  - Reuse the established structured-candidate and reviewed-draft boundaries rather than creating a parallel persistence path.
+  - Run required syntax/diff/functional gates and real Microsoft Edge checks at 320px and 390px before completion.
 
 ### Later major phases
 
 - **FINAL — Full Regression / Mobile / Backup / Release Gate**
 
-Phase numbers may be split further when safety or implementation size requires it, but do not skip the major-category order without an explicit roadmap decision.
+Phase numbers may be split further when safety, human evidence dependencies, or implementation size require it, but do not skip the major-category order without an explicit roadmap decision.
 
 ## Permanent analysis principles
 

@@ -49,5 +49,11 @@ The relay calls Google Gemini directly using `gemini-3.6-flash`, accepts only ex
 
 OCR output still enters the existing review flow. The relay does not auto-confirm reports, write analytics, mutate legacy data, or apply inventory movement.
 
-Field-level real-paper review UI calibration is deferred to **AN14B3B**.
+## Sales real-paper review boundary (AN14B3B1)
+
+The sales-journal review UI is calibrated from a real paper sample. It exposes structured header fields, printed totals, product rows, sold-out rows, and quantity/amount consistency feedback for human correction.
+
+A user must explicitly confirm that the structured values were compared with the paper before an Analytics OCR draft can be created. The draft is not automatically confirmed, no inventory movement is applied, and legacy operational storage is not written.
+
+Input, recovery, and joined input/recovery field-level layouts remain deferred to **AN14B3B2** until real paper samples are available. Their layouts must not be guessed.
 

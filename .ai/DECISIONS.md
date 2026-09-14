@@ -60,19 +60,21 @@ This file records confirmed project decisions that must survive chat migration. 
 - OCR candidates require human review. No automatic report confirmation, Analytics write, inventory movement, or legacy write may be introduced unless a later explicit phase authorizes it.
 - Field-level review UI must be calibrated against real paper samples rather than guessed layouts.
 
-## AN14B3B real-paper decisions
+## AN14B3B real-paper decisions and split
 
-- The current phase is `AN14B3B — Real-paper Review UI Calibration`.
+- `AN14B3B` is split at the real-world evidence boundary: `AN14B3B1` covers the sales journal; `AN14B3B2` covers input/recovery papers.
 - A real sales-journal sample has been inspected and is sufficient to begin sales-side calibration.
 - Confirmed sales-journal concepts visible in the sample include report identity/header data, vendor/machine context, product code/name, price, sales quantity, total quantity, total amount, previous-clear/elapsed-period information, and sold-out information.
-- Sales review should support human comparison/correction and existing quantity/amount consistency checks before any draft/report confirmation path.
+- Sales review supports human comparison/correction, visible quantity/amount consistency checks, and explicit paper approval before creating an Analytics draft.
+- `AN14B3B1` is complete only with draft-only behavior: no automatic confirmation, inventory movement, or legacy write.
 - Do not guess the field layout for `input`, `recovery`, or joined `input_recovery` papers. Real samples are still required for those layouts.
 - The user expects to provide the input-confirmation and recovery paper photos when available during work.
-- The immutable annotated pre-edit safety tag for AN14B3B is `backup-pre-AN14B3B-AN14B3A-20260914`, targeting the AN14B3A main baseline.
+- The immutable annotated pre-edit safety tag used for `AN14B3B1` is `backup-pre-AN14B3B-canonical-main-20260914`, targeting `c107298c3f08196de2ac97bc51d596aea403f310`.
+- `AN14B3B2` must create its own fresh immutable annotated Safety Tag at the then-current verified `main` before production-code edits.
 
 ## Current release boundary
 
-- Latest completed product phase: `AN14B3A — Production OCR Provider Connection`.
+- Latest completed product phase: `AN14B3B1 — Sales-journal Real-paper Review UI Calibration`.
 - Production OCR connectivity and real-image structured response were already validated before AN14B3B.
-- AN14B3B production implementation has not yet been committed to `main` at the time this canonical-state system is established.
-- After AN14B3B, the roadmap proceeds to `FINAL — Full Regression / Mobile / Backup / Release Gate` unless the user explicitly changes the roadmap.
+- Sales-journal field-level review is the completed first half of real-paper calibration; input/recovery calibration remains pending real paper evidence.
+- After `AN14B3B2`, the roadmap proceeds to `FINAL — Full Regression / Mobile / Backup / Release Gate` unless the user explicitly changes the roadmap.
