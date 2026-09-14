@@ -31,6 +31,13 @@ function safeSupportedTypes(raw){
   values=values.filter(value=>REPORT_TYPES.includes(value));
   return values.length?Array.from(new Set(values)):REPORT_TYPES.slice();
 }
+function getGatewayToken(request){
+  const apiKey=process.env.AI_GATEWAY_API_KEY;
+  if(apiKey)return apiKey;
+  const envOidc=process.env.VERCEL_OIDC_TOKEN;
+  if(envOidc)return envOidc;
+  return request.headers.get("x-vercel-oidc-token")||"";
+}
 
 export default {
   async fetch(request){
@@ -41,8 +48,8 @@ export default {
     }
     if(request.method!=="POST")return json(405,{error:"Method not allowed"},origin);
     if(!ALLOWED_ORIGINS.has(origin))return json(403,{error:"Origin is not allowed"},origin);
-    const gatewayToken=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;
-    if(!gatewayToken)return json(503,{error:"OCR gateway is not configured"},origin);
+    const gatewayToken=getGatewayToken(request);
+    if(!gatewayToken)return json(503,{error:"OCR gateway authentication is unavailable"},origin);
     const contentLength=Number(request.headers.get("content-length")||0);
     if(contentLength&&contentLength>4.45*1024*1024)return json(413,{error:"OCR image payload is too large"},origin);
     let form;
