@@ -1,7 +1,7 @@
 const ALLOWED_ORIGINS=new Set(["https://tenta0604.github.io","http://localhost:8000","http://127.0.0.1:8000"]);
 const REPORT_TYPES=["sales","input","recovery","input_recovery"];
 const MAX_IMAGE_BYTES=4*1024*1024;
-const DEFAULT_MODEL="gemini-2.5-flash";
+const DEFAULT_MODEL="gemini-3.6-flash";
 
 function cors(origin){
   const headers={"Vary":"Origin","Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8"};
