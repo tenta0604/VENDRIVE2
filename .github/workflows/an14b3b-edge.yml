@@ -94,7 +94,8 @@ jobs:
                 if(scrollWidth>width+1)throw new Error(`horizontal overflow at ${width}px: ${scrollWidth}`);
                 if(await page.locator('.vdrSalesLine').count()<1)throw new Error(`sales line missing at ${width}px`);
                 const reviewText=await page.locator('#reportCaptureReviewResult').innerText();
-                if(!reviewText.includes('売上ジャーナル照合')||!reviewText.includes('テスト飲料'))throw new Error(`review content missing at ${width}px`);
+                const productName=await page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^商品名$/})}).locator('input').first().inputValue();
+                if(!reviewText.includes('売上ジャーナル照合')||productName!=='テスト飲料')throw new Error(`review content missing at ${width}px`);
                 if(errors.length)throw new Error(`page errors at ${width}px: ${errors.join(' | ')}`);
                 await context.close();
               }
@@ -111,12 +112,12 @@ jobs:
               const save=page.locator('.vdrSalesSave');
               if(!(await save.isDisabled()))throw new Error('save must be disabled before explicit paper approval');
 
-              const salesQtyField=page.locator('.vdrSalesField').filter({hasText:'売上数'}).locator('input').first();
+              const salesQtyField=page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^売上数$/})}).locator('input').first();
               await salesQtyField.fill('1');
               await page.waitForFunction(()=>document.querySelector('.vdrSalesValidation')?.textContent.includes('要確認'));
 
-              const totalQtyField=page.locator('.vdrSalesField').filter({hasText:'売上数合計'}).locator('input').first();
-              const totalAmountField=page.locator('.vdrSalesField').filter({hasText:'売上金額'}).locator('input').first();
+              const totalQtyField=page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^売上数合計$/})}).locator('input').first();
+              const totalAmountField=page.locator('.vdrSalesField').filter({has:page.locator('label').filter({hasText:/^売上金額$/})}).locator('input').first();
               await totalQtyField.fill('1');
               await totalAmountField.fill('150');
               await page.waitForFunction(()=>document.querySelector('.vdrSalesValidation')?.textContent.includes('照合OK'));
