@@ -1,0 +1,76 @@
+name: AN14B3B Validation
+
+on:
+  push:
+    branches: [chatgpt/an14b3b-sales-review-current-20260914]
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and safety checks
+        run: |
+          set -euo pipefail
+          node --check sales-review.js
+          node --check ocr-config.js
+          git diff --check c107298c3f08196de2ac97bc51d596aea403f310...HEAD
+          grep -q 'createDraftFromReview' sales-review.js
+          grep -q '自動確定・在庫移動・legacy書き込みは行いません' sales-review.js
+          grep -q 'script.src="./sales-review.js"' ocr-config.js
+          ! grep -E 'reset --hard|force push|localStorage\.setItem|vendrive2_v7_data' sales-review.js
+
+  real-edge:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Start localhost
+        shell: pwsh
+        run: |
+          $p = Start-Process python -ArgumentList '-m','http.server','8000','--bind','127.0.0.1' -PassThru -WindowStyle Hidden
+          $p.Id | Out-File -FilePath "$env:RUNNER_TEMP\vendrive-http.pid"
+          Start-Sleep -Seconds 2
+      - name: Real Microsoft Edge sales review regression
+        shell: pwsh
+        run: |
+          $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+          if (!(Test-Path $edge)) { $edge = "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe" }
+          if (!(Test-Path $edge)) { throw 'Microsoft Edge not found' }
+          $profile = Join-Path $env:RUNNER_TEMP 'vendrive-an14b3b-edge-profile'
+          if (Test-Path $profile) { Remove-Item -Recurse -Force $profile }
+          $proc = Start-Process $edge -ArgumentList '--headless=new','--disable-gpu','--no-first-run','--remote-debugging-port=9222',"--user-data-dir=$profile",'http://127.0.0.1:8000/' -PassThru
+          $proc.Id | Out-File -FilePath "$env:RUNNER_TEMP\vendrive-edge.pid"
+          Start-Sleep -Seconds 3
+          @'
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function targets(){for(let i=0;i<30;i++){try{const r=await fetch('http://127.0.0.1:9222/json/list');const j=await r.json();const p=j.find(x=>x.type==='page'&&x.url.includes('127.0.0.1:8000'));if(p)return p}catch{}await sleep(250)}throw new Error('Edge CDP target unavailable')}
+          async function session(){const t=await targets(),ws=new WebSocket(t.webSocketDebuggerUrl),pending=new Map(),events=[],exceptions=[];let seq=0;await new Promise((ok,fail)=>{ws.onopen=ok;ws.onerror=fail});ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result)}else{events.push(m);if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params)}};function send(method,params={}){return new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}))})}return {ws,send,exceptions}}
+          async function evalv(s,expression){const r=await s.send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error('evaluate failed: '+JSON.stringify(r.exceptionDetails));return r.result.value}
+          const fixture={reviewVersion:2,status:'needs_review',image:{name:'sales.jpg',mime:'image/jpeg',size:1000,lastModified:null,stored:false},classification:{detectedType:'sales',typeConfidence:.99,selectedType:null,effectiveType:'sales',userOverride:false},identity:{occurredAt:'2026-09-14T12:00:00+09:00',makerKey:'KIRIN',vendorNumber:'12345',machineId:null},ocr:{connected:true,provider:'google-gemini-api',requestId:'edge-an14b3b',warnings:[],rawTextStored:false,imageStored:false},candidatePayload:{previousClearAt:'2026-08-31T12:00:00+09:00',elapsedHours:336,totalQty:3,totalAmount:430,products:[{productCode:'A1',printedName:'商品A',temperature:null,column:null,price:140,salesQty:1},{productCode:'B2',printedName:'商品B',temperature:null,column:null,price:145,salesQty:2}],soldOuts:[{productCode:'B2',column:19,temperature:'COLD',soldOutElapsedHours:19}],specialCircumstance:null},candidateValidation:{structureReady:true,readyToConfirm:true,reason:null,validation:{quantityMatch:true,amountMatch:true,warnings:[]}},persistence:{reportCreated:false,analyticsWrite:false,legacyWrite:false,allowed:false,reason:'AN14B1_review_only'},policy:{requiresUserReview:true,requiresExplicitSave:true,imageStored:false,rawOcrTextStored:false,autoSave:false}};
+          const s=await session();await s.send('Runtime.enable');
+          for(let i=0;i<60;i++){const ready=await evalv(s,"!!(window.VENDRIVE2SalesReview&&window.VENDRIVE2Analytics&&document.getElementById('reportCaptureReviewResult'))");if(ready)break;if(i===59)throw new Error('sales review module not ready');await sleep(100)}
+          for(const width of [320,390]){
+            await s.send('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:true});
+            await evalv(s,`document.getElementById('reportCaptureModal').classList.add('open');window.VENDRIVE2SalesReview.render(${JSON.stringify(fixture)});true`);
+            await sleep(100);
+            const ui=await evalv(s,`(()=>({editor:!!document.getElementById('salesReviewEditor'),products:document.querySelectorAll('[data-sales-product]').length,sold:document.querySelectorAll('[data-sales-soldout]').length,overflow:document.documentElement.scrollWidth>window.innerWidth,buttonDisabled:document.getElementById('salesReviewSave').disabled}))()`);
+            if(!ui.editor||ui.products!==2||ui.sold!==1||ui.overflow||ui.buttonDisabled)throw new Error('UI regression '+width+': '+JSON.stringify(ui));
+          }
+          const before=await evalv(s,`Promise.all([Promise.resolve(localStorage.getItem('vendrive2_v7_data')),window.VENDRIVE2Analytics.data.inventory.listEvents()]).then(v=>({legacy:v[0],events:v[1].length}))`);
+          await evalv(s,`document.getElementById('salesReviewSave').click();true`);
+          for(let i=0;i<50;i++){const done=await evalv(s,"document.getElementById('salesReviewSave').textContent==='下書き作成済み'");if(done)break;if(i===49)throw new Error('draft creation did not complete');await sleep(100)}
+          const after=await evalv(s,`Promise.all([Promise.resolve(localStorage.getItem('vendrive2_v7_data')),window.VENDRIVE2Analytics.data.inventory.listEvents(),window.VENDRIVE2Analytics.reports.list()]).then(v=>({legacy:v[0],events:v[1].length,reports:v[2].map(r=>({status:r.status,method:r.source&&r.source.method,type:r.type}))}))`);
+          if(before.legacy!==after.legacy)throw new Error('legacy storage mutated');
+          if(before.events!==after.events)throw new Error('inventory movement occurred');
+          const latest=after.reports[after.reports.length-1];if(!latest||latest.type!=='sales'||latest.method!=='ocr'||latest.status!=='draft')throw new Error('unexpected draft '+JSON.stringify(latest));
+          if(s.exceptions.length)throw new Error('page exceptions: '+JSON.stringify(s.exceptions));
+          console.log('AN14B3B REAL EDGE PASS',JSON.stringify({widths:[320,390],legacyUnchanged:true,inventoryUnchanged:true,draft:latest}));
+          s.ws.close();
+          '@ | Set-Content -Encoding UTF8 "$env:RUNNER_TEMP\an14b3b-edge.mjs"
+          node "$env:RUNNER_TEMP\an14b3b-edge.mjs"
