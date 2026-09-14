@@ -1,12 +1,58 @@
 {
-  "workflowVersion": 2,
+  "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN14B3A",
+  "activePhase": "AN14B3B",
   "nextPhase": "AN14B3B",
   "appVersion": "2026.09.14-AN14B3A",
   "engineVersion": "AN14B3A",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "ready"
+  "status": "in_progress_partial_evidence",
+  "currentWork": {
+    "title": "AN14B3B — Real-paper Review UI Calibration",
+    "productionCodeOnMain": "not_started",
+    "preEditSafetyTag": "backup-pre-AN14B3B-AN14B3A-20260914",
+    "preEditSafetyTagTarget": "9cbb69850bae04ac7f7a9bd9b645cd7d80259c6d",
+    "progress": [
+      "AN14B3A production OCR provider connection is complete and deployed",
+      "AN14B3B immutable annotated pre-edit safety tag has been created and verified",
+      "A real sales-journal sample has been inspected and is sufficient to begin sales-side review calibration",
+      "No AN14B3B production implementation has been committed to main"
+    ],
+    "nextActions": [
+      "Implement sales-journal field-level OCR review/correction UI using the real-paper structure",
+      "Preserve explicit human review, no auto-confirm, no inventory movement, and no legacy write",
+      "Calibrate input/recovery layouts only after real input-confirmation and recovery paper samples are available",
+      "Run syntax, diff, functional, and real Edge 320px/390px regression before completing AN14B3B"
+    ]
+  },
+  "requiredUserInput": [
+    {
+      "item": "投入確認票の実紙写真",
+      "requiredFor": "input report layout calibration",
+      "status": "pending"
+    },
+    {
+      "item": "回収票の実紙写真",
+      "requiredFor": "recovery report layout calibration",
+      "status": "pending"
+    }
+  ],
+  "unresolved": [
+    "Input, recovery, and joined input/recovery paper layouts must not be guessed before real samples are available"
+  ],
+  "recovery": {
+    "authority": "latest synchronized main plus canonical state files",
+    "readOrder": [
+      "AGENTS.md",
+      ".ai/STATE.json",
+      "AI_ROADMAP.md",
+      ".ai/LAST_RUN.json",
+      ".ai/DECISIONS.md",
+      ".ai/WORKFLOW.md"
+    ],
+    "shortResumePrompt": "VENDRIVE続き"
+  }
 }

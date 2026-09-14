@@ -3,8 +3,9 @@
 ## Current state
 
 - Latest completed phase: **AN14B3A — Production OCR Provider Connection**
+- Active / next phase: **AN14B3B — Real-paper Review UI Calibration**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Next phase: **AN14B3B — Real-paper Review UI Calibration**
+- Current real-paper evidence: sales journal available; input-confirmation and recovery paper layouts pending real samples.
 
 ## Completed
 
@@ -49,8 +50,14 @@
 ### AN14 — Report Capture / OCR Integration
 
 - **AN14B3B — Real-paper Review UI Calibration**
+  - Calibrate the sales-journal review/correction UI from the inspected real sales sample.
+  - Preserve the existing explicit-review boundary: no automatic report confirmation, Analytics write, inventory movement, or legacy write.
+  - Use the existing quantity/amount validation as visible review evidence where appropriate.
+  - Do not guess input/recovery paper layouts. Calibrate `input`, `recovery`, and joined `input_recovery` only after their real paper samples are available.
+  - Before completion, run required syntax/diff/functional gates and real Microsoft Edge checks at mobile widths including 320px and 390px.
 
 ### Later major phases
+
 - **FINAL — Full Regression / Mobile / Backup / Release Gate**
 
 Phase numbers may be split further when safety or implementation size requires it, but do not skip the major-category order without an explicit roadmap decision.
@@ -63,3 +70,8 @@ Phase numbers may be split further when safety or implementation size requires i
 - Introduce recent history, YoY, weather, sold-out evidence, actual fill, and prediction error incrementally in future forecasting phases.
 - Do not treat far-future weather as a confirmed value.
 - Prioritize backend correctness and data safety before UI.
+- Real-paper OCR/review layouts must be calibrated from evidence rather than invented from assumptions.
+
+## Recovery note
+
+Phase order lives in this roadmap. Current work detail, blockers, and required user input live in `.ai/STATE.json`; the most recent completed operation and exact next action live in `.ai/LAST_RUN.json`; locked decisions live in `.ai/DECISIONS.md`.

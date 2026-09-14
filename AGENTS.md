@@ -10,6 +10,17 @@
 - Avoid large refactors unless a phase explicitly requires one.
 - Never modify the old `tenta0604/VENDRIVE` repository.
 
+## Canonical project state and chat recovery
+
+- GitHub `main`, not the chat transcript, is the durable source of truth for project continuity.
+- The canonical recovery set is `AGENTS.md`, `.ai/STATE.json`, `AI_ROADMAP.md`, `.ai/LAST_RUN.json`, `.ai/DECISIONS.md`, and `.ai/WORKFLOW.md`.
+- At the start of a new VENDRIVE2 chat, or whenever the user gives a short resume instruction such as `VENDRIVE続き`, fetch the latest `main` first and read the canonical recovery set before deciding what to do next.
+- Do not require the user to paste a long migration prompt, reconstruct progress manually, or summarize the previous chat when repository state can be recovered directly.
+- If the current chat becomes long enough that context loss or migration risk is increasing, proactively recommend moving to a new chat instead of waiting for the user to ask.
+- Before recommending migration, update the canonical state files so the next chat can recover the current phase, progress, unresolved items, required user input, and next action from GitHub alone.
+- When new confirmed product decisions are made, update `.ai/DECISIONS.md` during the same safe work cycle rather than leaving them only in conversation history.
+- If chat context and canonical files disagree, do not silently guess. Prefer the latest verified `main` state, then reconcile only with explicit newer user instructions or independently verifiable repository evidence.
+
 ## Execution ownership and tool routing
 
 - ChatGPT is the default lead and executor for VENDRIVE2 development. Prefer direct execution through ChatGPT's connected GitHub capabilities, GitHub Actions, and other available tools when they can complete the work safely at comparable or better quality.
@@ -33,10 +44,13 @@
 - Do not implement later phases speculatively.
 - Within the selected phase, complete necessary implementation, fixes, and verification before stopping.
 - After the phase completes, stop and wait for the next instruction.
+- Repository-state maintenance, chat-recovery updates, and documentation-only continuity work are operational maintenance rather than a product phase; they must not advance `completedPhase` or `nextPhase` by themselves.
 
 ## Preflight for every phase
 
 Before editing, verify the repository root, `main` branch, `HEAD`, `origin/main`, working tree, and ahead/behind counts. Fetch origin first when network access is available. If the tree is dirty, history diverges, or the baseline is unexpected, do not repair it automatically; report `SAFE STOP`.
+
+Also verify the canonical state set is internally consistent: STATE completed/next phase must agree with ROADMAP, LAST_RUN must identify the latest completed operation and next action, and DECISIONS must not conflict with the intended change.
 
 ## Git safety and commit policy
 
@@ -47,6 +61,7 @@ Before editing, verify the repository root, `main` branch, `HEAD`, `origin/main`
 - Preserve unrelated user changes.
 - Commit and push only when every required gate passes.
 - If any required gate fails or remains unresolved: `NO COMMIT`, `NO PUSH`.
+- Documentation-only canonical-state maintenance that does not change production code does not require a new production safety tag, but still requires a verified synchronized main baseline and consistency checks.
 
 ## Verification
 
@@ -58,6 +73,7 @@ Before editing, verify the repository root, `main` branch, `HEAD`, `origin/main`
 - Evidence must identify the phase, pre-edit base SHA and immutable safety tag, versions, gate results, changed files, and unresolved issues.
 - Mark a gate `NOT_REQUIRED` only with a reason. Never record planned, assumed, or unexecuted checks as `PASS`.
 - `.ai/LAST_RUN.json` must not store the current commit SHA; Git `HEAD` / `origin/main` remains authoritative.
+- For continuity-only maintenance, LAST_RUN may use an operational run name instead of a product phase, but it must still record the baseline, checks, changed files, open items, and exact next action.
 
 ## Data and operational safety
 
@@ -90,4 +106,4 @@ On failure, report:
 - failing gate
 - `HEAD`, `origin/main`, changed files, and unresolved issue
 
-Do not rely on the user copying a long report elsewhere. Leave independently reviewable evidence in GitHub commit history, diffs, tags, and workflow runs.
+Do not rely on the user copying a long report elsewhere. Leave independently reviewable evidence in GitHub commit history, diffs, tags, workflow runs, and the canonical state files.

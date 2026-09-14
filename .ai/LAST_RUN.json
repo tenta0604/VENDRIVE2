@@ -1,11 +1,15 @@
 {
-  "evidenceVersion": 1,
-  "phase": "AN14B3A",
+  "evidenceVersion": 2,
+  "runType": "continuity_maintenance",
+  "run": "LONG_TERM_PROJECT_STATE_BOOTSTRAP",
+  "productPhase": "AN14B3B",
   "status": "PASS",
   "base": {
-    "head": "4e744ad2de682faded22029914b67e0d3ec4b598",
-    "safetyTag": "backup-pre-AN14B3-repaired-main-20260914",
-    "safetyTagTarget": "4e744ad2de682faded22029914b67e0d3ec4b598"
+    "head": "9cbb69850bae04ac7f7a9bd9b645cd7d80259c6d",
+    "productionSafetyTag": "NOT_REQUIRED",
+    "productionSafetyTagReason": "This run changes only canonical project-state and recovery documentation; production code is untouched.",
+    "activePhasePreEditSafetyTag": "backup-pre-AN14B3B-AN14B3A-20260914",
+    "activePhasePreEditSafetyTagTarget": "9cbb69850bae04ac7f7a9bd9b645cd7d80259c6d"
   },
   "versions": {
     "app": "2026.09.14-AN14B3A",
@@ -13,83 +17,45 @@
     "db": 4,
     "schema": 4
   },
+  "work": {
+    "summary": "Established GitHub-main canonical project memory so VENDRIVE2 can recover across chat migrations without a long handoff prompt.",
+    "completed": [
+      "Verified latest main and existing STATE, ROADMAP, LAST_RUN, AGENTS, and WORKFLOW",
+      "Added canonical DECISIONS file",
+      "Expanded STATE to include active work, progress, required user input, unresolved items, and recovery order",
+      "Added new-chat bootstrap and proactive migration rules to AGENTS and WORKFLOW",
+      "Refined ROADMAP with real-paper AN14B3B calibration boundaries without changing phase order",
+      "Preserved all application/engine/database/schema versions and production behavior"
+    ]
+  },
   "gates": {
     "preflight": "PASS",
-    "safetyTag": "PASS",
-    "versionState": "PASS",
-    "diffCheck": "PASS",
-    "syntax": "PASS",
-    "functional": "PASS",
-    "security": {
-      "status": "PASS",
-      "coverage": [
-        "Gemini API key remains server-side in Vercel Secret storage",
-        "final production tree contains no diagnostic endpoints or temporary validation workflows",
-        "final production code contains no embedded Gemini/OpenAI API-key pattern",
-        "OCR response contract excludes raw OCR text, image bytes, base64/Data URLs, and credentials"
-      ]
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "coverage": [
-        "OCR relay and adapter do not write legacy storage",
-        "OCR relay and adapter do not write analytics state",
-        "existing reviewed-draft boundary still requires explicit user approval",
-        "no automatic report confirmation or inventory movement"
-      ]
-    },
-    "realEdge": {
-      "required": true,
-      "status": "PASS",
-      "runIds": [
-        34834173574,
-        34834173585
-      ],
-      "coverage": [
-        "Microsoft Edge real-browser regression",
-        "320px mobile viewport",
-        "390px mobile viewport",
-        "no horizontal overflow or page errors",
-        "OCR modal/review wiring remains available"
-      ]
-    },
-    "relayPreview": {
-      "status": "PASS",
-      "deploymentId": "dpl_A9DXEJ7rVcvLRmbCF7ijXbM2qnkn",
-      "evidence": "clean zero-config Preview deployment READY after temporary diagnostics were removed"
-    },
-    "productionDeployment": {
-      "status": "PASS",
-      "deploymentId": "dpl_EzesiM2VVcch2DWQGojdas4ZGsET",
-      "evidence": "main deployment READY and production alias resolved to the same Git SHA"
-    },
-    "productionRealImageOcr": {
-      "status": "PASS",
-      "runId": 34834507894,
-      "evidence": {
-        "httpStatus": 200,
-        "provider": "google-gemini-api",
-        "detectedType": "sales",
-        "totalQty": 3,
-        "totalAmount": 430,
-        "productCount": 2,
-        "warnings": 0
-      }
-    },
+    "mainBaseline": "PASS",
+    "productionCodeChanged": false,
+    "versionChange": "NOT_REQUIRED",
+    "versionChangeReason": "Continuity-only maintenance does not change production behavior or release version.",
+    "safetyTag": "NOT_REQUIRED",
+    "safetyTagReason": "No production code edit in this run.",
+    "jsonValidation": "PASS",
+    "canonicalStateConsistency": "PASS",
+    "roadmapOrderPreserved": "PASS",
     "build": "NOT_REQUIRED",
-    "buildReason": "The GitHub Pages application is direct HTML/JavaScript; the Vercel relay is zero-config serverless and its production deployment gate passed."
+    "buildReason": "Documentation/state-only maintenance.",
+    "realEdge": "NOT_REQUIRED",
+    "realEdgeReason": "No UI/runtime/browser behavior changed."
   },
   "changedFiles": [
-    ".ai/LAST_RUN.json",
+    "AGENTS.md",
     ".ai/STATE.json",
-    "AI_ROADMAP.md",
-    "OCR_ADAPTER.md",
-    "analytics.js",
-    "api/ocr.mjs",
-    "index.html",
-    "ocr-config.js",
-    "ocr-relay-adapter.js",
-    "version.json"
+    ".ai/LAST_RUN.json",
+    ".ai/DECISIONS.md",
+    ".ai/WORKFLOW.md",
+    "AI_ROADMAP.md"
   ],
+  "openItems": [
+    "Real input-confirmation paper sample is still required for input layout calibration",
+    "Real recovery paper sample is still required for recovery layout calibration"
+  ],
+  "nextAction": "Resume AN14B3B from main: implement sales-journal field-level review/correction UI from the inspected real sales sample while preserving the existing no-auto-confirm/no-write safety boundary; incorporate input/recovery layouts only after their real-paper samples arrive.",
   "unresolved": []
 }
