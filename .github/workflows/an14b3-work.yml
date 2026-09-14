@@ -87,3 +87,23 @@ jobs:
           git add index.html
           git commit -m "feat: wire secure OCR relay adapter"
           git push origin HEAD
+
+  real-edge:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser driver
+        shell: pwsh
+        run: npm install --no-save playwright-core@1.55.0
+      - name: Validate in Microsoft Edge
+        shell: pwsh
+        run: |
+          @'
+          const http=require('http'),fs=require('fs'),path=require('path');
+          const {chromium}=require('playwright-core');
+          const root=process.cwd(),mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json'};
+          const server=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/'||p==='')p='/index.html';const f=path.join(root,p.replace(/^\//,''));if(!f.startsWith(root)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){res.writeHead(404);return res.end('not found')}res.setHeader('Content-Type',mime[path.extname(f)]||'application/octet-stream');res.end(fs.readFileSync(f))});
+          server.listen(4173,'127.0.0.1',async()=>{let browser;try{browser=await chromium.launch({channel:'msedge',headless:true});for(const width of [320,390]){const context=await browser.newContext({viewport:{width,height:844}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});const tabs=await page.locator('.tabs button').count();if(tabs<6)throw new Error(`expected >=6 tabs at ${width}px, got ${tabs}`);const bodyWidth=await page.evaluate(()=>document.documentElement.scrollWidth);if(bodyWidth>width+1)throw new Error(`horizontal overflow at ${width}px: ${bodyWidth}`);if(errors.length)throw new Error(`page errors at ${width}px: ${errors.join(' | ')}`);await context.close()}
+          const context=await browser.newContext({viewport:{width:390,height:844}});await context.addInitScript(()=>{window.VENDRIVE2OCRAdapter=Object.freeze({version:1,transport:'test-stub',analyze:async()=>({provider:'edge-test',requestId:'req-edge-1',detectedType:'sales',typeConfidence:.98,occurredAt:'2026-09-14T09:00:00+09:00',makerKey:'test-maker',vendorNumber:'001',machineId:null,candidatePayload:{previousClearAt:'2026-09-13T09:00:00+09:00',elapsedHours:24,totalQty:2,totalAmount:300,products:[{productCode:'A',printedName:'A',temperature:null,column:1,price:150,salesQty:2}],soldOuts:[],specialCircumstance:null},warnings:[]})})});const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});const png=Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360606060000000050001a5f645400000000049454e44ae426082','hex');await page.locator('#reportCaptureFile').setInputFiles({name:'edge-test.png',mimeType:'image/png',buffer:png});await page.waitForSelector('#reportCaptureModal.open');await page.locator('#runReportOcr').click();await page.waitForFunction(()=>document.querySelector('#reportOcrStatus')?.textContent.includes('OCR候補を取得しました'));const text=await page.locator('#reportOcrResult').innerText();if(!text.includes('売上')||!text.includes('98%'))throw new Error('OCR review summary missing expected values');if(errors.length)throw new Error(errors.join(' | '));console.log('EDGE_PASS',JSON.stringify({viewports:[320,390],ocrReview:true}));await context.close()}catch(e){console.error(e);process.exitCode=1}finally{if(browser)await browser.close();server.close()}});
+          '@ | Set-Content -Encoding utf8 .tmp-an14b3-edge.cjs
+          node .tmp-an14b3-edge.cjs
