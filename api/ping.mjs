@@ -1,6 +1,11 @@
-export default async function handler(req,res){
-  res.statusCode=200;
-  res.setHeader("Content-Type","application/json; charset=utf-8");
-  res.setHeader("Cache-Control","no-store");
-  res.end(JSON.stringify({ok:true,method:req.method,oidcHeader:Boolean(req.headers["x-vercel-oidc-token"]),oidcEnv:Boolean(process.env.VERCEL_OIDC_TOKEN)}));
+function payload(request){
+  return Response.json({
+    ok:true,
+    method:request.method,
+    oidcHeader:Boolean(request.headers.get("x-vercel-oidc-token")),
+    oidcEnv:Boolean(process.env.VERCEL_OIDC_TOKEN)
+  },{headers:{"Cache-Control":"no-store"}});
 }
+
+export async function GET(request){return payload(request)}
+export async function POST(request){return payload(request)}
