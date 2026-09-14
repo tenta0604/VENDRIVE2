@@ -1,9 +1,9 @@
-import handler from "./ocr.mjs";
+import { POST as ocrPOST, OPTIONS as ocrOPTIONS } from "./ocr.mjs";
 
 export async function POST(request){
-  return handler.fetch(request);
+  return ocrPOST(request);
 }
 
 export async function OPTIONS(request){
-  return handler.fetch(request);
+  return ocrOPTIONS(request);
 }
