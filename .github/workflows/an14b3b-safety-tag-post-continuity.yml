@@ -1,0 +1,52 @@
+name: AN14B3B Safety Tag Post Continuity
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  create-annotated-safety-tag:
+    if: github.head_ref == 'chatgpt/an14b3b-safety-tag-post-continuity-20260914'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact base commit
+        uses: actions/checkout@v4
+        with:
+          ref: c107298c3f08196de2ac97bc51d596aea403f310
+          fetch-depth: 0
+      - name: Verify main and create immutable annotated tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED='c107298c3f08196de2ac97bc51d596aea403f310'
+          TAG='backup-pre-AN14B3B-continuity-main-20260914'
+
+          REMOTE_MAIN="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          test "$REMOTE_MAIN" = "$EXPECTED" || { echo "main moved: $REMOTE_MAIN"; exit 1; }
+
+          EXISTING="$(git ls-remote origin "refs/tags/$TAG" | awk '{print $1}')"
+          if [ -n "$EXISTING" ]; then
+            git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+            TYPE="$(git cat-file -t "$TAG")"
+            test "$TYPE" = 'tag' || { echo 'same-name tag exists but is not annotated'; exit 1; }
+            TARGET="$(git rev-parse "$TAG^{}")"
+            test "$TARGET" = "$EXPECTED" || { echo "same-name annotated tag mismatch: $TARGET"; exit 1; }
+            echo "Annotated safety tag already exists at expected commit."
+            exit 0
+          fi
+
+          git config user.name 'VENDRIVE2 Safety Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git tag -a "$TAG" "$EXPECTED" -m 'Safety backup before AN14B3B implementation after continuity-state bootstrap'
+          test "$(git cat-file -t "$TAG")" = 'tag'
+          test "$(git rev-parse "$TAG^{}")" = "$EXPECTED"
+          git push origin "refs/tags/$TAG"
+
+          git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+          test "$(git cat-file -t "$TAG")" = 'tag'
+          test "$(git rev-parse "$TAG^{}")" = "$EXPECTED"
+          echo "AN14B3B annotated safety tag verified: $TAG -> $EXPECTED"
