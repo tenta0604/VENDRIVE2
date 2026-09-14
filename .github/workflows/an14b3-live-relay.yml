@@ -22,9 +22,9 @@ jobs:
             -H 'Origin: https://tenta0604.github.io' \
             -F 'file=@tiny.png;type=image/png' \
             -F 'supportedReportTypes=["sales","input","recovery","input_recovery"]' \
-            https://vendrive2-ocr-relay-git-chatgpt-an14-a1f2b0-nekotokikanjyu-5172.vercel.app/api/ocr-web)
+            https://vendrive2-ocr-relay-git-chatgpt-an14-a1f2b0-nekotokikanjyu-5172.vercel.app/api/ocr)
           echo "HTTP $code"
           cat response.json
           echo
           test "$code" = "200"
-          node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync("response.json","utf8"));if(x.provider!=="vercel-ai-gateway")throw new Error("provider mismatch");if(!Array.isArray(x.warnings))throw new Error("warnings missing");if("rawText" in x||"rawOcrText" in x||"imageData" in x||"base64" in x)throw new Error("unsafe field returned");console.log("preview relay structured response PASS")'
+          node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync("response.json","utf8"));if(x.provider!=="google-gemini-api")throw new Error("provider mismatch");if(typeof x.requestId!=="string"||!x.requestId.trim())throw new Error("requestId missing");if(!Array.isArray(x.warnings))throw new Error("warnings missing");if("rawText" in x||"rawOcrText" in x||"imageData" in x||"base64" in x)throw new Error("unsafe field returned");console.log("preview relay structured response PASS")'
