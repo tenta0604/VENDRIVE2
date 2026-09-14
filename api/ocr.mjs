@@ -39,53 +39,54 @@ function getGatewayToken(request){
   return process.env.AI_GATEWAY_API_KEY||"";
 }
 
-export default {
-  async fetch(request){
-    const origin=request.headers.get("origin")||"";
-    if(request.method==="OPTIONS"){
-      if(!ALLOWED_ORIGINS.has(origin))return json(403,{error:"Origin is not allowed"},origin);
-      return new Response(null,{status:204,headers:cors(origin)});
-    }
-    if(request.method!=="POST")return json(405,{error:"Method not allowed"},origin);
+async function handle(request){
+  const origin=request.headers.get("origin")||"";
+  if(request.method==="OPTIONS"){
     if(!ALLOWED_ORIGINS.has(origin))return json(403,{error:"Origin is not allowed"},origin);
-    const gatewayToken=getGatewayToken(request);
-    if(!gatewayToken)return json(503,{error:"OCR gateway authentication is unavailable"},origin);
-    const contentLength=Number(request.headers.get("content-length")||0);
-    if(contentLength&&contentLength>4.45*1024*1024)return json(413,{error:"OCR image payload is too large"},origin);
-    let form;
-    try{form=await request.formData()}catch(error){return json(400,{error:"Invalid OCR upload"},origin)}
-    const file=form.get("file");
-    if(!(file instanceof File)||!file.type.startsWith("image/")||file.size<1)return json(400,{error:"A valid image file is required"},origin);
-    if(file.size>MAX_IMAGE_BYTES)return json(413,{error:"OCR image must be 4MB or less"},origin);
-    const supported=safeSupportedTypes(String(form.get("supportedReportTypes")||"[]"));
-    const bytes=new Uint8Array(await file.arrayBuffer());
-    let binary="";
-    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
-    const imageUrl=`data:${file.type};base64,${btoa(binary)}`;
-    const schema=resultSchema();
-    const prompt=[
-      "You extract structured data from Japanese vending-machine operational report images for VENDRIVE2.",
-      `Allowed report types: ${supported.join(", ")}.`,
-      "Return only fields visible or safely inferable from the image. Never invent missing values.",
-      "If identity, timestamps, report type, totals, or lines are uncertain, use null where the schema permits and add a short warning.",
-      "Do not return raw OCR text, full transcription, image bytes, data URLs, secrets, tokens, or credentials.",
-      "makerKey should be a short normalized maker identifier only when clearly supported by the page; otherwise null.",
-      "machineId is normally null unless the page explicitly contains an application machine ID.",
-      "For candidatePayload, choose the shape matching detectedType. If the report cannot be safely structured, return null.",
-      "For date-times use ISO 8601 with +09:00 when the printed report provides enough information; otherwise null.",
-      "provider must be vercel-ai-gateway and requestId should be a short opaque identifier you generate for this extraction."
-    ].join("\n");
-    let upstream;
-    try{
-      upstream=await fetch("https://ai-gateway.vercel.sh/v1/responses",{method:"POST",headers:{"Authorization":`Bearer ${gatewayToken}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OCR_GATEWAY_MODEL||"google/gemini-2.5-flash",input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:imageUrl,detail:"high"}]}],text:{format:{type:"json_schema",name:"vendrive_ocr_candidate",strict:true,schema}},providerOptions:{gateway:{disallowPromptTraining:true}}})});
-    }catch(error){return json(502,{error:"OCR gateway connection failed"},origin)}
-    let data;
-    try{data=await upstream.json()}catch(error){return json(502,{error:"OCR gateway returned invalid data"},origin)}
-    if(!upstream.ok)return json(upstream.status===429?429:502,{error:"OCR gateway request failed"},origin);
-    let parsed;
-    try{parsed=JSON.parse(extractOutputText(data))}catch(error){return json(502,{error:"OCR structured result could not be parsed"},origin)}
-    parsed.provider="vercel-ai-gateway";
-    if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=data.id||crypto.randomUUID();
-    return json(200,parsed,origin);
+    return new Response(null,{status:204,headers:cors(origin)});
   }
-};
+  if(request.method!=="POST")return json(405,{error:"Method not allowed"},origin);
+  if(!ALLOWED_ORIGINS.has(origin))return json(403,{error:"Origin is not allowed"},origin);
+  const gatewayToken=getGatewayToken(request);
+  if(!gatewayToken)return json(503,{error:"OCR gateway authentication is unavailable"},origin);
+  const contentLength=Number(request.headers.get("content-length")||0);
+  if(contentLength&&contentLength>4.45*1024*1024)return json(413,{error:"OCR image payload is too large"},origin);
+  let form;
+  try{form=await request.formData()}catch(error){return json(400,{error:"Invalid OCR upload"},origin)}
+  const file=form.get("file");
+  if(!(file instanceof File)||!file.type.startsWith("image/")||file.size<1)return json(400,{error:"A valid image file is required"},origin);
+  if(file.size>MAX_IMAGE_BYTES)return json(413,{error:"OCR image must be 4MB or less"},origin);
+  const supported=safeSupportedTypes(String(form.get("supportedReportTypes")||"[]"));
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  let binary="";
+  for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+  const imageUrl=`data:${file.type};base64,${btoa(binary)}`;
+  const schema=resultSchema();
+  const prompt=[
+    "You extract structured data from Japanese vending-machine operational report images for VENDRIVE2.",
+    `Allowed report types: ${supported.join(", ")}.`,
+    "Return only fields visible or safely inferable from the image. Never invent missing values.",
+    "If identity, timestamps, report type, totals, or lines are uncertain, use null where the schema permits and add a short warning.",
+    "Do not return raw OCR text, full transcription, image bytes, data URLs, secrets, tokens, or credentials.",
+    "makerKey should be a short normalized maker identifier only when clearly supported by the page; otherwise null.",
+    "machineId is normally null unless the page explicitly contains an application machine ID.",
+    "For candidatePayload, choose the shape matching detectedType. If the report cannot be safely structured, return null.",
+    "For date-times use ISO 8601 with +09:00 when the printed report provides enough information; otherwise null.",
+    "provider must be vercel-ai-gateway and requestId should be a short opaque identifier you generate for this extraction."
+  ].join("\n");
+  let upstream;
+  try{
+    upstream=await fetch("https://ai-gateway.vercel.sh/v1/responses",{method:"POST",headers:{"Authorization":`Bearer ${gatewayToken}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OCR_GATEWAY_MODEL||"google/gemini-2.5-flash",input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:imageUrl,detail:"high"}]}],text:{format:{type:"json_schema",name:"vendrive_ocr_candidate",strict:true,schema}},providerOptions:{gateway:{disallowPromptTraining:true}}})});
+  }catch(error){return json(502,{error:"OCR gateway connection failed"},origin)}
+  let data;
+  try{data=await upstream.json()}catch(error){return json(502,{error:"OCR gateway returned invalid data"},origin)}
+  if(!upstream.ok)return json(upstream.status===429?429:502,{error:"OCR gateway request failed"},origin);
+  let parsed;
+  try{parsed=JSON.parse(extractOutputText(data))}catch(error){return json(502,{error:"OCR structured result could not be parsed"},origin)}
+  parsed.provider="vercel-ai-gateway";
+  if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=data.id||crypto.randomUUID();
+  return json(200,parsed,origin);
+}
+
+export async function POST(request){return handle(request)}
+export async function OPTIONS(request){return handle(request)}
