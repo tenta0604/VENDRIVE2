@@ -42,7 +42,7 @@ jobs:
           node --check api/ocr.mjs
           grep -F '<script src="ocr-config.js"></script>' index.html
           grep -F '<script src="ocr-relay-adapter.js"></script>' index.html
-          ! grep -REn '(sk-proj-|OPENAI_API_KEY[[:space:]]*=|api[_-]?key[[:space:]]*[:=][[:space:]]*["'\'' ][A-Za-z0-9_-]{16,})' -- index.html analytics.js ocr-config.js ocr-relay-adapter.js api/ocr.mjs
+          ! grep -REn '(sk-proj-|AIza[0-9A-Za-z_-]{20,}|OPENAI_API_KEY[[:space:]]*=|GEMINI_API_KEY[[:space:]]*=|api[_-]?key[[:space:]]*[:=][[:space:]]*["'\'' ][A-Za-z0-9_-]{16,})' -- index.html analytics.js ocr-config.js ocr-relay-adapter.js api/ocr.mjs
           git diff --check
       - name: Adapter behavior checks
         shell: bash
@@ -74,10 +74,9 @@ jobs:
           if(r.status!==403)throw new Error('unapproved origin was not rejected');
           r=await handler(new Request('https://relay.example/api/ocr',{method:'GET',headers:{origin:'https://tenta0604.github.io'}}));
           if(r.status!==405)throw new Error('non-POST request was not rejected');
-          delete process.env.VERCEL_OIDC_TOKEN;
-          delete process.env.AI_GATEWAY_API_KEY;
+          delete process.env.GEMINI_API_KEY;
           r=await handler(new Request('https://relay.example/api/ocr',{method:'POST',headers:{origin:'https://tenta0604.github.io'}}));
-          if(r.status!==503)throw new Error('missing gateway auth was not fail-closed');
+          if(r.status!==503)throw new Error('missing Gemini auth was not fail-closed');
           NODE
       - name: Commit work branch patch
         shell: bash
