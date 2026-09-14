@@ -18,7 +18,7 @@ jobs:
           set -euo pipefail
           sleep 12
           printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' | base64 -d > tiny.png
-          code=$(curl -sS -o response.json -w '%{http_code}' \
+          code=$(curl -sS -L --post302 --post301 -o response.json -w '%{http_code}' \
             -H 'Origin: https://tenta0604.github.io' \
             -F 'file=@tiny.png;type=image/png' \
             -F 'supportedReportTypes=["sales","input","recovery","input_recovery"]' \
