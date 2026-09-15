@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL.4",
+  "appVersion": "2026.09.15-FINAL.5",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-MAINT-OCR-TIMEOUT-20260915",
-    "lastSafetyTagTarget": "11ce3764e2aa8b196f63af81399a8c1d014b0583",
+    "lastSafetyTag": "backup-pre-OCR-UX-SPEED-20260915",
+    "lastSafetyTagTarget": "5e2c726df7fed16c045176acea85708f629174c9",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -42,7 +42,12 @@
       "Added distinct user-facing OCR failure categories for provider busy, timeout, connection, structured parse, authentication, and rejection failures.",
       "Replaced the too-short sequential 8-second OCR model attempts with hedged provider requests: the primary model keeps running while fallback models start only if the prior request is slow or fails.",
       "Raised the OCR provider attempt window to 30 seconds, the provider budget to 55 seconds, and the client relay timeout to 75 seconds.",
-      "Added realistic large-image production smoke coverage so tiny 1x1 test images can no longer falsely certify OCR latency."
+      "Added realistic large-image production smoke coverage so tiny 1x1 test images can no longer falsely certify OCR latency.",
+      "Added a compact OCR review layer that shows all important values at a glance, highlights only deterministic uncertainty or inconsistencies, and opens the existing detailed editor only when requested.",
+      "Renamed OCR confidence presentation so report-type confidence is not mistaken for per-field OCR accuracy.",
+      "Added explicit registered-machine matching via maker/vendor identity, with user-confirmed machine linking for unique candidates.",
+      "Reduced input-confirmation OCR scope to analysis-relevant product/quantity fields instead of counter/payment reconciliation.",
+      "Added client-side OCR image optimization and visible processing progress to reduce upload and inference latency without storing images."
     ]
   },
   "requiredUserInput": [],

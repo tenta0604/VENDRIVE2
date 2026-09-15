@@ -1,94 +1,35 @@
 {
   "evidenceVersion": 2,
   "runType": "maintenance",
-  "phase": "MAINT-OCR-TIMEOUT",
-  "status": "PASS",
+  "phase": "OCR-UX-SPEED",
+  "status": "PENDING",
   "base": {
-    "head": "11ce3764e2aa8b196f63af81399a8c1d014b0583",
-    "safetyTag": "backup-pre-MAINT-OCR-TIMEOUT-20260915",
-    "safetyTagTarget": "11ce3764e2aa8b196f63af81399a8c1d014b0583"
+    "head": "5e2c726df7fed16c045176acea85708f629174c9",
+    "safetyTag": "backup-pre-OCR-UX-SPEED-20260915",
+    "safetyTagTarget": "5e2c726df7fed16c045176acea85708f629174c9"
   },
   "versions": {
-    "app": "2026.09.15-FINAL.4",
+    "app": "2026.09.15-FINAL.5",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
-  "rootCause": {
-    "productionEvidence": [
-      "2026-09-15T09:01:42Z POST /api/ocr -> 504; 3.6 timeout, 3.6 timeout, 3.5 timeout",
-      "2026-09-15T09:02:38Z POST /api/ocr -> 504; 3.6 timeout, 3.6 timeout, 3.5 timeout",
-      "2026-09-15T09:03:01Z POST /api/ocr -> 504; 3.6 timeout, 3.6 timeout, 3.5 timeout",
-      "2026-09-15T09:03:21Z POST /api/ocr -> 200; 3.6 first attempt timed out, second 3.6 attempt succeeded"
-    ],
-    "conclusion": "FINAL.3's fixed 8-second per-model cutoff was shorter than real receipt-image inference latency. The relay aborted valid Gemini work before completion; image quality was not the cause."
-  },
   "work": {
-    "summary": "Make real receipt OCR latency-tolerant while preserving failover and all existing data-safety boundaries.",
-    "completed": [
-      "Replaced sequential fixed 8-second attempts with hedged requests that leave slow models running while starting fallback models.",
-      "Set default per-model timeout to 30 seconds and total provider budget to 55 seconds.",
-      "Set browser relay timeout to 75 seconds to include mobile upload plus provider processing.",
-      "Kept immediate fallback on fast provider failures such as 503 high demand.",
-      "Kept image non-retention, review-only OCR candidates, and no automatic inventory or legacy mutation.",
-      "Bumped app version to 2026.09.15-FINAL.4."
+    "summary": "Improve OCR speed and mobile review UX without weakening explicit review, image-retention, or data-mutation safety.",
+    "planned": [
+      "compact review with issue-only emphasis and on-demand detailed editing",
+      "report-type confidence label correction",
+      "machine identity matching and explicit unique-candidate linking",
+      "input OCR scope reduction to analysis-relevant fields",
+      "client-side image optimization and progress feedback"
     ]
   },
   "gates": {
     "preflight": "PASS",
     "safetyTag": {
       "status": "PASS",
-      "tag": "backup-pre-MAINT-OCR-TIMEOUT-20260915",
-      "target": "11ce3764e2aa8b196f63af81399a8c1d014b0583"
-    },
-    "rootCause": {
-      "status": "PASS",
-      "evidence": [
-        "Multiple real receipt requests in production returned 504 after the old 8-second per-model cutoff.",
-        "A later real request succeeded when gemini-3.6-flash completed after the previous timeout window."
-      ]
-    },
-    "hedgedUnit": {
-      "status": "PASS",
-      "runId": 34951273842,
-      "coverage": [
-        "slow primary remains active while fallback starts",
-        "fast provider failure triggers immediate fallback",
-        "all-slow providers still classify as provider_timeout"
-      ]
-    },
-    "vercelProduction": {
-      "status": "PASS",
-      "deploymentId": "dpl_BANRCWUqSqZiW6oMNtYczzatc3n6",
-      "sourceCommit": "c4c2ecf24d0e547101e76e0a4888c66c0a5439f3",
-      "state": "READY"
-    },
-    "realisticProductionSmoke": {
-      "status": "PASS",
-      "runId": 34951530374,
-      "image": {
-        "bytes": 2162188,
-        "width": 1200,
-        "height": 1800
-      },
-      "attempts": [
-        {
-          "status": 200,
-          "elapsedMs": 11886,
-          "provider": "google-gemini-api"
-        },
-        {
-          "status": 200,
-          "elapsedMs": 10945,
-          "provider": "google-gemini-api"
-        }
-      ]
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "imageRetention": "unchanged: no analytics image storage",
-      "autoConfirmation": "unchanged: OCR remains candidate/review only",
-      "legacyMutation": "unchanged"
+      "tag": "backup-pre-OCR-UX-SPEED-20260915",
+      "target": "5e2c726df7fed16c045176acea85708f629174c9"
     }
   },
   "changedFiles": [
@@ -97,9 +38,12 @@
     "api/ocr.mjs",
     "index.html",
     "ocr-relay-adapter.js",
+    "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "Retry the real vending-machine receipt in VENDRIVE2 FINAL.4. The production OCR path now tolerates real image inference latency instead of aborting after 8 seconds.",
+  "openItems": [
+    "Run static/unit/real Edge 320px+390px compact-review and image-optimization regression, then production OCR smoke before PASS."
+  ],
+  "nextAction": "Verify optimized upload size, compact review behavior, machine-match safety, mobile overflow, and production OCR response before release.",
   "unresolved": []
 }
