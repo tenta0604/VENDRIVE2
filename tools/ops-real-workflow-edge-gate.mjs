@@ -41,6 +41,7 @@ try{
   assert(placement.captureTop>placement.heroTop,"report capture placement invalid");
   console.log("OPS_CAPTURE_PLACEMENT_PASS");
 
+  await nav(c,"http://127.0.0.1:8000/tools/ops-real-workflow-gate.html",390);
   const guards=await ev(c,`(async()=>{
     const d=new Date(),yyyy=d.getFullYear(),mm=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0"),today=yyyy+"-"+mm+"-"+dd,week=["日","月","火","水","木","金","土"],todayDay=week[d.getDay()],otherDay=week[(d.getDay()+1)%7];
     const state={machines:[
@@ -50,9 +51,9 @@ try{
       {id:"T1",text:"本日対象タスク",target:"サントリー",targetMachineIds:["M1"],completed:false},
       {id:"T2",text:"対象外タスク",target:"サントリー",targetMachineIds:["M2"],completed:false}
     ],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:["サントリー"],makerColors:{},makerSettings:[]};
-    localStorage.setItem("vendrive2_v7_data",JSON.stringify(state));localStorage.setItem("vendrive2_v7_data_version","1");localStorage.setItem("vendrive2_last_day",today);location.reload();return true;
+    localStorage.setItem("vendrive2_v7_data",JSON.stringify(state));localStorage.setItem("vendrive2_v7_data_version","1");localStorage.setItem("vendrive2_last_day",today);return true;
   })()`);
-  await new Promise(r=>setTimeout(r,1300));
+  await nav(c,"http://127.0.0.1:8000/",390);
   const warning=await ev(c,`(async()=>{
     window.__messages=[];window.confirm=(m)=>{window.__messages.push(String(m));return false};
     const card=document.querySelector("#todayList .swipeCard");if(!card)return{error:"today machine card missing",body:document.body.innerText.slice(0,500)};
