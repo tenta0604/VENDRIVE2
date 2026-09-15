@@ -18,6 +18,9 @@ async function run(){
   const model=process.env.OCR_GEMINI_MODEL||DEFAULT_MODEL;
   if(!apiKey)return {ok:false,model,error:"missing-api-key"};
   const base=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}`;
+  const listResponse=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=100",{headers:{"x-goog-api-key":apiKey}});
+  const listData=await jsonBody(listResponse);
+  const generateModels=Array.isArray(listData&&listData.models)?listData.models.filter(m=>Array.isArray(m.supportedGenerationMethods)&&m.supportedGenerationMethods.includes("generateContent")).map(m=>m.name).slice(0,100):[];
   const modelResponse=await fetch(base,{headers:{"x-goog-api-key":apiKey}});
   const modelData=await jsonBody(modelResponse);
 
@@ -54,7 +57,7 @@ async function run(){
   return {
     ok:true,
     model,
-    modelCheck:{status:modelResponse.status,ok:modelResponse.ok,error:safeError(modelData)},
+    availableGenerateModels:generateModels, modelList:{status:listResponse.status,ok:listResponse.ok,error:safeError(listData)}, modelCheck:{status:modelResponse.status,ok:modelResponse.ok,error:safeError(modelData)},
     simpleSchema:{status:simpleResponse.status,ok:simpleResponse.ok,error:safeError(simpleData)},
     fullSchema:{status:fullResponse.status,ok:fullResponse.ok,error:safeError(fullData)}
   };
