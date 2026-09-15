@@ -138,7 +138,8 @@ try{
 
   for(const width of [320,390]){
     await client.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:false});
-    await navigate(client,"http://127.0.0.1:8000/index.html?final="+width);
+    const legacyOrigin=width===320?"http://127.0.0.1:8000":"http://localhost:8000";
+    await navigate(client,legacyOrigin+"/index.html?final="+width);
 
     const legacyResult=await evalIn(client,`(async()=>{
       function a(c,m){if(!c)throw new Error(m)}
