@@ -48,6 +48,28 @@ function extractGeminiText(data){
   throw new Error("Gemini response did not contain structured text");
 }
 
+function normalizeProviderWarnings(parsed){
+  const incoming=Array.isArray(parsed&&parsed.warnings)?parsed.warnings.filter(value=>typeof value==="string"):[];
+  const kept=incoming.filter(value=>value!=="recovery_case_conversion_required"&&!value.startsWith("case_conversion_required:"));
+  const targets=[];
+  function scan(items,prefix){
+    if(!Array.isArray(items))return;
+    items.forEach((item,index)=>{
+      if(!item||typeof item!=="object")return;
+      const caseCount=Number.isInteger(item.caseCount)?item.caseCount:0;
+      const looseCount=Number.isInteger(item.looseCount)?item.looseCount:0;
+      const quantity=Number.isInteger(item.quantity)?item.quantity:null;
+      if(caseCount>0&&(quantity===null||quantity<=looseCount))targets.push(`${prefix}.${index}.quantity`);
+    });
+  }
+  const candidate=parsed&&parsed.candidatePayload;
+  if(parsed&&parsed.detectedType==="recovery"&&candidate)scan(candidate.items,"items");
+  if(parsed&&parsed.detectedType==="input_recovery"&&candidate&&candidate.recovery)scan(candidate.recovery.items,"recovery.items");
+  targets.forEach(path=>kept.push(`case_conversion_required:${path}`));
+  parsed.warnings=Array.from(new Set(kept)).slice(0,20);
+  return parsed;
+}
+
 async function handle(request){
   const origin=request.headers.get("origin")||"";
   if(request.method==="OPTIONS"){
@@ -77,7 +99,7 @@ async function handle(request){
     "Return only fields visible or safely inferable from the image. Never invent missing values.",
     "The real input-confirmation layout contains a header, product input rows, and an input total. Focus on product code, printed product name, temperature, quantity, and total quantity. Do not spend time extracting counter rows, branch counters, card/cash amounts, or sales-amount reconciliation from input-confirmation paper.",
     "The real recovery-confirmation layout contains product code/name, temperature, and recovery counts split into caseCount (ケース) and looseCount (バラ). Preserve both printed counts.",
-    "For recovery quantity, use the unit-equivalent count used by inventory. When caseCount is 0, quantity must equal looseCount. When caseCount is greater than 0 and the case size is not printed or otherwise certain, set quantity to 0 and add warning recovery_case_conversion_required instead of inventing a conversion.",
+    "For recovery quantity, use the unit-equivalent count used by inventory. When caseCount is 0, quantity must equal looseCount. When caseCount is greater than 0 and the case size is not printed or otherwise certain, set quantity to 0 and add a row-specific warning case_conversion_required:<field path>, for example case_conversion_required:recovery.items.0.quantity for input_recovery or case_conversion_required:items.0.quantity for recovery. Never invent a case conversion.",
     "For recovery totalQty, sum quantity values only when every row has a safe unit-equivalent quantity. Otherwise use 0 and add a warning.",
     "For joined input_recovery paper, return both calibrated sections under candidatePayload.input and candidatePayload.recovery.",
     "paper.carNumber, paper.operatorName, and paper.locationName come from the printed header when legible; otherwise null.",
@@ -157,7 +179,7 @@ async function handle(request){
           if(!failure){
             parsed.provider="google-gemini-api";
             if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=crypto.randomUUID();
-            if(!Array.isArray(parsed.warnings))parsed.warnings=[];
+            normalizeProviderWarnings(parsed);
             if(model!==primaryModel&&parsed.warnings.length<20&&!parsed.warnings.includes("ocr_provider_fallback_used"))parsed.warnings.push("ocr_provider_fallback_used");
             log(model,200,"success",index+1,{hedged:index>0});
             finish({ok:true,parsed,model},index);

@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL.7",
+  "appVersion": "2026.09.16-FINAL.8",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
-    "lastSafetyTagTarget": "efe6bd3ee990a636933d489794cd24fd500eb38e",
+    "lastSafetyTag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
+    "lastSafetyTagTarget": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -52,7 +52,10 @@
       "Reduced compact OCR item-row visual density while keeping product names readable and quantities emphasized.",
       "Separated OCR uncertainty, consistency checks, and machine-link confirmation into distinct compact-review badges so a machine-link prompt is no longer presented as a generic OCR issue.",
       "Added pinpoint inline editing for uncertain or missing metadata and item fields; only the flagged field opens for correction, while the existing full editor remains available at the bottom.",
-      "After a pinpoint correction, the matching uncertainty warning is cleared in-memory and the compact review is immediately re-evaluated without writing Analytics data."
+      "After a pinpoint correction, the matching uncertainty warning is cleared in-memory and the compact review is immediately re-evaluated without writing Analytics data.",
+      "OCR runs now use a generation token so failed, closed, replaced, or stale requests cannot leave or restore an older review beneath a newer error/result.",
+      "A current OCR failure explicitly clears the prior OCR review and in-memory OCR candidate before presenting the failure state.",
+      "Recovery case-conversion warnings are derived from structured recovery rows: false global warnings are removed when caseCount is zero, while genuinely unsafe case rows become pinpoint Japanese quantity checks with inline editing."
     ]
   },
   "requiredUserInput": [],

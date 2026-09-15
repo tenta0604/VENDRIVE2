@@ -35,7 +35,7 @@ function timeLabel(v){if(!v)return"—";var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):
 function localDateTime(v){var m=/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/.exec(v||"");return m?m[1]:""}
 function firstPaper(review,type){var p=review.candidatePayload||{};if(type==="input_recovery")return p.input&&p.input.paper||p.recovery&&p.recovery.paper||{};return p.paper||{}}
 function eachPaper(review,type,fn){var p=review.candidatePayload||{};if(type==="input_recovery"){if(p.input&&p.input.paper)fn(p.input.paper);if(p.recovery&&p.recovery.paper)fn(p.recovery.paper)}else if(p.paper)fn(p.paper)}
-function benignWarning(w){return w==="ocr_provider_fallback_used"}
+function benignWarning(w){return w==="ocr_provider_fallback_used"||w==="recovery_case_conversion_required"||(typeof w==="string"&&w.indexOf("case_conversion_required:")===0)}
 function normalizeWarningPath(path,type){
   path=String(path||"").replace(/^candidatePayload\./,"").replace(/^identity\./,"");
   if(type==="input"&&path.indexOf("input.")===0)path=path.slice(6);
@@ -78,7 +78,7 @@ function issuesFor(review,type){
   }else{
     var input=type==="input"?p:type==="input_recovery"?p.input:null,recovery=type==="recovery"?p:type==="input_recovery"?p.recovery:null;
     if(input){itemIssues(input.items,type==="input_recovery"?"input.items":"items","input");var iq=Array.isArray(input.items)?input.items.reduce(function(n,x){return n+(Number.isInteger(x.quantity)?x.quantity:0)},0):0;if(iq!==input.totalQty)addIssue(out,type==="input_recovery"?"input.totalQty":"totalQty","投入合計が商品行と一致していません","error","consistency")}
-    if(recovery){itemIssues(recovery.items,type==="input_recovery"?"recovery.items":"items","recovery");(recovery.items||[]).forEach(function(x,i){if(Number.isInteger(x.caseCount)&&x.caseCount>0&&(!Number.isInteger(x.quantity)||x.quantity<=x.looseCount))addIssue(out,(type==="input_recovery"?"recovery.items":"items")+"."+i+".quantity","ケース分を含む在庫反映単位数を確認してください","error","consistency")})}
+    if(recovery){itemIssues(recovery.items,type==="input_recovery"?"recovery.items":"items","recovery");(recovery.items||[]).forEach(function(x,i){if(Number.isInteger(x.caseCount)&&x.caseCount>0&&(!Number.isInteger(x.quantity)||x.quantity<=x.looseCount))addIssue(out,(type==="input_recovery"?"recovery.items":"items")+"."+i+".quantity","ケース入数が不明です。在庫反映数量を確認してください","error","consistency")})}
   }
   uncertain.forEach(function(path){if(!path)return;var msg=leafLabel(path)+"の読み取りが不確かです";addIssue(out,path,msg,"warn","ocr")});
   ((review.ocr&&review.ocr.warnings)||[]).filter(function(w){return typeof w==="string"&&!benignWarning(w)&&w.indexOf("uncertain:")!==0}).forEach(function(w){addIssue(out,"ocr","OCR警告: "+w,"warn","ocr_global")});

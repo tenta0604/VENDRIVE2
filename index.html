@@ -312,7 +312,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.15-FINAL.7',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.16-FINAL.8',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -777,9 +777,9 @@ function renderOrders(){
   var hbox=$id('historyList');hbox.innerHTML='';(state.history||[]).slice().sort(function(a,b){return b.completedAt-a.completedAt}).forEach(function(h){var e=document.createElement('div');e.className='history';e.innerHTML='<div><b>'+esc(h.machineName)+'</b><div class="meta">'+esc(h.type)+(h.sub?' ＞ '+esc(h.sub):'')+(h.detail?' ・ '+esc(h.detail):'')+'<br>'+new Date(h.completedAt).toLocaleString('ja-JP')+'</div></div><button class="historyDelete" type="button">削除</button>';e.querySelector('button').onclick=function(){deleteOrderHistoryEntry(h)};hbox.appendChild(e)});if(!hbox.children.length)hbox.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">直近30件の対応履歴はありません。</div>';
 }
 
-var reportCaptureCurrentFile=null,reportCaptureObjectUrl=null,reportCaptureReview=null,reportCaptureOcrResult=null;
+var reportCaptureCurrentFile=null,reportCaptureObjectUrl=null,reportCaptureReview=null,reportCaptureOcrResult=null,reportCaptureOcrRunToken=0;
 function reportCaptureTypeLabel(value){var labels={sales:'売上',input:'投入',recovery:'回収',input_recovery:'投入＋回収'};return labels[value]||'未確定'}
-function resetReportCapture(){if(reportCaptureObjectUrl){try{URL.revokeObjectURL(reportCaptureObjectUrl)}catch(error){}reportCaptureObjectUrl=null}reportCaptureCurrentFile=null;reportCaptureReview=null;var input=$id('reportCaptureFile'),preview=$id('reportCapturePreview'),meta=$id('reportCaptureFileMeta'),result=$id('reportCaptureReviewResult'),type=$id('reportCaptureType');if(input)input.value='';if(preview){preview.removeAttribute('src');preview.alt='選択した帳票画像のプレビュー'}if(meta)meta.textContent='';if(result)result.innerHTML='';var ocrResult=$id('reportOcrResult'),ocrStatus=$id('reportOcrStatus');if(ocrResult)ocrResult.innerHTML='';if(ocrStatus)ocrStatus.textContent='OCR接続を確認中…';reportCaptureOcrResult=null;if(type)type.value=''}
+function resetReportCapture(){reportCaptureOcrRunToken++;if(reportCaptureObjectUrl){try{URL.revokeObjectURL(reportCaptureObjectUrl)}catch(error){}reportCaptureObjectUrl=null}reportCaptureCurrentFile=null;reportCaptureReview=null;var input=$id('reportCaptureFile'),preview=$id('reportCapturePreview'),meta=$id('reportCaptureFileMeta'),result=$id('reportCaptureReviewResult'),type=$id('reportCaptureType');if(input)input.value='';if(preview){preview.removeAttribute('src');preview.alt='選択した帳票画像のプレビュー'}if(meta)meta.textContent='';if(result)result.innerHTML='';var ocrResult=$id('reportOcrResult'),ocrStatus=$id('reportOcrStatus');if(ocrResult)ocrResult.innerHTML='';if(ocrStatus)ocrStatus.textContent='OCR接続を確認中…';reportCaptureOcrResult=null;if(type)type.value=''}
 function closeReportCaptureReview(){resetReportCapture();closeModal('reportCaptureModal')}
 function openReportCapturePicker(){var input=$id('reportCaptureFile');if(!input)return;input.value='';input.click()}
 function handleReportCaptureFile(file){if(!file)return;if(!file.type||file.type.indexOf('image/')!==0){toast('画像ファイルを選択してください');resetReportCapture();return}if(!Number.isInteger(file.size)||file.size<1||file.size>20*1024*1024){toast('画像は20MB以下にしてください');resetReportCapture();return}resetReportCapture();reportCaptureCurrentFile=file;reportCaptureObjectUrl=URL.createObjectURL(file);var preview=$id('reportCapturePreview'),meta=$id('reportCaptureFileMeta');preview.src=reportCaptureObjectUrl;preview.alt=file.name+' の一時プレビュー';meta.textContent=file.name+' · '+Math.max(1,Math.round(file.size/1024))+'KB · 端末内一時表示';openModal('reportCaptureModal');updateReportOcrAvailability()}
@@ -790,7 +790,45 @@ function reportOcrFailureCopy(error){var code=error&&error.code||"",message=erro
 function reportReviewWithMachineMatch(review){var api=window.VENDRIVE2Analytics,id=review&&review.identity||{};if(!review)return Promise.resolve(review);if(!api||!api.bridge||typeof api.bridge.findMachineCandidates!=='function'||!id.makerKey||!id.vendorNumber){review.machineMatch={status:'unavailable',candidates:[]};return Promise.resolve(review)}return Promise.resolve(api.bridge.findMachineCandidates({makerKey:id.makerKey,vendorNumber:id.vendorNumber})).then(function(match){review.machineMatch=match||{status:'no_match',candidates:[]};if(match&&match.status==='confirmed_mapping'&&match.confirmedMapping&&!match.confirmedMapping.missing)review.identity.machineId=match.confirmedMapping.machineId;return review}).catch(function(error){console.warn('OCR machine match unavailable',error);review.machineMatch={status:'unavailable',candidates:[]};return review})}
 function mountPreparedReportReview(review){var result=$id('reportCaptureReviewResult'),effective=review&&review.classification?review.classification.effectiveType:null;if(!result)return;if(window.VENDRIVE2CompactOcrReview&&typeof window.VENDRIVE2CompactOcrReview.mount==='function'){result.innerHTML='';window.VENDRIVE2CompactOcrReview.mount(result,review);return}if(effective==='sales'&&window.VENDRIVE2SalesReview&&typeof window.VENDRIVE2SalesReview.mount==='function'){result.innerHTML='';window.VENDRIVE2SalesReview.mount(result,review);return}if((effective==='input'||effective==='recovery'||effective==='input_recovery')&&window.VENDRIVE2InputRecoveryReview&&typeof window.VENDRIVE2InputRecoveryReview.mount==='function'){result.innerHTML='';window.VENDRIVE2InputRecoveryReview.mount(result,review);return}result.innerHTML='<div class="analysisEmpty"><b>レビュー候補を表示できません</b><span>帳票種別を確認してください。</span></div>'}
 function reportOcrProgress(status){var started=Date.now(),phase='画像を準備中',transport='',timer=null;function render(){var sec=Math.max(0,Math.round((Date.now()-started)/1000));status.textContent=phase+' · '+sec+'秒'+transport}timer=setInterval(render,1000);render();return{update:function(info){info=info||{};if(info.stage==='prepare'||info.stage==='optimizing')phase='画像を軽量化中';else if(info.stage==='upload_ready'||info.stage==='ocr_wait')phase='OCR解析中';else if(info.stage==='complete')phase='結果を確認中';if(info.originalBytes&&info.uploadBytes&&info.uploadBytes<info.originalBytes){transport=' · '+Math.max(1,Math.round(info.originalBytes/1024))+'→'+Math.max(1,Math.round(info.uploadBytes/1024))+'KB'}render()},stop:function(){if(timer){clearInterval(timer);timer=null}}}}
-function runReportOcr(){if(!reportCaptureCurrentFile){toast('帳票画像を選択してください');return}var adapter=reportOcrAdapter(),status=$id('reportOcrStatus'),result=$id('reportOcrResult'),reviewResult=$id('reportCaptureReviewResult'),button=$id('runReportOcr'),api=window.VENDRIVE2Analytics;if(!adapter){status.textContent='OCR Adapterが接続されていません';result.innerHTML='<div class="analysisEmpty"><b>OCR接続待ち</b><span>画像は送信されていません。安全なAdapter接続後に利用できます。</span></div>';return}button.disabled=true;if(reviewResult)reviewResult.innerHTML='';var progress=reportOcrProgress(status);result.innerHTML='<div class="analysisLoading">帳票を読み取っています…</div>';var metadata={name:reportCaptureCurrentFile.name,mime:reportCaptureCurrentFile.type,size:reportCaptureCurrentFile.size,lastModified:reportCaptureCurrentFile.lastModified};Promise.resolve().then(function(){return adapter.analyze({file:reportCaptureCurrentFile,image:metadata,supportedReportTypes:['sales','input','recovery','input_recovery'],onProgress:function(info){progress.update(info)}})}).then(function(raw){progress.update({stage:'complete'});return api.capture.normalizeOcrResult(raw)}).then(function(normalized){reportCaptureOcrResult=normalized;var selected=$id('reportCaptureType').value||null;return api.capture.prepareOcrReview({image:metadata,selectedType:selected,ocrResult:normalized})}).then(reportReviewWithMachineMatch).then(function(review){reportCaptureReview=review;if(!($id('reportCaptureType').value)&&review.classification.detectedType)$id('reportCaptureType').value=review.classification.detectedType;status.textContent='OCR候補を取得しました · 要確認';result.innerHTML=reportOcrSummary(review);mountPreparedReportReview(review)}).catch(function(error){console.error('Secure OCR adapter failed',error);reportCaptureOcrResult=null;reportCaptureReview=null;var copy=reportOcrFailureCopy(error);status.textContent=copy.status;result.innerHTML='<div class="analysisEmpty"><b>'+esc(copy.title)+'</b><span>'+esc(copy.detail)+'</span></div>'}).then(function(){progress.stop();button.disabled=false})}
+function runReportOcr(){
+  if(!reportCaptureCurrentFile){toast('帳票画像を選択してください');return}
+  var adapter=reportOcrAdapter(),status=$id('reportOcrStatus'),result=$id('reportOcrResult'),reviewResult=$id('reportCaptureReviewResult'),button=$id('runReportOcr'),api=window.VENDRIVE2Analytics;
+  if(!adapter){status.textContent='OCR Adapterが接続されていません';result.innerHTML='<div class="analysisEmpty"><b>OCR接続待ち</b><span>画像は送信されていません。安全なAdapter接続後に利用できます。</span></div>';return}
+  var runToken=++reportCaptureOcrRunToken;
+  function stale(){return runToken!==reportCaptureOcrRunToken}
+  function staleError(){var error=new Error('stale OCR run');error.vendriveStaleOcr=true;return error}
+  button.disabled=true;
+  reportCaptureOcrResult=null;
+  reportCaptureReview=null;
+  if(reviewResult)reviewResult.innerHTML='';
+  var progress=reportOcrProgress(status);
+  result.innerHTML='<div class="analysisLoading">帳票を読み取っています…</div>';
+  var metadata={name:reportCaptureCurrentFile.name,mime:reportCaptureCurrentFile.type,size:reportCaptureCurrentFile.size,lastModified:reportCaptureCurrentFile.lastModified};
+  Promise.resolve()
+    .then(function(){return adapter.analyze({file:reportCaptureCurrentFile,image:metadata,supportedReportTypes:['sales','input','recovery','input_recovery'],onProgress:function(info){if(!stale())progress.update(info)}})})
+    .then(function(raw){if(stale())throw staleError();progress.update({stage:'complete'});return api.capture.normalizeOcrResult(raw)})
+    .then(function(normalized){if(stale())throw staleError();reportCaptureOcrResult=normalized;var selected=$id('reportCaptureType').value||null;return api.capture.prepareOcrReview({image:metadata,selectedType:selected,ocrResult:normalized})})
+    .then(function(review){if(stale())throw staleError();return reportReviewWithMachineMatch(review)})
+    .then(function(review){
+      if(stale())throw staleError();
+      reportCaptureReview=review;
+      if(!($id('reportCaptureType').value)&&review.classification.detectedType)$id('reportCaptureType').value=review.classification.detectedType;
+      status.textContent='OCR候補を取得しました · 要確認';
+      result.innerHTML=reportOcrSummary(review);
+      mountPreparedReportReview(review);
+    })
+    .catch(function(error){
+      if(stale()||error&&error.vendriveStaleOcr)return;
+      console.error('Secure OCR adapter failed',error);
+      reportCaptureOcrResult=null;
+      reportCaptureReview=null;
+      if(reviewResult)reviewResult.innerHTML='';
+      var copy=reportOcrFailureCopy(error);
+      status.textContent=copy.status;
+      result.innerHTML='<div class="analysisEmpty"><b>'+esc(copy.title)+'</b><span>'+esc(copy.detail)+'</span></div>';
+    })
+    .then(function(){progress.stop();if(!stale())button.disabled=false})
+}
 function prepareReportCaptureUiReview(){if(!reportCaptureCurrentFile){toast('帳票画像を選択してください');return}var api=window.VENDRIVE2Analytics,result=$id('reportCaptureReviewResult'),selected=$id('reportCaptureType').value||null;if(!api||!api.capture||typeof api.capture.prepareReview!=='function'){result.innerHTML='<div class="analysisEmpty"><b>レビュー機能を利用できません</b><span>ページを再読み込みしてください。</span></div>';return}result.innerHTML='<div class="analysisLoading">レビュー情報を確認中…</div>';var metadata={name:reportCaptureCurrentFile.name,mime:reportCaptureCurrentFile.type,size:reportCaptureCurrentFile.size,lastModified:reportCaptureCurrentFile.lastModified},reviewPromise=reportCaptureOcrResult?api.capture.prepareOcrReview({image:metadata,selectedType:selected,ocrResult:reportCaptureOcrResult}):api.capture.prepareReview({image:metadata,selectedType:selected,detectedType:null,typeConfidence:null,candidatePayload:null,provider:null});reviewPromise.then(reportReviewWithMachineMatch).then(function(review){reportCaptureReview=review;mountPreparedReportReview(review)}).catch(function(error){console.error('Report capture review failed',error);result.innerHTML='<div class="analysisEmpty"><b>レビュー準備に失敗しました</b><span>画像を選び直してください。データは保存されていません。</span></div>'})}
 
 var analysisUiSection='proposals',analysisUiRenderToken=0;

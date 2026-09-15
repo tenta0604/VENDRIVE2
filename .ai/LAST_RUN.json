@@ -1,64 +1,49 @@
 {
   "evidenceVersion": 2,
   "runType": "maintenance",
-  "phase": "MAINT-PINPOINT-EDIT",
-  "status": "PASS",
+  "phase": "MAINT-OCR-STALE-WARNING",
+  "status": "PENDING",
   "base": {
-    "head": "efe6bd3ee990a636933d489794cd24fd500eb38e",
-    "safetyTag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
-    "safetyTagTarget": "efe6bd3ee990a636933d489794cd24fd500eb38e"
+    "head": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce",
+    "safetyTag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
+    "safetyTagTarget": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce"
   },
   "versions": {
-    "app": "2026.09.15-FINAL.7",
+    "app": "2026.09.16-FINAL.8",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Make OCR review uncertainty self-explanatory and locally editable without forcing the full editor.",
+    "summary": "Prevent stale OCR reviews after failures and replace internal recovery case-conversion warnings with accurate pinpoint review behavior.",
     "completed": [
-      "Separated OCR field issues, consistency issues, and machine-link confirmation into distinct badges.",
-      "Added exact-field highlighting with an adjacent Edit button for uncertain/missing metadata and item values.",
-      "Added inline single-field editors that re-evaluate the review after correction without persisting data.",
-      "Renamed the bottom editor action to 全体を編集 and kept the existing full editor available on demand.",
-      "Bumped app version to 2026.09.15-FINAL.7."
+      "Added OCR run-generation invalidation across reset, retry, success, and failure UI paths.",
+      "Current failures explicitly clear previous review DOM and in-memory OCR candidate state.",
+      "Normalized recovery case-conversion warnings from structured rows instead of displaying a raw provider token.",
+      "caseCount=0 recovery rows no longer produce a case-conversion warning.",
+      "Unsafe case rows use the existing pinpoint quantity editor with a Japanese explanation.",
+      "Bumped app version to 2026.09.16-FINAL.8."
     ]
   },
   "gates": {
     "preflight": "PASS",
     "safetyTag": {
       "status": "PASS",
-      "tag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
-      "target": "efe6bd3ee990a636933d489794cd24fd500eb38e"
-    },
-    "realEdge": {
-      "status": "PASS",
-      "runId": 34983881936,
-      "coverage": [
-        "machine-only issue renders as 紐づけ確認 1件 and not OCR確認",
-        "uncertain productCode is highlighted at the exact field with an adjacent 編集 button",
-        "inline correction updates only the in-memory review value and clears the matching uncertainty warning",
-        "editing vendorNumber refreshes machine matching without persisting a link or draft",
-        "全体を編集 remains available and mounts the existing detailed editor",
-        "320px and 390px paths remain within viewport"
-      ]
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "inlineEditPersistence": "none until explicit draft creation",
-      "machineLinkPersistence": "only explicit machine-link button",
-      "autoConfirmation": "unchanged",
-      "imageRetention": "unchanged"
+      "tag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
+      "target": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce"
     }
   },
   "changedFiles": [
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
+    "api/ocr.mjs",
     "index.html",
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "Deploy FINAL.7 and verify the live version. Real-device OCR reviews should distinguish machine-link confirmation from OCR uncertainty and allow exact-field inline correction.",
+  "openItems": [
+    "Run API warning-normalization unit tests, real Edge stale-result/failure regression, pinpoint case-conversion UI regression, mobile overflow checks, and production OCR smoke before PASS."
+  ],
+  "nextAction": "Release only after stale review cannot coexist with a current OCR failure and recovery case warnings are correct for both zero-case and real case-conversion scenarios.",
   "unresolved": []
 }
