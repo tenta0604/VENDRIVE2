@@ -1,60 +1,34 @@
 {
   "evidenceVersion": 2,
   "runType": "maintenance",
-  "phase": "MAINT-OCR-HINT",
-  "status": "PASS",
+  "phase": "MAINT-EMPTY-START",
+  "status": "PENDING",
   "base": {
-    "head": "dc8b485376593f22ced236f9f668159011238b70",
-    "safetyTag": "backup-pre-MAINT-OCR-HINT-20260915",
-    "safetyTagTarget": "dc8b485376593f22ced236f9f668159011238b70"
+    "head": "17e653bffbafd210e24cdf68293a4ce976ebc01e",
+    "safetyTag": "backup-pre-MAINT-EMPTY-START-20260915",
+    "safetyTagTarget": "17e653bffbafd210e24cdf68293a4ce976ebc01e"
   },
   "versions": {
-    "app": "2026.09.15-FINAL.1",
+    "app": "2026.09.15-FINAL.2",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Maintenance release to correct stale OCR guidance text without changing OCR, Analytics, DB, or persistence logic.",
+    "summary": "Remove development sample vending machines from the true fresh-install path without deleting or replacing existing saved/recoverable user data.",
     "completed": [
-      "Replaced obsolete OCR pre-connection hint with text matching the live secure OCR workflow.",
-      "Bumped client-visible release version to 2026.09.15-FINAL.1."
+      "Removed the development sample-data initializer from production startup code.",
+      "Changed the no-storage/no-recovery startup path to persist and render the already-empty initial state.",
+      "Kept localStorage-first and IndexedDB recovery behavior unchanged.",
+      "Bumped client version to 2026.09.15-FINAL.2."
     ]
   },
   "gates": {
     "preflight": "PASS",
     "safetyTag": {
       "status": "PASS",
-      "tag": "backup-pre-MAINT-OCR-HINT-20260915",
-      "target": "dc8b485376593f22ced236f9f668159011238b70"
-    },
-    "diffScope": {
-      "status": "PASS",
-      "productionLogicChanged": false,
-      "changedFiles": [
-        ".ai/LAST_RUN.json",
-        ".ai/STATE.json",
-        "index.html",
-        "version.json"
-      ],
-      "note": "User-facing change is limited to OCR guidance copy and client release version; OCR, Analytics, DB, and persistence logic are unchanged."
-    },
-    "vercelPreview": {
-      "status": "PASS",
-      "deploymentId": "dpl_GbSpYcJbQMbaXMgUoLoQNCvcxwck",
-      "sourceCommit": "c5a443f250365dc9e583a765338c37252b42684e",
-      "state": "READY"
-    },
-    "githubPages": {
-      "status": "PASS",
-      "runId": 34934319014,
-      "sourceCommit": "c5a443f250365dc9e583a765338c37252b42684e"
-    },
-    "livePage": {
-      "status": "PASS",
-      "appVersion": "2026.09.15-FINAL.1",
-      "expectedHint": "販売・投入・回収の帳票を撮影し、安全なOCRで読み取って内容をレビューします。画像は保存しません。",
-      "httpStatus": 200
+      "tag": "backup-pre-MAINT-EMPTY-START-20260915",
+      "target": "17e653bffbafd210e24cdf68293a4ce976ebc01e"
     }
   },
   "changedFiles": [
@@ -63,7 +37,9 @@
     "index.html",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "Begin controlled real-world use of VENDRIVE2. Treat any newly observed issue as an operations bug/maintenance item; do not start a new product phase unless explicitly scoped.",
+  "openItems": [
+    "Run real Edge regression for fresh start, existing localStorage, and IndexedDB-only recovery before PASS."
+  ],
+  "nextAction": "Run the fixed maintenance gate, then deploy to main and verify the live fresh-install page contains zero sample vending machines.",
   "unresolved": []
 }

@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL.1",
+  "appVersion": "2026.09.15-FINAL.2",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-MAINT-OCR-HINT-20260915",
-    "lastSafetyTagTarget": "dc8b485376593f22ced236f9f668159011238b70",
+    "lastSafetyTag": "backup-pre-MAINT-EMPTY-START-20260915",
+    "lastSafetyTagTarget": "17e653bffbafd210e24cdf68293a4ce976ebc01e",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -35,7 +35,9 @@
     ],
     "maintenance": [
       "Updated stale OCR pre-connection guidance to match the live secure OCR workflow.",
-      "Bumped app version to 2026.09.15-FINAL.1 so existing clients can detect the maintenance update."
+      "Bumped app version to 2026.09.15-FINAL.1 so existing clients can detect the maintenance update.",
+      "Fresh installations now start with zero vending machines instead of injecting development sample machines A-F.",
+      "Existing localStorage data and IndexedDB recovery data remain authoritative and are not deleted by the empty-start maintenance."
     ]
   },
   "requiredUserInput": [],

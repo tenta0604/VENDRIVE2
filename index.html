@@ -309,7 +309,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.15-FINAL.1',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.15-FINAL.2',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -455,16 +455,6 @@ function maintainRestoredState(candidate){
   var previous=state,candidate;
   try{candidate=normalizeStateCandidate(x);state=candidate;return true}catch(e){state=previous;console.error('VENDRIVE2 normalize failed',e);return false}
 }
-function initializeSampleData(){
-  state.machines=[
-    {id:'A',name:'自販機 A',code:'A-001',address:'愛知県一宮市',days:['木'],cycle:'3日周期',last:'2026-08-24',time:'指定なし',sales:'コーラ 5本/日・お茶 7本/日',memo:'駐車スペースに注意',lat:20,lng:20},
-    {id:'B',name:'自販機 B',code:'A-002',address:'愛知県一宮市',days:['木'],cycle:'1週間に1回',last:'2026-08-20',time:'14:00〜16:00',sales:'コーヒー 8本/日・水 3本/日',memo:'午後指定',lat:55,lng:65},
-    {id:'C',name:'自販機 C',code:'A-003',address:'愛知県一宮市',days:['木'],cycle:'2週間に1回',last:'2026-08-13',time:'10:00〜12:00',sales:'水 10本/日・お茶 6本/日',memo:'午前中推奨',lat:30,lng:80},
-    {id:'D',name:'自販機 D',code:'A-004',address:'愛知県一宮市',days:['木'],cycle:'3日周期',last:today,time:'指定なし',sales:'コーラ 4本/日',memo:'本日補充完了',lat:70,lng:25,visited:true},
-    {id:'E',name:'自販機 E',code:'A-005',address:'愛知県一宮市',days:['金'],cycle:'1週間に1回',last:'2026-08-21',time:'指定なし',sales:'お茶 6本/日',memo:'商品が出ないとの電話',lat:70,lng:78,order:{type:'商品関連',sub:'商品違い',detail:'コーラを押したらお茶が出た',createdAt:Date.now()-3600000}},
-    {id:'F',name:'自販機 F',code:'A-006',address:'愛知県一宮市',days:['月'],cycle:'2日周期',last:'2026-08-25',time:'指定なし',sales:'水 9本/日',memo:'在庫少なめ',lat:45,lng:45}
-  ];state.history=[];state.machines.forEach(function(m){m.makerGroup=makerGroup(m.maker)});
-}
 function finalizeLoadedState(){
   var dayKey='vendrive2_last_day',maintenanceChanged=false;
   try{var last=localStorage.getItem(dayKey);if(last!==today){state.machines.forEach(function(m){m.visited=false;m.skip=null;m.force=null});localStorage.setItem(dayKey,today);persist()}}catch(e){console.error('VENDRIVE2 day reset failed',e)}
@@ -481,7 +471,7 @@ function load(){
   recoverIndexedDb(function(recovered){
     if(recovered){finalizeLoadedState();renderAll();toast('保存データを復元しました');return}
     if(hasStoredData){console.error('VENDRIVE2 stored data retained after load failure');toast('保存データの読み込みに失敗しました');return}
-    initializeSampleData();finalizeLoadedState();renderAll();
+    finalizeLoadedState();renderAll();
   });
 }function recentEntries(list){return(Array.isArray(list)?list:[]).slice().sort(function(a,b){return Number(b&&b.completedAt||0)-Number(a&&a.completedAt||0)}).slice(0,30)}
 function sameEntryList(a,b){return a.length===b.length&&a.every(function(item,index){return item===b[index]})}
