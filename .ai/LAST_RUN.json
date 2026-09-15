@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "product",
   "phase": "OPS-REAL-WORKFLOW",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "e333b11b0ed6488738ab4b4d50082ea84f0287f1",
     "safetyTag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
@@ -29,6 +29,34 @@
       "status": "PASS",
       "tag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
       "target": "e333b11b0ed6488738ab4b4d50082ea84f0287f1"
+    },
+    "realEdge": {
+      "status": "PASS",
+      "runId": 34993922258,
+      "coverage": [
+        "OCR review creates a draft, shows an explicit success card, then requires a second explicit user confirmation before the report becomes confirmed",
+        "confirmed report status persisted through the real Analytics IndexedDB API",
+        "report capture is directly below the Today work-progress hero",
+        "visit completion warns when that machine still has an unfinished task",
+        "end-of-day warning includes unfinished orders/tasks only for today's active route target set",
+        "out-of-route task does not leak into the end-of-day warning",
+        "390px and 320px remain within viewport"
+      ],
+      "evidence": {
+        "draftConfirm": "OPS_DRAFT_CONFIRM_PASS",
+        "capturePlacement": "OPS_CAPTURE_PLACEMENT_PASS",
+        "todayGuards": "OPS_TODAY_GUARDS_390_PASS",
+        "mobile320": "OPS_MOBILE_320_PASS"
+      }
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "draftAutoConfirm": false,
+      "explicitFinalConfirmation": true,
+      "imageRetention": "unchanged: no OCR image storage",
+      "legacyMutation": "unchanged",
+      "unfinishedTaskGuard": "warning only; user may explicitly continue",
+      "endOfDayGuard": "warning only and scoped to today targets"
     }
   },
   "changedFiles": [
@@ -38,9 +66,7 @@
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [
-    "Run real Edge 320px/390px workflow regression for draft confirmation, capture placement, visit task guard, and end-of-day scoped warnings."
-  ],
-  "nextAction": "Release only after the real-device-equivalent workflow shows confirmed reports entering Analytics while unfinished work warnings remain scoped to today's machines.",
+  "openItems": [],
+  "nextAction": "Use FINAL.9 in real operations. Confirm real OCR reports only after checking them; confirmed sales reports feed the analytics engine and confirmed input/recovery reports feed inventory-derived planning and analysis.",
   "unresolved": []
 }
