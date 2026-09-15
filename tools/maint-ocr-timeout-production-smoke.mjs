@@ -27,7 +27,7 @@ function receiptLikePng(width=1200,height=1800){
     }
   }
   const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(width,0);ihdr.writeUInt32BE(height,4);ihdr[8]=8;ihdr[9]=0;ihdr[10]=0;ihdr[11]=0;ihdr[12]=0;
-  return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk("IHDR",ihdr),chunk("IDAT",deflateSync(raw,{level:6})),chunk("IEND",Buffer.alloc(0))]);
+  return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk("IHDR",ihdr),chunk("IDAT",deflateSync(raw,{level:0})),chunk("IEND",Buffer.alloc(0))]);
 }
 const endpoint="https://vendrive2-ocr-relay.vercel.app/api/ocr",png=receiptLikePng();
 if(png.length<1000000||png.length>3900000)throw new Error("realistic smoke image size out of range: "+png.length);
