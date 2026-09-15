@@ -189,7 +189,7 @@ function mount(container,review){
   var residual=globalIssues.concat(consistencyIssues.filter(function(x){return !issueFor(issues,x.key)||x.key.indexOf(".quantity")<0}));
   if(residual.length){var ic=el("div","vdrCompactCard"),list=el("div","vdrCompactIssues");ic.appendChild(el("div","vdrCompactSection","確認ポイント"));residual.forEach(function(x){list.appendChild(el("div","vdrCompactIssue"+(x.severity==="error"?" error":""),(x.severity==="error"?"⚠ ":"")+x.message))});ic.appendChild(list);root.appendChild(ic)}
 
-  var actionsCard=el("div","vdrCompactCard"),detail=el("div","vdrCompactDetail");detail.hidden=true,actions=el("div","vdrCompactActions"),edit=el("button","vdrCompactButton","全体を編集");edit.type="button";actions.appendChild(edit);
+  var actionsCard=el("div","vdrCompactCard"),detail=el("div","vdrCompactDetail"),actions=el("div","vdrCompactActions"),edit=el("button","vdrCompactButton","全体を編集");detail.hidden=true;edit.type="button";actions.appendChild(edit);
   var approvalWrap=el("label","vdrCompactApproval"),approval=document.createElement("input");approval.type="checkbox";approvalWrap.appendChild(approval);approvalWrap.appendChild(el("span","","一覧を実紙と照合し、この内容をAnalyticsの下書きとして保存してよいことを確認しました。"));
   var save=el("button","vdrCompactButton primary","この内容で下書きを作成");save.type="button";save.disabled=true;actions.appendChild(save);actionsCard.appendChild(actions);actionsCard.appendChild(approvalWrap);
   var status=el("div","vdrCompactStatus",blocking.length?"赤い要修正項目があるため、修正してから保存してください。":"まだ保存されていません。自動確定・在庫変動・legacyデータ変更は行いません。");actionsCard.appendChild(status);actionsCard.appendChild(detail);root.appendChild(actionsCard);
