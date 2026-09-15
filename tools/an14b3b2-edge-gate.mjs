@@ -77,7 +77,7 @@ function fixture(type,width){
 for(const width of widths){
   const client=await connect(await pageTarget());
   try{
-    await client.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:true});
+    await client.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:false});
     await client.send("Page.navigate",{url:"http://127.0.0.1:8000/tools/an14b3b2-edge-fixture.html?width="+width});
     await new Promise(r=>setTimeout(r,1800));
 
@@ -147,6 +147,7 @@ for(const width of widths){
     if(result.exceptionDetails)throw new Error(JSON.stringify(result.exceptionDetails));
     const value=result.result&&result.result.value;
     if(!value)throw new Error("No result from browser gate");
+    if(value.innerWidth!==width)throw new Error("Viewport width mismatch: requested "+width+", got "+value.innerWidth);
     console.log("EDGE_GATE",JSON.stringify(value));
     await client.send("Runtime.evaluate",{expression:"window.VENDRIVE2Analytics.close(); indexedDB.deleteDatabase('VENDRIVE2_ANALYTICS_DB'); localStorage.clear(); true",returnByValue:true});
   } finally {
