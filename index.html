@@ -309,7 +309,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.15-AN14B3B2',BACKUP_FORMAT_VERSION=1,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.15-AN14B3B2',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -366,7 +366,7 @@ function readBackupRestoreFile(file){
 }
 function openRestoreSnapshotsDb(done){
   if(!window.indexedDB){done(null);return}
-  try{var request=indexedDB.open('VENDRIVE2_DB',1);request.onupgradeneeded=function(){var db=request.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots')};request.onerror=function(){done(null)};request.onsuccess=function(){try{var db=request.result;if(!db.objectStoreNames.contains('snapshots')){done(null);return}done(db)}catch(e){done(null)}}}catch(e){done(null)}
+  try{var request=indexedDB.open('VENDRIVE2_DB',LEGACY_DB_VERSION);request.onupgradeneeded=function(){var db=request.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots')};request.onerror=function(){done(null)};request.onsuccess=function(){try{var db=request.result;if(!db.objectStoreNames.contains('snapshots')){done(null);return}done(db)}catch(e){done(null)}}}catch(e){done(null)}
 }
 function createPreRestoreCheckpoint(done){
   var raw,lastDay;
@@ -414,7 +414,7 @@ function persist(){
   }
   try{
     if(!dbPromise)dbPromise=new Promise(function(resolve,reject){
-      var req=indexedDB.open('VENDRIVE2_DB',1);
+      var req=indexedDB.open('VENDRIVE2_DB',LEGACY_DB_VERSION);
       req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots')};
       req.onsuccess=function(){resolve(req.result)};
       req.onerror=function(){reject(req.error)};
@@ -472,7 +472,7 @@ function finalizeLoadedState(){
 }
 function recoverIndexedDb(done){
   if(!window.indexedDB){done(false);return}
-  try{var rq=indexedDB.open('VENDRIVE2_DB',1);rq.onerror=function(){console.error('VENDRIVE2 IndexedDB recovery open failed',rq.error);done(false)};rq.onsuccess=function(){try{var db=rq.result;if(!db.objectStoreNames.contains('snapshots')){done(false);return}var g=db.transaction('snapshots','readonly').objectStore('snapshots').get('current');g.onerror=function(){console.error('VENDRIVE2 IndexedDB recovery read failed',g.error);done(false)};g.onsuccess=function(){try{var rec=g.result,x=rec&&rec.raw?JSON.parse(rec.raw):null;done(normalizeLoadedState(x))}catch(e){console.error('VENDRIVE2 IndexedDB recovery normalize failed',e);done(false)}}}catch(e){console.error('VENDRIVE2 IndexedDB recovery failed',e);done(false)}}}catch(e){console.error('VENDRIVE2 IndexedDB recovery setup failed',e);done(false)}
+  try{var rq=indexedDB.open('VENDRIVE2_DB',LEGACY_DB_VERSION);rq.onupgradeneeded=function(){var db=rq.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots')};rq.onerror=function(){console.error('VENDRIVE2 IndexedDB recovery open failed',rq.error);done(false)};rq.onsuccess=function(){try{var db=rq.result;if(!db.objectStoreNames.contains('snapshots')){done(false);return}var g=db.transaction('snapshots','readonly').objectStore('snapshots').get('current');g.onerror=function(){console.error('VENDRIVE2 IndexedDB recovery read failed',g.error);done(false)};g.onsuccess=function(){try{var rec=g.result,x=rec&&rec.raw?JSON.parse(rec.raw):null;done(normalizeLoadedState(x))}catch(e){console.error('VENDRIVE2 IndexedDB recovery normalize failed',e);done(false)}}}catch(e){console.error('VENDRIVE2 IndexedDB recovery failed',e);done(false)}}}catch(e){console.error('VENDRIVE2 IndexedDB recovery setup failed',e);done(false)}
 }
 function load(){
   var raw=null,hasStoredData=false,loaded=false;
