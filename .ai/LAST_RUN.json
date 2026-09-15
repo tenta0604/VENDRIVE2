@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "maintenance",
   "phase": "MAINT-COMPACT-FONT",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "de6b74084682364175f19e1124cc4b23807450ce",
     "safetyTag": "backup-pre-MAINT-COMPACT-FONT-20260915",
@@ -32,6 +32,38 @@
       "status": "PASS",
       "tag": "backup-pre-MAINT-COMPACT-FONT-20260915",
       "target": "de6b74084682364175f19e1124cc4b23807450ce"
+    },
+    "static": {
+      "status": "PASS",
+      "genericNameClassRemoved": true,
+      "isolatedItemClasses": true,
+      "appVersion": "2026.09.15-FINAL.6"
+    },
+    "realEdge": {
+      "status": "PASS",
+      "runId": 34968567004,
+      "mobile320": {
+        "width": 320,
+        "scrollWidth": 320,
+        "itemNameFont": "10.5px",
+        "itemCodeFont": "9.5px",
+        "itemQtyFont": "10.5px",
+        "brandFont": "19px"
+      },
+      "mobile390": {
+        "width": 390,
+        "scrollWidth": 390,
+        "itemNameFont": "11px",
+        "itemCodeFont": "9.5px",
+        "itemQtyFont": "10.5px",
+        "brandFont": "19px"
+      }
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "ocrLogic": "unchanged",
+      "reviewValidation": "unchanged",
+      "saveBehavior": "unchanged"
     }
   },
   "changedFiles": [
@@ -41,9 +73,7 @@
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [
-    "Run real Edge 320px/390px typography regression and confirm no global .name style leaks into compact OCR rows."
-  ],
-  "nextAction": "Deploy only after real Edge confirms compact item-name font size and no mobile overflow.",
+  "openItems": [],
+  "nextAction": "Deploy FINAL.6 and verify the live page version. The compact OCR product list should now use isolated small typography instead of inheriting the 19px VENDRIVE brand style.",
   "unresolved": []
 }
