@@ -140,7 +140,7 @@ function mount(container,review){
   if(inputPayload)ensureInput(inputPayload);
   if(recoveryPayload)ensureRecovery(recoveryPayload);
 
-  var root=el("div","vdrIrReview");container.appendChild(root),saved=false,approval,save,status,validationBox;
+  var root=el("div","vdrIrReview"),saved=false,approval,save,status,validationBox;container.appendChild(root);
   var intro=el("div","vdrIrCard");
   intro.appendChild(el("div","vdrIrTitle",combined?"投入＋回収票照合":type==="input"?"投入確認票照合":"回収品確認票照合"));
   intro.appendChild(el("div","vdrIrNote","OCR結果は候補です。実際の紙と照合して修正してください。画像自体は保存されません。"));
