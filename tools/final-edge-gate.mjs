@@ -141,37 +141,60 @@ try{
 
     const legacyResult=await evalIn(client,`(async()=>{
       function a(c,m){if(!c)throw new Error(m)}
-      a(typeof state==="object"&&typeof persist==="function"&&typeof prepareBackupRestore==="function"&&typeof applyBackupRestore==="function","Legacy runtime unavailable");
       const beforeKey="vendrive2_v7_data";
+      a(window.VENDRIVE2ReadBridge&&window.VENDRIVE2ReadBridge.version===1,"Legacy read bridge unavailable");
+      a(document.getElementById("exportBackup")&&document.getElementById("restoreBackupFile")&&document.getElementById("confirmRestoreBackup"),"Legacy backup UI unavailable");
+
+      const originalCreateObjectURL=URL.createObjectURL.bind(URL);
+      URL.createObjectURL=function(blob){window.__finalExportBlob=blob;return originalCreateObjectURL(blob)};
+      document.getElementById("exportBackup").click();
+      await new Promise(r=>setTimeout(r,150));
+      a(window.__finalExportBlob instanceof Blob,"Legacy export blob missing");
+      const exported=JSON.parse(await window.__finalExportBlob.text());
+      a(exported.kind==="VENDRIVE2_BACKUP"&&exported.formatVersion===1&&exported.appVersion==="2026.09.15-AN14B3B2"&&Array.isArray(exported.data.machines),"Legacy export content regression");
+      URL.createObjectURL=originalCreateObjectURL;
+
       const candidate={
         machines:[
-          {id:"M1",name:"FINAL Machine 1",maker:"サントリー",code:"V1",address:"愛知県一宮市",days:[todayDay],cycle:"毎日",last:"2026-09-14",time:"指定なし",timeCondition:{type:"none",start:"",end:""},sales:"",memo:"",lat:35.304,lng:136.803},
-          {id:"M2",name:"FINAL Machine 2",maker:"サントリー",code:"V2",address:"愛知県一宮市",days:[todayDay],cycle:"毎日",last:"2026-09-14",time:"指定なし",timeCondition:{type:"none",start:"",end:""},sales:"",memo:"",lat:35.305,lng:136.804}
+          {id:"M1",name:"FINAL Machine 1",maker:"サントリー",code:"V1",address:"愛知県一宮市",days:["日","月","火","水","木","金","土"],cycle:"毎日",last:"2026-09-14",time:"指定なし",timeCondition:{type:"none",start:"",end:""},sales:"",memo:"",lat:35.304,lng:136.803},
+          {id:"M2",name:"FINAL Machine 2",maker:"サントリー",code:"V2",address:"愛知県一宮市",days:["日","月","火","水","木","金","土"],cycle:"毎日",last:"2026-09-14",time:"指定なし",timeCondition:{type:"none",start:"",end:""},sales:"",memo:"",lat:35.305,lng:136.804}
         ],
         offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:["サントリー"],makerColors:{},makerSettings:[]
       };
-      const backup={kind:"VENDRIVE2_BACKUP",formatVersion:1,appVersion:APP_VERSION,createdAt:"2026-09-15T00:00:00.000Z",data:candidate,runtime:{lastDay:today}};
-      const prepared=prepareBackupRestore(backup);
-      a(prepared.state.machines.length===2&&prepared.lastDay===today,"Legacy backup prepare failed");
-      let futureBlocked=false;try{prepareBackupRestore({...backup,formatVersion:BACKUP_FORMAT_VERSION+1})}catch(e){futureBlocked=e.message==="future backup format"}
-      a(futureBlocked,"Future legacy backup was not blocked");
-      pendingBackupRestore=prepared;applyBackupRestore();
-      for(let i=0;i<60;i++){if(pendingBackupRestore===null)break;await new Promise(r=>setTimeout(r,100))}
-      a(pendingBackupRestore===null,"Legacy restore did not complete");
+      const backup={kind:"VENDRIVE2_BACKUP",formatVersion:1,appVersion:"2026.09.15-AN14B3B2",createdAt:"2026-09-15T00:00:00.000Z",data:candidate,runtime:{lastDay:"2026-09-15"}};
+      async function chooseBackup(value,name){
+        const input=document.getElementById("restoreBackupFile"),dt=new DataTransfer(),file=new File([JSON.stringify(value)],name,{type:"application/json"});
+        dt.items.add(file);input.files=dt.files;input.dispatchEvent(new Event("change",{bubbles:true}));
+        await new Promise(r=>setTimeout(r,250));
+      }
+
+      await chooseBackup({...backup,formatVersion:2},"future.json");
+      a(document.getElementById("toast").textContent.includes("新しいバージョン"),"Future legacy backup was not blocked");
+
+      await chooseBackup(backup,"final-backup.json");
+      a(document.getElementById("restoreBackupModal").classList.contains("open"),"Legacy restore preview did not open");
+      a(document.getElementById("restoreBackupSummary").textContent.includes("自販機：2台"),"Legacy restore preview summary mismatch");
+      document.getElementById("confirmRestoreBackup").click();
+      for(let i=0;i<60;i++){
+        const storedNow=JSON.parse(localStorage.getItem(beforeKey)||"null");
+        if(storedNow&&storedNow.machines&&storedNow.machines.length===2&&storedNow.machines[0].id==="M1")break;
+        await new Promise(r=>setTimeout(r,100));
+      }
       const stored=JSON.parse(localStorage.getItem(beforeKey)||"null");
       a(stored&&stored.machines&&stored.machines.length===2&&stored.machines[0].id==="M1","Legacy restore persistence failed");
       a(localStorage.getItem(beforeKey+"_version")==="1","Legacy storage version missing");
+      a(!document.getElementById("restoreBackupModal").classList.contains("open"),"Legacy restore modal remained open");
       const bridge=window.VENDRIVE2ReadBridge;
       const machines=bridge.getMachinesSnapshot(),planning=bridge.getPlanningSnapshot();
-      a(machines.length===2&&machines[0].managementCode==="V1"&&planning.version===1&&Array.isArray(planning.todayIds),"Legacy read bridge regression");
+      a(machines.length===2&&machines[0].managementCode==="V1"&&planning.version===1&&Array.isArray(planning.todayIds)&&planning.todayIds.length===2,"Legacy read bridge regression");
 
       const checkpoint=await new Promise((resolve,reject)=>{
         const req=indexedDB.open("VENDRIVE2_DB",1);
         req.onerror=()=>reject(req.error);
         req.onsuccess=()=>{
           const db=req.result,tx=db.transaction("snapshots","readonly"),store=tx.objectStore("snapshots"),cur=store.openCursor(),rows=[];
-          cur.onerror=()=>reject(cur.error);
-          cur.onsuccess=()=>{const c=cur.result;if(c){if(String(c.key).startsWith("pre-restore-"))rows.push(c.value);c.continue()}else resolve(rows)}
+          cur.onerror=()=>{db.close();reject(cur.error)};
+          cur.onsuccess=()=>{const c=cur.result;if(c){if(String(c.key).startsWith("pre-restore-"))rows.push(c.value);c.continue()}else{db.close();resolve(rows)}}
         };
       });
       a(checkpoint.length>=1&&checkpoint[checkpoint.length-1].kind==="pre-restore","Pre-restore checkpoint missing");
@@ -189,9 +212,9 @@ try{
 
       a(document.querySelector('script[src="sales-review.js"]')&&document.querySelector('script[src="input-recovery-review.js"]'),"Review modules not wired");
       a(typeof window.VENDRIVE2Analytics==="object"&&typeof window.VENDRIVE2OCRAdapter==="object","Analytics/OCR adapter not wired");
-      return {width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth,machines:machines.length,checkpoints:checkpoint.length,appVersion:APP_VERSION,analytics:window.VENDRIVE2Analytics.getHealth()};
+      return {width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth,machines:machines.length,checkpoints:checkpoint.length,exportVersion:exported.appVersion,analytics:window.VENDRIVE2Analytics.getHealth()};
     })()`);
-    a(legacyResult.width===width,"Viewport width mismatch");
+    assert(legacyResult.width===width,"Viewport width mismatch");
     console.log("FINAL_LEGACY",JSON.stringify(legacyResult));
     await evalIn(client,`(async()=>{try{window.VENDRIVE2Analytics.close()}catch(e){};await new Promise(resolve=>{const r=indexedDB.deleteDatabase("VENDRIVE2_ANALYTICS_DB");r.onsuccess=r.onerror=r.onblocked=()=>resolve(true)});await new Promise(resolve=>{const r=indexedDB.deleteDatabase("VENDRIVE2_DB");r.onsuccess=r.onerror=r.onblocked=()=>resolve(true)});localStorage.clear();return true})()`);
   }
