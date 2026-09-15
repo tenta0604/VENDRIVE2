@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL.5",
+  "appVersion": "2026.09.15-FINAL.6",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-OCR-UX-SPEED-20260915",
-    "lastSafetyTagTarget": "5e2c726df7fed16c045176acea85708f629174c9",
+    "lastSafetyTag": "backup-pre-MAINT-COMPACT-FONT-20260915",
+    "lastSafetyTagTarget": "de6b74084682364175f19e1124cc4b23807450ce",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -47,7 +47,9 @@
       "Renamed OCR confidence presentation so report-type confidence is not mistaken for per-field OCR accuracy.",
       "Added explicit registered-machine matching via maker/vendor identity, with user-confirmed machine linking for unique candidates.",
       "Reduced input-confirmation OCR scope to analysis-relevant product/quantity fields instead of counter/payment reconciliation.",
-      "Added client-side OCR image optimization and visible processing progress to reduce upload and inference latency without storing images."
+      "Added client-side OCR image optimization and visible processing progress to reduce upload and inference latency without storing images.",
+      "Fixed compact OCR review typography by replacing the generic .name/.code/.qty item classes with isolated OCR-specific classes, preventing collision with the global VENDRIVE brand .name style.",
+      "Reduced compact OCR item-row visual density while keeping product names readable and quantities emphasized."
     ]
   },
   "requiredUserInput": [],

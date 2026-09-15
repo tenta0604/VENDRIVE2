@@ -19,8 +19,8 @@ function ensureStyle(){
     ".vdrCompactMeta .warn{color:#b42318}",
     ".vdrCompactSection{font-size:10px;font-weight:950;margin:1px 0 5px}",
     ".vdrCompactTable{display:grid;gap:4px}",
-    ".vdrCompactRow{display:grid;grid-template-columns:minmax(54px,72px) minmax(0,1fr) minmax(38px,54px);gap:6px;align-items:center;border-bottom:1px solid #f0f0f1;padding:7px 2px;font-size:10px;min-width:0}",
-    ".vdrCompactRow:last-child{border-bottom:0}.vdrCompactRow span{min-width:0;overflow-wrap:anywhere}.vdrCompactRow .qty{text-align:right;font-weight:900}",
+    ".vdrCompactRow{display:grid;grid-template-columns:minmax(54px,72px) minmax(0,1fr) minmax(38px,54px);gap:7px;align-items:center;border-bottom:1px solid #f0f0f1;padding:6px 2px;font-size:10px;min-width:0}",
+    ".vdrCompactRow:last-child{border-bottom:0}.vdrCompactRow span{min-width:0;overflow-wrap:anywhere}.vdrCompactItemCode{font-size:9.5px;color:#34373b;font-weight:650}.vdrCompactItemName{font-size:11px;line-height:1.35;font-weight:800;letter-spacing:0}.vdrCompactItemQty{text-align:right;font-size:10.5px;font-weight:900;white-space:nowrap}",
     ".vdrCompactRow.warn{background:#fff7ed;color:#9a3412;border-radius:8px;padding:7px}.vdrCompactRow.error{background:#fff1f2;color:#b42318;border-radius:8px;padding:7px}",
     ".vdrCompactIssues{display:grid;gap:5px}.vdrCompactIssue{font-size:10px;line-height:1.45;border-radius:9px;padding:8px;background:#fff7ed;color:#9a3412}",
     ".vdrCompactIssue.error{background:#fff1f2;color:#b42318;font-weight:800}",
@@ -29,7 +29,7 @@ function ensureStyle(){
     ".vdrCompactApproval{display:flex;gap:8px;align-items:flex-start;font-size:9px;font-weight:800;line-height:1.45;padding:9px;background:#fafafa;border-radius:10px}",
     ".vdrCompactStatus{font-size:9px;color:#666;line-height:1.5}.vdrCompactDetail[hidden]{display:none!important}",
     ".vdrCompactDetail{border-top:1px solid #ececef;padding-top:10px}.vdrCompactMuted{font-size:9px;color:#777}",
-    "@media(max-width:350px){.vdrCompactMeta{grid-template-columns:1fr 1fr}.vdrCompactActions{grid-template-columns:1fr}.vdrCompactRow{grid-template-columns:58px minmax(0,1fr) 44px}}"
+    "@media(max-width:350px){.vdrCompactMeta{grid-template-columns:1fr 1fr}.vdrCompactActions{grid-template-columns:1fr}.vdrCompactRow{grid-template-columns:58px minmax(0,1fr) 44px}.vdrCompactItemName{font-size:10.5px}}"
   ].join("");document.head.appendChild(s);
 }
 function typeLabel(type){return {sales:"売上",input:"投入",recovery:"回収",input_recovery:"投入＋回収"}[type]||"未判定"}
@@ -100,7 +100,7 @@ function issuesFor(review,type){
 }
 function hasIssue(issues,key){var sev=null;issues.forEach(function(x){if(x.key===key||x.key.indexOf(key+".")===0||key.indexOf(x.key+".")===0){if(x.severity==="error")sev="error";else if(!sev)sev="warn"}});return sev}
 function row(parent,code,name,qty,severity){
-  var r=el("div","vdrCompactRow"+(severity?" "+severity:""));r.appendChild(el("span","code",code||"—"));r.appendChild(el("span","name",name||"—"));r.appendChild(el("span","qty",qty));parent.appendChild(r)
+  var r=el("div","vdrCompactRow"+(severity?" "+severity:""));r.appendChild(el("span","vdrCompactItemCode",code||"—"));r.appendChild(el("span","vdrCompactItemName",name||"—"));r.appendChild(el("span","vdrCompactItemQty",qty));parent.appendChild(r)
 }
 function machineInfo(review){
   var mm=review.machineMatch||null;if(!mm)return null;
