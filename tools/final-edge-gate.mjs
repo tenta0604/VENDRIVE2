@@ -181,7 +181,7 @@ try{
         await new Promise(r=>setTimeout(r,100));
       }
       const stored=JSON.parse(localStorage.getItem(beforeKey)||"null");
-      a(stored&&stored.machines&&stored.machines.length===2&&stored.machines[0].id==="M1","Legacy restore persistence failed");
+      a(stored&&stored.machines&&stored.machines.length===2&&stored.machines[0].id==="M1","Legacy restore persistence failed; toast="+document.getElementById("toast").textContent+"; modal="+document.getElementById("restoreBackupModal").className+"; raw="+String(localStorage.getItem(beforeKey)).slice(0,240));
       a(localStorage.getItem(beforeKey+"_version")==="1","Legacy storage version missing");
       a(!document.getElementById("restoreBackupModal").classList.contains("open"),"Legacy restore modal remained open");
       const bridge=window.VENDRIVE2ReadBridge;
