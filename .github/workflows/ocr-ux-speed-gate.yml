@@ -1,0 +1,90 @@
+name: OCR UX Speed Gate
+
+on:
+  push:
+    branches:
+      - ocr-ux-speed-20260915
+      - main
+    paths:
+      - "api/ocr.mjs"
+      - "ocr-relay-adapter.js"
+      - "ocr-review-compact.js"
+      - "index.html"
+      - "version.json"
+      - ".ai/STATE.json"
+      - ".ai/LAST_RUN.json"
+      - "tools/ocr-ux-gate.html"
+      - "tools/ocr-ux-edge-gate.mjs"
+      - "tools/ocr-ux-api-unit.mjs"
+      - "tools/ocr-ux-production-smoke.mjs"
+      - ".github/workflows/ocr-ux-speed-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static and focused schema gates
+        run: |
+          node --check api/ocr.mjs
+          node --check ocr-relay-adapter.js
+          node --check ocr-review-compact.js
+          node --check tools/ocr-ux-edge-gate.mjs
+          node --check tools/ocr-ux-api-unit.mjs
+          node --check tools/ocr-ux-production-smoke.mjs
+          git diff --check
+          grep -q "2026.09.15-FINAL.5" version.json
+          grep -q "APP_VERSION='2026.09.15-FINAL.5'" index.html
+          grep -q 'ocr-review-compact.js' index.html
+          ! grep -q 'counterRows:{type:"array"' api/ocr.mjs
+          git fetch --tags origin
+          test "$(git rev-list -n 1 backup-pre-OCR-UX-SPEED-20260915)" = "5e2c726df7fed16c045176acea85708f629174c9"
+      - name: Focused OCR schema unit
+        run: node tools/ocr-ux-api-unit.mjs
+
+  real-edge:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Real Edge mobile and image optimization
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $profile = Join-Path $env:TEMP "vendrive2-ocr-ux-edge"
+          if (Test-Path $profile) { Remove-Item -Recurse -Force $profile }
+          $server = Start-Process -FilePath "python" -ArgumentList "-m","http.server","8000","--bind","0.0.0.0" -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try {
+            Start-Sleep -Seconds 2
+            $edgeCandidates = @("$env:ProgramFiles (x86)\Microsoft\Edge\Application\msedge.exe","$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe")
+            $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+            if (-not $edge) { throw "Microsoft Edge not found" }
+            $edgeProc = Start-Process -FilePath $edge -ArgumentList "--headless=new","--disable-gpu","--remote-debugging-port=9222","--user-data-dir=$profile","about:blank" -PassThru
+            try { Start-Sleep -Seconds 2; node tools/ocr-ux-edge-gate.mjs }
+            finally { if ($edgeProc -and -not $edgeProc.HasExited) { Stop-Process -Id $edgeProc.Id -Force } }
+          } finally { if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force } }
+
+  production-smoke:
+    if: github.ref == 'refs/heads/main'
+    needs: [static-api, real-edge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Wait for production deployment
+        run: sleep 25
+      - name: Production OCR smoke
+        run: node tools/ocr-ux-production-smoke.mjs
