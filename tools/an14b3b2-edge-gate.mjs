@@ -78,7 +78,7 @@ for(const width of widths){
   const client=await connect(await pageTarget());
   try{
     await client.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:true});
-    await client.send("Page.navigate",{url:"http://127.0.0.1:8000/index.html?an14b3b2="+width});
+    await client.send("Page.navigate",{url:"http://127.0.0.1:8000/tools/an14b3b2-edge-fixture.html?width="+width});
     await new Promise(r=>setTimeout(r,1800));
 
     const fixtures={

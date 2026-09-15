@@ -29,6 +29,8 @@ jobs:
           node --check ocr-relay-adapter.js
           node --check api/ocr.mjs
           node --check tools/an14b3b2-edge-gate.mjs
+          if (-not (Select-String -Path index.html -SimpleMatch '<script src="input-recovery-review.js"></script>')) { throw "input/recovery review script is not wired into index.html" }
+          if (-not (Select-String -Path index.html -SimpleMatch "VENDRIVE2InputRecoveryReview.mount")) { throw "input/recovery review mount is not wired into index.html" }
           git diff --check 4b60c23d618c7995fcd7cb25bc0dbed20b0f35e2 HEAD
 
       - name: Real Edge mobile review gate
