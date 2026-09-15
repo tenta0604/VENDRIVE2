@@ -1,0 +1,72 @@
+name: Create immutable safety tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Safety tag name (must start with backup-pre-)'
+        required: true
+        type: string
+      expected_sha:
+        description: 'Exact main SHA that must be tagged'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify and create immutable annotated tag
+        shell: bash
+        env:
+          TAG_NAME: ${{ inputs.tag_name }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin main --tags
+          MAIN_SHA="$(git rev-parse origin/main)"
+          if [[ ! "$TAG_NAME" =~ ^backup-pre-[A-Za-z0-9._-]+$ ]]; then
+            echo "Invalid safety tag name: $TAG_NAME" >&2
+            exit 1
+          fi
+          if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "expected_sha must be a full 40-character commit SHA" >&2
+            exit 1
+          fi
+          if [[ "$MAIN_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "SAFE STOP: main moved. expected=$EXPECTED_SHA actual=$MAIN_SHA" >&2
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/$TAG_NAME"; then
+            EXISTING="$(git rev-parse "$TAG_NAME^{}")"
+            if [[ "$EXISTING" == "$EXPECTED_SHA" ]]; then
+              TYPE="$(git cat-file -t "$TAG_NAME")"
+              if [[ "$TYPE" != "tag" ]]; then
+                echo "SAFE STOP: existing ref is not an annotated tag" >&2
+                exit 1
+              fi
+              echo "Safety tag already exists at expected SHA; leaving it untouched."
+              exit 0
+            fi
+            echo "SAFE STOP: safety tag already exists at a different SHA; refusing to move/delete/recreate it." >&2
+            exit 1
+          fi
+          git config user.name "VENDRIVE Safety Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" "$EXPECTED_SHA" -m "Immutable pre-edit safety checkpoint for VENDRIVE2 at $EXPECTED_SHA"
+          git push origin "refs/tags/$TAG_NAME"
+          git fetch origin "refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
+          TARGET="$(git rev-parse "$TAG_NAME^{}")"
+          TYPE="$(git cat-file -t "$TAG_NAME")"
+          test "$TARGET" = "$EXPECTED_SHA"
+          test "$TYPE" = "tag"
+          echo "SAFETY_TAG_PASS tag=$TAG_NAME target=$TARGET type=$TYPE"
