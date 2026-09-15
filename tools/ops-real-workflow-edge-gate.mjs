@@ -19,8 +19,9 @@ try{
     const host=document.getElementById("review");window.VENDRIVE2CompactOcrReview.mount(host,review);
     const checkbox=host.querySelector('.vdrCompactApproval input');checkbox.checked=true;checkbox.dispatchEvent(new Event("change",{bubbles:true}));
     const create=Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("この内容で下書きを作成"));if(!create)return{error:"create button missing",text:host.innerText};if(create.disabled)return{error:"create button disabled",text:host.innerText};
-    create.click();await new Promise(r=>setTimeout(r,220));
-    const createdText=host.innerText,confirmBtn=host.querySelector(".vdrDraftConfirmButton");if(!confirmBtn)return{error:"confirm button missing",createdText};
+    create.click();
+    let confirmBtn=null;for(let i=0;i<30&&!confirmBtn;i++){await new Promise(r=>setTimeout(r,100));confirmBtn=host.querySelector(".vdrDraftConfirmButton")}
+    const createdText=host.innerText;if(!confirmBtn)return{error:"confirm button missing",createdText};
     window.confirm=()=>true;confirmBtn.click();await new Promise(r=>setTimeout(r,180));
     const reports=await api.data.reports.list(),report=reports.find(x=>x.source&&x.source.method==="ocr"&&x.vendorNumber==="4038404");
     return{createdText,finalText:host.innerText,status:report&&report.status,button:confirmBtn.textContent,scrollWidth:document.documentElement.scrollWidth,width:innerWidth};
