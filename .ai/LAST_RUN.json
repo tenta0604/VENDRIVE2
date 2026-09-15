@@ -1,69 +1,35 @@
 {
   "evidenceVersion": 2,
   "runType": "maintenance",
-  "phase": "MAINT-COMPACT-FONT",
-  "status": "PASS",
+  "phase": "MAINT-PINPOINT-EDIT",
+  "status": "PENDING",
   "base": {
-    "head": "de6b74084682364175f19e1124cc4b23807450ce",
-    "safetyTag": "backup-pre-MAINT-COMPACT-FONT-20260915",
-    "safetyTagTarget": "de6b74084682364175f19e1124cc4b23807450ce"
+    "head": "efe6bd3ee990a636933d489794cd24fd500eb38e",
+    "safetyTag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
+    "safetyTagTarget": "efe6bd3ee990a636933d489794cd24fd500eb38e"
   },
   "versions": {
-    "app": "2026.09.15-FINAL.6",
+    "app": "2026.09.15-FINAL.7",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
-  "rootCause": {
-    "conclusion": "Compact OCR item names used the generic CSS class name 'name', so index.html's global .name brand rule (19px/900) overrode the intended compact row typography."
-  },
   "work": {
-    "summary": "Isolate compact OCR item typography from global CSS and reduce row density without changing OCR data, validation, or save behavior.",
+    "summary": "Make OCR review uncertainty self-explanatory and locally editable without forcing the full editor.",
     "completed": [
-      "Replaced generic item classes with vdrCompactItemCode/vdrCompactItemName/vdrCompactItemQty.",
-      "Set compact item name to 11px (10.5px on <=350px), code 9.5px, quantity 10.5px.",
-      "Reduced item row vertical padding from 7px to 6px.",
-      "Bumped app version to 2026.09.15-FINAL.6."
+      "Separated OCR field issues, consistency issues, and machine-link confirmation into distinct badges.",
+      "Added exact-field highlighting with an adjacent Edit button for uncertain/missing metadata and item values.",
+      "Added inline single-field editors that re-evaluate the review after correction without persisting data.",
+      "Renamed the bottom editor action to 全体を編集 and kept the existing full editor available on demand.",
+      "Bumped app version to 2026.09.15-FINAL.7."
     ]
   },
   "gates": {
     "preflight": "PASS",
     "safetyTag": {
       "status": "PASS",
-      "tag": "backup-pre-MAINT-COMPACT-FONT-20260915",
-      "target": "de6b74084682364175f19e1124cc4b23807450ce"
-    },
-    "static": {
-      "status": "PASS",
-      "genericNameClassRemoved": true,
-      "isolatedItemClasses": true,
-      "appVersion": "2026.09.15-FINAL.6"
-    },
-    "realEdge": {
-      "status": "PASS",
-      "runId": 34968567004,
-      "mobile320": {
-        "width": 320,
-        "scrollWidth": 320,
-        "itemNameFont": "10.5px",
-        "itemCodeFont": "9.5px",
-        "itemQtyFont": "10.5px",
-        "brandFont": "19px"
-      },
-      "mobile390": {
-        "width": 390,
-        "scrollWidth": 390,
-        "itemNameFont": "11px",
-        "itemCodeFont": "9.5px",
-        "itemQtyFont": "10.5px",
-        "brandFont": "19px"
-      }
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "ocrLogic": "unchanged",
-      "reviewValidation": "unchanged",
-      "saveBehavior": "unchanged"
+      "tag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
+      "target": "efe6bd3ee990a636933d489794cd24fd500eb38e"
     }
   },
   "changedFiles": [
@@ -73,7 +39,9 @@
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "Deploy FINAL.6 and verify the live page version. The compact OCR product list should now use isolated small typography instead of inheriting the 19px VENDRIVE brand style.",
+  "openItems": [
+    "Run real Edge 320px/390px pinpoint-edit regression including machine-only, uncertain-field, inline correction, and full-editor availability."
+  ],
+  "nextAction": "Deploy only after exact-field highlighting/editing and mobile layout pass in real Edge.",
   "unresolved": []
 }

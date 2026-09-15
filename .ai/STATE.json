@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL.6",
+  "appVersion": "2026.09.15-FINAL.7",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-MAINT-COMPACT-FONT-20260915",
-    "lastSafetyTagTarget": "de6b74084682364175f19e1124cc4b23807450ce",
+    "lastSafetyTag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
+    "lastSafetyTagTarget": "efe6bd3ee990a636933d489794cd24fd500eb38e",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -49,7 +49,10 @@
       "Reduced input-confirmation OCR scope to analysis-relevant product/quantity fields instead of counter/payment reconciliation.",
       "Added client-side OCR image optimization and visible processing progress to reduce upload and inference latency without storing images.",
       "Fixed compact OCR review typography by replacing the generic .name/.code/.qty item classes with isolated OCR-specific classes, preventing collision with the global VENDRIVE brand .name style.",
-      "Reduced compact OCR item-row visual density while keeping product names readable and quantities emphasized."
+      "Reduced compact OCR item-row visual density while keeping product names readable and quantities emphasized.",
+      "Separated OCR uncertainty, consistency checks, and machine-link confirmation into distinct compact-review badges so a machine-link prompt is no longer presented as a generic OCR issue.",
+      "Added pinpoint inline editing for uncertain or missing metadata and item fields; only the flagged field opens for correction, while the existing full editor remains available at the bottom.",
+      "After a pinpoint correction, the matching uncertainty warning is cleared in-memory and the compact review is immediately re-evaluated without writing Analytics data."
     ]
   },
   "requiredUserInput": [],
