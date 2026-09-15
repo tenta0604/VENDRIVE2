@@ -17,7 +17,7 @@ function ensureStyle(){
     ".vdrCompactSection{font-size:10px;font-weight:950;margin:1px 0 5px}.vdrCompactTable{display:grid;gap:4px}",
     ".vdrCompactRow{display:grid;grid-template-columns:minmax(54px,72px) minmax(0,1fr) minmax(42px,58px);gap:7px;align-items:stretch;border-bottom:1px solid #f0f0f1;padding:6px 2px;min-width:0}.vdrCompactRow:last-child{border-bottom:0}",
     ".vdrCompactCell{min-width:0;display:flex;align-items:center;gap:4px;flex-wrap:wrap}.vdrCompactCell.warn{background:#fff7ed;color:#9a3412;border-radius:7px;padding:4px}.vdrCompactCell.error{background:#fff1f2;color:#b42318;border-radius:7px;padding:4px}",
-    ".vdrCompactItemCode{font-size:9.5px;color:#34373b;font-weight:650;overflow-wrap:anywhere}.vdrCompactItemName{font-size:11px;line-height:1.35;font-weight:800;letter-spacing:0;overflow-wrap:anywhere}.vdrCompactItemQty{text-align:right;font-size:10.5px;font-weight:900;white-space:nowrap;margin-left:auto}",
+    ".vdrCompactItemCode{font-size:9.5px;color:#34373b;font-weight:650;overflow-wrap:anywhere}.vdrCompactItemName{font-size:11px;line-height:1.35;font-weight:800;letter-spacing:0;overflow-wrap:anywhere}.vdrCompactItemQty{text-align:right;font-size:10.5px;font-weight:900;white-space:nowrap;margin-left:auto}.vdrCompactRowNote{grid-column:1/-1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:8.5px;color:#9a3412;background:#fff7ed;border-radius:7px;padding:5px 7px}",
     ".vdrFieldFlag{font-size:7.5px;font-weight:950;color:#b42318;white-space:nowrap}.vdrFieldEdit{border:1px solid #f3b6ad;background:#fff;border-radius:7px;padding:3px 6px;font-size:8px;font-weight:950;color:#b42318;white-space:nowrap}",
     ".vdrInlineEditor{grid-column:1/-1;border:1px solid #f1c6bd;background:#fffaf8;border-radius:10px;padding:9px;display:grid;gap:7px;margin-top:3px}.vdrInlineEditorTitle{font-size:9px;font-weight:950;color:#8a2c1d}.vdrInlineEditor input,.vdrInlineEditor select{width:100%;box-sizing:border-box;border:1px solid #d8dadd;border-radius:8px;padding:8px;font-size:11px;background:#fff}.vdrInlineEditorActions{display:flex;gap:6px;justify-content:flex-end}.vdrInlineEditorActions button{border:1px solid #d7d9dd;border-radius:8px;background:#fff;padding:6px 9px;font-size:9px;font-weight:900}.vdrInlineEditorActions .save{background:#111;color:#fff;border-color:#111}",
     ".vdrCompactIssues{display:grid;gap:5px}.vdrCompactIssue{font-size:10px;line-height:1.45;border-radius:9px;padding:8px;background:#fff7ed;color:#9a3412}.vdrCompactIssue.error{background:#fff1f2;color:#b42318;font-weight:800}",
@@ -41,6 +41,8 @@ function normalizeWarningPath(path,type){
   if(type==="input"&&path.indexOf("input.")===0)path=path.slice(6);
   if(type==="recovery"&&path.indexOf("recovery.")===0)path=path.slice(9);
   if(type==="sales"&&path.indexOf("sales.")===0)path=path.slice(6);
+  if(path==="paper.locationName"||path==="input.paper.locationName"||path==="recovery.paper.locationName")return "locationName";
+  if(path==="paper.operatorName"||path==="input.paper.operatorName"||path==="recovery.paper.operatorName")return "operatorName";
   return path;
 }
 function uncertainPaths(review,type){
@@ -120,7 +122,7 @@ function mount(container,review){
   var issues=issuesFor(review,type),blocking=issues.filter(function(x){return x.severity==="error"}),ocrIssues=issues.filter(function(x){return x.category==="ocr"||x.category==="required"}),machineIssues=issues.filter(function(x){return x.category==="machine"}),consistencyIssues=issues.filter(function(x){return x.category==="consistency"}),globalIssues=issues.filter(function(x){return x.category==="ocr_global"}),root=el("div","vdrCompact"),card=el("div","vdrCompactCard"),top=el("div","vdrCompactTop"),titleWrap=el("div"),confidence=review.classification&&typeof review.classification.typeConfidence==="number"?Math.round(review.classification.typeConfidence*100)+"%":"—";
   titleWrap.appendChild(el("div","vdrCompactTitle",typeLabel(type)+"帳票"));titleWrap.appendChild(el("div","vdrCompactSub","帳票種別の判定 "+confidence+" · 怪しい箇所だけその場で修正できます"));top.appendChild(titleWrap);
   var badges=el("div","vdrCompactBadges");
-  if(ocrIssues.length)badges.appendChild(el("span","vdrCompactBadge "+(ocrIssues.some(function(x){return x.severity==="error"})?"error":"warn"),"OCR確認 "+ocrIssues.length+"件"));
+  if(ocrIssues.length||globalIssues.length){var ocrCount=ocrIssues.length+globalIssues.length;badges.appendChild(el("span","vdrCompactBadge "+(ocrIssues.some(function(x){return x.severity==="error"})?"error":"warn"),"OCR確認 "+ocrCount+"件"))}
   if(consistencyIssues.length)badges.appendChild(el("span","vdrCompactBadge error","数量確認 "+consistencyIssues.length+"件"));
   if(machineIssues.length)badges.appendChild(el("span","vdrCompactBadge machine","紐づけ確認 "+machineIssues.length+"件"));
   if(!ocrIssues.length&&!consistencyIssues.length&&!machineIssues.length&&!globalIssues.length)badges.appendChild(el("span","vdrCompactBadge","確認可能"));
@@ -166,7 +168,8 @@ function mount(container,review){
         if(qtyIssue)editControl(qCell,qtyIssue,"在庫反映数量",function(btn){inlineEditor(btn,"在庫反映数量を修正",{type:"number",value:item.quantity},function(v){item.quantity=v;clearUncertain(review,type,base+".quantity");rerender(container,review)})});
         row.appendChild(qCell)
       }else row.appendChild(fieldCell("vdrCompactItemQty",String(item.quantity)+"本",base+".quantity","投入数",{type:"number",value:item.quantity},function(v){item.quantity=v}));
-      var priceIssue=issueFor(issues,base+".price");if(priceIssue){var extra=el("div","vdrInlineEditorTitle","⚠ 価格の読み取りが不確かです"),pb=el("button","vdrFieldEdit","編集");pb.type="button;";pb.type="button";pb.onclick=function(){inlineEditor(pb,"価格を修正",{type:"number",value:item.price},function(v){item.price=v;clearUncertain(review,type,base+".price");rerender(container,review)})};extra.appendChild(pb);row.appendChild(extra)}
+      var priceIssue=issueFor(issues,base+".price");if(priceIssue){var extra=el("div","vdrCompactRowNote","⚠ 価格を確認してください"),pb=el("button","vdrFieldEdit","編集");pb.type="button";pb.onclick=function(){inlineEditor(pb,"価格を修正",{type:"number",value:item.price},function(v){item.price=v;clearUncertain(review,type,base+".price");rerender(container,review)})};extra.appendChild(pb);row.appendChild(extra)}
+      var columnIssue=issueFor(issues,base+".column");if(columnIssue){var col=el("div","vdrCompactRowNote","⚠ 列番号を確認してください"),cb=el("button","vdrFieldEdit","編集");cb.type="button";cb.onclick=function(){inlineEditor(cb,"列番号を修正",{type:"number",value:item.column},function(v){item.column=v;clearUncertain(review,type,base+".column");rerender(container,review)})};col.appendChild(cb);row.appendChild(col)}
       table.appendChild(row)
     });
     if(!(items||[]).length)table.appendChild(el("div","vdrCompactMuted","商品行なし"));c.appendChild(table);root.appendChild(c)
