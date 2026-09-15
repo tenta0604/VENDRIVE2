@@ -190,7 +190,7 @@ try{
       a(machines.length===2&&machines[0].managementCode==="V1"&&planning.version===1&&Array.isArray(planning.todayIds)&&planning.todayIds.length===2,"Legacy read bridge regression");
 
       const checkpoint=await new Promise((resolve,reject)=>{
-        const req=indexedDB.open("VENDRIVE2_DB",1);
+        const req=indexedDB.open("VENDRIVE2_DB");
         req.onerror=()=>reject(req.error);
         req.onsuccess=()=>{
           const db=req.result,tx=db.transaction("snapshots","readonly"),store=tx.objectStore("snapshots"),cur=store.openCursor(),rows=[];
