@@ -166,7 +166,8 @@ function mount(container,review){
         if(caseIssue)editControl(qCell,caseIssue,"ケース数",function(btn){inlineEditor(btn,"ケース数を修正",{type:"number",value:item.caseCount||0},function(v){item.caseCount=v;clearUncertain(review,type,base+".caseCount");rerender(container,review)})});
         if(looseIssue)editControl(qCell,looseIssue,"バラ数",function(btn){inlineEditor(btn,"バラ数を修正",{type:"number",value:item.looseCount||0},function(v){item.looseCount=v;clearUncertain(review,type,base+".looseCount");rerender(container,review)})});
         if(qtyIssue)editControl(qCell,qtyIssue,"在庫反映数量",function(btn){inlineEditor(btn,"在庫反映数量を修正",{type:"number",value:item.quantity},function(v){item.quantity=v;clearUncertain(review,type,base+".quantity");rerender(container,review)})});
-        row.appendChild(qCell)
+        row.appendChild(qCell);
+        if(qtyIssue&&qtyIssue.message){row.appendChild(el("div","vdrCompactRowNote","⚠ "+qtyIssue.message))}
       }else row.appendChild(fieldCell("vdrCompactItemQty",String(item.quantity)+"本",base+".quantity","投入数",{type:"number",value:item.quantity},function(v){item.quantity=v}));
       var priceIssue=issueFor(issues,base+".price");if(priceIssue){var extra=el("div","vdrCompactRowNote","⚠ 価格を確認してください"),pb=el("button","vdrFieldEdit","編集");pb.type="button";pb.onclick=function(){inlineEditor(pb,"価格を修正",{type:"number",value:item.price},function(v){item.price=v;clearUncertain(review,type,base+".price");rerender(container,review)})};extra.appendChild(pb);row.appendChild(extra)}
       var columnIssue=issueFor(issues,base+".column");if(columnIssue){var col=el("div","vdrCompactRowNote","⚠ 列番号を確認してください"),cb=el("button","vdrFieldEdit","編集");cb.type="button";cb.onclick=function(){inlineEditor(cb,"列番号を修正",{type:"number",value:item.column},function(v){item.column=v;clearUncertain(review,type,base+".column");rerender(container,review)})};col.appendChild(cb);row.appendChild(col)}
