@@ -107,3 +107,13 @@ On failure, report:
 - `HEAD`, `origin/main`, changed files, and unresolved issue
 
 Do not rely on the user copying a long report elsewhere. Leave independently reviewable evidence in GitHub commit history, diffs, tags, workflow runs, and the canonical state files.
+
+
+## Finite verification / anti-loop rule
+
+- Before starting verification, define the finite gate checklist required to call the current scope complete.
+- Once every required gate has passed, stop verification and report completion. Do not add another "just in case" gate or repeat the same check merely for reassurance.
+- Re-run a gate only when code, test methodology, deployment state, or another relevant precondition actually changed after that gate ran.
+- Distinguish product defects from test-harness/test-data problems. A harness failure may justify fixing the harness and re-running the affected finite checklist, but it must not trigger unrelated new verification loops.
+- For deployment waits, check only until the required terminal evidence is available; after the deployment and live-version evidence pass, stop polling.
+- If new contradictory evidence appears later (for example a real-device bug report), open a new scoped maintenance phase instead of retroactively extending a completed gate loop.

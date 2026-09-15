@@ -85,3 +85,16 @@ Repository-state maintenance and chat-recovery documentation may be committed wi
 - verify JSON syntax and cross-file consistency before fast-forwarding `main`.
 
 The workflow exists so phase execution and chat recovery are reproducible from repository evidence. GitHub history, diffs, tags, workflow runs, and canonical state files—not a copied chat transcript—are the durable record.
+
+
+## Finite verification contract
+
+Before implementation verification begins, write down the finite checklist that is necessary and sufficient for the current scope.
+
+Rules:
+1. Do not add new "just in case" gates after all required gates have passed unless new contradictory evidence appears.
+2. Re-run a gate only if code, the test harness/methodology, deployment state, test data, or another relevant precondition changed after the previous run.
+3. If a failure is caused by the test harness rather than the product, fix only that harness issue and re-run the affected finite checklist; do not multiply unrelated checks.
+4. Deployment polling ends as soon as the required terminal deployment evidence and live-version evidence are obtained.
+5. After all required evidence passes, finalize canonical evidence, perform only the planned cleanup if any, and stop.
+6. A later real-device issue is a new maintenance scope with its own safety tag/gates when production code changes are required.

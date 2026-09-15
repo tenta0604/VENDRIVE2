@@ -2,9 +2,10 @@
 
 ## Current state
 
-- Latest completed phase: **FINAL — Full Regression / Mobile / Backup / Release Gate**
-- Active / next product phase: **None — current build is release-ready**
-- Release app version: **2026.09.15-FINAL**
+- Latest completed product phase: **OPS-REAL-WORKFLOW — OCR confirmation + Today operational safeguards**
+- Active product phase: **None**
+- Next product phase: **OPS10A — Vehicle Inventory Initial Stocktake / Baseline UI**
+- Release app version: **2026.09.16-FINAL.9**
 - Git revision authority: synchronized `HEAD` / `origin/main`
 - Current release evidence: full legacy, Analytics, OCR/review, backup/restore, data-safety, and exact 320px/390px Microsoft Edge regression passed.
 
@@ -48,12 +49,77 @@
 - AN14B3B1 — Sales-journal Real-paper Review UI Calibration
 - AN14B3B2 — Input / Recovery Real-paper Review UI Calibration
 - FINAL — Full Regression / Mobile / Backup / Release Gate
+- OPS-REAL-WORKFLOW — OCR confirmation / Today workflow hardening
 
 ## Release baseline
 
-VENDRIVE2 is release-ready at **2026.09.15-FINAL**. There is no automatically scheduled next product phase.
+VENDRIVE2 production baseline is **2026.09.16-FINAL.9**.
 
-Future product work must be explicitly scoped before implementation, preserve the existing safety/architecture decisions, and create a fresh immutable Safety Tag before production-code edits. Maintenance fixes should remain minimal and regression-tested rather than silently expanding the roadmap.
+The post-FINAL real-workflow layer is also complete:
+- reviewed OCR candidates create drafts only after explicit paper approval;
+- draft creation shows an explicit success state;
+- a second explicit confirmation changes the report to `confirmed`;
+- confirmed sales reports become analysis inputs;
+- confirmed input/recovery reports become inventory/planning inputs;
+- report capture sits directly below the Today work-progress hero;
+- visit completion warns about unfinished tasks on that machine;
+- end-of-day warns about unfinished orders/tasks only for today's active route machines.
+
+No product phase is currently active. The next scoped work is below.
+
+## Planned post-FINAL operations phases
+
+### OPS10A — Vehicle Inventory Initial Stocktake / Baseline UI
+
+Purpose: bootstrap real current vehicle stock without fabricating historical movements.
+
+Scope:
+- add a dedicated vehicle-stock initial stocktake screen backed by existing Analytics `baseline` semantics;
+- product search should behave like the vending-machine list search and support product name, product code, and maker;
+- support case count + loose units; convert to unit-equivalent total only when known case size exists;
+- never invent an unknown case size;
+- make zero versus not-counted explicit; do not silently turn unentered products into zero;
+- preview/confirm the full stocktake before writing the baseline;
+- record the stocktake timestamp as the inventory starting point;
+- after bootstrap, confirmed movements drive stock and later physical stocktakes use reconciliation/correction rather than history rewriting.
+
+### OPS10B1 — Multi-axis Product Intelligence / First-seen Classification
+
+Purpose: create classification data that is useful for revenue movement and replacement analysis, not just display labels.
+
+Scope:
+- evolve product intelligence beyond the existing single `category` field while preserving backward compatibility;
+- model a broad product family plus multiple structured attributes/tags;
+- support category-specific optional attributes and unknown values without fabricating facts;
+- examples for coffee include black/milked, sugar level, milk presence, volume band, container, hot/cold compatibility, price band, brand/maker;
+- examples for carbonated beverages include unsweetened sparkling water, cola, fruit soda, energy-style carbonation, lactic carbonation, flavor/sugar/volume/container/price/brand where applicable;
+- on the first appearance of a new product, propose classification automatically from available evidence;
+- require one human confirmation or correction, then reuse the confirmed classification instead of asking repeatedly.
+
+### OPS10B2 — Classification-aware Demand Transfer / Replacement Analysis
+
+Purpose: distinguish real demand decline from sales moving to a close substitute, and improve product-change recommendations.
+
+Scope:
+- compare product-level movement with aggregate movement across progressively similar product groups;
+- identify signals such as one unsweetened black coffee declining while another unsweetened black coffee at the same machine rises;
+- avoid concluding that a category is shrinking when demand is merely moving within a close substitute group;
+- use similarity attributes as evidence for replacement candidates rather than treating every item in a broad category as interchangeable;
+- preserve RAW → COMPUTED → RECOMMENDATION separation and avoid inventing causal certainty.
+
+### OPS10C — Explicit Active Visit / Nearby Candidate Workflow
+
+Purpose: reduce Today-tab scrolling without misidentifying adjacent vending machines.
+
+Scope:
+- GPS proximity is candidate discovery only; being within 100m must never automatically mean "currently visiting";
+- show nearby candidates compactly when no active machine is selected, keeping adjacent machines individually distinguishable;
+- let the user explicitly start exactly one machine as active work;
+- starting another while one is active requires a switch confirmation;
+- persist active work across app reopen and clear it automatically on visit completion;
+- preferred Today order: WORK PROGRESS → report capture → active-work / nearby compact area → normal Today list;
+- when active, pin the machine in the compact active-work area and avoid unnecessary duplicate display in the normal list;
+- compare OCR machine identity with the active machine; show positive match when aligned and warn on mismatch before association.
 
 ## Permanent analysis principles
 

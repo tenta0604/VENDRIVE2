@@ -1,12 +1,12 @@
 {
   "evidenceVersion": 2,
-  "runType": "product",
-  "phase": "OPS-REAL-WORKFLOW",
+  "runType": "continuity",
+  "phase": "CHAT-MIGRATION-CANONICALIZATION-20260916",
   "status": "PASS",
   "base": {
-    "head": "e333b11b0ed6488738ab4b4d50082ea84f0287f1",
-    "safetyTag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
-    "safetyTagTarget": "e333b11b0ed6488738ab4b4d50082ea84f0287f1"
+    "head": "0484784cfc4c006ca2a457dd8525df02dc4dba0d",
+    "safetyTag": null,
+    "safetyTagReason": "NOT_REQUIRED: canonical documentation/state continuity only; no production code changed."
   },
   "versions": {
     "app": "2026.09.16-FINAL.9",
@@ -15,58 +15,32 @@
     "schema": 4
   },
   "work": {
-    "summary": "Finish the real-world workflow from OCR draft to confirmed analytics data and add Today-tab operational safeguards.",
+    "summary": "Persist the full end-of-chat VENDRIVE2 handoff so a new chat can resume from GitHub with only 'VENDRIVE続き'.",
     "completed": [
-      "Added a clear draft-created success state and explicit final confirmation into Analytics.",
-      "Moved report capture to the top portion of the Today tab, directly below work progress.",
-      "Added unfinished-task confirmation before visit completion from both swipe and regular completion.",
-      "Added end-of-day warnings scoped to today's active route machines for unfinished orders and tasks."
+      "Recorded FINAL.9 as the production baseline and OPS-REAL-WORKFLOW as the latest completed product phase.",
+      "Defined OPS10A vehicle inventory initial stocktake with machine-list-style product search as the next phase.",
+      "Defined OPS10B1 multi-axis product intelligence and first-seen one-time human classification confirmation.",
+      "Defined OPS10B2 classification-aware demand-transfer and replacement analysis.",
+      "Defined OPS10C explicit active-visit / nearby-candidate workflow with GPS used only for candidate discovery and OCR cross-check.",
+      "Recorded the finite verification / anti-loop rule in AGENTS, DECISIONS, and WORKFLOW."
     ]
   },
   "gates": {
-    "preflight": "PASS",
-    "safetyTag": {
-      "status": "PASS",
-      "tag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
-      "target": "e333b11b0ed6488738ab4b4d50082ea84f0287f1"
-    },
-    "realEdge": {
-      "status": "PASS",
-      "runId": 34993922258,
-      "coverage": [
-        "OCR review creates a draft, shows an explicit success card, then requires a second explicit user confirmation before the report becomes confirmed",
-        "confirmed report status persisted through the real Analytics IndexedDB API",
-        "report capture is directly below the Today work-progress hero",
-        "visit completion warns when that machine still has an unfinished task",
-        "end-of-day warning includes unfinished orders/tasks only for today's active route target set",
-        "out-of-route task does not leak into the end-of-day warning",
-        "390px and 320px remain within viewport"
-      ],
-      "evidence": {
-        "draftConfirm": "OPS_DRAFT_CONFIRM_PASS",
-        "capturePlacement": "OPS_CAPTURE_PLACEMENT_PASS",
-        "todayGuards": "OPS_TODAY_GUARDS_390_PASS",
-        "mobile320": "OPS_MOBILE_320_PASS"
-      }
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "draftAutoConfirm": false,
-      "explicitFinalConfirmation": true,
-      "imageRetention": "unchanged: no OCR image storage",
-      "legacyMutation": "unchanged",
-      "unfinishedTaskGuard": "warning only; user may explicitly continue",
-      "endOfDayGuard": "warning only and scoped to today targets"
-    }
+    "synchronizedMainBaseline": "PASS",
+    "noProductionCodeChange": "PASS",
+    "canonicalJsonValidation": "PASS",
+    "crossFilePhaseConsistency": "PASS",
+    "safetyTag": "NOT_REQUIRED: continuity-only documentation/state maintenance"
   },
   "changedFiles": [
-    ".ai/LAST_RUN.json",
+    "AGENTS.md",
     ".ai/STATE.json",
-    "index.html",
-    "ocr-review-compact.js",
-    "version.json"
+    "AI_ROADMAP.md",
+    ".ai/LAST_RUN.json",
+    ".ai/DECISIONS.md",
+    ".ai/WORKFLOW.md"
   ],
   "openItems": [],
-  "nextAction": "Use FINAL.9 in real operations. Confirm real OCR reports only after checking them; confirmed sales reports feed the analytics engine and confirmed input/recovery reports feed inventory-derived planning and analysis.",
+  "nextAction": "On a new chat, the user may say only 'VENDRIVE続き'. Fetch latest main, read the canonical recovery set, verify consistency, then start OPS10A. Before any OPS10A production-code edit, create a fresh immutable annotated Safety Tag at the then-current main HEAD.",
   "unresolved": []
 }

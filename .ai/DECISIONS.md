@@ -84,3 +84,53 @@ This file records confirmed project decisions that must survive chat migration. 
 - FINAL fixed two release blockers without expanding product scope: stale client APP_VERSION metadata and the legacy `VENDRIVE2_DB` snapshot-store initialization path that could prevent safe restore checkpoints.
 - Full legacy, Analytics, OCR/review, schema 2/3/4 backup/restore, data-safety, and exact 320px/390px real Microsoft Edge regression passed.
 - VENDRIVE2 is release-ready. No next product phase is active; any future product work must be explicitly scoped and safety-tagged before production edits.
+
+
+## Post-FINAL.9 operational decisions
+
+- Production app baseline is `2026.09.16-FINAL.9`; Analytics engine remains `AN14B3B2`, DB/schema remain 4.
+- OCR review is no longer "draft-only forever": reviewed content still creates a draft first, but a second explicit user action may confirm it. Confirmed sales reports feed Analytics; confirmed input/recovery reports feed inventory/planning. There is still no automatic confirmation.
+- Report capture is positioned directly below Today work progress.
+- Visit completion warns when that vending machine has unfinished tasks. The warning is advisory and the user can explicitly continue.
+- End-of-day warning is scoped to vending machines in today's active route target set and covers unfinished orders and task assignments; out-of-route machines do not count.
+- Input-confirmation OCR prioritizes analysis-relevant product/quantity fields. Counter/payment detail is not required for the primary OCR extraction path.
+
+## Vehicle inventory bootstrap decision
+
+- Do not reconstruct past vehicle inventory history merely to initialize current stock.
+- The preferred bootstrap is one physical stocktake of the vehicle, saved as an Analytics inventory baseline at that timestamp.
+- Provide a dedicated stocktake UI with vending-machine-list-style product search by product name, product code, and maker.
+- Case + loose-unit entry is allowed only with known case size for automatic conversion; unknown case size must not be invented.
+- Unentered is not silently equivalent to zero. The UI must make "counted as zero" versus "not counted" explicit before final baseline confirmation.
+- After baseline, confirmed inventory movements determine current stock. Future physical stocktakes correct drift through reconciliation/correction rather than rewriting raw movement history.
+
+## Product intelligence decision for revenue analysis
+
+- A single product category is insufficient for VENDRIVE2's revenue-growth objective.
+- Product intelligence must support a broad family plus multiple structured attributes/tags so similarity can be evaluated at several levels.
+- Coffee must be distinguishable beyond "coffee", including dimensions such as black/milked, sugar level, milk presence, volume band, container, temperature compatibility, price band, and brand/maker where known.
+- Carbonated products must be distinguishable beyond "carbonated", including classes such as unsweetened sparkling water, cola, fruit soda, energy-style carbonation, and lactic carbonation, plus other relevant attributes such as flavor, sugar, volume, container, price band, and brand/maker.
+- Attributes are family-specific and may be unknown. Do not invent missing product facts just to fill the taxonomy.
+- When a product first appears, AI may propose a classification. The user should only need to confirm once or correct the wrong fields. Confirmed product intelligence becomes reusable master data.
+- Classification exists to improve analysis: when one product falls, the engine should check whether sales rose in sufficiently similar products before treating the movement as true demand decline.
+- Replacement recommendations should use similarity evidence rather than assuming all products within a broad family are interchangeable.
+
+## Active visit / nearby decision direction
+
+- GPS distance must never automatically set the currently visited vending machine.
+- 100m proximity is only a candidate-discovery signal because adjacent vending machines can be very close and are serviced sequentially.
+- The workflow should support one explicit active-work machine at a time.
+- Switching active work to another machine requires confirmation while an existing machine is active.
+- Active work should survive app reopen and clear automatically on visit completion.
+- Preferred Today hierarchy is: WORK PROGRESS → report capture → compact active-work / nearby area → normal Today list.
+- When no machine is active, nearby machines should be presented as compact distinct candidates; do not silently pick the nearest one as active.
+- When a machine is active, keep a compact active-work card pinned near the top and avoid unnecessary duplicate presentation in the normal list.
+- OCR identity should be cross-checked against the active machine. Matching identity is positive evidence; mismatch must warn before association.
+- This is the current agreed design direction for the next implementation phase; do not regress to the earlier idea of treating the nearest ≤100m machine as automatically visiting.
+
+## Finite verification decision
+
+- Verification must be finite and declared before execution.
+- Once every required gate for the current scope passes, stop. Do not create an additional reassurance loop.
+- Re-run only gates affected by a real change to code, test methodology, deployment state, or another relevant precondition.
+- A later real-device problem opens a new scoped maintenance phase; it does not justify extending a completed verification loop indefinitely.

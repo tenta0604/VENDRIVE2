@@ -2,16 +2,16 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "FINAL",
+  "completedPhase": "OPS-REAL-WORKFLOW",
   "activePhase": null,
-  "nextPhase": null,
+  "nextPhase": "OPS10A",
   "appVersion": "2026.09.16-FINAL.9",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
   "status": "complete",
   "currentWork": {
-    "title": "FINAL — Full Regression / Mobile / Backup / Release Gate complete",
+    "title": "FINAL.9 production baseline — next operations phases prepared",
     "releaseStatus": "release_ready",
     "completedReleaseScope": [
       "Full Analytics data-path regression across products, machine links, reports, inventory, expiry, analysis, forecasting, recommendations, and planning",
@@ -30,8 +30,9 @@
     "lastSafetyTagTarget": "e333b11b0ed6488738ab4b4d50082ea84f0287f1",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
-      "Use this release-ready main build as the production baseline",
-      "Treat any future product change as a new explicitly scoped phase and create a fresh immutable Safety Tag before production-code edits"
+      "Start OPS10A — Vehicle Inventory Initial Stocktake / Baseline UI with product search.",
+      "After OPS10A, continue with OPS10B1 multi-axis product intelligence, OPS10B2 classification-aware demand-transfer analysis, then OPS10C explicit active-visit / nearby workflow.",
+      "Before any production-code edit, create a fresh immutable annotated Safety Tag at the then-current main HEAD."
     ],
     "maintenance": [
       "Updated stale OCR pre-connection guidance to match the live secure OCR workflow.",
@@ -60,7 +61,63 @@
       "Moved 帳票撮影 directly below the Today progress hero so it is available before scrolling through the visit list.",
       "Visit completion now warns when that vending machine still has unfinished tasks; this applies to both swipe completion and normal visit completion.",
       "End-of-day confirmation now warns about unfinished orders and task assignments only for vending machines in today's active route target set."
-    ]
+    ],
+    "plannedPhases": [
+      {
+        "id": "OPS10A",
+        "title": "Vehicle Inventory Initial Stocktake / Baseline UI",
+        "purpose": "Create a one-time real stocktake flow for current vehicle inventory using existing Analytics baseline semantics, with machine-list-style product search."
+      },
+      {
+        "id": "OPS10B1",
+        "title": "Multi-axis Product Intelligence / First-seen Classification",
+        "purpose": "Replace single-category thinking with a structured product family plus multiple attributes; AI proposes classification and the user confirms once per new product."
+      },
+      {
+        "id": "OPS10B2",
+        "title": "Classification-aware Demand Transfer / Replacement Analysis",
+        "purpose": "Use product similarity and multi-level aggregate demand to distinguish true demand decline from sales moving to a close substitute, and improve replacement suggestions."
+      },
+      {
+        "id": "OPS10C",
+        "title": "Explicit Active Visit / Nearby Candidate Workflow",
+        "purpose": "Use GPS only to surface nearby candidates; let the user explicitly start exactly one active machine, keep it pinned near the top, and cross-check OCR identity against it."
+      }
+    ],
+    "handoff": {
+      "requestedResumePhrase": "VENDRIVE続き",
+      "userDoesNotNeedToPasteLongHandoff": true,
+      "vehicleInventoryDirection": [
+        "Do not reconstruct historical vehicle movements just to bootstrap current inventory.",
+        "Perform one real physical stocktake and register that timestamp as the starting baseline.",
+        "Provide live product search similar to the vending-machine list; search product name, product code, and maker.",
+        "Support case count plus loose units and convert only when case size is known; never invent case size.",
+        "Do not silently treat an unentered product as zero; the stocktake flow must make zero-vs-not-counted explicit.",
+        "After baseline, confirmed movements drive current stock; later real stocktakes use reconciliation/correction instead of rewriting history."
+      ],
+      "productIntelligenceDirection": [
+        "The business purpose is revenue analysis and replacement decisions, not cosmetic categorization.",
+        "A single category such as coffee or carbonated drink is insufficient.",
+        "Use product family plus multiple structured attributes/tags so close substitutes can be identified at several similarity levels.",
+        "Example coffee attributes: black/milked, sugar level, milk presence, volume band, container, hot/cold compatibility, price band, brand/maker.",
+        "Example carbonated attributes: unsweetened sparkling water, cola, fruit soda, energy-style carbonation, lactic carbonation, plus flavor/sugar/volume/container/price/brand as applicable.",
+        "Not every attribute applies to every family; the model must remain extensible and allow unknown values without inventing facts.",
+        "When a new product first appears, AI may propose classification from product evidence; the user confirms once or fixes only wrong fields. Confirmed classification is then reused.",
+        "Analysis should compare both the product and groups of close substitutes so a product decline can be distinguished from demand transferring to another similar product."
+      ],
+      "activeVisitDirection": [
+        "Do not infer 'currently visiting' automatically from being within 100m.",
+        "GPS proximity is candidate discovery only because adjacent vending machines can be a few meters apart and are worked sequentially.",
+        "The user explicitly starts one machine as active work; only one active machine may exist at a time.",
+        "Starting another machine while one is active requires a switch confirmation.",
+        "Persist the active machine across app reopen and clear it automatically on visit completion.",
+        "Preferred Today order: WORK PROGRESS, report capture, active-work / nearby compact area, then the normal Today list.",
+        "When no machine is active, show nearby candidates compactly rather than promoting one automatically; adjacent candidates must remain distinguishable.",
+        "When a machine is active, pin a compact active-work card near the top and avoid duplicating it in the normal list where practical.",
+        "OCR identity should be compared with the active machine; matching identity is positive confirmation and mismatch must warn before mis-association."
+      ],
+      "antiLoopRule": "Define a finite gate checklist before testing; once all required gates pass, stop. Re-run only when code, test methodology, deployment state, or another relevant precondition changed."
+    }
   },
   "requiredUserInput": [],
   "unresolved": [],
