@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL.2",
+  "appVersion": "2026.09.15-FINAL.3",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-MAINT-EMPTY-START-20260915",
-    "lastSafetyTagTarget": "17e653bffbafd210e24cdf68293a4ce976ebc01e",
+    "lastSafetyTag": "backup-pre-MAINT-OCR-502-20260915",
+    "lastSafetyTagTarget": "fd41c49bef3243efe08b9979bdd50ac9e57d842b",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -37,7 +37,9 @@
       "Updated stale OCR pre-connection guidance to match the live secure OCR workflow.",
       "Bumped app version to 2026.09.15-FINAL.1 so existing clients can detect the maintenance update.",
       "Fresh installations now start with zero vending machines instead of injecting development sample machines A-F.",
-      "Existing localStorage data and IndexedDB recovery data remain authoritative and are not deleted by the empty-start maintenance."
+      "Existing localStorage data and IndexedDB recovery data remain authoritative and are not deleted by the empty-start maintenance.",
+      "Hardened OCR provider availability with bounded retry and fallback across Gemini 3.6 Flash, 3.5 Flash, 3.5 Flash-Lite, and 3.1 Flash-Lite.",
+      "Added distinct user-facing OCR failure categories for provider busy, timeout, connection, structured parse, authentication, and rejection failures."
     ]
   },
   "requiredUserInput": [],

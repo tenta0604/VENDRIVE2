@@ -14,7 +14,7 @@
     if(window.console&&console.warn)console.warn("VENDRIVE2 OCR relay endpoint is invalid");
     return;
   }
-  function fail(message){throw new Error(message)}
+  function fail(message,code,retryable,status){var error=new Error(message);if(code)error.code=code;if(typeof retryable==="boolean")error.retryable=retryable;if(typeof status==="number")error.status=status;throw error}
   function assertAnalyzeInput(input){
     if(!input||typeof input!=="object")fail("OCR analyze input is required");
     var file=input.file;
@@ -26,7 +26,7 @@
     return file;
   }
   async function analyze(input){
-    var file=assertAnalyzeInput(input),form=new FormData(),controller=new AbortController(),timer=setTimeout(function(){controller.abort()},30000);
+    var file=assertAnalyzeInput(input),form=new FormData(),controller=new AbortController(),timer=setTimeout(function(){controller.abort()},40000);
     form.append("file",file,file.name||"report-image");
     form.append("supportedReportTypes",JSON.stringify(input.supportedReportTypes));
     if(input.image&&typeof input.image==="object")form.append("imageMetadata",JSON.stringify({name:input.image.name||null,mime:input.image.mime||file.type,size:input.image.size||file.size,lastModified:input.image.lastModified||null}));
@@ -38,10 +38,10 @@
       if(text.length>262144)fail("OCR relay response is too large");
       var payload;
       try{payload=JSON.parse(text)}catch(error){fail("OCR relay returned invalid JSON")}
-      if(!response.ok){var message=payload&&typeof payload.error==="string"?payload.error:"OCR relay request failed";fail(message)}
+      if(!response.ok){var message=payload&&typeof payload.error==="string"?payload.error:"OCR relay request failed",code=payload&&typeof payload.code==="string"?payload.code:"relay_request_failed",retryable=payload&&typeof payload.retryable==="boolean"?payload.retryable:false;fail(message,code,retryable,response.status)}
       return payload;
     }catch(error){
-      if(error&&error.name==="AbortError")fail("OCR relay request timed out");
+      if(error&&error.name==="AbortError")fail("OCR relay request timed out","relay_timeout",true,504);
       throw error;
     }finally{clearTimeout(timer)}
   }

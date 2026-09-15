@@ -1,73 +1,58 @@
 {
   "evidenceVersion": 2,
   "runType": "maintenance",
-  "phase": "MAINT-EMPTY-START",
-  "status": "PASS",
+  "phase": "MAINT-OCR-502",
+  "status": "PENDING",
   "base": {
-    "head": "17e653bffbafd210e24cdf68293a4ce976ebc01e",
-    "safetyTag": "backup-pre-MAINT-EMPTY-START-20260915",
-    "safetyTagTarget": "17e653bffbafd210e24cdf68293a4ce976ebc01e"
+    "head": "fd41c49bef3243efe08b9979bdd50ac9e57d842b",
+    "safetyTag": "backup-pre-MAINT-OCR-502-20260915",
+    "safetyTagTarget": "fd41c49bef3243efe08b9979bdd50ac9e57d842b"
   },
   "versions": {
-    "app": "2026.09.15-FINAL.2",
+    "app": "2026.09.15-FINAL.3",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
+  "rootCause": {
+    "observedProductionRequests": [
+      "2026-09-15T07:28:48Z POST /api/ocr -> 502",
+      "2026-09-15T07:29:33Z POST /api/ocr -> 502"
+    ],
+    "providerDiagnostic": "Gemini gemini-3.6-flash returned 503 UNAVAILABLE / high demand for both simple and full structured-output probes.",
+    "conclusion": "The photographed receipts reached the Vercel relay; failure was provider availability, not image upload or client routing."
+  },
   "work": {
-    "summary": "Remove development sample vending machines from the true fresh-install path without deleting or replacing existing saved/recoverable user data.",
+    "summary": "Harden production OCR against transient Gemini model unavailability without changing image retention, confirmation, inventory, or legacy-data safety boundaries.",
     "completed": [
-      "Removed the development sample-data initializer from production startup code.",
-      "Changed the no-storage/no-recovery startup path to persist and render the already-empty initial state.",
-      "Kept localStorage-first and IndexedDB recovery behavior unchanged.",
-      "Bumped client version to 2026.09.15-FINAL.2."
+      "Added bounded retry of the configured primary OCR model.",
+      "Added fallback models gemini-3.5-flash, gemini-3.5-flash-lite, and gemini-3.1-flash-lite.",
+      "Added provider attempt timeout and overall provider budget.",
+      "Added sanitized provider attempt observability without logging image or OCR content.",
+      "Added specific relay error codes and user-facing OCR failure explanations.",
+      "Kept image non-retention and draft-only review safety unchanged.",
+      "Bumped app version to 2026.09.15-FINAL.3."
     ]
   },
   "gates": {
     "preflight": "PASS",
     "safetyTag": {
       "status": "PASS",
-      "tag": "backup-pre-MAINT-EMPTY-START-20260915",
-      "target": "17e653bffbafd210e24cdf68293a4ce976ebc01e"
-    },
-    "staticScope": {
-      "status": "PASS",
-      "sampleInitializerRemoved": true,
-      "sampleMachineFixtureRemoved": true,
-      "versionAligned": "2026.09.15-FINAL.2"
-    },
-    "realEdge": {
-      "status": "PASS",
-      "runId": 34937247487,
-      "coverage": [
-        "fresh origin at exact 320px starts with zero machines and persists zero machines",
-        "existing localStorage at exact 390px preserves the existing machine without sample injection",
-        "IndexedDB-only recovery preserves the recoverable machine without sample injection",
-        "no horizontal overflow in tested startup paths"
-      ]
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "coverage": [
-        "existing localStorage remains authoritative",
-        "IndexedDB recovery remains authoritative when localStorage is absent",
-        "no existing data deletion or sample-signature auto-deletion was introduced"
-      ]
-    },
-    "vercelPreview": {
-      "status": "PASS",
-      "deploymentId": "dpl_5vsUAr2wQsfoFqXMHL169Htf2z7Z",
-      "sourceCommit": "e7787089557c61b851069cb1d898f49043258459",
-      "state": "READY"
+      "tag": "backup-pre-MAINT-OCR-502-20260915",
+      "target": "fd41c49bef3243efe08b9979bdd50ac9e57d842b"
     }
   },
   "changedFiles": [
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
+    "api/ocr.mjs",
     "index.html",
+    "ocr-relay-adapter.js",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "Deploy the verified maintenance commit to main, confirm GitHub Pages serves 2026.09.15-FINAL.2, and begin controlled real-world use. Existing device data must remain untouched unless separately approved.",
+  "openItems": [
+    "Run static/unit fallback regression, then production provider smoke test before PASS."
+  ],
+  "nextAction": "Verify fallback behavior in CI, deploy to main, require a real production /api/ocr 200 smoke response, and remove temporary test/diagnostic files.",
   "unresolved": []
 }

@@ -1,0 +1,58 @@
+name: MAINT OCR 502 Gate
+
+on:
+  push:
+    branches:
+      - maint-ocr-502-20260915
+      - main
+    paths:
+      - "api/ocr.mjs"
+      - "ocr-relay-adapter.js"
+      - "index.html"
+      - "version.json"
+      - ".ai/STATE.json"
+      - ".ai/LAST_RUN.json"
+      - "tools/maint-ocr-502-unit.mjs"
+      - "tools/maint-ocr-502-production-smoke.mjs"
+      - ".github/workflows/maint-ocr-502-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static gates
+        run: |
+          node --check api/ocr.mjs
+          node --check ocr-relay-adapter.js
+          node --check tools/maint-ocr-502-unit.mjs
+          node --check tools/maint-ocr-502-production-smoke.mjs
+          git diff --check
+          grep -q "2026.09.15-FINAL.3" version.json
+          grep -q "APP_VERSION='2026.09.15-FINAL.3'" index.html
+          ! test -f api/ocr-diagnose.mjs
+      - name: OCR fallback unit regression
+        run: node tools/maint-ocr-502-unit.mjs
+
+  production-smoke:
+    if: github.ref == 'refs/heads/main'
+    needs: static-and-unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Wait for deployment propagation
+        run: sleep 20
+      - name: Real production OCR provider smoke
+        run: node tools/maint-ocr-502-production-smoke.mjs
