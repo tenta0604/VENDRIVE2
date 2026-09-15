@@ -7,9 +7,9 @@ function envMs(name,fallback,min,max){
   const value=Number(process.env[name]);
   return Number.isFinite(value)?Math.max(min,Math.min(max,Math.round(value))):fallback;
 }
-const PROVIDER_BUDGET_MS=envMs("OCR_PROVIDER_BUDGET_MS",55000,5000,90000);
-const PROVIDER_ATTEMPT_TIMEOUT_MS=envMs("OCR_PROVIDER_ATTEMPT_TIMEOUT_MS",30000,3000,60000);
-const PROVIDER_HEDGE_DELAY_MS=envMs("OCR_PROVIDER_HEDGE_DELAY_MS",8000,250,30000);
+const PROVIDER_BUDGET_MS=envMs("OCR_PROVIDER_BUDGET_MS",55000,250,90000);
+const PROVIDER_ATTEMPT_TIMEOUT_MS=envMs("OCR_PROVIDER_ATTEMPT_TIMEOUT_MS",30000,100,60000);
+const PROVIDER_HEDGE_DELAY_MS=envMs("OCR_PROVIDER_HEDGE_DELAY_MS",8000,25,30000);
 
 function cors(origin){
   const headers={"Vary":"Origin","Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8"};
