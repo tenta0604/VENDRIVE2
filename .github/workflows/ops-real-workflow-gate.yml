@@ -1,0 +1,49 @@
+name: Real Workflow Gate
+
+on:
+  push:
+    branches:
+      - ops-real-workflow-20260916
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static checks
+        shell: pwsh
+        run: |
+          node --check ocr-review-compact.js
+          node --check tools/ops-real-workflow-edge-gate.mjs
+          git diff --check
+          $index=Get-Content index.html -Raw
+          if(-not $index.Contains("APP_VERSION='2026.09.16-FINAL.9'")){throw "version mismatch"}
+          if(-not $index.Contains("confirmPendingTasksBeforeVisit")){throw "visit task guard missing"}
+          if(-not $index.Contains("todayPendingWork")){throw "end-of-day guard missing"}
+          $compact=Get-Content ocr-review-compact.js -Raw
+          if(-not $compact.Contains("下書きを確認・確定する")){throw "draft confirm action missing"}
+          git fetch --tags origin
+          if((git rev-list -n 1 backup-pre-OPS-REAL-WORKFLOW-20260916) -ne "e333b11b0ed6488738ab4b4d50082ea84f0287f1"){throw "safety tag mismatch"}
+      - name: Real Edge workflow regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $profile=Join-Path $env:TEMP "vendrive2-ops-real-edge"
+          if(Test-Path $profile){Remove-Item -Recurse -Force $profile}
+          $server=Start-Process -FilePath "python" -ArgumentList "-m","http.server","8000","--bind","0.0.0.0" -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          try{
+            Start-Sleep -Seconds 2
+            $edgeCandidates=@("$env:ProgramFiles (x86)\Microsoft\Edge\Application\msedge.exe","$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe")
+            $edge=$edgeCandidates|Where-Object{Test-Path $_}|Select-Object -First 1
+            if(-not $edge){throw "Microsoft Edge not found"}
+            $edgeProc=Start-Process -FilePath $edge -ArgumentList "--headless=new","--disable-gpu","--remote-debugging-port=9222","--user-data-dir=$profile","about:blank" -PassThru
+            try{Start-Sleep -Seconds 2;node tools/ops-real-workflow-edge-gate.mjs}finally{if($edgeProc -and -not $edgeProc.HasExited){Stop-Process -Id $edgeProc.Id -Force}}
+          }finally{if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}}
