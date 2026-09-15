@@ -1,0 +1,37 @@
+name: OPS10A cache fix push
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ops10a-cache-fix-push.yml']
+permissions: {contents: write}
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags origin
+          H=$(git rev-parse HEAD)
+          T=$(git tag --points-at "${H}^" | grep '^backup-pre-OPS10A-CACHE-FIX2-' | tail -1 || true)
+          test -n "$T"
+          test "$(git cat-file -t "$T")" = tag
+          B=chatgpt/ops10a-cache-fix-20260916-v2
+          git checkout -b "$B"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text()
+          old='<script src="ops10a-stocktake.js"></script>'
+          new='<script src="ops10a-stocktake.js?v=2026.09.16-FINAL.10-ops10a-ui2"></script>'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check ops10a-stocktake.js
+          git diff --check
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git commit -m 'fix: bust stale OPS10A mobile asset cache'
+          git push origin HEAD:"$B"
