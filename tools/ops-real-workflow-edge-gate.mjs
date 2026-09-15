@@ -50,7 +50,7 @@ try{
       {id:"T1",text:"本日対象タスク",target:"サントリー",targetMachineIds:["M1"],completed:false},
       {id:"T2",text:"対象外タスク",target:"サントリー",targetMachineIds:["M2"],completed:false}
     ],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:["サントリー"],makerColors:{},makerSettings:[]};
-    localStorage.setItem("vendrive2_v7_data",JSON.stringify(state));localStorage.setItem("vendrive2_v7_data_version","1");location.reload();return true;
+    localStorage.setItem("vendrive2_v7_data",JSON.stringify(state));localStorage.setItem("vendrive2_v7_data_version","1");localStorage.setItem("vendrive2_last_day",today);location.reload();return true;
   })()`);
   await new Promise(r=>setTimeout(r,1300));
   const warning=await ev(c,`(async()=>{
