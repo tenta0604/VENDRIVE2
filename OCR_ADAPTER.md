@@ -39,7 +39,7 @@ OCR output remains a review candidate. AN14B1 does not create or confirm a repor
 
 It revalidates the report payload using the existing report validator and creates a report with source method `ocr`. It never confirms the report and never applies inventory movement. If the payload is structurally valid but not ready to confirm (for example, quantity or amount mismatch), the saved report remains `needs_review`.
 
-Production UI wiring for field-level corrections is intentionally deferred until real report samples are available, so the review form can match the actual paper layouts instead of guessing.
+Field-level correction UI is calibrated only from real report samples: sales in AN14B3B1 and input/recovery/joined input-recovery in AN14B3B2.
 
 ## Production provider boundary (AN14B3A)
 

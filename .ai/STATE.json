@@ -2,56 +2,39 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "AN14B3B1",
-  "activePhase": "AN14B3B2",
-  "nextPhase": "AN14B3B2",
-  "appVersion": "2026.09.14-AN14B3B1",
-  "engineVersion": "AN14B3B1",
+  "completedPhase": "AN14B3B2",
+  "activePhase": "FINAL",
+  "nextPhase": "FINAL",
+  "appVersion": "2026.09.15-AN14B3B2",
+  "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "waiting_user_input",
+  "status": "ready",
   "currentWork": {
-    "title": "AN14B3B2 — Input / Recovery Real-paper Review UI Calibration",
-    "productionCodeOnMain": "sales_review_complete",
-    "completedSalesScope": [
-      "Real sales-journal field-level OCR review/correction UI",
-      "Editable header, totals, product rows, and sold-out rows",
-      "Visible quantity and amount consistency validation",
+    "title": "FINAL — Full Regression / Mobile / Backup / Release Gate",
+    "productionCodeOnMain": "real_paper_review_complete",
+    "completedRealPaperScope": [
+      "Sales-journal field-level OCR review/correction UI",
+      "Input-confirmation header, counter, payment, item, and printed-total review UI calibrated from real paper",
+      "Recovery header plus case/loose count review UI calibrated from real paper",
+      "Joined input_recovery paper reviewed through the same calibrated input and recovery sections",
       "Explicit paper-comparison approval before Analytics draft creation",
-      "No automatic confirmation, inventory movement, or legacy write",
-      "Real Microsoft Edge verification at 320px and 390px"
+      "No automatic confirmation, inventory movement, image/raw-OCR retention, or legacy write",
+      "Real Microsoft Edge verification at exact 320px and 390px viewports"
     ],
-    "lastSafetyTag": "backup-pre-AN14B3B-canonical-main-20260914",
-    "lastSafetyTagTarget": "c107298c3f08196de2ac97bc51d596aea403f310",
+    "lastSafetyTag": "backup-pre-AN14B3B2-20260915",
+    "lastSafetyTagTarget": "4b60c23d618c7995fcd7cb25bc0dbed20b0f35e2",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
-      "Receive and inspect real input-confirmation and recovery paper photos",
-      "If a joined input/recovery paper exists, inspect a real sample rather than guessing its layout",
-      "Run fresh main preflight and create a new immutable annotated Safety Tag at the then-current main",
-      "Implement input/recovery review UI using only evidence from real papers",
-      "Run syntax, diff, functional, and real Edge 320px/390px regression before completing AN14B3B2"
+      "Run fresh synchronized-main preflight for FINAL",
+      "Create a fresh immutable annotated Safety Tag before any FINAL production-code edit",
+      "Run full regression across legacy operations, Analytics, OCR/review, backup/restore, and mobile layouts",
+      "Resolve any release-blocking regression without expanding scope",
+      "Complete the release gate only after all required evidence passes"
     ]
   },
-  "requiredUserInput": [
-    {
-      "item": "投入確認票の実紙写真",
-      "requiredFor": "input report layout calibration",
-      "status": "pending"
-    },
-    {
-      "item": "回収票の実紙写真",
-      "requiredFor": "recovery report layout calibration",
-      "status": "pending"
-    },
-    {
-      "item": "投入＋回収が一体の実紙写真（現場にある場合）",
-      "requiredFor": "joined input_recovery layout calibration",
-      "status": "optional_pending"
-    }
-  ],
-  "unresolved": [
-    "Input, recovery, and joined input/recovery paper layouts must not be guessed before real samples are available"
-  ],
+  "requiredUserInput": [],
+  "unresolved": [],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
     "readOrder": [

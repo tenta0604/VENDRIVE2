@@ -63,18 +63,21 @@ This file records confirmed project decisions that must survive chat migration. 
 ## AN14B3B real-paper decisions and split
 
 - `AN14B3B` is split at the real-world evidence boundary: `AN14B3B1` covers the sales journal; `AN14B3B2` covers input/recovery papers.
-- A real sales-journal sample has been inspected and is sufficient to begin sales-side calibration.
-- Confirmed sales-journal concepts visible in the sample include report identity/header data, vendor/machine context, product code/name, price, sales quantity, total quantity, total amount, previous-clear/elapsed-period information, and sold-out information.
+- Real samples have now confirmed four relevant physical forms: sales journal, standalone **投入確認**, standalone **回収品確認**, and a joined paper containing both input and recovery sections.
+- Confirmed sales-journal concepts include report identity/header data, vendor/machine context, product code/name, price, sales quantity, total quantity, total amount, previous-clear/elapsed-period information, and sold-out information.
 - Sales review supports human comparison/correction, visible quantity/amount consistency checks, and explicit paper approval before creating an Analytics draft.
-- `AN14B3B1` is complete only with draft-only behavior: no automatic confirmation, inventory movement, or legacy write.
-- Do not guess the field layout for `input`, `recovery`, or joined `input_recovery` papers. Real samples are still required for those layouts.
-- The user expects to provide the input-confirmation and recovery paper photos when available during work.
+- Input review follows the printed structure: header, counter rows (**売価・枝番・前回・今回・売上数**), card/cash/sales amounts, product input rows, and printed **投入合計**.
+- Input review must check `今回 - 前回 = 売上数`, counter-derived sales amount, `カード + 現金 = 売上金額`, and product-row quantity total before approval.
+- Recovery review preserves the printed **ケース** and **バラ** counts separately. Existing inventory/report movement continues to use the unit-equivalent `quantity` field.
+- When recovery **ケース = 0**, unit-equivalent `quantity` must equal printed **バラ**. When **ケース > 0** and case size is not certain, VENDRIVE2 must not invent a conversion; human-reviewed unit-equivalent quantity is required before the report can become valid.
+- Joined `input_recovery` uses the same calibrated input and recovery sections rather than a separate persistence path.
+- All real-paper review remains draft-only after explicit paper comparison: no automatic report confirmation, inventory movement, image/raw-OCR retention, or legacy write.
 - The immutable annotated pre-edit safety tag used for `AN14B3B1` is `backup-pre-AN14B3B-canonical-main-20260914`, targeting `c107298c3f08196de2ac97bc51d596aea403f310`.
-- `AN14B3B2` must create its own fresh immutable annotated Safety Tag at the then-current verified `main` before production-code edits.
+- The immutable annotated pre-edit safety tag used for `AN14B3B2` is `backup-pre-AN14B3B2-20260915`, targeting `4b60c23d618c7995fcd7cb25bc0dbed20b0f35e2`.
 
 ## Current release boundary
 
-- Latest completed product phase: `AN14B3B1 — Sales-journal Real-paper Review UI Calibration`.
-- Production OCR connectivity and real-image structured response were already validated before AN14B3B.
-- Sales-journal field-level review is the completed first half of real-paper calibration; input/recovery calibration remains pending real paper evidence.
-- After `AN14B3B2`, the roadmap proceeds to `FINAL — Full Regression / Mobile / Backup / Release Gate` unless the user explicitly changes the roadmap.
+- Latest completed product phase: `AN14B3B2 — Input / Recovery Real-paper Review UI Calibration`.
+- Production OCR connectivity and real-image structured response were validated before AN14B3B; the provider schema is now calibrated for the confirmed input/recovery paper structures.
+- Sales, input, recovery, and joined input/recovery field-level review are all implemented under the same explicit-review and draft-only boundary.
+- The next phase is `FINAL — Full Regression / Mobile / Backup / Release Gate` unless the user explicitly changes the roadmap.

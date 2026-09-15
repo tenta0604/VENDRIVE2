@@ -2,10 +2,10 @@
 
 ## Current state
 
-- Latest completed phase: **AN14B3B1 — Sales-journal Real-paper Review UI Calibration**
-- Active / next phase: **AN14B3B2 — Input / Recovery Real-paper Review UI Calibration**
+- Latest completed phase: **AN14B3B2 — Input / Recovery Real-paper Review UI Calibration**
+- Active / next phase: **FINAL — Full Regression / Mobile / Backup / Release Gate**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Current real-paper evidence: sales journal calibrated and validated; input-confirmation and recovery paper layouts are waiting for real samples.
+- Current real-paper evidence: sales journal, standalone input-confirmation, standalone recovery-confirmation, and joined input/recovery layouts are calibrated and validated from real samples.
 
 ## Completed
 
@@ -45,21 +45,16 @@
 - AN14B2 — Reviewed OCR Candidate → Draft Report
 - AN14B3A — Production OCR Provider Connection
 - AN14B3B1 — Sales-journal Real-paper Review UI Calibration
+- AN14B3B2 — Input / Recovery Real-paper Review UI Calibration
 
 ## Next roadmap
 
-### AN14 — Report Capture / OCR Integration
+### FINAL — Full Regression / Mobile / Backup / Release Gate
 
-- **AN14B3B2 — Input / Recovery Real-paper Review UI Calibration**
-  - Inspect real input-confirmation and recovery paper samples before defining their field-level UI.
-  - If a joined `input_recovery` paper exists, calibrate it from a real sample rather than assumptions.
-  - Preserve the explicit-review boundary: no automatic report confirmation, inventory movement, or legacy write.
-  - Reuse the established structured-candidate and reviewed-draft boundaries rather than creating a parallel persistence path.
-  - Run required syntax/diff/functional gates and real Microsoft Edge checks at 320px and 390px before completion.
-
-### Later major phases
-
-- **FINAL — Full Regression / Mobile / Backup / Release Gate**
+- Re-run the complete legacy, Analytics, OCR/review, data-safety, backup/restore, and mobile regression set against the release candidate.
+- Confirm no automatic OCR confirmation, inventory movement, or legacy write was introduced outside explicit approved flows.
+- Verify release-critical mobile layouts and data recovery behavior before declaring VENDRIVE2 release-ready.
+- Fix only release-blocking regressions inside FINAL scope; do not introduce new product features.
 
 Phase numbers may be split further when safety, human evidence dependencies, or implementation size require it, but do not skip the major-category order without an explicit roadmap decision.
 
