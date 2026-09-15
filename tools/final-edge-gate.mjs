@@ -153,7 +153,7 @@ try{
       await new Promise(r=>setTimeout(r,150));
       a(window.__finalExportBlob instanceof Blob,"Legacy export blob missing");
       const exported=JSON.parse(await window.__finalExportBlob.text());
-      a(exported.kind==="VENDRIVE2_BACKUP"&&exported.formatVersion===1&&exported.appVersion==="2026.09.15-AN14B3B2"&&Array.isArray(exported.data.machines),"Legacy export content regression");
+      a(exported.kind==="VENDRIVE2_BACKUP"&&exported.formatVersion===1&&exported.appVersion==="2026.09.15-FINAL"&&Array.isArray(exported.data.machines),"Legacy export content regression");
       URL.createObjectURL=originalCreateObjectURL;
 
       const candidate={
@@ -163,7 +163,7 @@ try{
         ],
         offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:["サントリー"],makerColors:{},makerSettings:[]
       };
-      const backup={kind:"VENDRIVE2_BACKUP",formatVersion:1,appVersion:"2026.09.15-AN14B3B2",createdAt:"2026-09-15T00:00:00.000Z",data:candidate,runtime:{lastDay:"2026-09-15"}};
+      const backup={kind:"VENDRIVE2_BACKUP",formatVersion:1,appVersion:"2026.09.15-FINAL",createdAt:"2026-09-15T00:00:00.000Z",data:candidate,runtime:{lastDay:"2026-09-15"}};
       async function chooseBackup(value,name){
         const input=document.getElementById("restoreBackupFile"),dt=new DataTransfer(),file=new File([JSON.stringify(value)],name,{type:"application/json"});
         dt.items.add(file);input.files=dt.files;input.dispatchEvent(new Event("change",{bubbles:true}));

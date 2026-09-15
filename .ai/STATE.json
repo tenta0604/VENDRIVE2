@@ -2,35 +2,36 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "AN14B3B2",
-  "activePhase": "FINAL",
-  "nextPhase": "FINAL",
-  "appVersion": "2026.09.15-AN14B3B2",
+  "completedPhase": "FINAL",
+  "activePhase": null,
+  "nextPhase": null,
+  "appVersion": "2026.09.15-FINAL",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "ready",
+  "status": "complete",
   "currentWork": {
-    "title": "FINAL — Full Regression / Mobile / Backup / Release Gate",
-    "productionCodeOnMain": "real_paper_review_complete",
-    "completedRealPaperScope": [
-      "Sales-journal field-level OCR review/correction UI",
-      "Input-confirmation header, counter, payment, item, and printed-total review UI calibrated from real paper",
-      "Recovery header plus case/loose count review UI calibrated from real paper",
-      "Joined input_recovery paper reviewed through the same calibrated input and recovery sections",
-      "Explicit paper-comparison approval before Analytics draft creation",
-      "No automatic confirmation, inventory movement, image/raw-OCR retention, or legacy write",
-      "Real Microsoft Edge verification at exact 320px and 390px viewports"
+    "title": "FINAL — Full Regression / Mobile / Backup / Release Gate complete",
+    "releaseStatus": "release_ready",
+    "completedReleaseScope": [
+      "Full Analytics data-path regression across products, machine links, reports, inventory, expiry, analysis, forecasting, recommendations, and planning",
+      "OCR review and draft-only safety boundary regression for sales and input/recovery review flows",
+      "Analytics backup validation and restore coverage for source schemas 2, 3, and 4",
+      "Legacy backup export, restore preview, future-format rejection, pre-restore checkpoint, and restore verification",
+      "Legacy VENDRIVE2_DB v1 empty-database self-repair to internal version 2 with snapshots store creation",
+      "Real Microsoft Edge mobile regression at exact 320px and 390px without horizontal overflow",
+      "Release metadata aligned so deployed clients can detect the FINAL build"
     ],
-    "lastSafetyTag": "backup-pre-AN14B3B2-20260915",
-    "lastSafetyTagTarget": "4b60c23d618c7995fcd7cb25bc0dbed20b0f35e2",
+    "releaseFixes": [
+      "Aligned index APP_VERSION with canonical release metadata",
+      "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
+    ],
+    "lastSafetyTag": "backup-pre-FINAL-20260915",
+    "lastSafetyTagTarget": "1f0189c859c489355b5d0dc852fc470f56f5148f",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
-      "Run fresh synchronized-main preflight for FINAL",
-      "Create a fresh immutable annotated Safety Tag before any FINAL production-code edit",
-      "Run full regression across legacy operations, Analytics, OCR/review, backup/restore, and mobile layouts",
-      "Resolve any release-blocking regression without expanding scope",
-      "Complete the release gate only after all required evidence passes"
+      "Use this release-ready main build as the production baseline",
+      "Treat any future product change as a new explicitly scoped phase and create a fresh immutable Safety Tag before production-code edits"
     ]
   },
   "requiredUserInput": [],

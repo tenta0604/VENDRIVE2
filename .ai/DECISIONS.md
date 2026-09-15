@@ -49,6 +49,7 @@ This file records confirmed project decisions that must survive chat migration. 
 - Legacy write flow remains: proposal → user adoption → final confirmation → legacy write.
 - Legacy storage (`vendrive2_v7_data`, `vendrive2_last_day`, legacy `VENDRIVE2_DB`) remains separate from Analytics storage.
 - Current Analytics DB/schema version is 4 unless a later explicit migration phase changes it.
+- Legacy backup storage remains separate from Analytics. The internal IndexedDB database `VENDRIVE2_DB` is version 2 as of FINAL only to guarantee the `snapshots` object store and repair previously created empty version-1 databases; `STORAGE_VERSION` and `BACKUP_FORMAT_VERSION` remain 1, and this does not change Analytics DB/schema version 4.
 
 ## OCR and report capture
 
@@ -77,7 +78,9 @@ This file records confirmed project decisions that must survive chat migration. 
 
 ## Current release boundary
 
-- Latest completed product phase: `AN14B3B2 — Input / Recovery Real-paper Review UI Calibration`.
-- Production OCR connectivity and real-image structured response were validated before AN14B3B; the provider schema is now calibrated for the confirmed input/recovery paper structures.
-- Sales, input, recovery, and joined input/recovery field-level review are all implemented under the same explicit-review and draft-only boundary.
-- The next phase is `FINAL — Full Regression / Mobile / Backup / Release Gate` unless the user explicitly changes the roadmap.
+- Latest completed product phase: `FINAL — Full Regression / Mobile / Backup / Release Gate`.
+- Release app version is `2026.09.15-FINAL`; Analytics engine remains `AN14B3B2` with DB/schema version 4.
+- The immutable annotated FINAL pre-edit Safety Tag is `backup-pre-FINAL-20260915`, targeting `1f0189c859c489355b5d0dc852fc470f56f5148f`.
+- FINAL fixed two release blockers without expanding product scope: stale client APP_VERSION metadata and the legacy `VENDRIVE2_DB` snapshot-store initialization path that could prevent safe restore checkpoints.
+- Full legacy, Analytics, OCR/review, schema 2/3/4 backup/restore, data-safety, and exact 320px/390px real Microsoft Edge regression passed.
+- VENDRIVE2 is release-ready. No next product phase is active; any future product work must be explicitly scoped and safety-tagged before production edits.

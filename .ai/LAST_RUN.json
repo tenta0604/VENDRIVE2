@@ -1,30 +1,30 @@
 {
   "evidenceVersion": 2,
   "runType": "product_phase",
-  "phase": "AN14B3B2",
+  "phase": "FINAL",
   "status": "PASS",
   "base": {
-    "head": "4b60c23d618c7995fcd7cb25bc0dbed20b0f35e2",
-    "safetyTag": "backup-pre-AN14B3B2-20260915",
-    "safetyTagTarget": "4b60c23d618c7995fcd7cb25bc0dbed20b0f35e2"
+    "head": "1f0189c859c489355b5d0dc852fc470f56f5148f",
+    "safetyTag": "backup-pre-FINAL-20260915",
+    "safetyTagTarget": "1f0189c859c489355b5d0dc852fc470f56f5148f"
   },
   "versions": {
-    "app": "2026.09.15-AN14B3B2",
+    "app": "2026.09.15-FINAL",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Calibrated input-confirmation, recovery-confirmation, and joined input/recovery OCR review from real paper samples while preserving the explicit-review and draft-only safety boundary.",
+    "summary": "Completed the VENDRIVE2 release gate, fixed two release-blocking legacy/client-version issues, and validated the full release candidate without adding product scope.",
     "completed": [
-      "Added dedicated field-level review/correction UI for input, recovery, and joined input_recovery reports",
-      "Matched input review to printed header, counter rows, card/cash/sales amounts, product input rows, and printed input total",
-      "Added counter-delta, counter-derived sales amount, payment arithmetic, and item-total consistency checks",
-      "Preserved recovery case and loose counts separately and prohibited invented case-size conversion",
-      "When recovery case count is zero, synchronized inventory unit quantity to the printed loose count",
-      "Updated the Gemini structured response schema and extraction instructions to the real paper layouts",
-      "Required explicit paper comparison approval before creating one Analytics OCR draft",
-      "Kept automatic confirmation, inventory movement, image/raw-OCR retention, and legacy writes disabled"
+      "Detected and fixed stale APP_VERSION metadata so release updates are discoverable by existing clients",
+      "Detected and fixed legacy VENDRIVE2_DB snapshot-store initialization that could block safe backup restore on fresh or broken v1 databases",
+      "Verified the legacy v1 database upgrades non-destructively to internal version 2 and retains the backup format/storage format boundary",
+      "Validated Analytics inventory arithmetic, expiry facts, sales observations/windows/comparisons, forecasts, recommendations, visit planning, bring-from-vehicle, and end-of-day loading proposal",
+      "Validated OCR reviewed-draft safety with no automatic confirmation, inventory movement, image/raw-OCR retention, or legacy mutation",
+      "Validated Analytics backup schemas 2, 3, and 4 including guarded restore and safety snapshot",
+      "Validated legacy backup export, future-format rejection, pre-restore checkpoint, restore persistence, and read bridge",
+      "Validated exact 320px and 390px Microsoft Edge mobile layouts with no horizontal overflow"
     ]
   },
   "gates": {
@@ -33,63 +33,50 @@
     "diffCheck": "PASS",
     "syntax": "PASS",
     "functional": "PASS",
+    "releaseRegression": {
+      "status": "PASS",
+      "runId": 34917193274,
+      "note": "Full production-behavior regression passed before release metadata finalization; the terminal-state/release-version gate is rerun after this canonical commit."
+    },
     "dataSafety": {
       "status": "PASS",
       "coverage": [
-        "input, recovery, and joined input_recovery each mount and validate in real Edge",
-        "save remains disabled until validation passes and explicit paper approval is checked",
-        "input quantity mismatch blocks save and corrected values restore validity",
-        "case-zero recovery loose count is preserved and synchronized to inventory unit quantity",
-        "draft creation uses the existing reviewed OCR boundary",
-        "no automatic report confirmation",
-        "zero inventory movement",
-        "legacy vendrive2_v7_data remains unchanged"
+        "Analytics backup restore requires explicit RESTORE_ANALYTICS confirmation",
+        "Analytics restore creates a safety snapshot before replacement",
+        "Legacy restore creates a pre-restore checkpoint before replacement",
+        "OCR reviewed draft creation does not auto-confirm or apply inventory movement",
+        "OCR review flow does not modify vendrive2_v7_data",
+        "Legacy backup future format is rejected"
       ]
     },
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34915668304,
+      "runId": 34917193274,
       "coverage": [
         "real Microsoft Edge on Windows runner",
         "exact 320px viewport",
         "exact 390px viewport",
-        "standalone input review",
-        "standalone recovery review",
-        "joined input_recovery review",
-        "field editing and mismatch detection",
-        "explicit approval gate",
-        "edited values persisted to one OCR draft",
-        "zero inventory movement",
-        "no legacy write",
+        "legacy backup export and restore",
+        "legacy v1 database self-repair",
+        "Analytics schema 2/3/4 backup validation and restore",
+        "inventory, expiry, analysis, forecast, recommendation, and planning pipelines",
+        "sales and input/recovery review approval gates",
         "no horizontal overflow"
       ]
     },
-    "vercelPreview": {
-      "status": "PASS",
-      "deploymentId": "dpl_8sj6CDpZUPdr7pcVM2KcNvHGFVRA",
-      "sourceCommit": "599c4a698ebee36019b32311cd96de06019ae733",
-      "state": "READY"
-    },
     "build": "NOT_REQUIRED",
-    "buildReason": "The client application is direct HTML/JavaScript with no client build step; syntax/diff/real-Edge gates passed, and the Vercel preview containing the calibrated relay schema reached READY."
+    "buildReason": "The client is direct HTML/JavaScript. Syntax, diff, functional, data-safety, backup/restore, and real Edge regression gates passed."
   },
   "changedFiles": [
     ".ai/DECISIONS.md",
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
-    ".github/workflows/an14b3b2-safety-tag.yml",
     "AI_ROADMAP.md",
-    "OCR_ADAPTER.md",
-    "analytics.js",
-    "api/ocr.mjs",
     "index.html",
-    "input-recovery-review.js",
     "version.json"
   ],
-  "openItems": [
-    "FINAL — Full Regression / Mobile / Backup / Release Gate remains."
-  ],
-  "nextAction": "Start FINAL from synchronized main with a fresh immutable annotated Safety Tag, then run the complete release regression and backup/mobile gates.",
+  "openItems": [],
+  "nextAction": "No active product phase remains. Use VENDRIVE2 as the release-ready baseline and explicitly scope any future product change before editing.",
   "unresolved": []
 }

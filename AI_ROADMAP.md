@@ -2,10 +2,11 @@
 
 ## Current state
 
-- Latest completed phase: **AN14B3B2 — Input / Recovery Real-paper Review UI Calibration**
-- Active / next phase: **FINAL — Full Regression / Mobile / Backup / Release Gate**
+- Latest completed phase: **FINAL — Full Regression / Mobile / Backup / Release Gate**
+- Active / next product phase: **None — current build is release-ready**
+- Release app version: **2026.09.15-FINAL**
 - Git revision authority: synchronized `HEAD` / `origin/main`
-- Current real-paper evidence: sales journal, standalone input-confirmation, standalone recovery-confirmation, and joined input/recovery layouts are calibrated and validated from real samples.
+- Current release evidence: full legacy, Analytics, OCR/review, backup/restore, data-safety, and exact 320px/390px Microsoft Edge regression passed.
 
 ## Completed
 
@@ -46,17 +47,13 @@
 - AN14B3A — Production OCR Provider Connection
 - AN14B3B1 — Sales-journal Real-paper Review UI Calibration
 - AN14B3B2 — Input / Recovery Real-paper Review UI Calibration
+- FINAL — Full Regression / Mobile / Backup / Release Gate
 
-## Next roadmap
+## Release baseline
 
-### FINAL — Full Regression / Mobile / Backup / Release Gate
+VENDRIVE2 is release-ready at **2026.09.15-FINAL**. There is no automatically scheduled next product phase.
 
-- Re-run the complete legacy, Analytics, OCR/review, data-safety, backup/restore, and mobile regression set against the release candidate.
-- Confirm no automatic OCR confirmation, inventory movement, or legacy write was introduced outside explicit approved flows.
-- Verify release-critical mobile layouts and data recovery behavior before declaring VENDRIVE2 release-ready.
-- Fix only release-blocking regressions inside FINAL scope; do not introduce new product features.
-
-Phase numbers may be split further when safety, human evidence dependencies, or implementation size require it, but do not skip the major-category order without an explicit roadmap decision.
+Future product work must be explicitly scoped before implementation, preserve the existing safety/architecture decisions, and create a fresh immutable Safety Tag before production-code edits. Maintenance fixes should remain minimal and regression-tested rather than silently expanding the roadmap.
 
 ## Permanent analysis principles
 

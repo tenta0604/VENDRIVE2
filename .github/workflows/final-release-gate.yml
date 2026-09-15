@@ -41,8 +41,8 @@ jobs:
           $engine = [regex]::Match($analytics, 'ENGINE_VERSION="([^"]+)"').Groups[1].Value
           $db = [int][regex]::Match($analytics, 'DB_VERSION=(\d+)').Groups[1].Value
           $schema = [int][regex]::Match($analytics, 'SCHEMA_VERSION=(\d+)').Groups[1].Value
-          if ($state.completedPhase -ne "AN14B3B2" -or $state.nextPhase -ne "FINAL") { throw "Canonical phase preflight mismatch" }
-          if ($last.phase -ne "AN14B3B2" -or $last.status -ne "PASS") { throw "LAST_RUN preflight mismatch" }
+          if ($state.completedPhase -ne "FINAL" -or $null -ne $state.nextPhase -or $state.status -ne "complete" -or $state.currentWork.releaseStatus -ne "release_ready") { throw "Canonical FINAL state mismatch" }
+          if ($last.phase -ne "FINAL" -or $last.status -ne "PASS") { throw "FINAL LAST_RUN mismatch" }
           if ($version.version -ne $state.appVersion -or $app -ne $state.appVersion) { throw "APP_VERSION/version.json/STATE mismatch: index=$app version=$($version.version) state=$($state.appVersion)" }
           if ($engine -ne $state.engineVersion -or $db -ne $state.dbVersion -or $schema -ne $state.schemaVersion) { throw "Analytics version preflight mismatch" }
 
