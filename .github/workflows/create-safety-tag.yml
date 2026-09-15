@@ -11,14 +11,48 @@ on:
         description: 'Exact main SHA that must be tagged'
         required: true
         type: string
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   create-tag:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' &&
+       github.event.issue.user.login == github.repository_owner &&
+       startsWith(github.event.issue.title, '[SAFETY-TAG] '))
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve request
+        id: request
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_TAG: ${{ inputs.tag_name }}
+          DISPATCH_SHA: ${{ inputs.expected_sha }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG_NAME="$DISPATCH_TAG"
+            EXPECTED_SHA="$DISPATCH_SHA"
+          else
+            if [[ "$ISSUE_TITLE" =~ ^\[SAFETY-TAG\][[:space:]]+([A-Za-z0-9._-]+)[[:space:]]+@[[:space:]]+([0-9a-fA-F]{40})$ ]]; then
+              PHASE="${BASH_REMATCH[1]}"
+              EXPECTED_SHA="${BASH_REMATCH[2],,}"
+              TAG_NAME="backup-pre-${PHASE}-$(date -u +%Y%m%d)"
+            else
+              echo "SAFE STOP: malformed safety-tag issue title" >&2
+              exit 1
+            fi
+          fi
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "expected_sha=$EXPECTED_SHA" >> "$GITHUB_OUTPUT"
+
       - name: Checkout exact main
         uses: actions/checkout@v4
         with:
@@ -28,18 +62,18 @@ jobs:
       - name: Verify and create immutable annotated tag
         shell: bash
         env:
-          TAG_NAME: ${{ inputs.tag_name }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          TAG_NAME: ${{ steps.request.outputs.tag_name }}
+          EXPECTED_SHA: ${{ steps.request.outputs.expected_sha }}
         run: |
           set -euo pipefail
           git fetch origin main --tags
           MAIN_SHA="$(git rev-parse origin/main)"
           if [[ ! "$TAG_NAME" =~ ^backup-pre-[A-Za-z0-9._-]+$ ]]; then
-            echo "Invalid safety tag name: $TAG_NAME" >&2
+            echo "SAFE STOP: invalid safety tag name: $TAG_NAME" >&2
             exit 1
           fi
           if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
-            echo "expected_sha must be a full 40-character commit SHA" >&2
+            echo "SAFE STOP: expected_sha must be a full 40-character commit SHA" >&2
             exit 1
           fi
           if [[ "$MAIN_SHA" != "$EXPECTED_SHA" ]]; then
@@ -48,16 +82,12 @@ jobs:
           fi
           if git show-ref --verify --quiet "refs/tags/$TAG_NAME"; then
             EXISTING="$(git rev-parse "$TAG_NAME^{}")"
-            if [[ "$EXISTING" == "$EXPECTED_SHA" ]]; then
-              TYPE="$(git cat-file -t "$TAG_NAME")"
-              if [[ "$TYPE" != "tag" ]]; then
-                echo "SAFE STOP: existing ref is not an annotated tag" >&2
-                exit 1
-              fi
-              echo "Safety tag already exists at expected SHA; leaving it untouched."
+            TYPE="$(git cat-file -t "$TAG_NAME")"
+            if [[ "$EXISTING" == "$EXPECTED_SHA" && "$TYPE" == "tag" ]]; then
+              echo "SAFETY_TAG_PASS existing tag=$TAG_NAME target=$EXISTING type=$TYPE"
               exit 0
             fi
-            echo "SAFE STOP: safety tag already exists at a different SHA; refusing to move/delete/recreate it." >&2
+            echo "SAFE STOP: existing tag/ref is incompatible; refusing to move/delete/recreate it." >&2
             exit 1
           fi
           git config user.name "VENDRIVE Safety Bot"
@@ -70,3 +100,22 @@ jobs:
           test "$TARGET" = "$EXPECTED_SHA"
           test "$TYPE" = "tag"
           echo "SAFETY_TAG_PASS tag=$TAG_NAME target=$TARGET type=$TYPE"
+
+      - name: Close successful issue request
+        if: success() && github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `SAFETY_TAG_PASS: ${process.env.TAG_NAME || 'immutable annotated safety tag created'}`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed',
+              state_reason: 'completed'
+            });
