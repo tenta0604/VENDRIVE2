@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "maintenance",
   "phase": "OCR-UX-SPEED",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "5e2c726df7fed16c045176acea85708f629174c9",
     "safetyTag": "backup-pre-OCR-UX-SPEED-20260915",
@@ -30,6 +30,71 @@
       "status": "PASS",
       "tag": "backup-pre-OCR-UX-SPEED-20260915",
       "target": "5e2c726df7fed16c045176acea85708f629174c9"
+    },
+    "focusedSchema": {
+      "status": "PASS",
+      "runId": 34960830474,
+      "evidence": {
+        "inputCounterPaymentExtractionRemoved": true,
+        "focusedInputSchemaBytes": 6116,
+        "promptBytes": 2605,
+        "uncertaintyWarningProtocol": true
+      }
+    },
+    "realEdge": {
+      "status": "PASS",
+      "runId": 34960830474,
+      "imageOptimization": {
+        "originalBytes": 2237827,
+        "uploadBytes": 964494,
+        "width": 1283,
+        "height": 2200
+      },
+      "mobile320": {
+        "scrollWidth": 305,
+        "width": 320,
+        "compactReview": true,
+        "detailsInitiallyHidden": true
+      },
+      "mobile390": {
+        "scrollWidth": 390,
+        "width": 390,
+        "compactSalesReview": true
+      },
+      "issueHighlighting": true,
+      "machineMatchUi": true
+    },
+    "vercelProduction": {
+      "status": "PASS",
+      "deploymentId": "dpl_GN7cMRuvn1ZAZz8JSwFRR92Ntq7E",
+      "sourceCommit": "978a2c73aed3c37c094b8602604e761aaaa38659",
+      "state": "READY"
+    },
+    "productionSmoke": {
+      "status": "PASS",
+      "runId": 34960830474,
+      "imageBytes": 2162188,
+      "requestStatus": 200,
+      "elapsedMs": 11826,
+      "provider": "google-gemini-api"
+    },
+    "githubPages": {
+      "status": "PASS",
+      "runId": 34960829797,
+      "sourceCommit": "978a2c73aed3c37c094b8602604e761aaaa38659"
+    },
+    "livePage": {
+      "status": "PASS",
+      "appVersion": "2026.09.15-FINAL.5",
+      "httpStatus": 200
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "imageRetention": "unchanged: no analytics image storage",
+      "rawOcrRetention": "unchanged: no raw OCR text storage",
+      "autoConfirmation": "unchanged: explicit review required",
+      "legacyMutation": "unchanged: no automatic legacy write",
+      "machineLinkMutation": "only on explicit user click for a unique candidate"
     }
   },
   "changedFiles": [
@@ -41,9 +106,7 @@
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [
-    "Run static/unit/real Edge 320px+390px compact-review and image-optimization regression, then production OCR smoke before PASS."
-  ],
-  "nextAction": "Verify optimized upload size, compact review behavior, machine-match safety, mobile overflow, and production OCR response before release.",
+  "openItems": [],
+  "nextAction": "Use FINAL.5 with real vending-machine receipts. Confirm the compact review is easier to scan and compare real-device OCR latency against FINAL.4; only real-use findings should drive the next change.",
   "unresolved": []
 }
