@@ -140,7 +140,7 @@ for(const width of widths){
       if(inventory.length!==0)throw new Error("inventory movement occurred");
       if(localStorage.getItem("vendrive2_v7_data")!=="AN14B3B2_SENTINEL")throw new Error("legacy data changed");
       const overflow=document.documentElement.scrollWidth>window.innerWidth;
-      return {width,overflow,reports:reports.length,inventory:inventory.length,status,scrollWidth:document.documentElement.scrollWidth,innerWidth:window.innerWidth};
+      return {width:window.innerWidth,overflow,reports:reports.length,inventory:inventory.length,status,scrollWidth:document.documentElement.scrollWidth,innerWidth:window.innerWidth};
     })()`;
 
     const result=await client.send("Runtime.evaluate",{expression,awaitPromise:true,returnByValue:true});
