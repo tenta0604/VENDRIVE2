@@ -78,6 +78,7 @@
     ".ai/DECISIONS.md",
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
+    ".github/workflows/an14b3b2-safety-tag.yml",
     "AI_ROADMAP.md",
     "OCR_ADAPTER.md",
     "analytics.js",
