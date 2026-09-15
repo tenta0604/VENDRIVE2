@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "maintenance",
   "phase": "MAINT-EMPTY-START",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "17e653bffbafd210e24cdf68293a4ce976ebc01e",
     "safetyTag": "backup-pre-MAINT-EMPTY-START-20260915",
@@ -29,6 +29,36 @@
       "status": "PASS",
       "tag": "backup-pre-MAINT-EMPTY-START-20260915",
       "target": "17e653bffbafd210e24cdf68293a4ce976ebc01e"
+    },
+    "staticScope": {
+      "status": "PASS",
+      "sampleInitializerRemoved": true,
+      "sampleMachineFixtureRemoved": true,
+      "versionAligned": "2026.09.15-FINAL.2"
+    },
+    "realEdge": {
+      "status": "PASS",
+      "runId": 34937247487,
+      "coverage": [
+        "fresh origin at exact 320px starts with zero machines and persists zero machines",
+        "existing localStorage at exact 390px preserves the existing machine without sample injection",
+        "IndexedDB-only recovery preserves the recoverable machine without sample injection",
+        "no horizontal overflow in tested startup paths"
+      ]
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "coverage": [
+        "existing localStorage remains authoritative",
+        "IndexedDB recovery remains authoritative when localStorage is absent",
+        "no existing data deletion or sample-signature auto-deletion was introduced"
+      ]
+    },
+    "vercelPreview": {
+      "status": "PASS",
+      "deploymentId": "dpl_5vsUAr2wQsfoFqXMHL169Htf2z7Z",
+      "sourceCommit": "e7787089557c61b851069cb1d898f49043258459",
+      "state": "READY"
     }
   },
   "changedFiles": [
@@ -37,9 +67,7 @@
     "index.html",
     "version.json"
   ],
-  "openItems": [
-    "Run real Edge regression for fresh start, existing localStorage, and IndexedDB-only recovery before PASS."
-  ],
-  "nextAction": "Run the fixed maintenance gate, then deploy to main and verify the live fresh-install page contains zero sample vending machines.",
+  "openItems": [],
+  "nextAction": "Deploy the verified maintenance commit to main, confirm GitHub Pages serves 2026.09.15-FINAL.2, and begin controlled real-world use. Existing device data must remain untouched unless separately approved.",
   "unresolved": []
 }
