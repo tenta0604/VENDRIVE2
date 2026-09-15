@@ -37,7 +37,7 @@ jobs:
           $ErrorActionPreference = "Stop"
           $profile = Join-Path $env:TEMP "vendrive2-an14b3b2-edge"
           if (Test-Path $profile) { Remove-Item -Recurse -Force $profile }
-          $server = Start-Process -FilePath "python" -ArgumentList "-m","http.server","8000","--bind","127.0.0.1" -PassThru -WindowStyle Hidden
+          $server = Start-Process -FilePath "python" -ArgumentList "-m","http.server","8000","--bind","127.0.0.1" -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
           try {
             Start-Sleep -Seconds 2
             $edgeCandidates = @(
