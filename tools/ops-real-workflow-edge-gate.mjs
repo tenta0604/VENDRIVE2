@@ -17,8 +17,9 @@ try{
     const review=await api.capture.prepareOcrReview({image:{name:"receipt.jpg",mime:"image/jpeg",size:1000,lastModified:null},selectedType:null,ocrResult:raw});
     review.machineMatch={status:"confirmed_mapping",confirmedMapping:{machineId:"M1",missing:false},candidates:[]};
     const host=document.getElementById("review");window.VENDRIVE2CompactOcrReview.mount(host,review);
-    const checkbox=host.querySelector('.vdrCompactApproval input');checkbox.click();
-    const create=Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("この内容で下書きを作成"));create.click();await new Promise(r=>setTimeout(r,160));
+    const checkbox=host.querySelector('.vdrCompactApproval input');checkbox.checked=true;checkbox.dispatchEvent(new Event("change",{bubbles:true}));
+    const create=Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("この内容で下書きを作成"));if(!create)return{error:"create button missing",text:host.innerText};if(create.disabled)return{error:"create button disabled",text:host.innerText};
+    create.click();await new Promise(r=>setTimeout(r,220));
     const createdText=host.innerText,confirmBtn=host.querySelector(".vdrDraftConfirmButton");if(!confirmBtn)return{error:"confirm button missing",createdText};
     window.confirm=()=>true;confirmBtn.click();await new Promise(r=>setTimeout(r,180));
     const reports=await api.data.reports.list(),report=reports.find(x=>x.source&&x.source.method==="ocr"&&x.vendorNumber==="4038404");
