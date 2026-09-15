@@ -35,8 +35,8 @@
     "functional": "PASS",
     "releaseRegression": {
       "status": "PASS",
-      "runId": 34917193274,
-      "note": "Full production-behavior regression passed before release metadata finalization; the terminal-state/release-version gate is rerun after this canonical commit."
+      "runId": 34917403629,
+      "note": "Full FINAL release candidate regression passed after canonical FINAL state and release version 2026.09.15-FINAL were applied."
     },
     "dataSafety": {
       "status": "PASS",
@@ -52,7 +52,7 @@
     "realEdge": {
       "required": true,
       "status": "PASS",
-      "runId": 34917193274,
+      "runId": 34917403629,
       "coverage": [
         "real Microsoft Edge on Windows runner",
         "exact 320px viewport",
@@ -66,7 +66,17 @@
       ]
     },
     "build": "NOT_REQUIRED",
-    "buildReason": "The client is direct HTML/JavaScript. Syntax, diff, functional, data-safety, backup/restore, and real Edge regression gates passed."
+    "buildReason": "The client is direct HTML/JavaScript. Syntax, diff, functional, data-safety, backup/restore, and real Edge regression gates passed.",
+    "finalCanonicalGate": {
+      "status": "PASS",
+      "runId": 34917403629,
+      "coverage": [
+        "terminal canonical STATE/LAST_RUN consistency",
+        "release version 2026.09.15-FINAL consistency across index, version.json, and STATE",
+        "FINAL safety tag target verification",
+        "full real Edge release regression after final metadata"
+      ]
+    }
   },
   "changedFiles": [
     ".ai/DECISIONS.md",
