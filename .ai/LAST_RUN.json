@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "maintenance",
   "phase": "MAINT-OCR-STALE-WARNING",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce",
     "safetyTag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
@@ -31,6 +31,52 @@
       "status": "PASS",
       "tag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
       "target": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce"
+    },
+    "recoveryWarningNormalization": {
+      "status": "PASS",
+      "runId": 34989542953,
+      "coverage": [
+        "legacy recovery_case_conversion_required is removed when all recovery caseCount values are zero",
+        "real case conversion need becomes a row-specific quantity check instead of a raw internal token"
+      ]
+    },
+    "realEdge": {
+      "status": "PASS",
+      "runId": 34989542953,
+      "coverage": [
+        "current OCR failure clears the previous review DOM",
+        "late success from an older OCR run cannot overwrite a newer failure state",
+        "zero-case recovery has no false quantity warning",
+        "real case conversion need shows Japanese row-level explanation and pinpoint edit",
+        "390px app path remains within viewport"
+      ]
+    },
+    "vercelProduction": {
+      "status": "PASS",
+      "deploymentId": "dpl_2ZAgUaed6RQaUfCsJU65sJBq2WVb",
+      "sourceCommit": "058b4da648ae758ef284129782b97aae79def840",
+      "state": "READY"
+    },
+    "productionSmoke": {
+      "status": "PASS",
+      "runId": 34989542953,
+      "imageBytes": 2162188,
+      "requestStatus": 200,
+      "elapsedMs": 9281,
+      "provider": "google-gemini-api",
+      "legacyRecoveryWarningLeaked": false
+    },
+    "githubPages": {
+      "status": "PASS",
+      "runId": 34989541303,
+      "sourceCommit": "058b4da648ae758ef284129782b97aae79def840"
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "imageRetention": "unchanged",
+      "autoConfirmation": "unchanged",
+      "legacyMutation": "unchanged",
+      "staleResultPersistence": "none"
     }
   },
   "changedFiles": [
@@ -41,9 +87,7 @@
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [
-    "Run API warning-normalization unit tests, real Edge stale-result/failure regression, pinpoint case-conversion UI regression, mobile overflow checks, and production OCR smoke before PASS."
-  ],
-  "nextAction": "Release only after stale review cannot coexist with a current OCR failure and recovery case warnings are correct for both zero-case and real case-conversion scenarios.",
+  "openItems": [],
+  "nextAction": "Use FINAL.8 on the real device. A failed OCR run must not leave an older review visible, and recovery rows with caseCount 0 must not show a case-conversion warning.",
   "unresolved": []
 }
