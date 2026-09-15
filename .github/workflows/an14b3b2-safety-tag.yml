@@ -1,0 +1,43 @@
+name: AN14B3B2 Safety Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/an14b3b2-safety-tag.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  create-safety-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create immutable annotated safety tag
+        shell: bash
+        env:
+          TAG_NAME: backup-pre-AN14B3B2-20260915
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --tags origin
+
+          if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
+            existing_target="$(git rev-list -n 1 "$TAG_NAME")"
+            if [ "$existing_target" != "$GITHUB_SHA" ]; then
+              echo "Safety tag already exists at a different commit: $existing_target"
+              exit 1
+            fi
+            echo "Safety tag already exists at expected commit: $existing_target"
+            exit 0
+          fi
+
+          git tag -a "$TAG_NAME" "$GITHUB_SHA" -m "Immutable safety backup before AN14B3B2 input/recovery real-paper calibration"
+          git push origin "refs/tags/$TAG_NAME"
