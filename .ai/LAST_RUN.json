@@ -1,30 +1,24 @@
 {
   "evidenceVersion": 2,
-  "runType": "product_phase",
-  "phase": "FINAL",
-  "status": "PASS",
+  "runType": "maintenance",
+  "phase": "MAINT-OCR-HINT",
+  "status": "PENDING",
   "base": {
-    "head": "1f0189c859c489355b5d0dc852fc470f56f5148f",
-    "safetyTag": "backup-pre-FINAL-20260915",
-    "safetyTagTarget": "1f0189c859c489355b5d0dc852fc470f56f5148f"
+    "head": "dc8b485376593f22ced236f9f668159011238b70",
+    "safetyTag": "backup-pre-MAINT-OCR-HINT-20260915",
+    "safetyTagTarget": "dc8b485376593f22ced236f9f668159011238b70"
   },
   "versions": {
-    "app": "2026.09.15-FINAL",
+    "app": "2026.09.15-FINAL.1",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Completed the VENDRIVE2 release gate, fixed two release-blocking legacy/client-version issues, and validated the full release candidate without adding product scope.",
+    "summary": "Maintenance release to correct stale OCR guidance text without changing OCR, Analytics, DB, or persistence logic.",
     "completed": [
-      "Detected and fixed stale APP_VERSION metadata so release updates are discoverable by existing clients",
-      "Detected and fixed legacy VENDRIVE2_DB snapshot-store initialization that could block safe backup restore on fresh or broken v1 databases",
-      "Verified the legacy v1 database upgrades non-destructively to internal version 2 and retains the backup format/storage format boundary",
-      "Validated Analytics inventory arithmetic, expiry facts, sales observations/windows/comparisons, forecasts, recommendations, visit planning, bring-from-vehicle, and end-of-day loading proposal",
-      "Validated OCR reviewed-draft safety with no automatic confirmation, inventory movement, image/raw-OCR retention, or legacy mutation",
-      "Validated Analytics backup schemas 2, 3, and 4 including guarded restore and safety snapshot",
-      "Validated legacy backup export, future-format rejection, pre-restore checkpoint, restore persistence, and read bridge",
-      "Validated exact 320px and 390px Microsoft Edge mobile layouts with no horizontal overflow"
+      "Replaced obsolete OCR pre-connection hint with text matching the live secure OCR workflow.",
+      "Bumped client-visible release version to 2026.09.15-FINAL.1."
     ]
   },
   "gates": {
@@ -79,14 +73,14 @@
     }
   },
   "changedFiles": [
-    ".ai/DECISIONS.md",
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
-    "AI_ROADMAP.md",
     "index.html",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "No active product phase remains. Use VENDRIVE2 as the release-ready baseline and explicitly scope any future product change before editing.",
+  "openItems": [
+    "Run maintenance diff/static/live deployment verification before marking PASS."
+  ],
+  "nextAction": "Verify the maintenance patch, deploy to main, and confirm the live page shows the updated OCR guidance and version.",
   "unresolved": []
 }

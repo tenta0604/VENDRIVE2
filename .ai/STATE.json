@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.15-FINAL",
+  "appVersion": "2026.09.15-FINAL.1",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,12 +26,16 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-FINAL-20260915",
-    "lastSafetyTagTarget": "1f0189c859c489355b5d0dc852fc470f56f5148f",
+    "lastSafetyTag": "backup-pre-MAINT-OCR-HINT-20260915",
+    "lastSafetyTagTarget": "dc8b485376593f22ced236f9f668159011238b70",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
       "Treat any future product change as a new explicitly scoped phase and create a fresh immutable Safety Tag before production-code edits"
+    ],
+    "maintenance": [
+      "Updated stale OCR pre-connection guidance to match the live secure OCR workflow.",
+      "Bumped app version to 2026.09.15-FINAL.1 so existing clients can detect the maintenance update."
     ]
   },
   "requiredUserInput": [],
