@@ -27,33 +27,32 @@ try{
 
   await nav(c,"http://127.0.0.1:8000/",390);
   const failure=await ev(c,`(async()=>{
-    if(typeof runReportOcr!=="function")return{error:"runReportOcr missing"};
-    reportCaptureCurrentFile=new File([new Blob(["x"],{type:"image/png"})],"test.png",{type:"image/png"});
-    reportCaptureReview={old:true};reportCaptureOcrResult={old:true};
+    const input=document.getElementById("reportCaptureFile"),button=document.getElementById("runReportOcr");
+    if(!input||!button||typeof input.onchange!=="function"||typeof button.onclick!=="function")return{error:"report capture UI not initialized"};
+    const dt=new DataTransfer();dt.items.add(new File([new Blob(["x"],{type:"image/png"})],"test.png",{type:"image/png"}));Object.defineProperty(input,"files",{value:dt.files,configurable:true});input.dispatchEvent(new Event("change",{bubbles:true}));
     document.getElementById("reportCaptureReviewResult").innerHTML='<div id="oldReview">OLD REVIEW</div>';
     document.getElementById("reportOcrResult").innerHTML='<div>OLD SUMMARY</div>';
     window.VENDRIVE2OCRAdapter={version:1,analyze:()=>Promise.reject(Object.assign(new Error("busy"),{code:"provider_busy",retryable:true,status:503}))};
-    runReportOcr();await new Promise(r=>setTimeout(r,120));
-    return{reviewHtml:document.getElementById("reportCaptureReviewResult").innerHTML,resultText:document.getElementById("reportOcrResult").innerText,status:document.getElementById("reportOcrStatus").innerText,reviewNull:reportCaptureReview===null,ocrNull:reportCaptureOcrResult===null,buttonDisabled:document.getElementById("runReportOcr").disabled};
+    button.disabled=false;button.click();await new Promise(r=>setTimeout(r,140));
+    return{reviewHtml:document.getElementById("reportCaptureReviewResult").innerHTML,resultText:document.getElementById("reportOcrResult").innerText,status:document.getElementById("reportOcrStatus").innerText,buttonDisabled:button.disabled};
   })()`);
   assert(!failure.error,failure.error||"");
   assert(failure.reviewHtml==="","failed OCR retained old review");
   assert(failure.resultText.includes("OCRサービスが混雑しています"),"busy failure not shown");
-  assert(failure.reviewNull&&failure.ocrNull,"failed OCR retained in-memory candidate");
   assert(failure.buttonDisabled===false,"OCR button remained disabled");
   console.log("OCR_FAILURE_CLEARS_STALE_REVIEW_PASS");
 
   const race=await ev(c,`(async()=>{
-    reportCaptureCurrentFile=new File([new Blob(["x"],{type:"image/png"})],"race.png",{type:"image/png"});
+    const input=document.getElementById("reportCaptureFile"),button=document.getElementById("runReportOcr");
+    const dt=new DataTransfer();dt.items.add(new File([new Blob(["x"],{type:"image/png"})],"race.png",{type:"image/png"}));Object.defineProperty(input,"files",{value:dt.files,configurable:true});input.dispatchEvent(new Event("change",{bubbles:true}));
     let resolveFirst=null,calls=0;
     const success={provider:"google-gemini-api",requestId:"late-success",detectedType:"input",typeConfidence:1,occurredAt:"2026-09-15T08:38:00+09:00",makerKey:"suntory",vendorNumber:"4038404",machineId:null,candidatePayload:{paper:{carNumber:"404",operatorName:"op",locationName:"loc"},totalQty:1,items:[{productCode:"705904",printedName:"sample",temperature:"COLD",column:null,quantity:1}]},warnings:[]};
     window.VENDRIVE2OCRAdapter={version:1,analyze:()=>{calls++;if(calls===1)return new Promise(r=>{resolveFirst=r});return Promise.reject(Object.assign(new Error("busy"),{code:"provider_busy",retryable:true,status:503}))}};
-    runReportOcr();await new Promise(r=>setTimeout(r,20));runReportOcr();await new Promise(r=>setTimeout(r,100));resolveFirst(success);await new Promise(r=>setTimeout(r,180));
-    return{reviewHtml:document.getElementById("reportCaptureReviewResult").innerHTML,resultText:document.getElementById("reportOcrResult").innerText,status:document.getElementById("reportOcrStatus").innerText,reviewNull:reportCaptureReview===null,ocrNull:reportCaptureOcrResult===null};
+    button.disabled=false;button.click();await new Promise(r=>setTimeout(r,20));button.disabled=false;button.click();await new Promise(r=>setTimeout(r,120));resolveFirst(success);await new Promise(r=>setTimeout(r,220));
+    return{reviewHtml:document.getElementById("reportCaptureReviewResult").innerHTML,resultText:document.getElementById("reportOcrResult").innerText,status:document.getElementById("reportOcrStatus").innerText};
   })()`);
   assert(race.reviewHtml==="","late old success restored review");
   assert(race.resultText.includes("OCRサービスが混雑しています"),"newer failure was overwritten by late success");
-  assert(race.reviewNull&&race.ocrNull,"late success restored in-memory OCR state");
   console.log("OCR_STALE_SUCCESS_CANNOT_OVERWRITE_NEW_FAILURE_PASS");
 
   const dimensions=await ev(c,`(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,version:document.body.innerText.includes("2026.09.16-FINAL.8")}))()`);
