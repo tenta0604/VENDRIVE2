@@ -1,0 +1,42 @@
+name: OPS10A cache fix
+on:
+  issues: {types: [opened]}
+permissions: {contents: write}
+jobs:
+  fix:
+    if: github.actor == github.repository_owner && github.event.issue.title == '[OPS10A-CACHE-FIX]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags origin
+          H=$(git rev-parse HEAD)
+          T=$(git tag --points-at "$H" | grep '^backup-pre-OPS10A-CACHE-FIX-' | tail -1 || true)
+          test -n "$T"
+          test "$(git cat-file -t "$T")" = tag
+          B=chatgpt/ops10a-cache-fix-20260916
+          git checkout -B "$B"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text()
+          old='<script src="ops10a-stocktake.js"></script>'
+          new='<script src="ops10a-stocktake.js?v=2026.09.16-FINAL.10-ops10a-ui1"></script>'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+          c=Path('ops10a-stocktake.js'); js=c.read_text()
+          marker='var fab=el("button","ops10a-fab","車載在庫 棚卸し");fab.type="button";'
+          assert marker in js
+          # Defensive invariant: the action must never remain a direct body child even if future layout code changes.
+          guard='var fab=el("button","ops10a-fab","車載在庫 棚卸し");fab.type="button";fab.setAttribute("data-ops10a-scope","analysis-inventory");'
+          c.write_text(js.replace(marker,guard,1))
+          PY
+          node --check ops10a-stocktake.js
+          git diff --check
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html ops10a-stocktake.js
+          git commit -m 'fix: bust stale OPS10A mobile asset cache'
+          git push -f origin HEAD:"$B"
