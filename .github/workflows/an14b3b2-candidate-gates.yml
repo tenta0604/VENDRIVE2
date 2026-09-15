@@ -1,0 +1,154 @@
+name: AN14B3B2 Candidate Gates
+
+on:
+  push:
+    branches:
+      - an14b3b2-real-paper-review-20260915
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-edge:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Static syntax gates
+        shell: pwsh
+        run: |
+          node --check analytics.js
+          node --check sales-review.js
+          node --check input-recovery-review.js
+          node --check ocr-relay-adapter.js
+          node --check api/ocr.mjs
+          git diff --check HEAD^
+
+      - name: Real Edge mobile review gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $profile = Join-Path $env:TEMP "vendrive2-an14b3b2-edge"
+          if (Test-Path $profile) { Remove-Item -Recurse -Force $profile }
+          $server = Start-Process -FilePath "python" -ArgumentList "-m","http.server","8000","--bind","127.0.0.1" -PassThru -WindowStyle Hidden
+          try {
+            Start-Sleep -Seconds 2
+            $edgeCandidates = @(
+              "$env:ProgramFiles (x86)\Microsoft\Edge\Application\msedge.exe",
+              "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
+            )
+            $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+            if (-not $edge) { throw "Microsoft Edge not found" }
+            $edgeProc = Start-Process -FilePath $edge -ArgumentList "--headless=new","--disable-gpu","--remote-debugging-port=9222","--user-data-dir=$profile","about:blank" -PassThru
+            try {
+              Start-Sleep -Seconds 2
+              @'
+const widths=[320,390];
+let seq=0;
+async function cdp(wsUrl){
+  const ws=new WebSocket(wsUrl),pending=new Map();
+  await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject});
+  ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result)}};
+  return {send(method,params={}){return new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}))})},close(){ws.close()}};
+}
+async function target(){
+  const res=await fetch("http://127.0.0.1:9222/json/list");
+  const list=await res.json();
+  const page=list.find(x=>x.type==="page");
+  if(!page)throw new Error("No Edge page target");
+  return page.webSocketDebuggerUrl;
+}
+function fixture(width){
+  const minute=width===320?"38":"39";
+  return {
+    reviewVersion:2,status:"needs_review",
+    image:{name:"fixture.jpg",mime:"image/jpeg",size:123,lastModified:1,stored:false},
+    classification:{detectedType:"input_recovery",typeConfidence:0.99,selectedType:null,effectiveType:"input_recovery",userOverride:false},
+    identity:{occurredAt:"2026-09-15T08:"+minute+":00+09:00",makerKey:"suntory",vendorNumber:"4038404",machineId:null},
+    ocr:{connected:true,provider:"google-gemini-api",requestId:"edge-"+width,warnings:[],rawTextStored:false,imageStored:false},
+    candidatePayload:{
+      input:{
+        paper:{carNumber:"404",operatorName:"大岩 忍",locationName:"第一フジタクシー大治"},
+        counterRows:[
+          {price:190,branchNumber:0,previousCount:112,currentCount:131,salesQty:19},
+          {price:180,branchNumber:0,previousCount:40,currentCount:42,salesQty:2}
+        ],
+        payment:{cardAmount:0,cashAmount:3970,salesAmount:3970},
+        totalQty:3,
+        items:[
+          {productCode:"705904",printedName:"185ボス カフェオレ",temperature:"COLD",column:null,quantity:1},
+          {productCode:"705905",printedName:"185ボス スレインボー",temperature:"COLD",column:null,quantity:2}
+        ]
+      },
+      recovery:{
+        paper:{carNumber:"404",operatorName:"大岩 忍",locationName:"第一フジタクシー大治"},
+        totalQty:11,
+        items:[
+          {productCode:"744654",printedName:"280Pノムヨーグレット",temperature:"COLD",column:null,caseCount:0,looseCount:10,quantity:10},
+          {productCode:"744533",printedName:"500Pデカビタ",temperature:"COLD",column:null,caseCount:0,looseCount:1,quantity:1}
+        ]
+      }
+    },
+    candidateValidation:{structureReady:true,readyToConfirm:true,reason:null,validation:{quantityMatch:true,amountMatch:null,warnings:[]}},
+    persistence:{reportCreated:false,analyticsWrite:false,legacyWrite:false,allowed:false,reason:"review_only"},
+    policy:{requiresUserReview:true,requiresExplicitSave:true,imageStored:false,rawOcrTextStored:false,autoSave:false}
+  };
+}
+for(const width of widths){
+  const client=await cdp(await target());
+  try{
+    await client.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:true});
+    await client.send("Page.navigate",{url:"http://127.0.0.1:8000/index.html?an14b3b2="+width});
+    await new Promise(r=>setTimeout(r,1800));
+    const expression=`(async()=> {
+      if(!window.VENDRIVE2Analytics||!window.VENDRIVE2InputRecoveryReview)throw new Error("review modules unavailable");
+      localStorage.setItem("vendrive2_v7_data","AN14B3B2_SENTINEL");
+      const host=document.createElement("div");host.id="edge-review-host";document.body.innerHTML="";document.body.appendChild(host);
+      const review=${JSON.stringify(fixture(width))};
+      const mounted=window.VENDRIVE2InputRecoveryReview.mount(host,review);
+      if(!mounted||!mounted.mounted)throw new Error("mount failed");
+      const overflow=document.documentElement.scrollWidth>window.innerWidth;
+      if(overflow)throw new Error("horizontal overflow");
+      const approval=host.querySelector('[data-role="ir-approval"]'),save=host.querySelector('[data-role="ir-save"]'),validation=host.querySelector('[data-role="ir-validation"]');
+      if(!approval||!save||!validation)throw new Error("review controls missing");
+      if(!validation.classList.contains("ok"))throw new Error("initial validation not ok: "+validation.textContent);
+      const qty=host.querySelector('[data-role="ir-input-qty"]');
+      qty.value="9";qty.dispatchEvent(new Event("input",{bubbles:true}));
+      if(validation.classList.contains("ok")||!save.disabled)throw new Error("mismatch did not block save");
+      qty.value="1";qty.dispatchEvent(new Event("input",{bubbles:true}));
+      if(!validation.classList.contains("ok"))throw new Error("corrected input did not validate");
+      approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));
+      if(save.disabled)throw new Error("approval did not enable save");
+      save.click();
+      for(let i=0;i<40;i++){if(host.querySelector('[data-role="ir-status"]').textContent.includes("下書きを作成しました"))break;await new Promise(r=>setTimeout(r,100))}
+      const status=host.querySelector('[data-role="ir-status"]').textContent;
+      if(!status.includes("下書きを作成しました"))throw new Error("draft save failed: "+status);
+      const reports=await window.VENDRIVE2Analytics.data.reports.list();
+      const inventory=await window.VENDRIVE2Analytics.data.inventory.listEvents();
+      if(reports.length!==1||reports[0].type!=="input_recovery"||reports[0].status!=="draft")throw new Error("unexpected report persistence");
+      if(inventory.length!==0)throw new Error("inventory movement occurred");
+      if(localStorage.getItem("vendrive2_v7_data")!=="AN14B3B2_SENTINEL")throw new Error("legacy data changed");
+      return {width,overflow,reports:reports.length,inventory:inventory.length,status,scrollWidth:document.documentElement.scrollWidth,innerWidth:window.innerWidth};
+    })()`;
+    const result=await client.send("Runtime.evaluate",{expression,awaitPromise:true,returnByValue:true});
+    if(result.exceptionDetails)throw new Error(JSON.stringify(result.exceptionDetails));
+    const value=result.result&&result.result.value;
+    if(!value)throw new Error("No result from browser gate");
+    console.log("EDGE_GATE",JSON.stringify(value));
+    await client.send("Runtime.evaluate",{expression:"window.VENDRIVE2Analytics.close(); indexedDB.deleteDatabase('VENDRIVE2_ANALYTICS_DB'); localStorage.clear(); true",returnByValue:true});
+  } finally {client.close()}
+}
+'@ | Set-Content -Path "$env:TEMP\an14b3b2-edge-gate.mjs" -Encoding UTF8
+              node "$env:TEMP\an14b3b2-edge-gate.mjs"
+            } finally {
+              if ($edgeProc -and -not $edgeProc.HasExited) { Stop-Process -Id $edgeProc.Id -Force }
+            }
+          } finally {
+            if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force }
+          }

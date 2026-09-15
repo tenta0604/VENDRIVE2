@@ -55,5 +55,13 @@ The sales-journal review UI is calibrated from a real paper sample. It exposes s
 
 A user must explicitly confirm that the structured values were compared with the paper before an Analytics OCR draft can be created. The draft is not automatically confirmed, no inventory movement is applied, and legacy operational storage is not written.
 
-Input, recovery, and joined input/recovery field-level layouts remain deferred to **AN14B3B2** until real paper samples are available. Their layouts must not be guessed.
+## Input / recovery real-paper review boundary (AN14B3B2)
+
+Real samples confirmed three production layouts: standalone **投入確認**, standalone **回収品確認**, and a joined paper that prints both sections.
+
+The input review exposes the printed header, counter rows (売価・枝番・前回・今回・売上数), card/cash/sales amounts, product input rows, and printed 投入合計. It checks row counter deltas, counter-derived sales amount, payment arithmetic, and product-row quantity totals before draft creation.
+
+The recovery review preserves the printed **ケース** and **バラ** counts separately. Inventory movement continues to use the existing unit quantity field. When ケース is zero, unit quantity must match バラ. When ケース is nonzero, the UI requires a reviewed unit-equivalent quantity rather than inventing a case conversion.
+
+The joined `input_recovery` review uses the same two calibrated sections inside one explicit review. All three layouts keep the same safety boundary: human comparison is required, only an Analytics OCR draft can be created, and no automatic confirmation, inventory movement, image retention, raw OCR retention, or legacy write occurs.
 
