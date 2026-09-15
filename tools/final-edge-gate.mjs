@@ -134,6 +134,7 @@ try{
   console.log("FINAL_ANALYTICS",JSON.stringify(analyticsResult));
 
   await evalIn(client,`(async()=>{try{window.VENDRIVE2Analytics.close()}catch(e){};await new Promise(resolve=>{const r=indexedDB.deleteDatabase("VENDRIVE2_ANALYTICS_DB");r.onsuccess=r.onerror=r.onblocked=()=>resolve(true)});localStorage.clear();return true})()`);
+  await evalIn(client,`new Promise((resolve,reject)=>{const r=indexedDB.open("VENDRIVE2_DB",1);r.onerror=()=>reject(r.error);r.onsuccess=()=>{r.result.close();resolve(true)}})`);
 
   for(const width of [320,390]){
     await client.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:false});
