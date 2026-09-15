@@ -1,0 +1,37 @@
+name: MAINT OCR Hint Safety Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/maint-ocr-hint-safety-tag.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create immutable annotated maintenance safety tag
+        shell: bash
+        env:
+          TAG_NAME: backup-pre-MAINT-OCR-HINT-20260915
+          TARGET_SHA: dc8b485376593f22ced236f9f668159011238b70
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --tags origin
+          if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
+            existing="$(git rev-list -n 1 "$TAG_NAME")"
+            [ "$existing" = "$TARGET_SHA" ] || { echo "tag conflict"; exit 1; }
+            exit 0
+          fi
+          git cat-file -e "$TARGET_SHA^{commit}"
+          git tag -a "$TAG_NAME" "$TARGET_SHA" -m "Immutable backup before maintenance OCR hint copy fix"
+          git push origin "refs/tags/$TAG_NAME"
