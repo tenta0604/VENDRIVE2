@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VENDRIVE2 FINAL Analytics Fixture</title>
+</head>
+<body>
+<div id="salesHost"></div>
+<div id="irHost"></div>
+<script>
+window.VENDRIVE2ReadBridge=Object.freeze({
+  version:1,
+  normalizeManagementCode:function(value){return String(value||"").replace(/[^0-9A-Za-z]/g,"").toLowerCase()},
+  getMachinesSnapshot:function(){
+    return [
+      {id:"M1",name:"FINAL Machine 1",managementCode:"V1",managementCodeKey:"v1",maker:"サントリー",makerKey:"suntory",address:"愛知県一宮市",lat:35.304,lng:136.803,days:["火"],cycle:"毎日",weeklyCount:null,timeCondition:{type:"none",start:"",end:""}},
+      {id:"M2",name:"FINAL Machine 2",managementCode:"V2",managementCodeKey:"v2",maker:"サントリー",makerKey:"suntory",address:"愛知県一宮市",lat:35.305,lng:136.804,days:["水"],cycle:"毎日",weeklyCount:null,timeCondition:{type:"none",start:"",end:""}}
+    ];
+  },
+  getMachineSnapshot:function(id){return this.getMachinesSnapshot().find(function(x){return x.id===id})||null},
+  getPlanningSnapshot:function(){
+    return {
+      version:1,
+      today:"2026-09-15",
+      todayDay:"火",
+      restDays:[],
+      todayIds:["M1"],
+      tomorrow:{date:"2026-09-16",day:"水",ids:["M1","M2"],manual:false},
+      machines:[
+        {id:"M1",last:"2026-09-12",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-16"},
+        {id:"M2",last:"2026-09-13",visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:"2026-09-16"}
+      ]
+    };
+  }
+});
+</script>
+<script src="../analytics.js"></script>
+<script src="../sales-review.js"></script>
+<script src="../input-recovery-review.js"></script>
+</body>
+</html>
