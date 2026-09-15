@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "maintenance",
   "phase": "MAINT-OCR-502",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "fd41c49bef3243efe08b9979bdd50ac9e57d842b",
     "safetyTag": "backup-pre-MAINT-OCR-502-20260915",
@@ -40,6 +40,52 @@
       "status": "PASS",
       "tag": "backup-pre-MAINT-OCR-502-20260915",
       "target": "fd41c49bef3243efe08b9979bdd50ac9e57d842b"
+    },
+    "providerDiagnosis": {
+      "status": "PASS",
+      "evidence": "gemini-3.6-flash returned 503 UNAVAILABLE/high demand during isolated provider probes; user production requests reached /api/ocr and failed at provider stage."
+    },
+    "fallbackUnit": {
+      "status": "PASS",
+      "runId": 34945022098,
+      "coverage": [
+        "gemini-3.6-flash 503 then retry 503 then gemini-3.5-flash 200",
+        "all candidate models 503 maps to provider_busy",
+        "allowed-origin CORS preflight remains valid"
+      ]
+    },
+    "vercelProduction": {
+      "status": "PASS",
+      "deploymentId": "dpl_2YpSnsQFaGCvQZ74xcTbyUVN8ZWq",
+      "sourceCommit": "dbbbb26c55144976618b135683fa77078b8449ee",
+      "state": "READY"
+    },
+    "productionSmoke": {
+      "status": "PASS",
+      "runId": 34945130803,
+      "requestStatus": 200,
+      "provider": "google-gemini-api",
+      "observedProviderSequence": [
+        "gemini-3.6-flash timeout",
+        "gemini-3.6-flash retry timeout",
+        "gemini-3.5-flash HTTP 200 success"
+      ]
+    },
+    "githubPages": {
+      "status": "PASS",
+      "runId": 34945130198,
+      "sourceCommit": "dbbbb26c55144976618b135683fa77078b8449ee"
+    },
+    "livePage": {
+      "status": "PASS",
+      "appVersion": "2026.09.15-FINAL.3",
+      "httpStatus": 200
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "imageRetention": "unchanged: no analytics image storage",
+      "autoConfirmation": "unchanged: OCR remains candidate/review only",
+      "legacyMutation": "unchanged"
     }
   },
   "changedFiles": [
@@ -50,9 +96,7 @@
     "ocr-relay-adapter.js",
     "version.json"
   ],
-  "openItems": [
-    "Run static/unit fallback regression, then production provider smoke test before PASS."
-  ],
-  "nextAction": "Verify fallback behavior in CI, deploy to main, require a real production /api/ocr 200 smoke response, and remove temporary test/diagnostic files.",
+  "openItems": [],
+  "nextAction": "Use VENDRIVE2 FINAL.3 in real operation. If OCR still fails, use the specific displayed failure category and server observability to triage; do not treat image quality as the default cause.",
   "unresolved": []
 }
