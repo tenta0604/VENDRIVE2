@@ -26,7 +26,7 @@
     return file;
   }
   async function analyze(input){
-    var file=assertAnalyzeInput(input),form=new FormData(),controller=new AbortController(),timer=setTimeout(function(){controller.abort()},40000);
+    var file=assertAnalyzeInput(input),form=new FormData(),controller=new AbortController(),timer=setTimeout(function(){controller.abort()},75000);
     form.append("file",file,file.name||"report-image");
     form.append("supportedReportTypes",JSON.stringify(input.supportedReportTypes));
     if(input.image&&typeof input.image==="object")form.append("imageMetadata",JSON.stringify({name:input.image.name||null,mime:input.image.mime||file.type,size:input.image.size||file.size,lastModified:input.image.lastModified||null}));

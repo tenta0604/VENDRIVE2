@@ -3,9 +3,13 @@ const REPORT_TYPES=["sales","input","recovery","input_recovery"];
 const MAX_IMAGE_BYTES=4*1024*1024;
 const DEFAULT_MODEL="gemini-3.6-flash";
 const FALLBACK_MODELS=["gemini-3.5-flash","gemini-3.5-flash-lite","gemini-3.1-flash-lite"];
-const PROVIDER_BUDGET_MS=24000;
-const PROVIDER_ATTEMPT_TIMEOUT_MS=8000;
-const PRIMARY_RETRY_DELAY_MS=350;
+function envMs(name,fallback,min,max){
+  const value=Number(process.env[name]);
+  return Number.isFinite(value)?Math.max(min,Math.min(max,Math.round(value))):fallback;
+}
+const PROVIDER_BUDGET_MS=envMs("OCR_PROVIDER_BUDGET_MS",55000,5000,90000);
+const PROVIDER_ATTEMPT_TIMEOUT_MS=envMs("OCR_PROVIDER_ATTEMPT_TIMEOUT_MS",30000,3000,60000);
+const PROVIDER_HEDGE_DELAY_MS=envMs("OCR_PROVIDER_HEDGE_DELAY_MS",8000,250,30000);
 
 function cors(origin){
   const headers={"Vary":"Origin","Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8"};
@@ -90,66 +94,105 @@ async function handle(request){
     "provider must be google-gemini-api and requestId should be a short opaque identifier you generate for this extraction."
   ].join("\n");
   const primaryModel=(process.env.OCR_GEMINI_MODEL||DEFAULT_MODEL).trim()||DEFAULT_MODEL;
-  const fallbackModels=FALLBACK_MODELS.filter((model,index,list)=>model!==primaryModel&&list.indexOf(model)===index);
-  const models=[primaryModel,primaryModel,...fallbackModels];
-  const startedAt=Date.now(),failures=[];
+  const models=Array.from(new Set([primaryModel,...FALLBACK_MODELS]));
   const requestBody=JSON.stringify({
     contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:file.type,data:base64}}]}],
     generationConfig:{responseMimeType:"application/json",responseJsonSchema:schema}
   });
-
-  for(let attempt=0;attempt<models.length;attempt++){
-    const model=models[attempt],elapsed=Date.now()-startedAt,remaining=PROVIDER_BUDGET_MS-elapsed;
-    if(remaining<1200)break;
-    if(attempt===1&&model===primaryModel)await new Promise(resolve=>setTimeout(resolve,Math.min(PRIMARY_RETRY_DELAY_MS,Math.max(0,remaining-1000))));
-    const controller=new AbortController(),timeoutMs=Math.min(PROVIDER_ATTEMPT_TIMEOUT_MS,Math.max(1000,PROVIDER_BUDGET_MS-(Date.now()-startedAt)-500));
-    const timer=setTimeout(()=>controller.abort(),timeoutMs);
-    let upstream,data;
-    try{
-      upstream=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
-        method:"POST",
-        headers:{"x-goog-api-key":apiKey,"Content-Type":"application/json"},
-        body:requestBody,
-        signal:controller.signal
+  const providerResult=await new Promise(resolve=>{
+    const failures=[],states=models.map(()=>({phase:"idle",timer:null,controller:null})),startedAt=Date.now();
+    let settled=false,completed=0,globalTimer=null;
+    function log(model,status,kind,attempt,extra){
+      console.info("VENDRIVE2_OCR_PROVIDER",JSON.stringify(Object.assign({model,status,kind,attempt,elapsedMs:Date.now()-startedAt},extra||{})));
+    }
+    function cancelAll(exceptIndex){
+      states.forEach(function(state,index){
+        if(state.timer){clearTimeout(state.timer);state.timer=null}
+        if(index!==exceptIndex&&state.controller)try{state.controller.abort()}catch(error){}
       });
-      try{data=await upstream.json()}catch(error){
-        failures.push({kind:"invalid_data",model,status:upstream.status});
-        console.info("VENDRIVE2_OCR_PROVIDER",JSON.stringify({model,status:upstream.status,kind:"invalid_data",attempt:attempt+1}));
-        continue;
+    }
+    function finish(result,exceptIndex){
+      if(settled)return;
+      settled=true;
+      if(globalTimer)clearTimeout(globalTimer);
+      cancelAll(exceptIndex);
+      resolve(Object.assign({failures},result));
+    }
+    function schedule(index,delay){
+      if(settled||index>=models.length||states[index].phase!=="idle")return;
+      states[index].phase="scheduled";
+      states[index].timer=setTimeout(function(){states[index].timer=null;startAttempt(index)},delay);
+    }
+    async function startAttempt(index){
+      if(settled||index>=models.length)return;
+      const state=states[index];
+      if(state.phase==="running"||state.phase==="done")return;
+      if(state.timer){clearTimeout(state.timer);state.timer=null}
+      state.phase="running";
+      if(index+1<models.length)schedule(index+1,PROVIDER_HEDGE_DELAY_MS);
+      const model=models[index],controller=new AbortController();
+      state.controller=controller;
+      const attemptTimer=setTimeout(function(){controller.abort()},PROVIDER_ATTEMPT_TIMEOUT_MS);
+      let upstream,data,failure=null;
+      try{
+        upstream=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
+          method:"POST",
+          headers:{"x-goog-api-key":apiKey,"Content-Type":"application/json"},
+          body:requestBody,
+          signal:controller.signal
+        });
+        try{data=await upstream.json()}catch(error){
+          failure={kind:"invalid_data",model,status:upstream.status};
+        }
+        if(!failure&&!upstream.ok){
+          const providerError=data&&data.error&&typeof data.error==="object"?data.error:{};
+          const providerStatus=typeof providerError.status==="string"?providerError.status:null;
+          let kind="rejected";
+          if(upstream.status===429||upstream.status===500||upstream.status===502||upstream.status===503||upstream.status===504)kind="busy";
+          else if(upstream.status===401||upstream.status===403)kind="auth";
+          failure={kind,model,status:upstream.status,providerStatus};
+        }
+        if(!failure){
+          let parsed;
+          try{parsed=JSON.parse(extractGeminiText(data))}catch(error){
+            failure={kind:"structured_parse",model,status:upstream.status};
+          }
+          if(!failure){
+            parsed.provider="google-gemini-api";
+            if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=crypto.randomUUID();
+            if(!Array.isArray(parsed.warnings))parsed.warnings=[];
+            if(model!==primaryModel&&parsed.warnings.length<20&&!parsed.warnings.includes("ocr_provider_fallback_used"))parsed.warnings.push("ocr_provider_fallback_used");
+            log(model,200,"success",index+1,{hedged:index>0});
+            finish({ok:true,parsed,model},index);
+            return;
+          }
+        }
+      }catch(error){
+        if(settled&&error&&error.name==="AbortError")return;
+        failure={kind:error&&error.name==="AbortError"?"timeout":"connection",model,status:null};
+      }finally{clearTimeout(attemptTimer)}
+      if(settled)return;
+      state.phase="done";state.controller=null;completed++;
+      failures.push(failure);
+      log(model,failure.status,failure.kind,index+1,failure.providerStatus?{providerStatus:failure.providerStatus}:{});
+      if(failure.kind==="auth"){finish({ok:false});return}
+      if(index+1<models.length){
+        const next=states[index+1];
+        if(next.phase==="scheduled"&&next.timer){clearTimeout(next.timer);next.timer=null;next.phase="idle"}
+        startAttempt(index+1);
       }
-    }catch(error){
-      const kind=error&&error.name==="AbortError"?"timeout":"connection";
-      failures.push({kind,model,status:null});
-      console.info("VENDRIVE2_OCR_PROVIDER",JSON.stringify({model,status:null,kind,attempt:attempt+1}));
-      continue;
-    }finally{clearTimeout(timer)}
-
-    if(!upstream.ok){
-      const providerError=data&&data.error&&typeof data.error==="object"?data.error:{};
-      const providerStatus=typeof providerError.status==="string"?providerError.status:null;
-      let kind="rejected";
-      if(upstream.status===429||upstream.status===500||upstream.status===502||upstream.status===503||upstream.status===504)kind="busy";
-      else if(upstream.status===401)kind="auth";
-      failures.push({kind,model,status:upstream.status,providerStatus});
-      console.info("VENDRIVE2_OCR_PROVIDER",JSON.stringify({model,status:upstream.status,providerStatus,kind,attempt:attempt+1}));
-      if(kind==="auth")break;
-      continue;
+      if(completed>=models.length)finish({ok:false});
     }
-
-    let parsed;
-    try{parsed=JSON.parse(extractGeminiText(data))}catch(error){
-      failures.push({kind:"structured_parse",model,status:upstream.status});
-      console.info("VENDRIVE2_OCR_PROVIDER",JSON.stringify({model,status:upstream.status,kind:"structured_parse",attempt:attempt+1}));
-      continue;
-    }
-    parsed.provider="google-gemini-api";
-    if(typeof parsed.requestId!=="string"||!parsed.requestId.trim())parsed.requestId=crypto.randomUUID();
-    if(!Array.isArray(parsed.warnings))parsed.warnings=[];
-    if(model!==primaryModel&&parsed.warnings.length<20&&!parsed.warnings.includes("ocr_provider_fallback_used"))parsed.warnings.push("ocr_provider_fallback_used");
-    console.info("VENDRIVE2_OCR_PROVIDER",JSON.stringify({model,status:200,kind:"success",attempt:attempt+1}));
-    return json(200,parsed,origin);
-  }
-
+    globalTimer=setTimeout(function(){
+      if(settled)return;
+      failures.push({kind:"timeout",model:null,status:null,scope:"budget"});
+      log(null,null,"timeout",0,{scope:"budget"});
+      finish({ok:false});
+    },PROVIDER_BUDGET_MS);
+    startAttempt(0);
+  });
+  if(providerResult.ok)return json(200,providerResult.parsed,origin);
+  const failures=providerResult.failures;
   if(failures.some(item=>item.kind==="auth"))return json(503,{error:"OCR provider authentication is unavailable",code:"provider_auth_unavailable",retryable:false},origin);
   if(failures.some(item=>item.kind==="busy"))return json(503,{error:"OCR provider is temporarily busy. Please retry.",code:"provider_busy",retryable:true},origin);
   if(failures.some(item=>item.kind==="timeout"))return json(504,{error:"OCR provider timed out",code:"provider_timeout",retryable:true},origin);
