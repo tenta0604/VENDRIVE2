@@ -2,7 +2,7 @@
   "evidenceVersion": 2,
   "runType": "maintenance",
   "phase": "MAINT-PINPOINT-EDIT",
-  "status": "PENDING",
+  "status": "PASS",
   "base": {
     "head": "efe6bd3ee990a636933d489794cd24fd500eb38e",
     "safetyTag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
@@ -30,6 +30,25 @@
       "status": "PASS",
       "tag": "backup-pre-MAINT-PINPOINT-EDIT-20260915",
       "target": "efe6bd3ee990a636933d489794cd24fd500eb38e"
+    },
+    "realEdge": {
+      "status": "PASS",
+      "runId": 34983881936,
+      "coverage": [
+        "machine-only issue renders as 紐づけ確認 1件 and not OCR確認",
+        "uncertain productCode is highlighted at the exact field with an adjacent 編集 button",
+        "inline correction updates only the in-memory review value and clears the matching uncertainty warning",
+        "editing vendorNumber refreshes machine matching without persisting a link or draft",
+        "全体を編集 remains available and mounts the existing detailed editor",
+        "320px and 390px paths remain within viewport"
+      ]
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "inlineEditPersistence": "none until explicit draft creation",
+      "machineLinkPersistence": "only explicit machine-link button",
+      "autoConfirmation": "unchanged",
+      "imageRetention": "unchanged"
     }
   },
   "changedFiles": [
@@ -39,9 +58,7 @@
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [
-    "Run real Edge 320px/390px pinpoint-edit regression including machine-only, uncertain-field, inline correction, and full-editor availability."
-  ],
-  "nextAction": "Deploy only after exact-field highlighting/editing and mobile layout pass in real Edge.",
+  "openItems": [],
+  "nextAction": "Deploy FINAL.7 and verify the live version. Real-device OCR reviews should distinguish machine-link confirmation from OCR uncertainty and allow exact-field inline correction.",
   "unresolved": []
 }
