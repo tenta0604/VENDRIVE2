@@ -90,7 +90,7 @@ async function handle(request){
     "provider must be google-gemini-api and requestId should be a short opaque identifier you generate for this extraction."
   ].join("\n");
   const primaryModel=(process.env.OCR_GEMINI_MODEL||DEFAULT_MODEL).trim()||DEFAULT_MODEL;
-  const models=Array.from(new Set([primaryModel,primaryModel,...FALLBACK_MODELS]));
+  const fallbackModels=FALLBACK_MODELS.filter((model,index,list)=>model!==primaryModel&&list.indexOf(model)===index);\n  const models=[primaryModel,primaryModel,...fallbackModels];
   const startedAt=Date.now(),failures=[];
   const requestBody=JSON.stringify({
     contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:file.type,data:base64}}]}],
