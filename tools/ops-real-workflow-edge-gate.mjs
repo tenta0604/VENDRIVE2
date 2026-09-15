@@ -25,7 +25,7 @@ try{
     const reports=await api.data.reports.list(),report=reports.find(x=>x.source&&x.source.method==="ocr"&&x.vendorNumber==="4038404");
     return{createdText,finalText:host.innerText,status:report&&report.status,button:confirmBtn.textContent,scrollWidth:document.documentElement.scrollWidth,width:innerWidth};
   })()`);
-  assert(!draft.error,draft.error||"");
+  assert(!draft.error,JSON.stringify(draft));
   assert(draft.createdText.includes("✓ 下書きを作成しました"),"draft success card missing");
   assert(draft.createdText.includes("下書きを確認・確定する"),"explicit confirmation action missing");
   assert(draft.status==="confirmed","draft did not become confirmed");
