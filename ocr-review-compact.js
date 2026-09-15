@@ -23,7 +23,7 @@ function ensureStyle(){
     ".vdrCompactIssues{display:grid;gap:5px}.vdrCompactIssue{font-size:10px;line-height:1.45;border-radius:9px;padding:8px;background:#fff7ed;color:#9a3412}.vdrCompactIssue.error{background:#fff1f2;color:#b42318;font-weight:800}",
     ".vdrCompactMachine{display:flex;justify-content:space-between;gap:8px;align-items:center}.vdrCompactMachineText{min-width:0}.vdrCompactMachineText b{font-size:11px}.vdrCompactMachineText span{display:block;font-size:9px;color:#70747a;margin-top:2px;overflow-wrap:anywhere}.vdrMachineFlag{font-size:8px;font-weight:950;color:#1d4ed8;margin-top:5px}",
     ".vdrCompactActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vdrCompactButton{border:1px solid #d7d9dd;border-radius:11px;background:#fff;padding:10px;font-size:10px;font-weight:900}.vdrCompactButton.primary{background:#111;color:#fff;border-color:#111}.vdrCompactButton:disabled{opacity:.4}",
-    ".vdrCompactApproval{display:flex;gap:8px;align-items:flex-start;font-size:9px;font-weight:800;line-height:1.45;padding:9px;background:#fafafa;border-radius:10px}.vdrCompactStatus{font-size:9px;color:#666;line-height:1.5}",
+    ".vdrCompactApproval{display:flex;gap:8px;align-items:flex-start;font-size:9px;font-weight:800;line-height:1.45;padding:9px;background:#fafafa;border-radius:10px}.vdrCompactStatus{font-size:9px;color:#666;line-height:1.5}.vdrDraftSuccess{display:grid;gap:7px;border:1px solid #a7e0b5;background:#f0fdf4;border-radius:12px;padding:11px;margin-top:8px}.vdrDraftSuccessTitle{font-size:12px;font-weight:950;color:#166534}.vdrDraftSuccessText{font-size:9px;line-height:1.5;color:#356044}.vdrDraftConfirmButton{border:0;border-radius:10px;background:#166534;color:#fff;padding:10px;font-size:10px;font-weight:950}.vdrDraftConfirmButton:disabled{opacity:.55}.vdrDraftSuccess.confirmed{background:#ecfdf3;border-color:#74c98a}",
     ".vdrCompactDetail[hidden]{display:none!important}.vdrCompactDetail{border-top:1px solid #ececef;padding-top:10px}.vdrCompactMuted{font-size:9px;color:#777}",
     "@media(max-width:350px){.vdrCompactActions{grid-template-columns:1fr}.vdrCompactRow{grid-template-columns:58px minmax(0,1fr) 48px}.vdrCompactItemName{font-size:10.5px}.vdrFieldEdit{padding:3px 5px}}"
   ].join("");document.head.appendChild(s);
@@ -196,7 +196,24 @@ function mount(container,review){
   var status=el("div","vdrCompactStatus",blocking.length?"赤い要修正項目があるため、修正してから保存してください。":"まだ保存されていません。自動確定・在庫変動・legacyデータ変更は行いません。");actionsCard.appendChild(status);actionsCard.appendChild(detail);root.appendChild(actionsCard);
   function update(){save.disabled=blocking.length>0||!approval.checked}approval.onchange=update;
   edit.onclick=function(){if(detail.hidden){detail.hidden=false;edit.textContent="全体編集を閉じる";detail.innerHTML="";var editor=type==="sales"?global.VENDRIVE2SalesReview:global.VENDRIVE2InputRecoveryReview;if(editor&&typeof editor.mount==="function")editor.mount(detail,review);else detail.appendChild(el("div","vdrCompactMuted","編集画面を利用できません"));setTimeout(function(){try{detail.scrollIntoView({behavior:"smooth",block:"start"})}catch(error){}},0)}else{detail.hidden=true;edit.textContent="全体を編集"}};
-  save.onclick=function(){if(save.disabled)return;var api=global.VENDRIVE2Analytics;if(!api||!api.capture||typeof api.capture.createDraftFromReview!=="function")return;save.disabled=true;status.textContent="下書きを作成しています…";Promise.resolve(api.capture.createDraftFromReview({review:clone(review),userApproved:true,visitId:null})).then(function(result){approval.disabled=true;edit.disabled=true;save.disabled=true;status.textContent="下書きを作成しました"+(result&&result.report&&result.report.id?"（ID: "+result.report.id+"）":"")+"。自動確定・在庫変動は行っていません。"}).catch(function(error){status.textContent="下書きを作成できませんでした："+(error&&error.message?error.message:"内容を確認してください");update()})};
+  function showDraftSuccess(result){
+    var report=result&&result.report,id=report&&report.id;if(!id)return;
+    approval.disabled=true;approvalWrap.style.display="none";edit.disabled=true;save.disabled=true;save.textContent="作成済み";status.textContent="";
+    var old=actionsCard.querySelector(".vdrDraftSuccess");if(old)old.remove();
+    var card=el("div","vdrDraftSuccess"),title=el("div","vdrDraftSuccessTitle","✓ 下書きを作成しました"),effect=type==="sales"?"確定すると、この売上データが分析エンジンの対象になります。":"確定すると、この投入・回収データが在庫計算と分析の対象になります。",text=el("div","vdrDraftSuccessText","まだ正式確定ではありません。内容に問題がなければ、下のボタンで確定してください。 "+effect),confirmButton=el("button","vdrDraftConfirmButton","下書きを確認・確定する");
+    confirmButton.type="button";card.appendChild(title);card.appendChild(text);card.appendChild(confirmButton);actionsCard.insertBefore(card,detail);
+    confirmButton.onclick=function(){
+      var api=global.VENDRIVE2Analytics;if(!api||!api.data||!api.data.reports||typeof api.data.reports.confirm!=="function")return;
+      var message="この帳票を正式に確定しますか？\n\n"+effect+"\n確定後も元のOCR画像は保存されません。";
+      if(typeof global.confirm==="function"&&!global.confirm(message))return;
+      confirmButton.disabled=true;confirmButton.textContent="確定しています…";
+      Promise.resolve(api.data.reports.confirm(id)).then(function(out){
+        if(!out||out.confirmed!==true){confirmButton.disabled=false;confirmButton.textContent="下書きを確認・確定する";text.textContent="まだ確定できません。内容を全体編集で確認してください。";return}
+        card.classList.add("confirmed");title.textContent="✓ 帳票を確定しました";text.textContent=type==="sales"?"売上データが分析エンジンの対象になりました。":"投入・回収データが在庫計算と分析の対象になりました。";confirmButton.textContent="確定済み";confirmButton.disabled=true;save.textContent="確定済み";
+      }).catch(function(error){confirmButton.disabled=false;confirmButton.textContent="下書きを確認・確定する";text.textContent="確定できませんでした："+(error&&error.message?error.message:"内容を確認してください")})
+    }
+  }
+  save.onclick=function(){if(save.disabled)return;var api=global.VENDRIVE2Analytics;if(!api||!api.capture||typeof api.capture.createDraftFromReview!=="function")return;save.disabled=true;status.textContent="下書きを作成しています…";Promise.resolve(api.capture.createDraftFromReview({review:clone(review),userApproved:true,visitId:null})).then(function(result){showDraftSuccess(result)}).catch(function(error){status.textContent="下書きを作成できませんでした："+(error&&error.message?error.message:"内容を確認してください");update()})};
   update();container.appendChild(root);return{mounted:true,review:review,issues:issues}
 }
 global.VENDRIVE2CompactOcrReview=Object.freeze({version:2,mount:mount});

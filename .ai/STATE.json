@@ -5,7 +5,7 @@
   "completedPhase": "FINAL",
   "activePhase": null,
   "nextPhase": null,
-  "appVersion": "2026.09.16-FINAL.8",
+  "appVersion": "2026.09.16-FINAL.9",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
@@ -26,8 +26,8 @@
       "Aligned index APP_VERSION with canonical release metadata",
       "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
     ],
-    "lastSafetyTag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
-    "lastSafetyTagTarget": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce",
+    "lastSafetyTag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
+    "lastSafetyTagTarget": "e333b11b0ed6488738ab4b4d50082ea84f0287f1",
     "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
       "Use this release-ready main build as the production baseline",
@@ -55,7 +55,11 @@
       "After a pinpoint correction, the matching uncertainty warning is cleared in-memory and the compact review is immediately re-evaluated without writing Analytics data.",
       "OCR runs now use a generation token so failed, closed, replaced, or stale requests cannot leave or restore an older review beneath a newer error/result.",
       "A current OCR failure explicitly clears the prior OCR review and in-memory OCR candidate before presenting the failure state.",
-      "Recovery case-conversion warnings are derived from structured recovery rows: false global warnings are removed when caseCount is zero, while genuinely unsafe case rows become pinpoint Japanese quantity checks with inline editing."
+      "Recovery case-conversion warnings are derived from structured recovery rows: false global warnings are removed when caseCount is zero, while genuinely unsafe case rows become pinpoint Japanese quantity checks with inline editing.",
+      "OCR draft creation now has an explicit success card and a separate user-confirmed finalization step. Confirmed sales reports become analysis inputs; confirmed input/recovery reports become inventory-calculation inputs.",
+      "Moved 帳票撮影 directly below the Today progress hero so it is available before scrolling through the visit list.",
+      "Visit completion now warns when that vending machine still has unfinished tasks; this applies to both swipe completion and normal visit completion.",
+      "End-of-day confirmation now warns about unfinished orders and task assignments only for vending machines in today's active route target set."
     ]
   },
   "requiredUserInput": [],

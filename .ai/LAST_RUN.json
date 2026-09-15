@@ -1,93 +1,46 @@
 {
   "evidenceVersion": 2,
-  "runType": "maintenance",
-  "phase": "MAINT-OCR-STALE-WARNING",
-  "status": "PASS",
+  "runType": "product",
+  "phase": "OPS-REAL-WORKFLOW",
+  "status": "PENDING",
   "base": {
-    "head": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce",
-    "safetyTag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
-    "safetyTagTarget": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce"
+    "head": "e333b11b0ed6488738ab4b4d50082ea84f0287f1",
+    "safetyTag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
+    "safetyTagTarget": "e333b11b0ed6488738ab4b4d50082ea84f0287f1"
   },
   "versions": {
-    "app": "2026.09.16-FINAL.8",
+    "app": "2026.09.16-FINAL.9",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Prevent stale OCR reviews after failures and replace internal recovery case-conversion warnings with accurate pinpoint review behavior.",
+    "summary": "Finish the real-world workflow from OCR draft to confirmed analytics data and add Today-tab operational safeguards.",
     "completed": [
-      "Added OCR run-generation invalidation across reset, retry, success, and failure UI paths.",
-      "Current failures explicitly clear previous review DOM and in-memory OCR candidate state.",
-      "Normalized recovery case-conversion warnings from structured rows instead of displaying a raw provider token.",
-      "caseCount=0 recovery rows no longer produce a case-conversion warning.",
-      "Unsafe case rows use the existing pinpoint quantity editor with a Japanese explanation.",
-      "Bumped app version to 2026.09.16-FINAL.8."
+      "Added a clear draft-created success state and explicit final confirmation into Analytics.",
+      "Moved report capture to the top portion of the Today tab, directly below work progress.",
+      "Added unfinished-task confirmation before visit completion from both swipe and regular completion.",
+      "Added end-of-day warnings scoped to today's active route machines for unfinished orders and tasks."
     ]
   },
   "gates": {
     "preflight": "PASS",
     "safetyTag": {
       "status": "PASS",
-      "tag": "backup-pre-MAINT-OCR-STALE-WARNING-20260916",
-      "target": "11bb3fb93a69bd44ef7b5227b41b9fbda80479ce"
-    },
-    "recoveryWarningNormalization": {
-      "status": "PASS",
-      "runId": 34989542953,
-      "coverage": [
-        "legacy recovery_case_conversion_required is removed when all recovery caseCount values are zero",
-        "real case conversion need becomes a row-specific quantity check instead of a raw internal token"
-      ]
-    },
-    "realEdge": {
-      "status": "PASS",
-      "runId": 34989542953,
-      "coverage": [
-        "current OCR failure clears the previous review DOM",
-        "late success from an older OCR run cannot overwrite a newer failure state",
-        "zero-case recovery has no false quantity warning",
-        "real case conversion need shows Japanese row-level explanation and pinpoint edit",
-        "390px app path remains within viewport"
-      ]
-    },
-    "vercelProduction": {
-      "status": "PASS",
-      "deploymentId": "dpl_2ZAgUaed6RQaUfCsJU65sJBq2WVb",
-      "sourceCommit": "058b4da648ae758ef284129782b97aae79def840",
-      "state": "READY"
-    },
-    "productionSmoke": {
-      "status": "PASS",
-      "runId": 34989542953,
-      "imageBytes": 2162188,
-      "requestStatus": 200,
-      "elapsedMs": 9281,
-      "provider": "google-gemini-api",
-      "legacyRecoveryWarningLeaked": false
-    },
-    "githubPages": {
-      "status": "PASS",
-      "runId": 34989541303,
-      "sourceCommit": "058b4da648ae758ef284129782b97aae79def840"
-    },
-    "dataSafety": {
-      "status": "PASS",
-      "imageRetention": "unchanged",
-      "autoConfirmation": "unchanged",
-      "legacyMutation": "unchanged",
-      "staleResultPersistence": "none"
+      "tag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
+      "target": "e333b11b0ed6488738ab4b4d50082ea84f0287f1"
     }
   },
   "changedFiles": [
     ".ai/LAST_RUN.json",
     ".ai/STATE.json",
-    "api/ocr.mjs",
     "index.html",
     "ocr-review-compact.js",
     "version.json"
   ],
-  "openItems": [],
-  "nextAction": "Use FINAL.8 on the real device. A failed OCR run must not leave an older review visible, and recovery rows with caseCount 0 must not show a case-conversion warning.",
+  "openItems": [
+    "Run real Edge 320px/390px workflow regression for draft confirmation, capture placement, visit task guard, and end-of-day scoped warnings."
+  ],
+  "nextAction": "Release only after the real-device-equivalent workflow shows confirmed reports entering Analytics while unfinished work warnings remain scoped to today's machines.",
   "unresolved": []
 }
