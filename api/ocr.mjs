@@ -109,3 +109,5 @@ async function handle(request){
 
 export async function POST(request){return handle(request)}
 export async function OPTIONS(request){return handle(request)}
+
+export function __diagnosticResultSchema(){return resultSchema()}
