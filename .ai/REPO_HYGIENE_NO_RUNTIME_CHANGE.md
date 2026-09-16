@@ -1,0 +1,1 @@
+This branch intentionally changes no production runtime source. It only retires historical GitHub Actions executors and adds repository-maintenance documentation. Smartphone verification is therefore not a release gate for this cleanup.
