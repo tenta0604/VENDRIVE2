@@ -1,0 +1,32 @@
+name: AN15 hardening tests
+on:
+  pull_request:
+    paths:
+      - 'an15*.js'
+      - 'tests/an15-*.test.js'
+      - '.github/workflows/an15-hardening-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'an15*.js'
+      - 'tests/an15-*.test.js'
+      - '.github/workflows/an15-hardening-tests.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: |
+          node --check an15a-forecast-scoring.js
+          node --check an15b-self-calibration.js
+          node --check an15c-context-response.js
+          node --check an15-lifecycle-integration.js
+          node --check tests/an15-lifecycle.test.js
+          node --check tests/an15-calibration-context.test.js
+      - name: Executable AN15A-C hardening tests
+        run: node --test tests/an15-*.test.js
