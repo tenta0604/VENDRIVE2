@@ -1,40 +1,56 @@
 {
   "evidenceVersion": 2,
-  "runType": "product-phase",
-  "phase": "OPS10B1",
+  "runType": "maintenance",
+  "phase": "OPS10B1-DEVICE-FIX",
   "status": "PASS_PENDING_FINAL_DEVICE_CONFIRMATION",
   "base": {
-    "head": "2265803dc6c4d49e63dd4430146124da80e0146e",
-    "safetyTag": "backup-pre-OPS10B1-20260915",
-    "safetyTagTarget": "2265803dc6c4d49e63dd4430146124da80e0146e",
+    "head": "7736f159ace64b8820bb9b18891dfd115a0525bb",
+    "safetyTag": "backup-pre-OPS10B1-DEVICE-RUNTIME-20260916",
+    "safetyTagTarget": "7736f159ace64b8820bb9b18891dfd115a0525bb",
     "safetyTagType": "annotated"
   },
-  "versions": {"app":"2026.09.16-FINAL.11","engine":"AN14B3B2","db":4,"schema":4},
+  "versions": {
+    "app": "2026.09.16-FINAL.13",
+    "engine": "AN14B3B2",
+    "db": 4,
+    "schema": 4
+  },
   "work": {
-    "summary": "Add confirmed multi-axis product intelligence and compact machine-level Today task workflow with per-task visit completion.",
+    "summary": "Stabilize OPS10B1 Today task visibility on real devices and simplify per-task visit completion.",
     "completed": [
-      "Product intelligence stores family plus optional structured attributes separately from raw product records.",
-      "Unknown attributes remain null/unknown; existing category is only used as explicit backward-compatible family evidence.",
-      "First-seen products require confirmation; confirmed records are reused and can be reviewed/corrected.",
-      "Standalone Today important-task block is removed by the FINAL.11 Today renderer.",
-      "Unfinished tasks are shown on their machine visit cards, capped at two visible rows plus +N, with task-wide done/total progress.",
-      "Visit completion presents individual checkboxes; only checked tasks are completed and unchecked tasks remain unfinished.",
-      "Preview deployment rendered FINAL.11 successfully and did not show the removed standalone important-task block."
+      "Visit task confirmation now has one completion action: 訪問を完了.",
+      "Only checked tasks are completed for the current machine; unchecked tasks remain unfinished.",
+      "Per-task overall progress strings were removed from the visit dialog.",
+      "Today machine cards now render all linked unfinished task names compactly instead of two rows plus +N.",
+      "Today card task rendering is re-applied after the normal Today render lifecycle to avoid disappearing until a later rerender.",
+      "Standalone Today important-task block remains removed.",
+      "APP version and version.json were advanced to FINAL.13.",
+      "Guarded maintenance static gates passed before merge.",
+      "Production deployment for FINAL.13 reached READY.",
+      "Fresh mobile cloud smoke load of production returned HTTP 200 and rendered the application."
     ]
   },
   "gates": {
-    "mainBaseUnchangedBeforeEdit": "PASS",
     "immutableAnnotatedSafetyTag": "PASS",
-    "previewDeploymentReady": "PASS",
-    "previewFinal11Rendered": "PASS",
-    "standaloneImportantTaskBlockAbsent": "PASS",
-    "productIntelligenceReviewUiLoaded": "PASS",
-    "rawProductOverwrite": "PASS: none",
-    "dbSchemaBump": "NOT_REQUIRED: existing Analytics meta store used",
-    "finalSmartphoneDeviceCheck": "PENDING_AFTER_PRODUCTION_DEPLOYMENT"
+    "guardedMaintenanceStaticGates": "PASS",
+    "singleVisitCompletionAction": "PASS",
+    "legacySecondVisitActionRemoved": "PASS",
+    "todayTaskNamesNotProgress": "PASS",
+    "allLinkedTaskNamesRendered": "PASS",
+    "productionDeploymentReady": "PASS",
+    "freshMobileCloudSmoke": "PASS",
+    "dbSchemaBump": "NOT_REQUIRED",
+    "finalSmartphoneDeviceCheck": "PENDING"
   },
-  "changedFiles": ["ocr-config.js","ops10b1-today-tasks.js","ops10b1-product-intelligence.js","version.json",".ai/STATE.json",".ai/LAST_RUN.json"],
-  "openItems": ["Final smartphone confirmation after production deployment."],
-  "nextAction": "Merge PR after repository checks, verify production deployment, then ask for one smartphone check of FINAL.11 Today task integration/per-task completion. After confirmation, OPS10B2 is next.",
+  "changedFiles": [
+    "index.html",
+    "version.json",
+    ".ai/STATE.json",
+    ".ai/LAST_RUN.json"
+  ],
+  "openItems": [
+    "Final smartphone confirmation that task names are visible immediately on Today cards and the visit dialog has one completion button."
+  ],
+  "nextAction": "After the smartphone confirmation passes, mark OPS10B1 fully confirmed and advance to OPS10B2 demand-transfer analysis.",
   "unresolved": []
 }
