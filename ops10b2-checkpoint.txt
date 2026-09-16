@@ -1,0 +1,1 @@
+OPS10B2 pre-edit checkpoint preparation complete. Production implementation must not run until an immutable annotated safety tag points at the exact main HEAD containing this marker.
