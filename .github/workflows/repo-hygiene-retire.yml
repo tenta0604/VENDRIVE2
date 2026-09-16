@@ -1,0 +1,38 @@
+name: Repo hygiene retire legacy executors
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  retire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/repo-hygiene-20260916
+      - name: Retire completed one-off OPS workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/ops10a-*.yml
+          rm -f .github/workflows/ops10b2-exec.yml
+          git diff --check
+          test -f .github/workflows/create-safety-tag.yml
+          test -f .github/workflows/an15-hardening-tests.yml
+          test -f .github/workflows/maintenance-executor.yml
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No cleanup required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows
+          git commit -m "chore: retire completed OPS executor workflows"
+          git push origin HEAD:chatgpt/repo-hygiene-20260916
