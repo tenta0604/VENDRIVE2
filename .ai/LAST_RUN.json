@@ -1,46 +1,46 @@
 {
   "evidenceVersion": 2,
-  "runType": "continuity_maintenance",
-  "phase": "OPS10B1-FINAL15-DEVICE-CLOSEOUT",
+  "runType": "phase_closeout",
+  "phase": "OPS10B2",
   "status": "PASS",
   "base": {
-    "head": "61208141ee7ab560bc2fff10f80ed4ff81ea0381",
-    "safetyTag": "backup-pre-OPS10B1-TODAY-TASK-RERENDER-FIX-20260916",
-    "safetyTagTarget": "40b0b20ca7c87262485ec65f1d51b90de180022f",
+    "preProductionHead": "df8e4c35630ca53f54e5a577a16a6b75a6e60684",
+    "safetyTag": "backup-pre-OPS10B2-EXEC-20260916",
     "safetyTagType": "annotated"
   },
   "versions": {"app":"2026.09.16-FINAL.15","engine":"AN14B3B2","db":4,"schema":4},
   "work": {
-    "summary": "Close FINAL.15 with production deployment evidence and the completed iPhone task-visibility confirmation, then restore canonical state consistency before OPS10B2.",
-    "rootCause": "The delayed current-position refresh path called renderToday() instead of renderTodayWithTasks(), causing task augmentation to disappear after initial render.",
+    "summary": "Add classification-aware demand-transfer evidence and replacement-review proposals without mutating observations or auto-applying product changes.",
     "completed": [
-      "Delayed Today rerender now preserves task augmentation.",
-      "Pages deployment for main cleanup HEAD completed successfully.",
-      "User confirmed on iPhone that task names remain visible.",
-      "Previously passed visit-completion behavior was not redundantly re-tested."
+      "Added ops10b2-demand-transfer.js production sidecar.",
+      "Uses same-machine latest/previous product-rate movement as computed evidence.",
+      "Similarity uses only confirmed OPS10B1 classification attributes and preserves unknowns.",
+      "Separates close-substitute and broad-family evidence.",
+      "Carries sold-out censoring into confidence limitations.",
+      "Emits causalClaim=false evidence and proposal-only recommendations with autoApply=false.",
+      "Loaded sidecar from existing production bootstrap without DB/schema changes or Today/visit changes."
     ]
   },
   "gates": {
-    "immutableAnnotatedSafetyTag": "PASS",
-    "exactScopedDiff": "PASS",
-    "inlineJavascriptSyntax": "PASS",
-    "expectedRuntimeBindings": "PASS",
-    "visitCompletionRegressionScope": "PASS_UNCHANGED",
+    "immutableAnnotatedSafetyCheckpoint": "PASS",
+    "confirmedClassificationOnly": "PASS",
+    "unknownAttributesNotInferred": "PASS",
+    "rawObservationMutation": "NONE",
+    "causalClaim": false,
+    "autoApply": false,
     "databaseSchemaBump": "NOT_REQUIRED",
+    "todayVisitRegressionScope": "UNCHANGED",
     "productionDeployment": "PASS",
-    "finalSmartphoneTaskVisibility": "PASS"
+    "smartphoneCheck": "NOT_REQUIRED_NO_NEW_INTERACTIVE_UI"
   },
-  "changedFiles": ["index.html","version.json"],
+  "changedFiles": ["ops10b2-demand-transfer.js","ocr-config.js"],
   "openItems": [],
-  "nextAction": "Execute OPS10B2 from canonical nextPhase after verifying main/state/roadmap consistency and the OPS10B2 safety checkpoint.",
+  "nextAction": "Execute OPS10C explicit active-visit / nearby-candidate workflow.",
   "unresolved": [],
   "production": {
-    "mergeCommit": "2629eb281996bb32c9295c91aeb8a9fe79f1096a",
-    "headAfterCleanup": "61208141ee7ab560bc2fff10f80ed4ff81ea0381",
-    "pagesRunId": 35052302002,
+    "mergeCommit": "5a114696c41466244718b750a9adf0d7e57ea4ed",
+    "pagesRunId": 35053217811,
     "pagesConclusion": "success",
-    "liveUrl": "https://tenta0604.github.io/VENDRIVE2/",
-    "liveVersion": "2026.09.16-FINAL.15",
-    "deviceConfirmation": "PASS"
+    "liveUrl": "https://tenta0604.github.io/VENDRIVE2/"
   }
 }
