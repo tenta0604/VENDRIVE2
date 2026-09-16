@@ -3,45 +3,37 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "OPS10B2",
-  "activePhase": null,
+  "activePhase": "OPS10C",
   "nextPhase": "OPS10C",
   "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "ready_for_next_phase",
+  "status": "awaiting_ops10c_device_verification",
   "currentWork": {
-    "title": "OPS10B2 complete — classification-aware demand transfer foundation",
-    "releaseStatus": "Production merge and GitHub Pages deployment PASS",
-    "completedReleaseScope": [
-      "OPS10A vehicle inventory stocktake/baseline UI with smartphone verification",
-      "OPS10B1 confirmed multi-axis product intelligence master data",
-      "FINAL.15 Today task visibility and visit-completion behavior device-confirmed",
-      "OPS10B2 same-machine decline/rise demand-transfer evidence using confirmed classification only",
-      "OPS10B2 replacement-review proposals remain non-causal and never auto-apply"
+    "title": "OPS10C — Explicit Active Visit / Nearby Candidate Workflow",
+    "releaseStatus": "Implementation prepared for production; smartphone interaction verification required before phase closeout.",
+    "scope": [
+      "GPS within 100m is candidate discovery only and never auto-selects a visit.",
+      "Nearby machines remain individually selectable.",
+      "Exactly one active machine is explicitly selected; switching requires confirmation.",
+      "Active visit persists across reopen and clears on visit completion.",
+      "Today order is WORK PROGRESS, report capture, active/nearby compact area, normal list.",
+      "Active machine is hidden from duplicate normal Today list while pinned.",
+      "OCR machine identity is compared with active visit and can show match/mismatch warning."
     ],
-    "analysisPolicy": [
-      "Unknown product attributes remain unknown.",
-      "Only status=confirmed OPS10B1 intelligence participates in similarity evidence.",
-      "RAW sales observations are read, not mutated.",
-      "Evidence carries causalClaim=false and proposals carry autoApply=false / requiresUserConfirmation=true."
-    ],
+    "safety": {
+      "preEditHead": "331215a4d6b0cb91ce356e280c20d445d99d0868",
+      "tag": "backup-pre-OPS10C-ACTIVE-VISIT-20260916",
+      "tagType": "annotated"
+    },
     "nextActions": [
-      "Execute OPS10C explicit active-visit / nearby-candidate workflow from the roadmap.",
-      "Do not repeat FINAL.15 Today/visit device checks unless relevant code changes.",
-      "Do not add OPS10B2 interactive UI unless a later scoped phase requires it."
-    ],
-    "antiLoopRule": "Passed real-device evidence is durable and must not be repeated unless relevant production code changes.",
-    "production": {
-      "mergeCommit": "5a114696c41466244718b750a9adf0d7e57ea4ed",
-      "pagesRunId": 35053217811,
-      "pagesConclusion": "success",
-      "liveUrl": "https://tenta0604.github.io/VENDRIVE2/",
-      "ops10b2Runtime": "ops10b2-demand-transfer.js",
-      "deviceConfirmationRequired": false
-    }
+      "Deploy OPS10C production sidecar.",
+      "Verify on iPhone: nearby candidate selection, active pin/persistence, switch confirmation, duplicate suppression, visit-completion clear, and OCR identity warning behavior.",
+      "Close OPS10C only after required device evidence passes."
+    ]
   },
-  "requiredUserInput": [],
+  "requiredUserInput": ["OPS10C smartphone interaction verification after production deployment"],
   "unresolved": [],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
