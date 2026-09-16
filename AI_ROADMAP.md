@@ -2,12 +2,13 @@
 
 ## Current state
 
-- Latest completed product phase: **OPS10B1 — Multi-axis Product Intelligence / First-seen Classification**
+- Latest completed product phase: **OPS10B2 — Classification-aware Demand Transfer / Replacement Analysis**
 - Active product phase: **None**
-- Next product phase: **OPS10B2 — Classification-aware Demand Transfer / Replacement Analysis**
+- Next product phase: **OPS10C — Explicit Active Visit / Nearby Candidate Workflow**
 - Release app version: **2026.09.16-FINAL.15**
 - Git revision authority: synchronized `HEAD` / `origin/main`
 - FINAL.15 Today task visibility is production-deployed and iPhone-confirmed; previously passed visit-completion behavior is not to be redundantly re-tested unless relevant code changes.
+- OPS10B2 analysis runtime is production-deployed; it adds no new interactive device UI, so no additional smartphone gate is required for that phase.
 
 ## Completed
 
@@ -34,29 +35,17 @@
 - OPS-REAL-WORKFLOW — OCR confirmation / Today workflow hardening
 - OPS10A — Vehicle Inventory Initial Stocktake / Baseline UI
 - OPS10B1 — Multi-axis Product Intelligence / First-seen Classification
+- OPS10B2 — Classification-aware Demand Transfer / Replacement Analysis
 
 ## Release baseline
 
-VENDRIVE2 production baseline is **2026.09.16-FINAL.15**.
+VENDRIVE2 production baseline remains **2026.09.16-FINAL.15** for the visible app shell. OPS10B2 is a production analysis sidecar and does not change the visible shell version.
 
-OPS10A provides real vehicle-stock baseline entry without fabricating historical movements. OPS10B1 adds confirmed multi-axis product intelligence with broad family plus optional structured attributes and preserves unknown values instead of inventing facts. Today operational safeguards show relevant unfinished task names on visit cards and use per-task completion confirmation; FINAL.15 preserves that task display across delayed current-position rerenders.
+OPS10A provides real vehicle-stock baseline entry without fabricating historical movements. OPS10B1 adds confirmed multi-axis product intelligence with broad family plus optional structured attributes and preserves unknown values instead of inventing facts. OPS10B2 compares same-machine product movement using confirmed similarity evidence, carries censoring limitations forward, and emits non-causal proposal-only replacement review signals. Today operational safeguards show relevant unfinished task names on visit cards and use per-task completion confirmation; FINAL.15 preserves that task display across delayed current-position rerenders.
 
-No product phase is currently active. The next scoped work is OPS10B2.
+No product phase is currently active. The next scoped work is OPS10C.
 
 ## Planned post-FINAL operations phases
-
-### OPS10B2 — Classification-aware Demand Transfer / Replacement Analysis
-
-Purpose: distinguish real demand decline from sales moving to a close substitute, and improve product-change recommendations.
-
-Scope:
-- compare product-level movement with aggregate movement across progressively similar product groups;
-- identify signals such as one unsweetened black coffee declining while another unsweetened black coffee at the same machine rises;
-- avoid concluding that a category is shrinking when demand is merely moving within a close substitute group;
-- use similarity attributes as evidence for replacement candidates rather than treating every item in a broad category as interchangeable;
-- use only confirmed OPS10B1 classification attributes as similarity evidence; unknown attributes stay unknown and never become inferred facts;
-- preserve RAW → COMPUTED → RECOMMENDATION separation and avoid inventing causal certainty;
-- analysis output remains proposal/evidence only and must not auto-apply product changes.
 
 ### OPS10C — Explicit Active Visit / Nearby Candidate Workflow
 
