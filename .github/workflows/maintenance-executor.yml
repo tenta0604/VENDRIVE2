@@ -7,7 +7,7 @@ permissions:
   issues: write
 jobs:
   maintenance:
-    if: github.actor == github.repository_owner && (github.event.issue.title == '[MAINTENANCE] OPS10B1-CACHE-FIX' || github.event.issue.title == '[MAINTENANCE] OPS10B1-DEVICE-FIX')
+    if: github.actor == github.repository_owner && github.event.issue.title == '[MAINTENANCE] OPS10B1-DEVICE-FIX-V2'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,28 +16,29 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --tags origin
-          if [ "${{ github.event.issue.title }}" = "[MAINTENANCE] OPS10B1-DEVICE-FIX" ]; then
-            TAG=backup-pre-OPS10B1-DEVICE-FIX-20260916
-            EXPECTED=05a8f86dab4110d5f6b7abf5c0bf10cfeba2430f
-            test "$(git cat-file -t "$TAG")" = tag
-            test "$(git rev-list -n1 "$TAG")" = "$EXPECTED"
-            python .github/scripts/ops10b1-device-fix.py
-            git diff --check
-            grep -q "APP_VERSION='2026.09.16-FINAL.13'" index.html
-            grep -q 'id="visitTaskConfirmApply">訪問を完了' index.html
-            ! grep -q 'visitTaskConfirmKeep' index.html
-            grep -q 'tasks.forEach(function(task)' index.html
-            grep -q 'querySelectorAll(.swipeWrap.)' index.html
-            git config user.name github-actions[bot]
-            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-            git add index.html version.json
-            git commit -m 'fix: stabilize Today task workflow on device'
-            git push origin HEAD:chatgpt/ops10b1-device-runtime-20260916
-          else
-            echo 'Legacy cache-fix trigger retained for compatibility; no-op because FINAL.12 is already integrated.'
-          fi
+          TAG=backup-pre-OPS10B1-DEVICE-RUNTIME-20260916
+          EXPECTED=7736f159ace64b8820bb9b18891dfd115a0525bb
+          test "$(git cat-file -t "$TAG")" = tag
+          test "$(git rev-list -n1 "$TAG")" = "$EXPECTED"
+          python .github/scripts/ops10b1-device-fix.py
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert "APP_VERSION='2026.09.16-FINAL.13'" in s
+          assert 'id="visitTaskConfirmApply">訪問を完了' in s
+          assert 'visitTaskConfirmKeep' not in s
+          assert 'tasks.forEach(function(task)' in s
+          assert "querySelectorAll('.swipeWrap')" in s
+          assert '全体進捗' not in s[s.index('function ensureVisitTaskConfirmModal(){'):s.index('\n\nfunction initDays(){')]
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html version.json
+          git commit -m 'fix: stabilize Today task workflow on device'
+          git push origin HEAD:chatgpt/ops10b1-device-runtime-v2-20260916
       - uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:context.issue.number,body:'MAINTENANCE_PASS: guarded maintenance completed and verified.'});
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:context.issue.number,body:'MAINTENANCE_PASS: FINAL.13 branch created; static gates passed.'});
             await github.rest.issues.update({owner:context.repo.owner,repo:context.repo.repo,issue_number:context.issue.number,state:'closed'});
