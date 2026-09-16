@@ -31,6 +31,29 @@
 - If Codex is needed, explain the specific reason first and minimize the scope of the handoff. Do not silently revert to the old `ChatGPT -> user copy/paste -> Codex -> user copy/paste -> ChatGPT` workflow.
 - Codex availability or usage limits must not block work that ChatGPT and connected tools can safely complete themselves.
 
+## Autonomous continuation / hard terminal-state rule
+
+A user instruction such as `進めて`, `続けて`, `やって`, or an equivalent continuation instruction is an execution command, not a request for a progress message.
+
+After accepting such an instruction, do not end the assistant turn merely because a tool returned an intermediate state. Continue selecting and executing the next available safe action until exactly one terminal state is reached:
+
+1. `COMPLETE` — the selected phase/scope is implemented, all finite required gates passed, deployment/live evidence required by the scope is terminal and verified, canonical bookkeeping is consistent, and planned cleanup is complete.
+2. `HUMAN_REQUIRED` — the next necessary action genuinely requires local/physical interaction, factual input unavailable to tools, credentials/security action, or a materially different UX/product decision from the user.
+3. `TECHNICAL_BLOCKER` — a real tool/platform/access/runtime limit prevents further execution in this turn and no available connected tool or safe alternate route can continue.
+4. `IRREVERSIBLE_APPROVAL_REQUIRED` — the next necessary action is destructive, irreversible, or carries production/user-data risk requiring explicit approval.
+
+The following are explicitly NON-TERMINAL states and must never by themselves cause a reply or empty turn ending: `queued`, `pending`, `in_progress`, `waiting`, `deployment running`, `workflow running`, `tag pending`, `branch created`, `PR opened`, `merge pending`, `skipped` when another required action remains, partial verification, partial bookkeeping, or a tool result that merely says the work has started.
+
+For every non-terminal result, immediately determine the next safe action. This may be another tool call, checking the relevant terminal status, using a different connected tool, completing bookkeeping, cleanup, verification, or advancing within the already-selected phase.
+
+Never send an empty assistant response after an execution command. Never send `進めてる`, `このまま進める`, `待っている`, or another progress-only response as a substitute for continued execution. Progress narration is not a terminal state.
+
+If an external asynchronous job is still running, treat it as `WAITING_EXTERNAL` internally, which is non-terminal. Continue checking only the finite status needed for the current scope. If the current tool/runtime cannot wait or poll further, use another available safe route; only if no route exists may this become `TECHNICAL_BLOCKER`, and the response must identify the exact blocker and durable resume point.
+
+Before any final response after a continuation command, perform a terminal-state self-check: `Which of COMPLETE / HUMAN_REQUIRED / TECHNICAL_BLOCKER / IRREVERSIBLE_APPROVAL_REQUIRED is true?` If none is true, do not respond yet; continue execution.
+
+This terminal-state rule applies across new chats. New-chat recovery must reload it from `AGENTS.md` before resuming work. Chat memory or personalization is supplementary, not the enforcement source.
+
 ## Development philosophy
 
 - Keep Analytics layers separate: `RAW` → `COMPUTED` → `RECOMMENDATION`.
@@ -107,7 +130,6 @@ On failure, report:
 - `HEAD`, `origin/main`, changed files, and unresolved issue
 
 Do not rely on the user copying a long report elsewhere. Leave independently reviewable evidence in GitHub commit history, diffs, tags, workflow runs, and the canonical state files.
-
 
 ## Finite verification / anti-loop rule
 
