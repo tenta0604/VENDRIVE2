@@ -13,35 +13,35 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --tags origin
-          EXPECTED=236c4757a6aa105e8f9a6e1cadf1b7adad4e4a1d
-          test "$(git rev-parse HEAD)" = "$EXPECTED"
-          TAG=backup-pre-OPS10B2-ANALYSIS-20260916
+          TAG=backup-pre-OPS10B2-EXEC-20260916
           test "$(git cat-file -t "$TAG")" = tag
-          test "$(git rev-parse "$TAG^{}")" = "$EXPECTED"
-          git checkout -b chatgpt/ops10b2-analysis-20260916
-          git show 4442c8529f02c05f0eb42aaaf6e739018db6ab8e:ops10b2-demand-transfer.js > ops10b2-demand-transfer.js
+          EXPECTED="$(git rev-parse "$TAG^{}")"
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          git checkout -b chatgpt/ops10b2-final16-20260916
+          git show 4f82090c844b3cb7ab44dbe3b230d4c2f40b4483:ops10b2-demand-transfer.js > ops10b2-demand-transfer.js
           python - <<'PY'
           from pathlib import Path
           p=Path('index.html');s=p.read_text()
           needle='<script src="ops10b1-product-intelligence.js'
-          assert needle in s
+          assert needle in s and 'ops10b2-demand-transfer.js' not in s
           i=s.index(needle); end=s.index('</script>',i)+9
           s=s[:end]+'\n<script src="ops10b2-demand-transfer.js?v=2026.09.16-FINAL.16"></script>'+s[end:]
-          assert "APP_VERSION='2026.09.16-FINAL.15'" in s
+          assert s.count("APP_VERSION='2026.09.16-FINAL.15'")==1
           s=s.replace("APP_VERSION='2026.09.16-FINAL.15'","APP_VERSION='2026.09.16-FINAL.16'",1)
           p.write_text(s)
           Path('version.json').write_text('{\n  "version": "2026.09.16-FINAL.16"\n}\n')
           PY
           node --check ops10b2-demand-transfer.js
           git diff --check
+          grep -q "status==='confirmed'" ops10b2-demand-transfer.js
           grep -q "causalClaim:false,autoApply:false" ops10b2-demand-transfer.js
-          grep -q "status:'confirmed'" ops10b2-demand-transfer.js
+          grep -q "requiresUserConfirmation:true,writesLegacyState:false,writesAnalyticsState:false" ops10b2-demand-transfer.js
           grep -q "ops10b2-demand-transfer.js?v=2026.09.16-FINAL.16" index.html
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add ops10b2-demand-transfer.js index.html version.json
           git commit -m 'feat: add classification-aware demand transfer analysis'
-          git push origin HEAD:chatgpt/ops10b2-analysis-20260916
+          git push origin HEAD:chatgpt/ops10b2-final16-20260916
       - uses: actions/github-script@v7
         with:
           script: |
