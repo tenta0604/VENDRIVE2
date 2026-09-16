@@ -2,43 +2,45 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "AN15G2_CODE",
-  "activePhase": "AN15_HARDENING",
-  "nextPhase": "AN15A_C_LIFECYCLE_INTEGRATION_AND_EXECUTABLE_TESTS",
+  "completedPhase": "AN15_HARDEN_LIFECYCLE",
+  "activePhase": null,
+  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "an15_intelligence_foundations_merged_hardening_required_before_numeric_promotion",
+  "status": "an15_closed_loop_measurement_wired_numeric_promotion_still_disabled",
   "currentWork": {
-    "title": "AN15 intelligence v2 hardening",
-    "releaseStatus": "AN15A-G2 sidecar/API foundations are merged. GitHub Pages for AN15G2 head passed. Vercel deployment of /api/explain is externally rate-limited, so Gemini production transport verification remains pending.",
+    "title": "AN15 intelligence v2 measured-learning baseline",
+    "releaseStatus": "AN15A-C lifecycle hardening is merged. Executable CI passes. Production forecasts are unchanged; eligible exact 24h forecast/outcome pairs can now accumulate automatically for evaluation.",
     "scope": [
-      "AN15A forecast ledger/scoring foundation exists but is not yet automatically wired to production forecast creation and later confirmed outcome scoring.",
-      "AN15B bounded self-calibration is evaluation-only and must not affect live forecasts until enough exact scored real samples and walk-forward evidence exist.",
-      "AN15C context-response learning is evaluation-only; weather must remain unknown unless supplied by a reliable observed source. Its promotion comparison must be incremental against the AN15B-calibrated baseline.",
-      "AN15D machine profiles and AN15D2 cross-machine pooling backtest are descriptive/evaluation-only; pooling is not live.",
-      "AN15E substitution v2 is confirmed-event, non-causal evidence only.",
-      "AN15F joint optimizer is proposal-only and performs no downstream writes.",
-      "AN15G/G2 explanation layer has no numeric authority. /api/explain is separate from OCR and has deterministic fallback.",
+      "Production listForecasts output is observed without changing forecast values.",
+      "Only complete, non-lower-bound machine/product forecasts are snapshotted as 24h evaluation candidates.",
+      "Only later confirmed sales reports whose previousClearAt exactly equals forecast asOf and whose occurredAt exactly equals targetAt are scored.",
+      "Sold-out outcomes are marked censored and excluded from exact-learning metrics.",
+      "Weekday/month/season are derived deterministically from target time; weather and holiday remain unknown unless explicitly sourced.",
+      "AN15C incremental evaluation now compares context adjustment against the AN15B-calibrated or sparse-fallback baseline.",
+      "AN15B/C/D/D2/E/F numeric or optimization promotion remains disabled until real held-out evidence supports it.",
+      "AN15G2 Gemini explanation production verification remains independent and may still be externally Vercel-rate-limited.",
       "OPS10C remains withdrawn; preserve existing Today nearest-machine ordering."
     ],
     "safety": {
-      "hardeningBase": "ee3617c4863388727c1b8fb61352aaf24d515684",
-      "hardeningTag": "backup-pre-AN15-BOOKKEEP-HARDENING-20260916"
+      "integrationBase": "d3a1bc13becb3600c890398468acaa71f1ee0e69",
+      "integrationTag": "backup-pre-AN15-HARDEN-LIFECYCLE-20260916",
+      "closeoutBase": "2ba1afc4384e7821c0fbd0c4f67d3717696e9bd9",
+      "closeoutTag": "backup-pre-AN15-HARDEN-CLOSEOUT-20260916"
     },
     "nextActions": [
-      "Wire AN15A snapshot creation to the real production forecast lifecycle without changing forecast values.",
-      "Score only safely matched later confirmed sales outcomes and preserve censored semantics.",
-      "Make AN15C incremental evaluation compare against AN15B-calibrated baseline.",
-      "Add executable no-lookahead/idempotency/censoring/sparse-data tests for AN15A-C before any numeric promotion.",
-      "Verify /api/explain against Gemini after the external Vercel deployment rate limit clears."
+      "Accumulate real exact scored samples without changing production numeric decisions.",
+      "Evaluate AN15B then AN15C then any pooling increment with no-lookahead held-out evidence.",
+      "Promote only a bounded/versioned/reversible correction after sample/confidence and improvement gates pass.",
+      "Verify /api/explain against Gemini when Vercel deployment availability permits."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Vercel production deployment of AN15G2 /api/explain is rate-limited externally.",
-    "AN15A-C production lifecycle integration and executable tests are not complete."
+    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence.",
+    "Gemini /api/explain production verification may remain blocked by external Vercel deployment rate limits."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
