@@ -1,0 +1,2 @@
+Production cleanup baseline: 7610ceeff1c57516b1967c31bf686ead4558ac5c
+Required annotated safety tag before merge: backup-pre-REPO-HYGIENE-20260916
