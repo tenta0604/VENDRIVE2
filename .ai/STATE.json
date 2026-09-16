@@ -5,23 +5,22 @@
   "completedPhase": "OPS10B1",
   "activePhase": null,
   "nextPhase": "OPS10B2",
-  "appVersion": "2026.09.16-FINAL.13",
+  "appVersion": "2026.09.16-FINAL.14",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "device_check_failed_today_task_visibility",
+  "status": "maintenance_static_pass_pending_merge",
   "currentWork": {
-    "title": "OPS10B1 — FINAL.13 Today task visibility device fix",
-    "releaseStatus": "FINAL.13 production READY; iPhone device check partially failed",
-    "lastSafetyTag": "backup-pre-OPS10B1-DEVICE-RUNTIME-20260916",
-    "lastSafetyTagTarget": "7736f159ace64b8820bb9b18891dfd115a0525bb",
-    "deviceEvidence": {
-      "checkedAtLocal": "2026-09-16T12:06:00+09:00",
-      "deviceVersionVisible": "2026.09.16-FINAL.13",
-      "todayTaskNamesVisibleImmediately": false,
-      "visitCompletionSingleButton": true,
-      "notes": "User iPhone screenshot shows FINAL.13 and Today visit cards without task-name rows. User separately confirmed visit completion is now one-button only."
-    },
+    "title": "OPS10B1 — FINAL.14 Today task visibility fix",
+    "releaseStatus": "FINAL.14 static gates PASS; merge/deployment pending",
+    "rootCause": "Today cards are rendered as .swipeRow, but appendTodayTasks queried .swipeWrap, so zero rendered cards were found and no task names could be appended.",
+    "fix": [
+      "Each rendered Today .swipeRow now stores the exact machine id in data-machine-id.",
+      "appendTodayTasks now queries .swipeRow and resolves each machine by that stored id instead of relying on a parallel array index.",
+      "Visit-completion behavior is unchanged from the already device-confirmed single-action FINAL.13 flow."
+    ],
+    "lastSafetyTag": "backup-pre-OPS10B1-TODAY-TASK-VISIBILITY-FIX-20260916",
+    "lastSafetyTagTarget": "900a13ca44bb07f1a602e2d08a5a7f8c91b791d6",
     "completedReleaseScope": [
       "OPS10A vehicle inventory stocktake/baseline UI with smartphone verification",
       "Multi-axis product intelligence master data",
@@ -29,21 +28,28 @@
       "Visit completion simplified to per-task checkboxes plus one 訪問を完了 action; confirmed on iPhone FINAL.13"
     ],
     "nextActions": [
-      "Do not advance to OPS10B2 yet.",
-      "Diagnose why linked unfinished task names still do not render on Today cards during normal initial render/reopen on the user's real dataset.",
-      "Fix the Today task render lifecycle/machine identity mapping at source, then deploy a new unambiguous app version and perform finite verification.",
-      "Request only the minimal smartphone confirmation after the new production build is READY.",
+      "Merge the guarded FINAL.14 branch after the recorded static gates.",
+      "Wait only for the production deployment terminal state and verify the live version is FINAL.14.",
+      "Request one minimal smartphone check: Today task names must be visible immediately on normal load/reopen.",
+      "Do not repeat the already-passed one-button visit-completion check unless relevant code changes.",
       "After the task-name device check passes, mark OPS10B1 fully confirmed and advance to OPS10B2."
     ],
-    "antiLoopRule": "Do not repeat already-passed one-button visit-completion verification unless relevant code changes. Focus the next maintenance only on Today task-name visibility."
+    "antiLoopRule": "Verification for this maintenance is finite: immutable safety tag, exact scoped diff, inline-JS syntax, no new whitespace/conflict markers, production deployment/live version, then one task-name smartphone check."
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.13 real-device defect: Today visit cards do not show linked unfinished task names on normal load even though the one-button visit-completion flow is fixed."
+    "FINAL.14 still requires one real-device confirmation that linked unfinished task names render immediately on Today cards after production deployment."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
-    "readOrder": ["AGENTS.md", ".ai/STATE.json", "AI_ROADMAP.md", ".ai/LAST_RUN.json", ".ai/DECISIONS.md", ".ai/WORKFLOW.md"],
+    "readOrder": [
+      "AGENTS.md",
+      ".ai/STATE.json",
+      "AI_ROADMAP.md",
+      ".ai/LAST_RUN.json",
+      ".ai/DECISIONS.md",
+      ".ai/WORKFLOW.md"
+    ],
     "shortResumePrompt": "VENDRIVE続き"
   }
 }
