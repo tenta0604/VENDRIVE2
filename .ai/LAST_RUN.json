@@ -1,42 +1,34 @@
 {
   "evidenceVersion": 2,
-  "runType": "phase_implementation",
+  "runType": "rollback_closeout",
   "phase": "OPS10C",
-  "status": "HUMAN_GATE_PENDING",
+  "status": "WITHDRAWN_AND_REMOVED",
   "base": {
-    "preProductionHead": "331215a4d6b0cb91ce356e280c20d445d99d0868",
-    "safetyTag": "backup-pre-OPS10C-ACTIVE-VISIT-20260916",
-    "safetyTagType": "annotated",
-    "safetyTagTarget": "331215a4d6b0cb91ce356e280c20d445d99d0868"
+    "rollbackPreEditHead": "17e81c3ed10c2a7dc7175fdac0b89ae6db8ed0ec",
+    "safetyTag": "backup-pre-OPS10C-ROLLBACK-20260916",
+    "productionHead": "edc0ee808bb3c94b3f7513171f6b5f636abbea24"
   },
   "versions": {"app":"2026.09.16-FINAL.15","engine":"AN14B3B2","db":4,"schema":4},
   "work": {
-    "summary": "Add explicit active-visit state and compact 100m nearby candidates without treating GPS proximity as visit identity.",
+    "summary": "Withdraw OPS10C install-spot / active-visit experiment after field verification and restore the simpler Today baseline.",
     "implemented": [
-      "Added ops10c-active-visit.js sidecar.",
-      "Nearby candidates are distance-sorted and never auto-selected.",
-      "Exactly one explicit active machine persists in localStorage across reopen.",
-      "Switching active machine requires confirmation.",
-      "Visit completion clears matching active machine.",
-      "Active machine is pinned after report capture and suppressed from duplicate Today list.",
-      "OCR result text is compared with active machine name/management code and match/mismatch UI is exposed.",
-      "No DB/schema migration and no Analytics RAW mutation."
+      "Removed ops10c-active-visit.js production sidecar.",
+      "Removed OPS10C runtime loading from ocr-config.js.",
+      "Preserved OPS10B2 runtime.",
+      "Preserved existing core Today nearest-machine ordering behavior.",
+      "Rollback PR #65 merged to main.",
+      "GitHub Pages build and deploy completed successfully for rollback head."
     ]
   },
   "gates": {
-    "immutableAnnotatedSafetyCheckpoint": "PASS",
-    "scopeReview": "PASS",
-    "gpsAutoVisitSelection": "NONE",
-    "singleExplicitActiveVisit": "IMPLEMENTED",
-    "switchConfirmation": "IMPLEMENTED",
-    "reopenPersistence": "IMPLEMENTED_PENDING_DEVICE",
-    "visitCompletionClear": "IMPLEMENTED_PENDING_DEVICE",
-    "ocrIdentityGuard": "IMPLEMENTED_PENDING_DEVICE",
-    "databaseSchemaBump": "NOT_REQUIRED",
-    "smartphoneCheck": "REQUIRED_PENDING"
+    "rollbackSafetyCheckpoint": "PASS",
+    "rollbackMerge": "PASS",
+    "productionBuild": "PASS",
+    "productionDeploy": "PASS",
+    "additionalSmartphoneCheck": "NOT_REQUIRED_FOR_WITHDRAWN_FEATURE"
   },
-  "changedFiles": ["ops10c-active-visit.js","ocr-config.js",".ai/STATE.json",".ai/LAST_RUN.json"],
-  "openItems": ["Production deployment and iPhone interaction verification"],
-  "nextAction": "Deploy OPS10C, then request only the finite iPhone interaction checks required to close the phase.",
+  "changedFiles": ["ocr-config.js","ops10c-active-visit.js"],
+  "openItems": ["Select next product scope from operational priorities"],
+  "nextAction": "Ask for the next operational priority only; OPS10C is closed as withdrawn and must not block future work.",
   "unresolved": []
 }

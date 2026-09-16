@@ -3,37 +3,32 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "OPS10B2",
-  "activePhase": "OPS10C",
-  "nextPhase": "OPS10C",
+  "activePhase": null,
+  "nextPhase": null,
   "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "awaiting_ops10c_device_verification",
+  "status": "product_baseline_stable_next_scope_requires_product_decision",
   "currentWork": {
-    "title": "OPS10C — Explicit Active Visit / Nearby Candidate Workflow",
-    "releaseStatus": "Implementation prepared for production; smartphone interaction verification required before phase closeout.",
+    "title": "Post-OPS10C rollback baseline",
+    "releaseStatus": "OPS10C install-spot / active-visit experiment withdrawn after field verification and removed from production. Existing Today nearest-machine ordering remains the intended baseline.",
     "scope": [
-      "GPS within 100m is candidate discovery only and never auto-selects a visit.",
-      "Nearby machines remain individually selectable.",
-      "Exactly one active machine is explicitly selected; switching requires confirmation.",
-      "Active visit persists across reopen and clears on visit completion.",
-      "Today order is WORK PROGRESS, report capture, active/nearby compact area, normal list.",
-      "Active machine is hidden from duplicate normal Today list while pinned.",
-      "OCR machine identity is compared with active visit and can show match/mismatch warning."
+      "OPS10C CURRENT INSTALL SPOT / automatic install-spot runtime is removed.",
+      "Do not reintroduce explicit visit-start or install-spot grouping without a new product decision.",
+      "Preserve existing Today nearest-machine ordering behavior.",
+      "OPS10B2 remains the latest completed product phase."
     ],
     "safety": {
-      "preEditHead": "331215a4d6b0cb91ce356e280c20d445d99d0868",
-      "tag": "backup-pre-OPS10C-ACTIVE-VISIT-20260916",
-      "tagType": "annotated"
+      "rollbackBase": "17e81c3ed10c2a7dc7175fdac0b89ae6db8ed0ec",
+      "rollbackTag": "backup-pre-OPS10C-ROLLBACK-20260916",
+      "rollbackProductionHead": "edc0ee808bb3c94b3f7513171f6b5f636abbea24"
     },
     "nextActions": [
-      "Deploy OPS10C production sidecar.",
-      "Verify on iPhone: nearby candidate selection, active pin/persistence, switch confirmation, duplicate suppression, visit-completion clear, and OCR identity warning behavior.",
-      "Close OPS10C only after required device evidence passes."
+      "Choose the next product scope from real operational needs; no further OPS10C device verification is required."
     ]
   },
-  "requiredUserInput": ["OPS10C smartphone interaction verification after production deployment"],
+  "requiredUserInput": ["Next product priority / operational pain point to implement"],
   "unresolved": [],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
