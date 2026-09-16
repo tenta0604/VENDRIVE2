@@ -60,7 +60,7 @@ async function authorized(request) {
   }
 }
 function normalize(parsed) {
-  const categories = new Set(["新規相談","既存顧客","営業・提案","採用・業務委託","請求・契約","迷惑・不要","その他"]);
+  const categories = new Set(["新規相談","進行中相談・商談","既存顧客","営業・提案","採用・業務委託","請求・契約","迷惑・不要","その他"]);
   const priorities = new Set(["high","medium","low"]);
   return {
     category: categories.has(parsed?.category) ? parsed.category : "その他",
@@ -80,7 +80,7 @@ const responseSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
-    category: { type: "string", enum: ["新規相談","既存顧客","営業・提案","採用・業務委託","請求・契約","迷惑・不要","その他"] },
+    category: { type: "string", enum: ["新規相談","進行中相談・商談","既存顧客","営業・提案","採用・業務委託","請求・契約","迷惑・不要","その他"] },
     priority: { type: "string", enum: ["high","medium","low"] },
     reply_required: { type: "boolean" },
     summary: { type: "string", maxLength: 180 },
@@ -121,6 +121,9 @@ async function handle(request) {
     "入力本文だけを根拠に整理し、未確認の価格・納期・実績・対応可否を断定しないでください。",
     "契約・支払・個人情報・アカウント権限・法的判断に関わる内容はrisk_flagsへ挙げてください。",
     "返信案は下書きであり自動送信を前提にしません。不明点が重要ならneeds_human_review=trueにしてください。",
+    "既存顧客は、契約中・導入済み・継続利用中など既存取引が本文から明確な場合だけ選んでください。見積依頼や過去の相談・打ち合わせだけでは既存顧客とみなさず、進行中相談・商談を選んでください。",
+    "返信案で、本文や確認済み事実にない担当者の存在、打ち合わせ時間、価格、納期、実績、対応可否、社内体制を作らないでください。",
+    "reply_required=falseの場合、draft_replyは原則空文字にしてください。丁寧なお断り返信が実務上有益な場合のみ短い案を出してください。",
     "簡潔な日本語で出力してください。"
   ].join("\n");
   const user = JSON.stringify(input);
