@@ -5,60 +5,50 @@
   "completedPhase": "OPS10B1",
   "activePhase": null,
   "nextPhase": "OPS10B2",
-  "appVersion": "2026.09.16-FINAL.14",
+  "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "production_ready_pending_device_confirmation",
+  "status": "ready_for_next_phase",
   "currentWork": {
-    "title": "OPS10B1 — FINAL.14 Today task visibility fix",
-    "releaseStatus": "FINAL.14 production READY; one smartphone task-name visibility confirmation pending",
-    "rootCause": "Today cards are rendered as .swipeRow, but appendTodayTasks queried .swipeWrap, so zero rendered cards were found and no task names could be appended.",
+    "title": "OPS10B1 complete — FINAL.15 device-confirmed",
+    "releaseStatus": "FINAL.15 production PASS; Today task visibility confirmed on iPhone",
+    "rootCause": "FINAL.14 fixed task-card binding, but delayed current-position refresh still called bare renderToday(), rebuilding Today cards without task augmentation.",
     "fix": [
-      "Each rendered Today .swipeRow now stores the exact machine id in data-machine-id.",
-      "appendTodayTasks now queries .swipeRow and resolves each machine by that stored id instead of relying on a parallel array index.",
-      "Visit-completion behavior is unchanged from the already device-confirmed single-action FINAL.13 flow."
+      "Delayed current-position refresh now calls renderTodayWithTasks().",
+      "Today task names remain visible after the delayed rerender.",
+      "Visit-completion behavior remains the already-confirmed single-action FINAL.13 flow."
     ],
-    "lastSafetyTag": "backup-pre-OPS10B1-TODAY-TASK-VISIBILITY-FIX-20260916",
-    "lastSafetyTagTarget": "900a13ca44bb07f1a602e2d08a5a7f8c91b791d6",
+    "lastSafetyTag": "backup-pre-OPS10B1-TODAY-TASK-RERENDER-FIX-20260916",
+    "lastSafetyTagTarget": "40b0b20ca7c87262485ec65f1d51b90de180022f",
     "completedReleaseScope": [
       "OPS10A vehicle inventory stocktake/baseline UI with smartphone verification",
-      "Multi-axis product intelligence master data",
-      "Standalone Today important-task block removed",
-      "Visit completion simplified to per-task checkboxes plus one 訪問を完了 action; confirmed on iPhone FINAL.13"
+      "OPS10B1 confirmed multi-axis product intelligence master data",
+      "Today unfinished task names rendered inside relevant visit cards",
+      "Visit completion simplified to per-task checkboxes plus one 訪問を完了 action",
+      "FINAL.15 delayed Today rerender preserves task visibility; confirmed on iPhone"
     ],
     "nextActions": [
-      "On the smartphone, reload/reopen VENDRIVE and confirm the app reports FINAL.14.",
-      "Confirm linked unfinished task names are visible immediately inside the relevant Today visit cards.",
-      "Do not repeat the already-passed one-button visit-completion check unless relevant code changes.",
-      "If task-name visibility passes, mark OPS10B1 fully device-confirmed and advance to OPS10B2."
+      "Execute OPS10B2 substitute-demand transfer analysis using only confirmed product intelligence attributes and existing sales evidence.",
+      "Preserve RAW → COMPUTED → RECOMMENDATION separation and avoid causal certainty.",
+      "Do not repeat FINAL.15 Today/visit device checks unless relevant code changes."
     ],
-    "antiLoopRule": "Verification for this maintenance is finite: immutable safety tag, exact scoped diff, inline-JS syntax, no new whitespace/conflict markers, production deployment/live version, then one task-name smartphone check.",
+    "antiLoopRule": "Passed FINAL.15 real-device evidence is durable and must not be repeated unless relevant production code changes.",
     "production": {
-      "mergeCommit": "ee23d7d49f45d6d7608fdeb80945bc264bda96c6",
-      "pagesRunId": 35051018652,
+      "mergeCommit": "2629eb281996bb32c9295c91aeb8a9fe79f1096a",
+      "headAfterCleanup": "61208141ee7ab560bc2fff10f80ed4ff81ea0381",
+      "pagesRunId": 35052302002,
       "pagesConclusion": "success",
       "liveUrl": "https://tenta0604.github.io/VENDRIVE2/",
-      "liveHttpStatus": 200,
-      "liveVersion": "2026.09.16-FINAL.14"
+      "liveVersion": "2026.09.16-FINAL.15",
+      "deviceConfirmation": "PASS"
     }
   },
-  "requiredUserInput": [
-    "One smartphone check only: on FINAL.14, verify linked unfinished task names are visible immediately on the relevant Today cards after normal load/reopen."
-  ],
-  "unresolved": [
-    "Final real-device confirmation of Today task-name visibility on FINAL.14."
-  ],
+  "requiredUserInput": [],
+  "unresolved": [],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
-    "readOrder": [
-      "AGENTS.md",
-      ".ai/STATE.json",
-      "AI_ROADMAP.md",
-      ".ai/LAST_RUN.json",
-      ".ai/DECISIONS.md",
-      ".ai/WORKFLOW.md"
-    ],
+    "readOrder": ["AGENTS.md", ".ai/STATE.json", "AI_ROADMAP.md", ".ai/LAST_RUN.json", ".ai/DECISIONS.md", ".ai/WORKFLOW.md"],
     "shortResumePrompt": "VENDRIVE続き"
   }
 }
