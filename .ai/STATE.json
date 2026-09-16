@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "maintenance_static_pass_pending_merge",
+  "status": "production_ready_pending_device_confirmation",
   "currentWork": {
     "title": "OPS10B1 — FINAL.14 Today task visibility fix",
-    "releaseStatus": "FINAL.14 static gates PASS; merge/deployment pending",
+    "releaseStatus": "FINAL.14 production READY; one smartphone task-name visibility confirmation pending",
     "rootCause": "Today cards are rendered as .swipeRow, but appendTodayTasks queried .swipeWrap, so zero rendered cards were found and no task names could be appended.",
     "fix": [
       "Each rendered Today .swipeRow now stores the exact machine id in data-machine-id.",
@@ -28,17 +28,26 @@
       "Visit completion simplified to per-task checkboxes plus one 訪問を完了 action; confirmed on iPhone FINAL.13"
     ],
     "nextActions": [
-      "Merge the guarded FINAL.14 branch after the recorded static gates.",
-      "Wait only for the production deployment terminal state and verify the live version is FINAL.14.",
-      "Request one minimal smartphone check: Today task names must be visible immediately on normal load/reopen.",
+      "On the smartphone, reload/reopen VENDRIVE and confirm the app reports FINAL.14.",
+      "Confirm linked unfinished task names are visible immediately inside the relevant Today visit cards.",
       "Do not repeat the already-passed one-button visit-completion check unless relevant code changes.",
-      "After the task-name device check passes, mark OPS10B1 fully confirmed and advance to OPS10B2."
+      "If task-name visibility passes, mark OPS10B1 fully device-confirmed and advance to OPS10B2."
     ],
-    "antiLoopRule": "Verification for this maintenance is finite: immutable safety tag, exact scoped diff, inline-JS syntax, no new whitespace/conflict markers, production deployment/live version, then one task-name smartphone check."
+    "antiLoopRule": "Verification for this maintenance is finite: immutable safety tag, exact scoped diff, inline-JS syntax, no new whitespace/conflict markers, production deployment/live version, then one task-name smartphone check.",
+    "production": {
+      "mergeCommit": "ee23d7d49f45d6d7608fdeb80945bc264bda96c6",
+      "pagesRunId": 35051018652,
+      "pagesConclusion": "success",
+      "liveUrl": "https://tenta0604.github.io/VENDRIVE2/",
+      "liveHttpStatus": 200,
+      "liveVersion": "2026.09.16-FINAL.14"
+    }
   },
-  "requiredUserInput": [],
+  "requiredUserInput": [
+    "One smartphone check only: on FINAL.14, verify linked unfinished task names are visible immediately on the relevant Today cards after normal load/reopen."
+  ],
   "unresolved": [
-    "FINAL.14 still requires one real-device confirmation that linked unfinished task names render immediately on Today cards after production deployment."
+    "Final real-device confirmation of Today task-name visibility on FINAL.14."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
