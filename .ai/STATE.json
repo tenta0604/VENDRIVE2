@@ -9,35 +9,38 @@
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "production_deployed_pending_final_device_confirmation",
+  "status": "device_check_failed_today_task_visibility",
   "currentWork": {
-    "title": "OPS10B1 — Multi-axis Product Intelligence + Today task workflow",
-    "releaseStatus": "FINAL.13 production READY; final smartphone behavior check pending",
+    "title": "OPS10B1 — FINAL.13 Today task visibility device fix",
+    "releaseStatus": "FINAL.13 production READY; iPhone device check partially failed",
     "lastSafetyTag": "backup-pre-OPS10B1-DEVICE-RUNTIME-20260916",
     "lastSafetyTagTarget": "7736f159ace64b8820bb9b18891dfd115a0525bb",
+    "deviceEvidence": {
+      "checkedAtLocal": "2026-09-16T12:06:00+09:00",
+      "deviceVersionVisible": "2026.09.16-FINAL.13",
+      "todayTaskNamesVisibleImmediately": false,
+      "visitCompletionSingleButton": true,
+      "notes": "User iPhone screenshot shows FINAL.13 and Today visit cards without task-name rows. User separately confirmed visit completion is now one-button only."
+    },
     "completedReleaseScope": [
-      "OPS10A vehicle inventory stocktake/baseline UI, including successful smartphone UI verification",
-      "Multi-axis product intelligence master data with broad family plus optional structured attributes",
-      "Unknown product attributes remain unknown instead of being fabricated",
-      "First-seen classification requires explicit human confirmation and confirmed data is reused",
-      "Today standalone important-task block removed",
-      "Machine-specific unfinished tasks are integrated directly into Today visit cards",
-      "FINAL.13 shows task names compactly without per-task progress strings or a two-item truncation",
-      "Visit completion uses per-task checkboxes and a single 訪問を完了 action",
-      "Checked tasks complete only for that machine; unchecked tasks remain unfinished",
-      "FINAL.13 production deployment reached READY and a fresh mobile cloud smoke load returned HTTP 200"
+      "OPS10A vehicle inventory stocktake/baseline UI with smartphone verification",
+      "Multi-axis product intelligence master data",
+      "Standalone Today important-task block removed",
+      "Visit completion simplified to per-task checkboxes plus one 訪問を完了 action; confirmed on iPhone FINAL.13"
     ],
     "nextActions": [
-      "Obtain one final smartphone confirmation that FINAL.13 shows Today machine-card task names immediately on normal load/reopen.",
-      "Confirm the visit-completion dialog has checkboxes plus one 訪問を完了 button.",
-      "After that confirmation, advance to OPS10B2 demand-transfer analysis."
+      "Do not advance to OPS10B2 yet.",
+      "Diagnose why linked unfinished task names still do not render on Today cards during normal initial render/reopen on the user's real dataset.",
+      "Fix the Today task render lifecycle/machine identity mapping at source, then deploy a new unambiguous app version and perform finite verification.",
+      "Request only the minimal smartphone confirmation after the new production build is READY.",
+      "After the task-name device check passes, mark OPS10B1 fully confirmed and advance to OPS10B2."
     ],
-    "antiLoopRule": "Once the finite OPS10B1 gates pass, do not repeat them unless code, deployment, methodology, or a relevant precondition changes."
+    "antiLoopRule": "Do not repeat already-passed one-button visit-completion verification unless relevant code changes. Focus the next maintenance only on Today task-name visibility."
   },
-  "requiredUserInput": [
-    "One final smartphone real-device check of FINAL.13 Today task visibility and the single-action per-task visit completion dialog."
+  "requiredUserInput": [],
+  "unresolved": [
+    "FINAL.13 real-device defect: Today visit cards do not show linked unfinished task names on normal load even though the one-button visit-completion flow is fixed."
   ],
-  "unresolved": [],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
     "readOrder": ["AGENTS.md", ".ai/STATE.json", "AI_ROADMAP.md", ".ai/LAST_RUN.json", ".ai/DECISIONS.md", ".ai/WORKFLOW.md"],
