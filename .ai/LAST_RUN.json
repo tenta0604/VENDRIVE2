@@ -1,34 +1,40 @@
 {
-  "evidenceVersion": 2,
-  "runType": "rollback_closeout",
-  "phase": "OPS10C",
-  "status": "WITHDRAWN_AND_REMOVED",
+  "evidenceVersion": 3,
+  "runType": "intelligence_v2_hardening_handoff",
+  "phase": "AN15G2_CODE",
+  "status": "MERGED_WITH_EXTERNAL_DEPLOY_BLOCKER_AND_FOUNDATION_GAPS_RECORDED",
   "base": {
-    "rollbackPreEditHead": "17e81c3ed10c2a7dc7175fdac0b89ae6db8ed0ec",
-    "safetyTag": "backup-pre-OPS10C-ROLLBACK-20260916",
-    "productionHead": "edc0ee808bb3c94b3f7513171f6b5f636abbea24"
+    "productionHead": "ee3617c4863388727c1b8fb61352aaf24d515684",
+    "hardeningSafetyTag": "backup-pre-AN15-BOOKKEEP-HARDENING-20260916"
   },
   "versions": {"app":"2026.09.16-FINAL.15","engine":"AN14B3B2","db":4,"schema":4},
   "work": {
-    "summary": "Withdraw OPS10C install-spot / active-visit experiment after field verification and restore the simpler Today baseline.",
+    "summary": "AN15A-G2 intelligence foundations are merged; canonical state now records the exact promotion blockers instead of treating foundations as a completed self-learning production loop.",
     "implemented": [
-      "Removed ops10c-active-visit.js production sidecar.",
-      "Removed OPS10C runtime loading from ocr-config.js.",
-      "Preserved OPS10B2 runtime.",
-      "Preserved existing core Today nearest-machine ordering behavior.",
-      "Rollback PR #65 merged to main.",
-      "GitHub Pages build and deploy completed successfully for rollback head."
+      "AN15A forecast ledger/scoring API foundation.",
+      "AN15B bounded self-calibration evaluation.",
+      "AN15C explicit weather/calendar context-response evaluation.",
+      "AN15D explainable machine profiles and AN15D2 pooling backtest.",
+      "AN15E confirmed-change substitution evidence.",
+      "AN15F proposal-only joint optimizer.",
+      "AN15G grounded explanation boundary and AN15G2 dedicated /api/explain Gemini transport.",
+      "GitHub Pages build/report/deploy passed for AN15G2 main head."
     ]
   },
   "gates": {
-    "rollbackSafetyCheckpoint": "PASS",
-    "rollbackMerge": "PASS",
-    "productionBuild": "PASS",
-    "productionDeploy": "PASS",
-    "additionalSmartphoneCheck": "NOT_REQUIRED_FOR_WITHDRAWN_FEATURE"
+    "an15g2CodeMerge": "PASS",
+    "githubPages": "PASS",
+    "vercelExplainDeployment": "BLOCKED_EXTERNAL_RATE_LIMIT",
+    "an15aProductionLifecycleWiring": "NOT_COMPLETE",
+    "an15aCExecutableTests": "NOT_COMPLETE",
+    "numericLearningProductionPromotion": "NOT_ALLOWED"
   },
-  "changedFiles": ["ocr-config.js","ops10c-active-visit.js"],
-  "openItems": ["Select next product scope from operational priorities"],
-  "nextAction": "Ask for the next operational priority only; OPS10C is closed as withdrawn and must not block future work.",
-  "unresolved": []
+  "openItems": [
+    "Integrate AN15A with real forecast/outcome lifecycle safely.",
+    "Fix AN15C incremental comparison against AN15B baseline.",
+    "Add executable tests for AN15A-C.",
+    "Verify Gemini explanation transport after Vercel limit clears."
+  ],
+  "nextAction": "Execute AN15A-C lifecycle integration and executable hardening tests without depending on Vercel.",
+  "unresolved": ["Vercel deployment rate limit for /api/explain"]
 }

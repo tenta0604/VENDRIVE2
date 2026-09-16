@@ -2,34 +2,44 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "OPS10B2",
-  "activePhase": null,
-  "nextPhase": null,
+  "completedPhase": "AN15G2_CODE",
+  "activePhase": "AN15_HARDENING",
+  "nextPhase": "AN15A_C_LIFECYCLE_INTEGRATION_AND_EXECUTABLE_TESTS",
   "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "product_baseline_stable_next_scope_requires_product_decision",
+  "status": "an15_intelligence_foundations_merged_hardening_required_before_numeric_promotion",
   "currentWork": {
-    "title": "Post-OPS10C rollback baseline",
-    "releaseStatus": "OPS10C install-spot / active-visit experiment withdrawn after field verification and removed from production. Existing Today nearest-machine ordering remains the intended baseline.",
+    "title": "AN15 intelligence v2 hardening",
+    "releaseStatus": "AN15A-G2 sidecar/API foundations are merged. GitHub Pages for AN15G2 head passed. Vercel deployment of /api/explain is externally rate-limited, so Gemini production transport verification remains pending.",
     "scope": [
-      "OPS10C CURRENT INSTALL SPOT / automatic install-spot runtime is removed.",
-      "Do not reintroduce explicit visit-start or install-spot grouping without a new product decision.",
-      "Preserve existing Today nearest-machine ordering behavior.",
-      "OPS10B2 remains the latest completed product phase."
+      "AN15A forecast ledger/scoring foundation exists but is not yet automatically wired to production forecast creation and later confirmed outcome scoring.",
+      "AN15B bounded self-calibration is evaluation-only and must not affect live forecasts until enough exact scored real samples and walk-forward evidence exist.",
+      "AN15C context-response learning is evaluation-only; weather must remain unknown unless supplied by a reliable observed source. Its promotion comparison must be incremental against the AN15B-calibrated baseline.",
+      "AN15D machine profiles and AN15D2 cross-machine pooling backtest are descriptive/evaluation-only; pooling is not live.",
+      "AN15E substitution v2 is confirmed-event, non-causal evidence only.",
+      "AN15F joint optimizer is proposal-only and performs no downstream writes.",
+      "AN15G/G2 explanation layer has no numeric authority. /api/explain is separate from OCR and has deterministic fallback.",
+      "OPS10C remains withdrawn; preserve existing Today nearest-machine ordering."
     ],
     "safety": {
-      "rollbackBase": "17e81c3ed10c2a7dc7175fdac0b89ae6db8ed0ec",
-      "rollbackTag": "backup-pre-OPS10C-ROLLBACK-20260916",
-      "rollbackProductionHead": "edc0ee808bb3c94b3f7513171f6b5f636abbea24"
+      "hardeningBase": "ee3617c4863388727c1b8fb61352aaf24d515684",
+      "hardeningTag": "backup-pre-AN15-BOOKKEEP-HARDENING-20260916"
     },
     "nextActions": [
-      "Choose the next product scope from real operational needs; no further OPS10C device verification is required."
+      "Wire AN15A snapshot creation to the real production forecast lifecycle without changing forecast values.",
+      "Score only safely matched later confirmed sales outcomes and preserve censored semantics.",
+      "Make AN15C incremental evaluation compare against AN15B-calibrated baseline.",
+      "Add executable no-lookahead/idempotency/censoring/sparse-data tests for AN15A-C before any numeric promotion.",
+      "Verify /api/explain against Gemini after the external Vercel deployment rate limit clears."
     ]
   },
-  "requiredUserInput": ["Next product priority / operational pain point to implement"],
-  "unresolved": [],
+  "requiredUserInput": [],
+  "unresolved": [
+    "Vercel production deployment of AN15G2 /api/explain is rate-limited externally.",
+    "AN15A-C production lifecycle integration and executable tests are not complete."
+  ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
     "readOrder": ["AGENTS.md", ".ai/STATE.json", "AI_ROADMAP.md", ".ai/LAST_RUN.json", ".ai/DECISIONS.md", ".ai/WORKFLOW.md"],
