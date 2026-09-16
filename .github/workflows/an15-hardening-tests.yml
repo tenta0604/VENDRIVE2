@@ -23,7 +23,10 @@ jobs:
       - name: Syntax check
         run: |
           node --check an15a-forecast-scoring.js
+          node --check an15b-self-calibration.js
+          node --check an15c-context-response.js
           node --check an15-lifecycle-integration.js
           node --check tests/an15-lifecycle.test.js
-      - name: Executable lifecycle tests
-        run: node --test tests/an15-lifecycle.test.js
+          node --check tests/an15-calibration-context.test.js
+      - name: Executable AN15A-C hardening tests
+        run: node --test tests/an15-*.test.js
