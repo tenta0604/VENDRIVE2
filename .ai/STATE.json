@@ -5,35 +5,37 @@
   "completedPhase": "OPS10B1",
   "activePhase": null,
   "nextPhase": "OPS10B2",
-  "appVersion": "2026.09.16-FINAL.11",
+  "appVersion": "2026.09.16-FINAL.13",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "implemented_pending_final_device_confirmation",
+  "status": "production_deployed_pending_final_device_confirmation",
   "currentWork": {
     "title": "OPS10B1 — Multi-axis Product Intelligence + Today task workflow",
-    "releaseStatus": "preview_verified_pending_production_device_check",
-    "lastSafetyTag": "backup-pre-OPS10B1-20260915",
-    "lastSafetyTagTarget": "2265803dc6c4d49e63dd4430146124da80e0146e",
+    "releaseStatus": "FINAL.13 production READY; final smartphone behavior check pending",
+    "lastSafetyTag": "backup-pre-OPS10B1-DEVICE-RUNTIME-20260916",
+    "lastSafetyTagTarget": "7736f159ace64b8820bb9b18891dfd115a0525bb",
     "completedReleaseScope": [
       "OPS10A vehicle inventory stocktake/baseline UI, including successful smartphone UI verification",
       "Multi-axis product intelligence master data with broad family plus optional structured attributes",
       "Unknown product attributes remain unknown instead of being fabricated",
       "First-seen classification requires explicit human confirmation and confirmed data is reused",
       "Today standalone important-task block removed",
-      "Machine-specific unfinished tasks integrated compactly into Today visit cards with overall per-task progress",
-      "Visit completion changed from all-or-nothing task confirmation to per-task checkboxes",
-      "Unchecked tasks can remain unfinished while the visit itself is completed"
+      "Machine-specific unfinished tasks are integrated directly into Today visit cards",
+      "FINAL.13 shows task names compactly without per-task progress strings or a two-item truncation",
+      "Visit completion uses per-task checkboxes and a single 訪問を完了 action",
+      "Checked tasks complete only for that machine; unchecked tasks remain unfinished",
+      "FINAL.13 production deployment reached READY and a fresh mobile cloud smoke load returned HTTP 200"
     ],
     "nextActions": [
-      "Deploy FINAL.11 after PR verification/merge.",
-      "Obtain one final smartphone confirmation of Today machine-card tasks and per-task visit-completion dialog.",
-      "After that, OPS10B2 is the next product phase."
+      "Obtain one final smartphone confirmation that FINAL.13 shows Today machine-card task names immediately on normal load/reopen.",
+      "Confirm the visit-completion dialog has checkboxes plus one 訪問を完了 button.",
+      "After that confirmation, advance to OPS10B2 demand-transfer analysis."
     ],
     "antiLoopRule": "Once the finite OPS10B1 gates pass, do not repeat them unless code, deployment, methodology, or a relevant precondition changes."
   },
   "requiredUserInput": [
-    "After production deployment only: one smartphone real-device check of FINAL.11 Today task integration and per-task visit completion."
+    "One final smartphone real-device check of FINAL.13 Today task visibility and the single-action per-task visit completion dialog."
   ],
   "unresolved": [],
   "recovery": {
