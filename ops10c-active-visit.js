@@ -1,8 +1,9 @@
 (function(){
 "use strict";
 var KEY="vendrive2_ops10c_spot_v2",OVERRIDE_KEY="vendrive2_ops10c_spot_overrides_v1",ENTER=85,KEEP=140,CLUSTER=28,MAX_ACC=80,activeSpot=null,stablePos=null,root=null,identityBox=null;
-function machines(){return (window.state&&state.machines||[]).filter(function(m){return m&&!m.visited})}
-function machine(id){return (window.state&&state.machines||[]).find(function(m){return m&&String(m.id)===String(id)})||null}
+function appState(){try{return typeof state!=="undefined"&&state?state:(window.state||null)}catch(e){return window.state||null}}
+function machines(){var s=appState();return (s&&s.machines||[]).filter(function(m){return m&&!m.visited})}
+function machine(id){var s=appState();return (s&&s.machines||[]).find(function(m){return m&&String(m.id)===String(id)})||null}
 function norm(v){return String(v||"").toLowerCase().replace(/[\s　\-－_・･（）()]/g,"")}
 function loc(m){if(!m)return null;var lat=Number(m.lat),lng=Number(m.lng);return isFinite(lat)&&isFinite(lng)?{lat:lat,lng:lng}:null}
 function distance(a,b){if(typeof window.distanceMeters==="function")return window.distanceMeters(a,b);var r=6371000,rad=Math.PI/180,dLat=(b.lat-a.lat)*rad,dLng=(b.lng-a.lng)*rad,x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*r*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
