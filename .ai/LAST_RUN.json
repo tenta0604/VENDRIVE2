@@ -1,46 +1,42 @@
 {
   "evidenceVersion": 2,
   "runType": "maintenance",
-  "phase": "OPS10B1-DEVICE-FIX",
-  "status": "PASS_PENDING_FINAL_DEVICE_CONFIRMATION",
+  "phase": "OPS10B1-TODAY-TASK-VISIBILITY-FIX",
+  "status": "STATIC_PASS_READY_TO_MERGE",
   "base": {
-    "head": "7736f159ace64b8820bb9b18891dfd115a0525bb",
-    "safetyTag": "backup-pre-OPS10B1-DEVICE-RUNTIME-20260916",
-    "safetyTagTarget": "7736f159ace64b8820bb9b18891dfd115a0525bb",
+    "head": "900a13ca44bb07f1a602e2d08a5a7f8c91b791d6",
+    "safetyTag": "backup-pre-OPS10B1-TODAY-TASK-VISIBILITY-FIX-20260916",
+    "safetyTagTarget": "900a13ca44bb07f1a602e2d08a5a7f8c91b791d6",
     "safetyTagType": "annotated"
   },
   "versions": {
-    "app": "2026.09.16-FINAL.13",
+    "app": "2026.09.16-FINAL.14",
     "engine": "AN14B3B2",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Stabilize OPS10B1 Today task visibility on real devices and simplify per-task visit completion.",
+    "summary": "Fix the FINAL.13 real-device Today task-name visibility defect without changing the already-confirmed visit-completion behavior.",
+    "rootCause": "renderToday creates .swipeRow wrappers while appendTodayTasks queried .swipeWrap, producing an empty wrapper list.",
     "completed": [
-      "Visit task confirmation now has one completion action: 訪問を完了.",
-      "Only checked tasks are completed for the current machine; unchecked tasks remain unfinished.",
-      "Per-task overall progress strings were removed from the visit dialog.",
-      "Today machine cards now render all linked unfinished task names compactly instead of two rows plus +N.",
-      "Today card task rendering is re-applied after the normal Today render lifecycle to avoid disappearing until a later rerender.",
-      "Standalone Today important-task block remains removed.",
-      "APP version and version.json were advanced to FINAL.13.",
-      "Guarded maintenance static gates passed before merge.",
-      "Production deployment for FINAL.13 reached READY.",
-      "Fresh mobile cloud smoke load of production returned HTTP 200 and rendered the application."
+      "Today rendered rows now carry data-machine-id.",
+      "Task rendering selects .swipeRow and resolves the machine by data-machine-id.",
+      "APP/version metadata advanced to FINAL.14.",
+      "The single 訪問を完了 visit-confirmation flow remains unchanged."
     ]
   },
   "gates": {
     "immutableAnnotatedSafetyTag": "PASS",
-    "guardedMaintenanceStaticGates": "PASS",
-    "singleVisitCompletionAction": "PASS",
-    "legacySecondVisitActionRemoved": "PASS",
-    "todayTaskNamesNotProgress": "PASS",
-    "allLinkedTaskNamesRendered": "PASS",
-    "productionDeploymentReady": "PASS",
-    "freshMobileCloudSmoke": "PASS",
-    "dbSchemaBump": "NOT_REQUIRED",
-    "finalSmartphoneDeviceCheck": "PENDING"
+    "exactScopedDiff": "PASS",
+    "inlineJavascriptSyntax": "PASS",
+    "expectedRuntimeBindings": "PASS",
+    "noConflictMarkers": "PASS",
+    "noNewTrailingWhitespace": "PASS",
+    "visitCompletionRegressionScope": "PASS_UNCHANGED",
+    "databaseSchemaBump": "NOT_REQUIRED",
+    "productionDeploymentReady": "PENDING",
+    "liveVersionFinal14": "PENDING",
+    "finalSmartphoneTaskVisibility": "PENDING"
   },
   "changedFiles": [
     "index.html",
@@ -49,8 +45,10 @@
     ".ai/LAST_RUN.json"
   ],
   "openItems": [
-    "Final smartphone confirmation that task names are visible immediately on Today cards and the visit dialog has one completion button."
+    "Merge branch to main.",
+    "Verify production deployment reaches a terminal READY/success state and live app reports FINAL.14.",
+    "Obtain one smartphone confirmation that Today task names are visible immediately."
   ],
-  "nextAction": "After the smartphone confirmation passes, mark OPS10B1 fully confirmed and advance to OPS10B2 demand-transfer analysis.",
+  "nextAction": "Merge the guarded branch, verify production FINAL.14, then request only the task-name smartphone check.",
   "unresolved": []
 }
