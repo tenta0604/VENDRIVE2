@@ -1,46 +1,40 @@
 {
   "evidenceVersion": 2,
-  "runType": "continuity",
-  "phase": "CHAT-MIGRATION-CANONICALIZATION-20260916",
-  "status": "PASS",
+  "runType": "product-phase",
+  "phase": "OPS10B1",
+  "status": "PASS_PENDING_FINAL_DEVICE_CONFIRMATION",
   "base": {
-    "head": "0484784cfc4c006ca2a457dd8525df02dc4dba0d",
-    "safetyTag": null,
-    "safetyTagReason": "NOT_REQUIRED: canonical documentation/state continuity only; no production code changed."
+    "head": "2265803dc6c4d49e63dd4430146124da80e0146e",
+    "safetyTag": "backup-pre-OPS10B1-20260915",
+    "safetyTagTarget": "2265803dc6c4d49e63dd4430146124da80e0146e",
+    "safetyTagType": "annotated"
   },
-  "versions": {
-    "app": "2026.09.16-FINAL.9",
-    "engine": "AN14B3B2",
-    "db": 4,
-    "schema": 4
-  },
+  "versions": {"app":"2026.09.16-FINAL.11","engine":"AN14B3B2","db":4,"schema":4},
   "work": {
-    "summary": "Persist the full end-of-chat VENDRIVE2 handoff so a new chat can resume from GitHub with only 'VENDRIVE続き'.",
+    "summary": "Add confirmed multi-axis product intelligence and compact machine-level Today task workflow with per-task visit completion.",
     "completed": [
-      "Recorded FINAL.9 as the production baseline and OPS-REAL-WORKFLOW as the latest completed product phase.",
-      "Defined OPS10A vehicle inventory initial stocktake with machine-list-style product search as the next phase.",
-      "Defined OPS10B1 multi-axis product intelligence and first-seen one-time human classification confirmation.",
-      "Defined OPS10B2 classification-aware demand-transfer and replacement analysis.",
-      "Defined OPS10C explicit active-visit / nearby-candidate workflow with GPS used only for candidate discovery and OCR cross-check.",
-      "Recorded the finite verification / anti-loop rule in AGENTS, DECISIONS, and WORKFLOW."
+      "Product intelligence stores family plus optional structured attributes separately from raw product records.",
+      "Unknown attributes remain null/unknown; existing category is only used as explicit backward-compatible family evidence.",
+      "First-seen products require confirmation; confirmed records are reused and can be reviewed/corrected.",
+      "Standalone Today important-task block is removed by the FINAL.11 Today renderer.",
+      "Unfinished tasks are shown on their machine visit cards, capped at two visible rows plus +N, with task-wide done/total progress.",
+      "Visit completion presents individual checkboxes; only checked tasks are completed and unchecked tasks remain unfinished.",
+      "Preview deployment rendered FINAL.11 successfully and did not show the removed standalone important-task block."
     ]
   },
   "gates": {
-    "synchronizedMainBaseline": "PASS",
-    "noProductionCodeChange": "PASS",
-    "canonicalJsonValidation": "PASS",
-    "crossFilePhaseConsistency": "PASS",
-    "safetyTag": "NOT_REQUIRED: continuity-only documentation/state maintenance"
+    "mainBaseUnchangedBeforeEdit": "PASS",
+    "immutableAnnotatedSafetyTag": "PASS",
+    "previewDeploymentReady": "PASS",
+    "previewFinal11Rendered": "PASS",
+    "standaloneImportantTaskBlockAbsent": "PASS",
+    "productIntelligenceReviewUiLoaded": "PASS",
+    "rawProductOverwrite": "PASS: none",
+    "dbSchemaBump": "NOT_REQUIRED: existing Analytics meta store used",
+    "finalSmartphoneDeviceCheck": "PENDING_AFTER_PRODUCTION_DEPLOYMENT"
   },
-  "changedFiles": [
-    "AGENTS.md",
-    ".ai/STATE.json",
-    "AI_ROADMAP.md",
-    ".ai/LAST_RUN.json",
-    ".ai/DECISIONS.md",
-    ".ai/WORKFLOW.md"
-  ],
-  "openItems": [],
-  "nextAction": "On a new chat, the user may say only 'VENDRIVE続き'. Fetch latest main, read the canonical recovery set, verify consistency, then start OPS10A. Before any OPS10A production-code edit, create a fresh immutable annotated Safety Tag at the then-current main HEAD.",
+  "changedFiles": ["ocr-config.js","ops10b1-today-tasks.js","ops10b1-product-intelligence.js","version.json",".ai/STATE.json",".ai/LAST_RUN.json"],
+  "openItems": ["Final smartphone confirmation after production deployment."],
+  "nextAction": "Merge PR after repository checks, verify production deployment, then ask for one smartphone check of FINAL.11 Today task integration/per-task completion. After confirmation, OPS10B2 is next.",
   "unresolved": []
 }

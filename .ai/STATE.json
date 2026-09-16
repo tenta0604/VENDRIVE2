@@ -2,135 +2,43 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "OPS-REAL-WORKFLOW",
+  "completedPhase": "OPS10B1",
   "activePhase": null,
-  "nextPhase": "OPS10A",
-  "appVersion": "2026.09.16-FINAL.9",
+  "nextPhase": "OPS10B2",
+  "appVersion": "2026.09.16-FINAL.11",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "complete",
+  "status": "implemented_pending_final_device_confirmation",
   "currentWork": {
-    "title": "FINAL.9 production baseline — next operations phases prepared",
-    "releaseStatus": "release_ready",
+    "title": "OPS10B1 — Multi-axis Product Intelligence + Today task workflow",
+    "releaseStatus": "preview_verified_pending_production_device_check",
+    "lastSafetyTag": "backup-pre-OPS10B1-20260915",
+    "lastSafetyTagTarget": "2265803dc6c4d49e63dd4430146124da80e0146e",
     "completedReleaseScope": [
-      "Full Analytics data-path regression across products, machine links, reports, inventory, expiry, analysis, forecasting, recommendations, and planning",
-      "OCR review and draft-only safety boundary regression for sales and input/recovery review flows",
-      "Analytics backup validation and restore coverage for source schemas 2, 3, and 4",
-      "Legacy backup export, restore preview, future-format rejection, pre-restore checkpoint, and restore verification",
-      "Legacy VENDRIVE2_DB v1 empty-database self-repair to internal version 2 with snapshots store creation",
-      "Real Microsoft Edge mobile regression at exact 320px and 390px without horizontal overflow",
-      "Release metadata aligned so deployed clients can detect the FINAL build"
+      "OPS10A vehicle inventory stocktake/baseline UI, including successful smartphone UI verification",
+      "Multi-axis product intelligence master data with broad family plus optional structured attributes",
+      "Unknown product attributes remain unknown instead of being fabricated",
+      "First-seen classification requires explicit human confirmation and confirmed data is reused",
+      "Today standalone important-task block removed",
+      "Machine-specific unfinished tasks integrated compactly into Today visit cards with overall per-task progress",
+      "Visit completion changed from all-or-nothing task confirmation to per-task checkboxes",
+      "Unchecked tasks can remain unfinished while the visit itself is completed"
     ],
-    "releaseFixes": [
-      "Aligned index APP_VERSION with canonical release metadata",
-      "Repaired legacy VENDRIVE2_DB initialization so the snapshots store is guaranteed and pre-restore safety checkpoints work on fresh or previously broken v1 databases"
-    ],
-    "lastSafetyTag": "backup-pre-OPS-REAL-WORKFLOW-20260916",
-    "lastSafetyTagTarget": "e333b11b0ed6488738ab4b4d50082ea84f0287f1",
-    "nextProductionEditRequiresFreshSafetyTag": true,
     "nextActions": [
-      "Start OPS10A — Vehicle Inventory Initial Stocktake / Baseline UI with product search.",
-      "After OPS10A, continue with OPS10B1 multi-axis product intelligence, OPS10B2 classification-aware demand-transfer analysis, then OPS10C explicit active-visit / nearby workflow.",
-      "Before any production-code edit, create a fresh immutable annotated Safety Tag at the then-current main HEAD."
+      "Deploy FINAL.11 after PR verification/merge.",
+      "Obtain one final smartphone confirmation of Today machine-card tasks and per-task visit-completion dialog.",
+      "After that, OPS10B2 is the next product phase."
     ],
-    "maintenance": [
-      "Updated stale OCR pre-connection guidance to match the live secure OCR workflow.",
-      "Bumped app version to 2026.09.15-FINAL.1 so existing clients can detect the maintenance update.",
-      "Fresh installations now start with zero vending machines instead of injecting development sample machines A-F.",
-      "Existing localStorage data and IndexedDB recovery data remain authoritative and are not deleted by the empty-start maintenance.",
-      "Hardened OCR provider availability with bounded retry and fallback across Gemini 3.6 Flash, 3.5 Flash, 3.5 Flash-Lite, and 3.1 Flash-Lite.",
-      "Added distinct user-facing OCR failure categories for provider busy, timeout, connection, structured parse, authentication, and rejection failures.",
-      "Replaced the too-short sequential 8-second OCR model attempts with hedged provider requests: the primary model keeps running while fallback models start only if the prior request is slow or fails.",
-      "Raised the OCR provider attempt window to 30 seconds, the provider budget to 55 seconds, and the client relay timeout to 75 seconds.",
-      "Added realistic large-image production smoke coverage so tiny 1x1 test images can no longer falsely certify OCR latency.",
-      "Added a compact OCR review layer that shows all important values at a glance, highlights only deterministic uncertainty or inconsistencies, and opens the existing detailed editor only when requested.",
-      "Renamed OCR confidence presentation so report-type confidence is not mistaken for per-field OCR accuracy.",
-      "Added explicit registered-machine matching via maker/vendor identity, with user-confirmed machine linking for unique candidates.",
-      "Reduced input-confirmation OCR scope to analysis-relevant product/quantity fields instead of counter/payment reconciliation.",
-      "Added client-side OCR image optimization and visible processing progress to reduce upload and inference latency without storing images.",
-      "Fixed compact OCR review typography by replacing the generic .name/.code/.qty item classes with isolated OCR-specific classes, preventing collision with the global VENDRIVE brand .name style.",
-      "Reduced compact OCR item-row visual density while keeping product names readable and quantities emphasized.",
-      "Separated OCR uncertainty, consistency checks, and machine-link confirmation into distinct compact-review badges so a machine-link prompt is no longer presented as a generic OCR issue.",
-      "Added pinpoint inline editing for uncertain or missing metadata and item fields; only the flagged field opens for correction, while the existing full editor remains available at the bottom.",
-      "After a pinpoint correction, the matching uncertainty warning is cleared in-memory and the compact review is immediately re-evaluated without writing Analytics data.",
-      "OCR runs now use a generation token so failed, closed, replaced, or stale requests cannot leave or restore an older review beneath a newer error/result.",
-      "A current OCR failure explicitly clears the prior OCR review and in-memory OCR candidate before presenting the failure state.",
-      "Recovery case-conversion warnings are derived from structured recovery rows: false global warnings are removed when caseCount is zero, while genuinely unsafe case rows become pinpoint Japanese quantity checks with inline editing.",
-      "OCR draft creation now has an explicit success card and a separate user-confirmed finalization step. Confirmed sales reports become analysis inputs; confirmed input/recovery reports become inventory-calculation inputs.",
-      "Moved 帳票撮影 directly below the Today progress hero so it is available before scrolling through the visit list.",
-      "Visit completion now warns when that vending machine still has unfinished tasks; this applies to both swipe completion and normal visit completion.",
-      "End-of-day confirmation now warns about unfinished orders and task assignments only for vending machines in today's active route target set."
-    ],
-    "plannedPhases": [
-      {
-        "id": "OPS10A",
-        "title": "Vehicle Inventory Initial Stocktake / Baseline UI",
-        "purpose": "Create a one-time real stocktake flow for current vehicle inventory using existing Analytics baseline semantics, with machine-list-style product search."
-      },
-      {
-        "id": "OPS10B1",
-        "title": "Multi-axis Product Intelligence / First-seen Classification",
-        "purpose": "Replace single-category thinking with a structured product family plus multiple attributes; AI proposes classification and the user confirms once per new product."
-      },
-      {
-        "id": "OPS10B2",
-        "title": "Classification-aware Demand Transfer / Replacement Analysis",
-        "purpose": "Use product similarity and multi-level aggregate demand to distinguish true demand decline from sales moving to a close substitute, and improve replacement suggestions."
-      },
-      {
-        "id": "OPS10C",
-        "title": "Explicit Active Visit / Nearby Candidate Workflow",
-        "purpose": "Use GPS only to surface nearby candidates; let the user explicitly start exactly one active machine, keep it pinned near the top, and cross-check OCR identity against it."
-      }
-    ],
-    "handoff": {
-      "requestedResumePhrase": "VENDRIVE続き",
-      "userDoesNotNeedToPasteLongHandoff": true,
-      "vehicleInventoryDirection": [
-        "Do not reconstruct historical vehicle movements just to bootstrap current inventory.",
-        "Perform one real physical stocktake and register that timestamp as the starting baseline.",
-        "Provide live product search similar to the vending-machine list; search product name, product code, and maker.",
-        "Support case count plus loose units and convert only when case size is known; never invent case size.",
-        "Do not silently treat an unentered product as zero; the stocktake flow must make zero-vs-not-counted explicit.",
-        "After baseline, confirmed movements drive current stock; later real stocktakes use reconciliation/correction instead of rewriting history."
-      ],
-      "productIntelligenceDirection": [
-        "The business purpose is revenue analysis and replacement decisions, not cosmetic categorization.",
-        "A single category such as coffee or carbonated drink is insufficient.",
-        "Use product family plus multiple structured attributes/tags so close substitutes can be identified at several similarity levels.",
-        "Example coffee attributes: black/milked, sugar level, milk presence, volume band, container, hot/cold compatibility, price band, brand/maker.",
-        "Example carbonated attributes: unsweetened sparkling water, cola, fruit soda, energy-style carbonation, lactic carbonation, plus flavor/sugar/volume/container/price/brand as applicable.",
-        "Not every attribute applies to every family; the model must remain extensible and allow unknown values without inventing facts.",
-        "When a new product first appears, AI may propose classification from product evidence; the user confirms once or fixes only wrong fields. Confirmed classification is then reused.",
-        "Analysis should compare both the product and groups of close substitutes so a product decline can be distinguished from demand transferring to another similar product."
-      ],
-      "activeVisitDirection": [
-        "Do not infer 'currently visiting' automatically from being within 100m.",
-        "GPS proximity is candidate discovery only because adjacent vending machines can be a few meters apart and are worked sequentially.",
-        "The user explicitly starts one machine as active work; only one active machine may exist at a time.",
-        "Starting another machine while one is active requires a switch confirmation.",
-        "Persist the active machine across app reopen and clear it automatically on visit completion.",
-        "Preferred Today order: WORK PROGRESS, report capture, active-work / nearby compact area, then the normal Today list.",
-        "When no machine is active, show nearby candidates compactly rather than promoting one automatically; adjacent candidates must remain distinguishable.",
-        "When a machine is active, pin a compact active-work card near the top and avoid duplicating it in the normal list where practical.",
-        "OCR identity should be compared with the active machine; matching identity is positive confirmation and mismatch must warn before mis-association."
-      ],
-      "antiLoopRule": "Define a finite gate checklist before testing; once all required gates pass, stop. Re-run only when code, test methodology, deployment state, or another relevant precondition changed."
-    }
+    "antiLoopRule": "Once the finite OPS10B1 gates pass, do not repeat them unless code, deployment, methodology, or a relevant precondition changes."
   },
-  "requiredUserInput": [],
+  "requiredUserInput": [
+    "After production deployment only: one smartphone real-device check of FINAL.11 Today task integration and per-task visit completion."
+  ],
   "unresolved": [],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
-    "readOrder": [
-      "AGENTS.md",
-      ".ai/STATE.json",
-      "AI_ROADMAP.md",
-      ".ai/LAST_RUN.json",
-      ".ai/DECISIONS.md",
-      ".ai/WORKFLOW.md"
-    ],
+    "readOrder": ["AGENTS.md", ".ai/STATE.json", "AI_ROADMAP.md", ".ai/LAST_RUN.json", ".ai/DECISIONS.md", ".ai/WORKFLOW.md"],
     "shortResumePrompt": "VENDRIVE続き"
   }
 }
