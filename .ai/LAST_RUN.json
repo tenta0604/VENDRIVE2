@@ -1,46 +1,42 @@
 {
   "evidenceVersion": 2,
-  "runType": "phase_closeout",
-  "phase": "OPS10B2",
-  "status": "PASS",
+  "runType": "phase_implementation",
+  "phase": "OPS10C",
+  "status": "HUMAN_GATE_PENDING",
   "base": {
-    "preProductionHead": "df8e4c35630ca53f54e5a577a16a6b75a6e60684",
-    "safetyTag": "backup-pre-OPS10B2-EXEC-20260916",
-    "safetyTagType": "annotated"
+    "preProductionHead": "331215a4d6b0cb91ce356e280c20d445d99d0868",
+    "safetyTag": "backup-pre-OPS10C-ACTIVE-VISIT-20260916",
+    "safetyTagType": "annotated",
+    "safetyTagTarget": "331215a4d6b0cb91ce356e280c20d445d99d0868"
   },
   "versions": {"app":"2026.09.16-FINAL.15","engine":"AN14B3B2","db":4,"schema":4},
   "work": {
-    "summary": "Add classification-aware demand-transfer evidence and replacement-review proposals without mutating observations or auto-applying product changes.",
-    "completed": [
-      "Added ops10b2-demand-transfer.js production sidecar.",
-      "Uses same-machine latest/previous product-rate movement as computed evidence.",
-      "Similarity uses only confirmed OPS10B1 classification attributes and preserves unknowns.",
-      "Separates close-substitute and broad-family evidence.",
-      "Carries sold-out censoring into confidence limitations.",
-      "Emits causalClaim=false evidence and proposal-only recommendations with autoApply=false.",
-      "Loaded sidecar from existing production bootstrap without DB/schema changes or Today/visit changes."
+    "summary": "Add explicit active-visit state and compact 100m nearby candidates without treating GPS proximity as visit identity.",
+    "implemented": [
+      "Added ops10c-active-visit.js sidecar.",
+      "Nearby candidates are distance-sorted and never auto-selected.",
+      "Exactly one explicit active machine persists in localStorage across reopen.",
+      "Switching active machine requires confirmation.",
+      "Visit completion clears matching active machine.",
+      "Active machine is pinned after report capture and suppressed from duplicate Today list.",
+      "OCR result text is compared with active machine name/management code and match/mismatch UI is exposed.",
+      "No DB/schema migration and no Analytics RAW mutation."
     ]
   },
   "gates": {
     "immutableAnnotatedSafetyCheckpoint": "PASS",
-    "confirmedClassificationOnly": "PASS",
-    "unknownAttributesNotInferred": "PASS",
-    "rawObservationMutation": "NONE",
-    "causalClaim": false,
-    "autoApply": false,
+    "scopeReview": "PASS",
+    "gpsAutoVisitSelection": "NONE",
+    "singleExplicitActiveVisit": "IMPLEMENTED",
+    "switchConfirmation": "IMPLEMENTED",
+    "reopenPersistence": "IMPLEMENTED_PENDING_DEVICE",
+    "visitCompletionClear": "IMPLEMENTED_PENDING_DEVICE",
+    "ocrIdentityGuard": "IMPLEMENTED_PENDING_DEVICE",
     "databaseSchemaBump": "NOT_REQUIRED",
-    "todayVisitRegressionScope": "UNCHANGED",
-    "productionDeployment": "PASS",
-    "smartphoneCheck": "NOT_REQUIRED_NO_NEW_INTERACTIVE_UI"
+    "smartphoneCheck": "REQUIRED_PENDING"
   },
-  "changedFiles": ["ops10b2-demand-transfer.js","ocr-config.js"],
-  "openItems": [],
-  "nextAction": "Execute OPS10C explicit active-visit / nearby-candidate workflow.",
-  "unresolved": [],
-  "production": {
-    "mergeCommit": "5a114696c41466244718b750a9adf0d7e57ea4ed",
-    "pagesRunId": 35053217811,
-    "pagesConclusion": "success",
-    "liveUrl": "https://tenta0604.github.io/VENDRIVE2/"
-  }
+  "changedFiles": ["ops10c-active-visit.js","ocr-config.js",".ai/STATE.json",".ai/LAST_RUN.json"],
+  "openItems": ["Production deployment and iPhone interaction verification"],
+  "nextAction": "Deploy OPS10C, then request only the finite iPhone interaction checks required to close the phase.",
+  "unresolved": []
 }
