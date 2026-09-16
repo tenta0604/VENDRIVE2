@@ -2,46 +2,43 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "OPS10B1",
+  "completedPhase": "OPS10B2",
   "activePhase": null,
-  "nextPhase": "OPS10B2",
+  "nextPhase": "OPS10C",
   "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
   "status": "ready_for_next_phase",
   "currentWork": {
-    "title": "OPS10B1 complete — FINAL.15 device-confirmed",
-    "releaseStatus": "FINAL.15 production PASS; Today task visibility confirmed on iPhone",
-    "rootCause": "FINAL.14 fixed task-card binding, but delayed current-position refresh still called bare renderToday(), rebuilding Today cards without task augmentation.",
-    "fix": [
-      "Delayed current-position refresh now calls renderTodayWithTasks().",
-      "Today task names remain visible after the delayed rerender.",
-      "Visit-completion behavior remains the already-confirmed single-action FINAL.13 flow."
-    ],
-    "lastSafetyTag": "backup-pre-OPS10B1-TODAY-TASK-RERENDER-FIX-20260916",
-    "lastSafetyTagTarget": "40b0b20ca7c87262485ec65f1d51b90de180022f",
+    "title": "OPS10B2 complete — classification-aware demand transfer foundation",
+    "releaseStatus": "Production merge and GitHub Pages deployment PASS",
     "completedReleaseScope": [
       "OPS10A vehicle inventory stocktake/baseline UI with smartphone verification",
       "OPS10B1 confirmed multi-axis product intelligence master data",
-      "Today unfinished task names rendered inside relevant visit cards",
-      "Visit completion simplified to per-task checkboxes plus one 訪問を完了 action",
-      "FINAL.15 delayed Today rerender preserves task visibility; confirmed on iPhone"
+      "FINAL.15 Today task visibility and visit-completion behavior device-confirmed",
+      "OPS10B2 same-machine decline/rise demand-transfer evidence using confirmed classification only",
+      "OPS10B2 replacement-review proposals remain non-causal and never auto-apply"
+    ],
+    "analysisPolicy": [
+      "Unknown product attributes remain unknown.",
+      "Only status=confirmed OPS10B1 intelligence participates in similarity evidence.",
+      "RAW sales observations are read, not mutated.",
+      "Evidence carries causalClaim=false and proposals carry autoApply=false / requiresUserConfirmation=true."
     ],
     "nextActions": [
-      "Execute OPS10B2 substitute-demand transfer analysis using only confirmed product intelligence attributes and existing sales evidence.",
-      "Preserve RAW → COMPUTED → RECOMMENDATION separation and avoid causal certainty.",
-      "Do not repeat FINAL.15 Today/visit device checks unless relevant code changes."
+      "Execute OPS10C explicit active-visit / nearby-candidate workflow from the roadmap.",
+      "Do not repeat FINAL.15 Today/visit device checks unless relevant code changes.",
+      "Do not add OPS10B2 interactive UI unless a later scoped phase requires it."
     ],
-    "antiLoopRule": "Passed FINAL.15 real-device evidence is durable and must not be repeated unless relevant production code changes.",
+    "antiLoopRule": "Passed real-device evidence is durable and must not be repeated unless relevant production code changes.",
     "production": {
-      "mergeCommit": "2629eb281996bb32c9295c91aeb8a9fe79f1096a",
-      "headAfterCleanup": "61208141ee7ab560bc2fff10f80ed4ff81ea0381",
-      "pagesRunId": 35052302002,
+      "mergeCommit": "5a114696c41466244718b750a9adf0d7e57ea4ed",
+      "pagesRunId": 35053217811,
       "pagesConclusion": "success",
       "liveUrl": "https://tenta0604.github.io/VENDRIVE2/",
-      "liveVersion": "2026.09.16-FINAL.15",
-      "deviceConfirmation": "PASS"
+      "ops10b2Runtime": "ops10b2-demand-transfer.js",
+      "deviceConfirmationRequired": false
     }
   },
   "requiredUserInput": [],
