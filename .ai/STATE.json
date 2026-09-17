@@ -2,45 +2,36 @@
   "workflowVersion": 3,
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
-  "completedPhase": "AN15_HARDEN_LIFECYCLE",
+  "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.16-FINAL.15",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "an15_closed_loop_measurement_wired_numeric_promotion_still_disabled",
+  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "AN15 intelligence v2 measured-learning baseline",
-    "releaseStatus": "AN15A-C lifecycle hardening is merged. Executable CI passes. Production forecasts are unchanged; eligible exact 24h forecast/outcome pairs can now accumulate automatically for evaluation.",
+    "title": "Operational evidence accumulation — no active feature development",
+    "releaseStatus": "AN15 foundations and lifecycle hardening are merged. AN15G2 Vercel runtime failure was diagnosed and fixed on 2026-09-17; production deployment is READY and /api/explain now reaches the route normally instead of FUNCTION_INVOCATION_FAILED. Production numeric forecasts remain unchanged. Active feature development is intentionally paused while real operational evidence accumulates.",
     "scope": [
+      "Use VENDRIVE normally in field operations; do not add features merely to keep development moving.",
       "Production listForecasts output is observed without changing forecast values.",
-      "Only complete, non-lower-bound machine/product forecasts are snapshotted as 24h evaluation candidates.",
-      "Only later confirmed sales reports whose previousClearAt exactly equals forecast asOf and whose occurredAt exactly equals targetAt are scored.",
-      "Sold-out outcomes are marked censored and excluded from exact-learning metrics.",
-      "Weekday/month/season are derived deterministically from target time; weather and holiday remain unknown unless explicitly sourced.",
-      "AN15C incremental evaluation now compares context adjustment against the AN15B-calibrated or sparse-fallback baseline.",
+      "Only complete, non-lower-bound machine/product forecasts are snapshotted as exact 24h evaluation candidates.",
+      "Only later confirmed sales reports with exact interval identity are scored; sold-out outcomes remain censored.",
       "AN15B/C/D/D2/E/F numeric or optimization promotion remains disabled until real held-out evidence supports it.",
-      "AN15G2 Gemini explanation production verification remains independent and may still be externally Vercel-rate-limited.",
+      "AN15G2 runtime adapter mismatch was fixed by using Vercel POST/OPTIONS Web Request exports; production deployment is READY and the prior request.headers.get runtime crash is resolved.",
       "OPS10C remains withdrawn; preserve existing Today nearest-machine ordering."
     ],
-    "safety": {
-      "integrationBase": "d3a1bc13becb3600c890398468acaa71f1ee0e69",
-      "integrationTag": "backup-pre-AN15-HARDEN-LIFECYCLE-20260916",
-      "closeoutBase": "2ba1afc4384e7821c0fbd0c4f67d3717696e9bd9",
-      "closeoutTag": "backup-pre-AN15-HARDEN-CLOSEOUT-20260916"
-    },
     "nextActions": [
-      "Accumulate real exact scored samples without changing production numeric decisions.",
-      "Evaluate AN15B then AN15C then any pooling increment with no-lookahead held-out evidence.",
-      "Promote only a bounded/versioned/reversible correction after sample/confidence and improvement gates pass.",
-      "Verify /api/explain against Gemini when Vercel deployment availability permits."
+      "Accumulate real exact scored samples through ordinary use without changing production numeric decisions.",
+      "Treat field friction, incorrect proposals, missing information, failed evidence accumulation, or measured forecast error as evidence for the next improvement cycle.",
+      "Evaluate AN15B then AN15C then any pooling increment with no-lookahead held-out evidence only when enough real samples exist.",
+      "Promote only bounded, versioned, reversible corrections after sample/confidence and improvement gates pass."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence.",
-    "Gemini /api/explain production verification may remain blocked by external Vercel deployment rate limits."
+    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
