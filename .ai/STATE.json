@@ -11,19 +11,20 @@
   "schemaVersion": 4,
   "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.20 compact OCR hotfix verified",
-    "releaseStatus": "The FINAL.20 compact OCR hotfix is merged and production/live verified. Compact sales-journal review shows sold-out rows only when OCR returns soldOuts. After explicit continue-capture from a confirmed report, the next input/recovery review carries the trusted visit machine context and does not ask for another durable re-link when there is no conflict. Draft save re-reads the exact Analytics visit and inherits its trusted machineId; the later paper keeps its own maker/vendor identity and no durable mapping is created automatically. A concrete different-machine candidate fails closed. PR #118 is merged, matching Vercel production is READY, and the dedicated gate passes on both production and GitHub Pages. Existing OCR field, visit-closeout/overlap, and same-visit continuation regressions passed on preview. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
+    "title": "Operational evidence accumulation — FINAL.20 HF2 product-master sync verified",
+    "releaseStatus": "FINAL.20 HF2 is merged and production/live verified. Confirmed OCR sales/input/recovery reports now synchronize discovered products into the Analytics product master without changing inventory quantities. Draft/unconfirmed OCR reports are explicitly excluded. Analysis > Inventory exposes a searchable Product Master and unconfirmed-classification entry point. Product-name heuristics can propose classifications such as coffee/black/unsweetened or low-sugar, but proposals remain unconfirmed until explicit user confirmation. Vehicle stocktake search now sees synchronized OCR products. Product listing order is natural product-code order, then smaller detected container size, then maker/name. PR #121 merged at 9b5ecdef5bca48347c98c5d995cb23d0f81be015; Vercel production deployment dpl_2E6Zj35tLsjafLSp4tmk6Ycv475Y is READY; the dedicated gate passes on production and GitHub Pages. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
     "scope": [
       "Use VENDRIVE normally; no active feature phase is open.",
-      "Compact sales review displays sold-out rows only when present.",
-      "Same-visit continued papers reuse the trusted visit machine without requiring another durable vendor→machine mapping.",
-      "A different concrete machine candidate still fails closed.",
-      "Keep explicit paper approval, explicit report confirmation, durable machine-link safety, inventory semantics, Analytics engine, DB and schema unchanged."
+      "Only confirmed OCR reports may add/update product-master discovery data; draft OCR candidates must not leak into the master.",
+      "Classification inference is proposal-only until explicit human confirmation.",
+      "Product master and vehicle stocktake search include synchronized OCR products.",
+      "Product lists use product-code natural order, then smaller detected size, then maker/name.",
+      "Keep inventory movement semantics, report confirmation boundaries, learned numeric forecasting, Analytics engine, DB and schema unchanged."
     ],
     "nextActions": [
-      "Continue normal field use and verify the sold-out compact display on a real sales journal when one appears.",
-      "Continue sales → input/recovery capture normally; repeated machine linking should not be necessary inside the same trusted visit.",
-      "Resume real evidence accumulation and reopen engineering only for new field friction or promotion-gate evidence."
+      "Use the new Product Master from Analysis > Inventory to search and confirm classifications where useful.",
+      "Verify real field products discovered from confirmed OCR reports appear in vehicle stocktake search.",
+      "Continue normal evidence accumulation; reopen engineering only for new field friction or when the numeric promotion gate has enough evidence."
     ]
   },
   "requiredUserInput": [],
