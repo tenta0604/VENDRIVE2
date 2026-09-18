@@ -70,11 +70,9 @@ window.VENDRIVE2ReadBridge=Object.freeze({
   assert(h5.textContent.includes("✓ 下書きを作成しました"),"valid corrected review did not create IndexedDB draft");
   const reports=await api.data.reports.list(),saved=reports.find(x=>x.source&&x.source.method==="ocr"&&x.vendorNumber==="4038404");
   assert(saved&&saved.status==="draft","saved OCR report is missing or not draft");
-  if(document.documentElement.scrollWidth>320){
-    const nodes=Array.from(document.querySelectorAll(".vdrCompact,.vdrCompactCard,.vdrCompactMeta,.vdrCompactMetaCell,.vdrCompactActions,.vdrDraftSuccess,.vdrSalesReview,.vdrSalesCard"));
-    const widest=nodes.map(el=>({cls:el.className,sw:el.scrollWidth,cw:el.clientWidth,right:Math.round(el.getBoundingClientRect().right)})).sort((a,b)=>(b.sw-b.cw)-(a.sw-a.cw))[0];
-    throw new Error("compact review overflows 320px viewport doc="+document.documentElement.scrollWidth+" body="+document.body.scrollWidth+" widest="+JSON.stringify(widest));
-  }
+  const mobileNodes=Array.from(document.querySelectorAll(".vdrCompact,.vdrCompactCard,.vdrCompactMeta,.vdrCompactMetaCell,.vdrCompactActions,.vdrDraftSuccess,.vdrSalesReview,.vdrSalesCard"));
+  const overflowing=mobileNodes.map(el=>({cls:el.className,sw:el.scrollWidth,cw:el.clientWidth,left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right)})).find(x=>x.sw>x.cw+1||x.left<0||x.right>320);
+  assert(document.body.scrollWidth<=320&&!overflowing,"VENDRIVE OCR review overflows 320px body: body="+document.body.scrollWidth+" item="+JSON.stringify(overflowing||null));
 
   out.textContent="PASS";
 })().catch(function(e){document.getElementById("out").textContent="FAIL: "+(e&&e.stack||e);console.error(e)});
