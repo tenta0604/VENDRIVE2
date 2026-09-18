@@ -2,7 +2,7 @@
 
 ## Current state
 
-- Visible app baseline: **2026.09.16-FINAL.15**.
+- Visible app baseline: **2026.09.18-FINAL.16** (bounded OCR field-maintenance release; Analytics engine/DB/schema unchanged).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
 - Active engineering phase: **None**. VENDRIVE is intentionally in an operational evidence phase rather than a feature-building phase.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
@@ -28,6 +28,8 @@ AN1-AN14, FINAL, OPS-REAL-WORKFLOW, OPS10A, OPS10B1 and OPS10B2 remain the estab
 ## Operational evidence phase
 
 Do not invent another development phase merely because implementation capacity exists. The system now needs real use more than more features.
+
+Real field use on 2026-09-18 produced a bounded maintenance correction rather than a new feature phase: sales OCR period fields now fail closed before draft creation, and manual OCR identity corrections are explicitly applied/revalidated with machine rematching before save. After production verification, normal evidence accumulation resumes.
 
 During normal field use, treat these as evidence that can reopen engineering:
 

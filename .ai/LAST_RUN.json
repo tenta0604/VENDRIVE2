@@ -1,39 +1,54 @@
 {
-  "evidenceVersion": 5,
-  "runType": "an15g2_production_closeout",
-  "phase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "status": "MERGED_DEPLOYED_RUNTIME_ADAPTER_FIXED_OPERATIONAL_PAUSE",
+  "evidenceVersion": 6,
+  "runType": "ocr_review_field_fix_maintenance",
+  "phase": "OCR_REVIEW_FIELD_FIX",
+  "status": "PREVIEW_VERIFIED_PENDING_MERGE_AND_PRODUCTION_VERIFY",
   "base": {
-    "preFixHead": "93681298ded0b15fd209efe38fa701388ec4ab84",
-    "fixPullRequest": 100,
-    "fixProductionHead": "4c5a019e9729543c166f1992b86d2a3528934ffd"
+    "preFixHead": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72",
+    "safetyTag": "backup-pre-OCR-REVIEW-FIELD-FIX-20260918",
+    "safetyTagTarget": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72"
   },
-  "versions": {"app":"2026.09.16-FINAL.15","engine":"AN14B3B2","db":4,"schema":4},
+  "versions": {
+    "app": "2026.09.18-FINAL.16",
+    "engine": "AN14B3B2",
+    "db": 4,
+    "schema": 4
+  },
   "work": {
-    "summary": "Closed the remaining AN15G2 external/runtime blocker. Vercel deployment rate limiting cleared; production /api/explain failure was traced to a Vercel request-adapter mismatch (request.headers.get unavailable under the old default export), fixed via POST/OPTIONS Web Request exports, merged through PR #100, and deployed READY.",
+    "summary": "Bounded maintenance from real field use: prevent malformed sales-period OCR data from reaching Analytics draft creation, and make manual OCR identity corrections—especially vendor number—apply visibly and re-run machine matching before save.",
     "implemented": [
-      "Created a pre-fix Safety Tag checkpoint before modifying the production explanation route.",
-      "Diagnosed the previous production 500 as request.headers.get is not a function rather than a Gemini model failure.",
-      "Changed only api/explain.mjs route exports from default handler to explicit POST/OPTIONS Web Request handlers.",
-      "Merged PR #100 to main at 4c5a019e9729543c166f1992b86d2a3528934ffd.",
-      "Verified the matching main deployment is Vercel Production READY.",
-      "Verified /api/explain reaches the deployed route without the prior FUNCTION_INVOCATION_FAILED; an unsupported GET returns normal 405 behavior.",
-      "No analytics numeric behavior or interactive app UI changed."
+      "Compact OCR review now validates sales previousClearAt, occurredAt, and elapsedHours before enabling draft creation.",
+      "Sales previousClearAt is directly editable in the compact review; other OCR identity fields including vendor number remain directly editable even when OCR returned a non-empty but wrong value.",
+      "Correcting vendor number or maker re-runs the existing machine-candidate lookup and refreshes the review.",
+      "The full editor now exposes an explicit '編集内容を反映して閉じる' path that re-matches and re-renders the compact review.",
+      "Draft creation performs a final fresh machine match plus blocking-issue recomputation before writing to IndexedDB.",
+      "Machine candidates are never auto-linked after a correction; the existing explicit user linkage action remains authoritative.",
+      "Added a browser regression gate covering invalid previousClearAt blocking/correction, vendor-number correction/rematch, full-editor apply, stale-save guard, actual IndexedDB draft creation, and 320px app-layout overflow."
     ]
   },
   "gates": {
     "safetyCheckpoint": "PASS",
-    "merge": "PASS",
-    "vercelProductionDeploy": "PASS",
-    "explainRuntimeAdapter": "PASS",
-    "priorFunctionInvocationFailure": "RESOLVED",
-    "numericLearningProductionPromotion": "NOT_ALLOWED_UNTIL_REAL_HELD_OUT_GATE",
-    "smartphoneCheck": "NOT_REQUIRED_NO_INTERACTIVE_UI_CHANGE"
+    "diffScope": "PASS",
+    "previewDeployment": "PASS",
+    "previewDeploymentId": "dpl_E6Qq3D5pTmESjas3dQsDQgdTJ7CN",
+    "browserRegressionGate": "PASS",
+    "browserRegressionRunId": "2b32cbd8-a1e8-497c-bb00-cf339dbdfa1d",
+    "malformedPreviousClearBlocked": "PASS",
+    "vendorCorrectionRematch": "PASS",
+    "fullEditorApplyAndRevalidate": "PASS",
+    "staleSaveGuard": "PASS",
+    "indexedDbDraftCreation": "PASS",
+    "mobile320AppLayout": "PASS",
+    "automaticMachineLinking": "NOT_INTRODUCED",
+    "automaticReportConfirmation": "NOT_INTRODUCED",
+    "numericAnalyticsChange": "NONE"
   },
   "openItems": [
-    "Accumulate sufficient real exact scored samples before considering bounded numeric promotion.",
-    "Observe real field use for friction, incorrect proposals, missing information, or evidence-pipeline failures before starting another feature cycle."
+    "Merge the maintenance PR to main and verify the matching production deployment/live gate.",
+    "After production verification, return to ordinary operational evidence accumulation."
   ],
-  "nextAction": "Pause active feature development. Use VENDRIVE normally, accumulate real evidence, and reopen engineering only for observed field problems or when the real held-out promotion gate has enough samples.",
-  "unresolved": ["Real evidence sample gate not yet satisfied"]
+  "nextAction": "Merge the verified FINAL.16 maintenance branch, wait for the matching production deployment, run the same live regression gate, then record production closeout.",
+  "unresolved": [
+    "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
+  ]
 }
