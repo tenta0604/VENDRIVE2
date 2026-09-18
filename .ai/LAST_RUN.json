@@ -2,13 +2,15 @@
   "evidenceVersion": 9,
   "runType": "machine_bring_opt_in_maintenance",
   "phase": "MACHINE_BRING_OPT_IN",
-  "status": "PREVIEW_VERIFIED_AWAITING_MERGE",
+  "status": "MERGED_DEPLOYED_LIVE_VERIFIED_OPERATIONAL_PAUSE",
   "base": {
     "preFixHead": "c666c0e7c0e4082b48f3f73d4c946a9f2afb1ee4",
     "safetyIssue": 110,
     "safetyTag": "backup-pre-MACHINE-BRING-OPT-IN-20260918",
     "safetyTagTarget": "c666c0e7c0e4082b48f3f73d4c946a9f2afb1ee4",
-    "maintenanceBranch": "chatgpt/machine-bring-opt-in-20260918"
+    "maintenanceBranch": "chatgpt/machine-bring-opt-in-20260918",
+    "fixPullRequest": 111,
+    "productProductionHead": "781500342d119598e538579620f1b4fa90ed862e"
   },
   "versions": {
     "app": "2026.09.18-FINAL.19",
@@ -17,7 +19,7 @@
     "schema": 4
   },
   "work": {
-    "summary": "Restore the missing per-machine vehicle bring proposal setting as explicit opt-in. Default is OFF for both legacy/unset and newly created machines. Only explicitly enabled machines contribute to machine bring-from-vehicle recommendations and end-of-day vehicle-loading proposals; sales analysis and visit planning remain unaffected.",
+    "summary": "Closed the bounded FINAL.19 machine bring opt-in maintenance cycle. The per-machine bring/load proposal control is restored with strict default OFF; only explicit ON machines feed bring-from-vehicle and end-of-day loading proposals, while sales analysis and visit planning remain unchanged. PR #111 merged, matching Vercel production is READY, production app smoke and the dedicated gate pass, GitHub Pages serves FINAL.19, and the live dedicated gate passes.",
     "implemented": [
       "Added existing-machine setting '車から持っていく本数の提案' with OFF/ON options and strict missing-value = OFF behavior.",
       "Added the same control to new-machine setup with OFF selected by default and persisted as a boolean.",
@@ -28,7 +30,13 @@
       "Updated the Analysis empty state to explain that only opted-in machines appear.",
       "Bumped app to FINAL.19 and Analytics engine to AN14B3B4; DB/schema remain 4.",
       "Added a dedicated browser/IndexedDB gate covering explicit ON, explicit OFF, legacy/unset default OFF, machine-specific query safety, unaffected visit planning, end-of-day scope, source/UI wiring, and 320px layout.",
-      "Aligned existing OCR and visit-closeout regression gate cache markers to FINAL.19."
+      "Aligned existing OCR and visit-closeout regression gate cache markers to FINAL.19.",
+      "Merged PR #111 to main at 781500342d119598e538579620f1b4fa90ed862e.",
+      "Verified matching Vercel production deployment dpl_9uBPEyAQ9aAW7fKTXQVnYhpbUBh9 is READY.",
+      "Ran the production machine-bring opt-in gate; PASS.",
+      "Ran the production app smoke; FINAL.19 and main navigation loaded without script-fatal errors.",
+      "Verified live GitHub Pages version.json serves 2026.09.18-FINAL.19.",
+      "Ran the live GitHub Pages machine-bring opt-in gate; PASS."
     ]
   },
   "gates": {
@@ -55,16 +63,26 @@
     "automaticReportConfirmation": "NOT_INTRODUCED",
     "learnedNumericForecastingChange": "NONE",
     "dbSchemaChange": "NONE",
-    "merge": "PENDING",
-    "productionVerification": "PENDING"
+    "merge": "PASS",
+    "productionVerification": "PASS",
+    "fixPullRequest": 111,
+    "vercelProductionDeploy": "PASS",
+    "vercelProductionDeploymentId": "dpl_9uBPEyAQ9aAW7fKTXQVnYhpbUBh9",
+    "productionMachineBringOptInGate": "PASS",
+    "productionMachineBringOptInRunId": "7b11df84-e34a-4157-90f1-b0e688399e95",
+    "productionAppSmoke": "PASS",
+    "productionAppSmokeRunId": "2cf29b39-1fa8-46fe-ae48-0121d4eab3ed",
+    "githubPagesVersion": "PASS",
+    "githubPagesVersionValue": "2026.09.18-FINAL.19",
+    "liveMachineBringOptInGate": "PASS",
+    "liveMachineBringOptInRunId": "b7113c60-a994-4f8f-b557-c7a9393a27cf"
   },
   "openItems": [
-    "Open/merge the FINAL.19 maintenance PR and verify production/live deployment.",
-    "Continue accumulating real exact scored evidence before any learned numeric promotion."
+    "Continue field use; enable bring recommendations only on selected machines.",
+    "Accumulate sufficient real exact scored samples before any learned numeric promotion."
   ],
-  "nextAction": "Open the bounded maintenance PR, merge after green checks, verify production Vercel/GitHub Pages/live gates, then return to normal field use.",
+  "nextAction": "Return to normal VENDRIVE field use. Enable the per-machine bring recommendation setting only where desired, and reopen engineering only for new field friction or when the numeric promotion gate has sufficient evidence.",
   "unresolved": [
-    "Production/live verification is pending until merge.",
     "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
   ]
 }

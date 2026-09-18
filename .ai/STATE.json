@@ -3,35 +3,32 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "MACHINE_BRING_OPT_IN",
+  "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.18-FINAL.19",
   "engineVersion": "AN14B3B4",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "maintenance_preview_verified_awaiting_merge",
+  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Field maintenance — per-machine bring recommendation opt-in",
-    "releaseStatus": "FINAL.19 candidate is preview-verified. The per-machine vehicle bring recommendation control is restored with a strict default-OFF policy. Existing machines without the setting are treated as OFF; new machines start OFF; only machines explicitly switched ON can produce bring-from-vehicle recommendations or contribute to the end-of-day next-workday loading proposal. General sales learning, demand forecasts, visit planning, tasks, orders, and OCR behavior remain active regardless of this setting. The dedicated opt-in browser/IndexedDB gate, main-app smoke gate, visit closeout gate, and OCR field regression gate pass on the READY Vercel preview. Analytics engine is AN14B3B4; DB/schema remain 4.",
+    "title": "Operational evidence accumulation — FINAL.19 bring recommendation opt-in verified",
+    "releaseStatus": "FINAL.19 is merged and live-verified. The per-machine `車から持っていく本数の提案` control is restored as strict opt-in: existing/legacy unset machines are OFF, new machines start OFF, and only explicitly ON machines can produce bring-from-vehicle recommendations or contribute to the end-of-day next-workday loading proposal. Sales observations, forecasts, generic recommendations, visit planning, OCR, tasks, orders, and normal visit completion remain unaffected when OFF. PR #111 is merged, matching Vercel production is READY, production app smoke and the dedicated opt-in gate pass, GitHub Pages serves FINAL.19, and the live opt-in gate passes. Analytics engine is AN14B3B4; DB/schema remain 4.",
     "scope": [
-      "Expose an ON/OFF control in both existing-machine details and new-machine setup.",
-      "Treat missing legacy values as OFF and initialize every newly created machine to OFF.",
-      "Pass the explicit boolean through the read-only legacy-to-Analytics bridge.",
-      "Filter only machine bring-from-vehicle and end-of-day vehicle-loading proposals by this opt-in.",
-      "Do not disable sales observations, forecasts, generic sales recommendations, or visit planning when the setting is OFF.",
-      "Keep proposal-only behavior: no automatic inventory movement, schedule write, confirmation, or machine link.",
-      "Keep Analytics DB/schema at 4."
+      "Use VENDRIVE normally; there is no active feature phase.",
+      "Leave bring recommendation OFF by default and enable only the machines where vehicle bring/load proposals are wanted.",
+      "OFF suppresses only bring-from-vehicle and end-of-day loading proposals; it does not suppress sales learning or visit planning.",
+      "Preserve proposal-only behavior with no automatic inventory movement, confirmation, route mutation, or machine link.",
+      "Keep Analytics DB/schema at 4 and learned numeric promotion disabled."
     ],
     "nextActions": [
-      "Open and merge the bounded FINAL.19 maintenance PR after diff/status review.",
-      "Verify the matching production deployment, GitHub Pages FINAL.19, and live regression gates.",
-      "Return to field use; enable the setting only on machines where vehicle bring proposals are desired."
+      "Use the machine detail setting to enable bring recommendations only for selected machines.",
+      "Continue focused real-device verification of the recent OCR visit-end flow when convenient.",
+      "Resume normal field evidence accumulation and reopen engineering only for new observed friction or promotion-gate evidence."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/live verification for FINAL.19 is pending.",
-    "Numeric learning promotion still requires sufficient real exact scored samples and held-out improvement evidence."
+    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
