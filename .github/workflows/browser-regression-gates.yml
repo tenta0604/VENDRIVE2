@@ -1,0 +1,59 @@
+name: Browser regression gates
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'analytics.js'
+      - 'ocr-*.js'
+      - 'product-master-hf2.js'
+      - 'ops10a-stocktake.js'
+      - 'ops10a-stocktake.css'
+      - 'tests/*-gate.html'
+      - 'tests/run-browser-gates.mjs'
+      - '.github/workflows/browser-regression-gates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'analytics.js'
+      - 'ocr-*.js'
+      - 'product-master-hf2.js'
+      - 'ops10a-stocktake.js'
+      - 'ops10a-stocktake.css'
+      - 'tests/*-gate.html'
+      - 'tests/run-browser-gates.mjs'
+      - '.github/workflows/browser-regression-gates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/vendrive-http.log 2>&1 &
+          echo $! > /tmp/vendrive-http.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/vendrive-http.log
+          exit 1
+      - name: Run browser regression gates
+        run: node tests/run-browser-gates.mjs
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/vendrive-http.log || true
