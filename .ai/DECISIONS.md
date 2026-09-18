@@ -158,3 +158,11 @@ This file records confirmed project decisions that must survive chat migration. 
 - Closing the capture UI without making those explicit choices may leave the Analytics visit incomplete; safety is preferred over silently assuming no work occurred.
 - A later actual input/recovery report conflicts with an already confirmed corresponding “none” resolution until that resolution is explicitly cleared.
 
+## OCR visit-flow continuity decision
+
+- Compact OCR review rerenders must preserve the active mount callbacks/options. A human correction that causes rerender must not detach the reviewed candidate from its Analytics visit or remove the post-confirm continuation/closeout actions.
+- Explicit OCR visit closeout may mark the corresponding legacy Today machine visited only when the Analytics/OCR visit has a trusted machine association and that machine is in Today's target set.
+- OCR visit closeout must reuse the existing normal visit-completion workflow rather than bypassing it: unresolved tasks still get the standard task checklist, and an existing order still gets the standard order confirmation.
+- Merely closing the OCR modal is not equivalent to completing the Today visit.
+- If the linked machine cannot be trusted/resolved or is not a Today target, do not silently mark a legacy machine visited.
+
