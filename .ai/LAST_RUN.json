@@ -2,13 +2,15 @@
   "evidenceVersion": 7,
   "runType": "visit_closeout_overlap_guard_maintenance",
   "phase": "VISIT_CLOSEOUT_OVERLAP_GUARD",
-  "status": "PREVIEW_VERIFIED_AWAITING_MERGE",
+  "status": "MERGED_DEPLOYED_LIVE_VERIFIED_OPERATIONAL_PAUSE",
   "base": {
     "preFixHead": "c6074074dd780a9f2d2ff34cf3cb93ffa1013246",
     "safetyIssue": 104,
     "safetyTag": "backup-pre-VISIT-CLOSEOUT-OVERLAP-GUARD-20260918",
     "safetyTagTarget": "c6074074dd780a9f2d2ff34cf3cb93ffa1013246",
-    "maintenanceBranch": "chatgpt/visit-closeout-overlap-guard-20260918"
+    "maintenanceBranch": "chatgpt/visit-closeout-overlap-guard-20260918",
+    "fixPullRequest": 105,
+    "productProductionHead": "c3c3155c2b2e1339fe8faac101014899b4a6b67b"
   },
   "versions": {
     "app": "2026.09.18-FINAL.17",
@@ -17,7 +19,7 @@
     "schema": 4
   },
   "work": {
-    "summary": "Bounded field-maintenance prompted by real operator use: guide post-confirm paper flow, represent legitimate no-input/no-recovery visits explicitly, and fail closed on cumulative/overlapping sales periods before they can distort analysis.",
+    "summary": "Closed the bounded FINAL.17 field-maintenance cycle. Post-confirm OCR capture now guides continuation/end-of-visit choices; explicit no-input/no-recovery visit facts handle legitimate no-service cases without fabricated zero reports; materially overlapping sales periods fail closed before OCR draft creation and again at confirmation to prevent cumulative-journal double-counting. PR #105 merged, matching Vercel production is READY, GitHub Pages serves FINAL.17, and live regression gates pass.",
     "implemented": [
       "OCR report drafts now attach to a shared Analytics visit for the current capture session so follow-up sales/input/recovery papers can be resolved as one visit.",
       "After explicit report confirmation, compact review offers context-sensitive follow-up actions such as continuing with input/recovery capture or explicitly ending with no input/no recovery.",
@@ -29,7 +31,12 @@
       "Adjacent periods are allowed; a five-minute tolerance is limited to boundary/clock noise.",
       "Analytics engine version bumped to AN14B3B3; DB/schema remain 4 and forecast numeric behavior is unchanged.",
       "Added a dedicated browser/IndexedDB/mobile gate covering overlap detection, adjacent-period allowance, sales-only no-service completion, input-with-no-recovery completion, post-confirm choices, and 320px layout.",
-      "Aligned the existing OCR correction regression gate cache marker to FINAL.17."
+      "Aligned the existing OCR correction regression gate cache marker to FINAL.17.",
+      "Merged PR #105 to main at c3c3155c2b2e1339fe8faac101014899b4a6b67b.",
+      "Verified matching Vercel production deployment dpl_J4t3q4P4s23PUU8Jw9CLqTG9wYwG is READY.",
+      "Verified live GitHub Pages version.json serves 2026.09.18-FINAL.17.",
+      "Ran the production deployment visit-closeout/overlap browser gate; it passed.",
+      "Ran the live GitHub Pages visit-closeout/overlap gate and existing OCR correction regression gate; both passed."
     ]
   },
   "gates": {
@@ -51,16 +58,26 @@
     "fabricatedZeroReports": "NOT_INTRODUCED",
     "numericForecastingChange": "NONE",
     "dbSchemaChange": "NONE",
-    "merge": "PENDING",
-    "productionVerification": "PENDING"
+    "merge": "PASS",
+    "productionVerification": "PASS",
+    "fixPullRequest": 105,
+    "vercelProductionDeploy": "PASS",
+    "vercelProductionDeploymentId": "dpl_J4t3q4P4s23PUU8Jw9CLqTG9wYwG",
+    "productionDeploymentBrowserGate": "PASS",
+    "productionDeploymentBrowserRunId": "290a8c06-4dc6-4d58-9b9c-0a95b8c65c3a",
+    "githubPagesVersion": "PASS",
+    "githubPagesVersionValue": "2026.09.18-FINAL.17",
+    "liveVisitCloseoutOverlapGate": "PASS",
+    "liveVisitCloseoutOverlapRunId": "38199768-242e-4d7d-b905-35137ac7324d",
+    "liveExistingOcrFieldRegressionGate": "PASS",
+    "liveExistingOcrFieldRegressionRunId": "49377e40-d7b7-4e66-a262-40bfee23c11a"
   },
   "openItems": [
-    "Open/merge maintenance PR and verify production/live deployment.",
-    "Accumulate sufficient real exact scored samples before any numeric promotion."
+    "Accumulate sufficient real exact scored samples before considering bounded numeric promotion.",
+    "Observe normal field use; reopen engineering only for new real friction, overlap-guard false positives, or sufficient promotion-gate evidence."
   ],
-  "nextAction": "Open the bounded maintenance PR, merge after green checks, verify production Vercel/GitHub Pages/live regression, then return to normal field evidence accumulation.",
+  "nextAction": "Return to normal VENDRIVE field use and operational evidence accumulation. Reopen engineering only for observed field problems or when the real held-out numeric promotion gate has enough samples.",
   "unresolved": [
-    "Production/live verification is pending until merge.",
     "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
   ]
 }
