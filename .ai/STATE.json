@@ -11,22 +11,21 @@
   "schemaVersion": 4,
   "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational evidence accumulation — bounded OCR field-maintenance fix preview-verified",
-    "releaseStatus": "Real field use on 2026-09-18 exposed two OCR-review friction points: malformed sales previousClearAt could reach draft creation, and a manually corrected vendor number lacked an explicit apply/revalidation path. FINAL.16 fixes both without changing Analytics numeric behavior, inventory semantics, or automatic-confirmation policy. The branch is browser/IndexedDB/mobile preview-verified and is pending merge plus production verification.",
+    "title": "Operational evidence accumulation — FINAL.16 OCR field-maintenance verified",
+    "releaseStatus": "Observed OCR-review field friction from 2026-09-18 is fixed in production FINAL.16. Sales period fields now fail closed before draft creation; manual OCR identity corrections, including vendor number, are applied and re-matched before save. PR #102 is merged, the matching Vercel production deployment is READY, GitHub Pages serves FINAL.16, and the live browser/IndexedDB/mobile regression gate passes. Analytics numeric behavior, DB/schema, inventory semantics, and explicit-confirmation policy are unchanged.",
     "scope": [
-      "Block invalid sales previousClearAt / occurredAt / elapsedHours before draft creation and revalidate again at save time.",
-      "Keep OCR identity fields directly editable; a corrected vendor number must update the reviewed candidate and immediately re-run vending-machine matching.",
-      "Full-editor corrections must be explicitly applied back to the compact review before draft creation.",
-      "A corrected vendor number may surface a machine candidate but must never auto-link it; explicit user linkage remains required.",
-      "Use VENDRIVE normally after this bounded maintenance fix; do not turn the observed friction into a broader feature phase.",
+      "Use VENDRIVE normally in field operations; no active feature phase is open.",
+      "Treat human-corrected OCR review values as the reviewed candidate authority and re-run machine matching after vendor/maker correction.",
+      "Keep required sales period fields fail-closed before draft persistence.",
+      "Preserve explicit machine linkage and explicit report confirmation; no auto-link or auto-confirm behavior.",
       "Production listForecasts output remains unchanged and AN15 learned numeric corrections remain evaluation-only.",
       "OPS10C remains withdrawn; preserve existing Today nearest-machine ordering."
     ],
     "nextActions": [
-      "Merge FINAL.16 after the verified maintenance gates, then verify the production deployment and live browser gate.",
       "Resume normal field use and accumulate real exact scored samples without changing production numeric decisions.",
       "Treat further repeated field friction, incorrect proposals, missing information, failed evidence accumulation, or measured forecast error as evidence for a separately scoped maintenance cycle.",
-      "Promote learned numeric corrections only after the existing held-out/no-lookahead gates pass."
+      "Evaluate AN15B/AN15C promotion only when sufficient real held-out/no-lookahead evidence exists.",
+      "Promote learned numeric corrections only through bounded, versioned, reversible gates."
     ]
   },
   "requiredUserInput": [],

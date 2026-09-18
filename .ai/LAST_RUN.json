@@ -2,11 +2,13 @@
   "evidenceVersion": 6,
   "runType": "ocr_review_field_fix_maintenance",
   "phase": "OCR_REVIEW_FIELD_FIX",
-  "status": "PREVIEW_VERIFIED_PENDING_MERGE_AND_PRODUCTION_VERIFY",
+  "status": "MERGED_DEPLOYED_LIVE_VERIFIED_OPERATIONAL_PAUSE",
   "base": {
     "preFixHead": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72",
     "safetyTag": "backup-pre-OCR-REVIEW-FIELD-FIX-20260918",
-    "safetyTagTarget": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72"
+    "safetyTagTarget": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72",
+    "fixPullRequest": 102,
+    "productProductionHead": "4ff1159f06d4366341fb939e1b4064c822f3f04b"
   },
   "versions": {
     "app": "2026.09.18-FINAL.16",
@@ -15,7 +17,7 @@
     "schema": 4
   },
   "work": {
-    "summary": "Bounded maintenance from real field use: prevent malformed sales-period OCR data from reaching Analytics draft creation, and make manual OCR identity corrections—especially vendor number—apply visibly and re-run machine matching before save.",
+    "summary": "Closed the bounded OCR review field-maintenance cycle caused by real field use. FINAL.16 now prevents malformed sales-period OCR data from reaching draft persistence and makes manual identity corrections—especially vendor number—apply, re-match, and revalidate before save. PR #102 merged, matching Vercel production deployment is READY, GitHub Pages serves FINAL.16, and the live regression gate passes.",
     "implemented": [
       "Compact OCR review now validates sales previousClearAt, occurredAt, and elapsedHours before enabling draft creation.",
       "Sales previousClearAt is directly editable in the compact review; other OCR identity fields including vendor number remain directly editable even when OCR returned a non-empty but wrong value.",
@@ -23,7 +25,11 @@
       "The full editor now exposes an explicit '編集内容を反映して閉じる' path that re-matches and re-renders the compact review.",
       "Draft creation performs a final fresh machine match plus blocking-issue recomputation before writing to IndexedDB.",
       "Machine candidates are never auto-linked after a correction; the existing explicit user linkage action remains authoritative.",
-      "Added a browser regression gate covering invalid previousClearAt blocking/correction, vendor-number correction/rematch, full-editor apply, stale-save guard, actual IndexedDB draft creation, and 320px app-layout overflow."
+      "Added a browser regression gate covering invalid previousClearAt blocking/correction, vendor-number correction/rematch, full-editor apply, stale-save guard, actual IndexedDB draft creation, and 320px app-layout overflow.",
+      "Merged PR #102 to main at product production head 4ff1159f06d4366341fb939e1b4064c822f3f04b.",
+      "Verified matching Vercel production deployment dpl_AzAYfqAsvN88W1WDjva1mGS8PDBQ is READY.",
+      "Verified GitHub Pages version.json serves 2026.09.18-FINAL.16.",
+      "Ran the live GitHub Pages browser regression gate; it passed the invalid-period block/correction, vendor rematch, full-editor apply, stale-save guard, IndexedDB draft creation, and 320px app-layout checks."
     ]
   },
   "gates": {
@@ -41,13 +47,23 @@
     "mobile320AppLayout": "PASS",
     "automaticMachineLinking": "NOT_INTRODUCED",
     "automaticReportConfirmation": "NOT_INTRODUCED",
-    "numericAnalyticsChange": "NONE"
+    "numericAnalyticsChange": "NONE",
+    "merge": "PASS",
+    "fixPullRequest": 102,
+    "vercelProductionDeploy": "PASS",
+    "vercelProductionDeploymentId": "dpl_AzAYfqAsvN88W1WDjva1mGS8PDBQ",
+    "githubPagesVersion": "PASS",
+    "githubPagesVersionValue": "2026.09.18-FINAL.16",
+    "liveBrowserRegressionGate": "PASS",
+    "liveBrowserRegressionRunId": "83d65a88-d3a4-48fc-91d0-84399db1fe8b",
+    "productionDeploymentBrowserGate": "PASS",
+    "productionDeploymentBrowserRunId": "b5defc3a-8b84-4c5e-afff-17f717d4d3b1"
   },
   "openItems": [
-    "Merge the maintenance PR to main and verify the matching production deployment/live gate.",
-    "After production verification, return to ordinary operational evidence accumulation."
+    "Accumulate sufficient real exact scored samples before considering bounded numeric promotion.",
+    "Observe normal field use; reopen engineering only for new real friction or when the existing promotion gate has enough evidence."
   ],
-  "nextAction": "Merge the verified FINAL.16 maintenance branch, wait for the matching production deployment, run the same live regression gate, then record production closeout.",
+  "nextAction": "Return to normal VENDRIVE field use and operational evidence accumulation. Reopen engineering only for observed field problems or when the real held-out numeric promotion gate has enough samples.",
   "unresolved": [
     "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
   ]
