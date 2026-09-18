@@ -3,36 +3,33 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "OCR_CONTINUATION_VENDOR_FIX",
+  "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.18-FINAL.20",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "maintenance_preview_verified_awaiting_merge",
+  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Field maintenance — same-visit OCR continuation + automatic OCR start",
-    "releaseStatus": "FINAL.20 candidate is preview-verified. Real-device use exposed `Visit vendor mismatch` when a confirmed sales journal was followed by input/recovery capture in the same visit. The root cause was Analytics requiring every report in a visit to share one vendorKey even when the visit already had a trusted machineId. FINAL.20 makes trusted same-machine identity authoritative for visit continuity while preserving each report's own maker/vendor identity; vendor mismatch still fails closed when no trusted same-machine context exists, and a different machineId still fails closed. Captured images now start OCR automatically; the OCR button is hidden on the normal path and appears only as retry after OCR failure/unavailability. Preview dedicated continuation/auto-OCR, OCR field, visit-closeout/overlap, machine-bring opt-in, and app smoke gates pass. Analytics engine is AN14B3B5; DB/schema remain 4.",
+    "title": "Operational evidence accumulation — FINAL.20 OCR continuation maintenance verified",
+    "releaseStatus": "FINAL.20 is merged and production/live verified. The real-device `Visit vendor mismatch` was caused by visit continuity being keyed too strictly to the first report vendorKey. Related papers now remain in the same visit when they resolve to the same trusted machineId, while each report keeps its own maker/vendor identity. Vendor mismatch still fails closed without trusted same-machine context, and different machineIds still fail closed. Captured images now start OCR automatically; the manual OCR control is retry-only. PR #114 is merged, matching Vercel production is READY, the production continuation gate, OCR field regression, visit-closeout regression, and app smoke pass; GitHub Pages serves FINAL.20 and the live continuation gate passes. Analytics engine is AN14B3B5; DB/schema remain 4.",
     "scope": [
-      "Allow related reports with different vendor identities to share one visit only when they resolve to the same trusted machineId.",
-      "Inherit the trusted visit machineId onto a continued report before enforcing vendor mismatch.",
-      "Keep vendor mismatch fail-closed when neither side establishes the same trusted machine.",
-      "Keep machine mismatch fail-closed when report and visit point to different machines.",
-      "Start OCR automatically after a valid captured/selected image when the OCR adapter is available.",
-      "Hide the manual OCR control during the normal path; expose it only as retry when OCR is unavailable or fails.",
-      "Keep explicit draft approval and explicit report confirmation unchanged; do not auto-confirm or auto-link a new machine mapping.",
-      "Keep inventory semantics and Analytics DB/schema unchanged."
+      "Use VENDRIVE normally; no active feature phase is open.",
+      "Continue related sales/input/recovery papers in one visit when the visit already has a trusted machine identity.",
+      "Preserve each report's own maker/vendor identity and keep mismatches fail-closed when same-machine identity is not established.",
+      "Expect OCR to begin automatically immediately after image capture/selection; use the manual button only as retry after failure/unavailability.",
+      "Keep explicit paper approval and explicit formal confirmation unchanged.",
+      "Keep no automatic durable machine linking, no inventory-semantics change, no DB/schema migration, and no learned numeric promotion."
     ],
     "nextActions": [
-      "Merge FINAL.20 after diff/status review.",
-      "Verify production Vercel, GitHub Pages FINAL.20, the dedicated continuation/auto-OCR gate, and affected OCR/visit regressions live.",
-      "Return to focused real-device retest of sales → input/recovery continuation; the image should begin reading immediately after capture."
+      "Perform focused real-device retest of sales → input/recovery continuation; draft creation should no longer show `Visit vendor mismatch` for the same trusted machine.",
+      "Confirm the camera/photo path begins OCR automatically without an extra read button tap.",
+      "Resume normal field evidence accumulation afterward; reopen engineering only for new real-device friction or promotion-gate evidence."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/live verification for FINAL.20 is pending.",
-    "Numeric learning promotion still requires sufficient real exact scored samples and held-out improvement evidence."
+    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
