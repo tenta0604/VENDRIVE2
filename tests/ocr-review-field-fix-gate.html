@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><title>OCR review field fix gate</title></head>
-<body><pre id="out">RUNNING</pre><div id="a"></div><div id="b"></div><div id="c"></div><div id="d"></div>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OCR review field fix gate</title><style>html,body{margin:0;width:320px;max-width:320px}body{overflow-x:hidden}</style></head>
+<body><pre id="out">RUNNING</pre><div id="a"></div><div id="b"></div><div id="c"></div><div id="d"></div><div id="e"></div>
 <script>
 window.VENDRIVE2ReadBridge=Object.freeze({
   version:1,
@@ -61,6 +61,16 @@ window.VENDRIVE2ReadBridge=Object.freeze({
   r4.candidatePayload.previousClearAt="bad-value";create.click();await sleep(120);
   assert(!h4.textContent.includes("✓ 下書きを作成しました"),"save guard allowed stale invalid previousClearAt");
   assert(cell(h4,"前回クリア").classList.contains("error"),"save guard did not rerender invalid field");
+
+  const r5=baseReview("4038404","2026-09-17T08:00:00+09:00"),h5=document.getElementById("e");
+  r5.machineMatch=await api.bridge.findMachineCandidates({makerKey:"suntory",vendorNumber:"4038404"});
+  window.VENDRIVE2CompactOcrReview.mount(h5,r5);
+  approval=h5.querySelector(".vdrCompactApproval input");create=button(h5,"この内容で下書きを作成");approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));create.click();
+  for(let i=0;i<30&&!h5.textContent.includes("✓ 下書きを作成しました");i++)await sleep(100);
+  assert(h5.textContent.includes("✓ 下書きを作成しました"),"valid corrected review did not create IndexedDB draft");
+  const reports=await api.data.reports.list(),saved=reports.find(x=>x.source&&x.source.method==="ocr"&&x.vendorNumber==="4038404");
+  assert(saved&&saved.status==="draft","saved OCR report is missing or not draft");
+  assert(document.documentElement.scrollWidth<=320,"compact review overflows 320px viewport");
 
   out.textContent="PASS";
 })().catch(function(e){document.getElementById("out").textContent="FAIL: "+(e&&e.stack||e);console.error(e)});
