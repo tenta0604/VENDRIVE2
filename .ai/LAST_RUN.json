@@ -2,13 +2,15 @@
   "evidenceVersion": 8,
   "runType": "ocr_visit_flow_fix_maintenance",
   "phase": "OCR_VISIT_FLOW_FIX",
-  "status": "PREVIEW_VERIFIED_AWAITING_MERGE",
+  "status": "MERGED_DEPLOYED_LIVE_VERIFIED_OPERATIONAL_PAUSE",
   "base": {
     "preFixHead": "21fc683bff0bee8d71e9d1425a49e22f31f162de",
     "safetyIssue": 107,
     "safetyTag": "backup-pre-OCR-VISIT-FLOW-FIX-20260918",
     "safetyTagTarget": "21fc683bff0bee8d71e9d1425a49e22f31f162de",
-    "maintenanceBranch": "chatgpt/ocr-visit-flow-fix-20260918"
+    "maintenanceBranch": "chatgpt/ocr-visit-flow-fix-20260918",
+    "fixPullRequest": 108,
+    "productProductionHead": "d2eab9b1fb7f06a788f70e149bd17f5764c79235"
   },
   "versions": {
     "app": "2026.09.18-FINAL.18",
@@ -17,7 +19,7 @@
     "schema": 4
   },
   "work": {
-    "summary": "Real-device verification found that sales-journal paths involving a compact-review rerender lost the visit callbacks, so post-confirm follow-up actions could disappear. FINAL.18 preserves those callbacks and routes explicit OCR visit closeout into the existing Today/task/order completion flow for the trusted matched machine.",
+    "summary": "Closed the bounded FINAL.18 OCR visit-flow maintenance cycle. The real-device sales-journal issue was caused by compact-review rerenders dropping mount callbacks/options; corrected sales reviews could therefore confirm without post-confirm follow-up actions. FINAL.18 preserves those callbacks and explicitly routes OCR visit closeout to the existing Today completion flow for the trusted matching machine, reusing the existing task checklist and order confirmation. PR #108 merged, Vercel production is READY, GitHub Pages serves FINAL.18, and production/live regression gates pass.",
     "implemented": [
       "Compact OCR rerender now preserves the mount options/callbacks instead of remounting with an empty options object.",
       "A corrected sales journal therefore still creates/uses the Analytics visit and shows post-confirm follow-up actions after explicit confirmation.",
@@ -26,7 +28,13 @@
       "Closing the OCR modal directly does not mark the Today machine visited.",
       "If there is no trusted machine association or the linked machine is not a Today target, legacy Today completion is not forced.",
       "Added regression coverage that performs a sales previousClearAt correction causing a rerender before draft/confirmation and verifies post-confirm actions still appear.",
-      "Regression gate also checks deployed index wiring from OCR closeout to normal Today completion plus the existing task/order path."
+      "Regression gate also checks deployed index wiring from OCR closeout to normal Today completion plus the existing task/order path.",
+      "Merged PR #108 to main at d2eab9b1fb7f06a788f70e149bd17f5764c79235.",
+      "Verified matching Vercel production deployment dpl_CJkjdUPhDeWGtNossSfj9xM8aKum is READY.",
+      "Verified live GitHub Pages version.json serves 2026.09.18-FINAL.18.",
+      "Ran the production visit-closeout/overlap browser gate; PASS.",
+      "Ran the production OCR field regression gate; PASS.",
+      "Ran the live GitHub Pages visit-closeout/overlap and OCR field regression gates; both PASS."
     ]
   },
   "gates": {
@@ -44,16 +52,28 @@
     "automaticReportConfirmation": "NOT_INTRODUCED",
     "numericForecastingChange": "NONE",
     "dbSchemaChange": "NONE",
-    "merge": "PENDING",
-    "productionVerification": "PENDING"
+    "merge": "PASS",
+    "productionVerification": "PASS",
+    "fixPullRequest": 108,
+    "vercelProductionDeploy": "PASS",
+    "vercelProductionDeploymentId": "dpl_CJkjdUPhDeWGtNossSfj9xM8aKum",
+    "productionVisitCloseoutOverlapGate": "PASS",
+    "productionVisitCloseoutOverlapRunId": "9d160cb5-bd82-48a9-8fb6-6651d6e4e19d",
+    "productionOcrFieldRegressionGate": "PASS",
+    "productionOcrFieldRegressionRunId": "ed918c1d-da1f-43e3-a7bf-94916f9cf490",
+    "githubPagesVersion": "PASS",
+    "githubPagesVersionValue": "2026.09.18-FINAL.18",
+    "liveVisitCloseoutOverlapGate": "PASS",
+    "liveVisitCloseoutOverlapRunId": "145889ca-7c47-4b7d-bd18-20a4a5a0bcd0",
+    "liveOcrFieldRegressionGate": "PASS",
+    "liveOcrFieldRegressionRunId": "baea6d8e-8673-4ba0-a684-0749e0ec4327"
   },
   "openItems": [
-    "Merge FINAL.18 and perform production/live verification.",
-    "Real-device confirmation of sales-journal post-confirm choices and Today completion with task/order cases."
+    "Focused real-device confirmation of sales-journal post-confirm choices and Today completion with task/order cases.",
+    "Accumulate sufficient real exact scored samples before any numeric promotion."
   ],
-  "nextAction": "Merge the bounded maintenance PR, verify production/live gates, then ask for the focused real-device retest.",
+  "nextAction": "Have the operator retest the sales-journal correction path and explicit OCR visit-end path on the real device. If those pass, resume normal field evidence accumulation.",
   "unresolved": [
-    "Production/live verification is pending until merge.",
     "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
   ]
 }
