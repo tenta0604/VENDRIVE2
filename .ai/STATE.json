@@ -3,32 +3,33 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": null,
+  "activePhase": "OCR_COMPACT_SOLDOUT_VISIT_CONTEXT",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.18-FINAL.20",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
+  "status": "maintenance_preview_verified_awaiting_merge",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.20 OCR continuation maintenance verified",
-    "releaseStatus": "FINAL.20 is merged and production/live verified. The real-device `Visit vendor mismatch` was caused by visit continuity being keyed too strictly to the first report vendorKey. Related papers now remain in the same visit when they resolve to the same trusted machineId, while each report keeps its own maker/vendor identity. Vendor mismatch still fails closed without trusted same-machine context, and different machineIds still fail closed. Captured images now start OCR automatically; the manual OCR control is retry-only. PR #114 is merged, matching Vercel production is READY, the production continuation gate, OCR field regression, visit-closeout regression, and app smoke pass; GitHub Pages serves FINAL.20 and the live continuation gate passes. Analytics engine is AN14B3B5; DB/schema remain 4.",
+    "title": "Field maintenance — compact sold-out display + continued visit machine context",
+    "releaseStatus": "A FINAL.20 bounded field hotfix is preview-verified. Compact sales-journal review now shows a sold-out section only when OCR returned soldOuts. Same-visit continuation now carries the already-confirmed visit machine context into the next input/recovery review so the operator is not asked to create another durable vendor→machine link for the same visit. The later paper keeps its own maker/vendor identity; persistence re-reads the exact Analytics visit before draft creation, inherits its trusted machineId, and fails closed if the new paper's concrete machine candidate conflicts. No new durable machine mapping is created automatically. Dedicated soldout/visit-context, OCR field, visit-closeout/overlap, and same-visit continuation gates pass on the READY preview. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
     "scope": [
-      "Use VENDRIVE normally; no active feature phase is open.",
-      "Continue related sales/input/recovery papers in one visit when the visit already has a trusted machine identity.",
-      "Preserve each report's own maker/vendor identity and keep mismatches fail-closed when same-machine identity is not established.",
-      "Expect OCR to begin automatically immediately after image capture/selection; use the manual button only as retry after failure/unavailability.",
-      "Keep explicit paper approval and explicit formal confirmation unchanged.",
-      "Keep no automatic durable machine linking, no inventory-semantics change, no DB/schema migration, and no learned numeric promotion."
+      "Show sold-out rows in the compact sales review only when soldOuts is non-empty.",
+      "After explicit continue-capture from a confirmed report, display the same trusted visit machine on the next related paper and suppress redundant re-link UI when there is no conflict.",
+      "Before draft persistence, re-read the exact open visit and inherit its trusted machineId rather than relying on UI inference.",
+      "Do not create a durable mapping for the later paper's maker/vendor automatically.",
+      "Fail closed if a concrete candidate on the continued paper identifies a different machine.",
+      "Keep explicit paper approval, explicit formal confirmation, inventory semantics, Analytics engine, DB and schema unchanged."
     ],
     "nextActions": [
-      "Perform focused real-device retest of sales → input/recovery continuation; draft creation should no longer show `Visit vendor mismatch` for the same trusted machine.",
-      "Confirm the camera/photo path begins OCR automatically without an extra read button tap.",
-      "Resume normal field evidence accumulation afterward; reopen engineering only for new real-device friction or promotion-gate evidence."
+      "Merge the bounded hotfix after diff/status review.",
+      "Verify production/live sold-out display and same-visit no-relink behavior with regression gates.",
+      "Return to field use and real evidence accumulation."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
+    "Production/live verification for this FINAL.20 hotfix is pending.",
     "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {

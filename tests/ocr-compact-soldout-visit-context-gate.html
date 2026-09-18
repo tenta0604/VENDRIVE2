@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OCR compact soldout + visit context gate</title><style>html,body{margin:0;width:320px;max-width:320px}body{overflow-x:hidden}</style></head>
+<body><pre id="out">RUNNING</pre><div id="host"></div><div id="empty"></div>
+<script>
+window.confirm=()=>true;
+const machines=[
+ {id:"M1",name:"継続対象機",managementCode:"2002",managementCodeKey:"2002",maker:"サントリー",makerKey:"サントリー",address:"A",lat:null,lng:null,days:["金"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null},
+ {id:"M2",name:"別自販機",managementCode:"3003",managementCodeKey:"3003",maker:"サントリー",makerKey:"サントリー",address:"B",lat:null,lng:null,days:["金"],cycle:"1週間に1回",weeklyCount:null,timeCondition:null}
+];
+window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:v=>String(v||"").replace(/\D/g,""),getMachinesSnapshot:()=>JSON.parse(JSON.stringify(machines)),getMachineSnapshot:id=>{const m=machines.find(x=>x.id===String(id));return m?JSON.parse(JSON.stringify(m)):null},getPlanningSnapshot:()=>({version:1,today:"2026-09-18",todayDay:"金",restDays:[],todayIds:["M1","M2"],tomorrow:{date:"2026-09-19",day:"土",ids:[],manual:false},machines:machines.map(m=>({id:m.id,last:null,visited:false,skip:null,force:null,orderPending:false,nextScheduledVisitDate:null}))})});
+</script>
+<script src="../analytics.js"></script><script src="../sales-review.js"></script><script src="../input-recovery-review.js"></script><script src="../ocr-review-compact.js?v=2026.09.18-FINAL.20"></script><script src="../ocr-compact-field-enhancements.js?v=2026.09.18-FINAL.20-HF1"></script>
+<script>
+(async function(){
+ const out=document.getElementById("out"),host=document.getElementById("host"),empty=document.getElementById("empty"),api=window.VENDRIVE2Analytics;
+ const assert=(v,m)=>{if(!v)throw new Error(m)},sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ async function waitFor(fn,msg){for(let i=0;i<60;i++){if(fn())return;await sleep(50)}throw new Error(msg)}
+ function salesPayload(sold){return {previousClearAt:"2026-09-17T08:00:00+09:00",elapsedHours:24,totalQty:2,totalAmount:200,products:[{productCode:"P1",printedName:"サンプル飲料",temperature:"COLD",column:2,price:100,salesQty:2}],soldOuts:sold?[{productCode:"P1",column:2,temperature:"COLD",soldOutElapsedHours:3}]:[],specialCircumstance:null}}
+ function review(type,maker,vendor,payload,machineMatch,machineId){return {reviewVersion:2,status:"needs_review",image:{name:"gate.jpg",mime:"image/jpeg",size:100,lastModified:1,stored:false},ocr:{connected:true,provider:"gate",requestId:"req-"+vendor,imageStored:false,rawTextStored:false,warnings:[]},classification:{detectedType:type,selectedType:null,effectiveType:type,typeConfidence:1,userOverride:false},identity:{occurredAt:"2026-09-18T08:00:00+09:00",makerKey:maker,vendorNumber:vendor,machineId:machineId||null},candidatePayload:payload,candidateValidation:{structureReady:true,readyToConfirm:true,reason:null,validation:{}},machineMatch:machineMatch,persistence:{reportCreated:false,analyticsWrite:false,legacyWrite:false,allowed:false,reason:"gate"},policy:{requiresUserReview:true,requiresExplicitSave:true,imageStored:false,rawOcrTextStored:false,autoSave:false}}}
+ function inputPayload(code){return {totalQty:1,items:[{productCode:code,printedName:"投入品",temperature:"COLD",column:1,quantity:1}],paper:{locationName:null,operatorName:null}}}
+ function recoveryPayload(code){return {totalQty:1,items:[{productCode:code,printedName:"回収品",temperature:"COLD",column:1,caseCount:0,looseCount:1,quantity:1}],paper:{locationName:null,operatorName:null}}}
+ function button(text,scope){return Array.from((scope||host).querySelectorAll("button")).find(b=>b.textContent.indexOf(text)>=0)}
+ function approveAndSave(scope){const a=scope.querySelector(".vdrCompactApproval input"),b=button("下書きを作成",scope);assert(a&&b,"approval/save controls missing");a.checked=true;a.dispatchEvent(new Event("change",{bubbles:true}));b.click()}
+ api.close();await new Promise((resolve,reject)=>{const q=indexedDB.deleteDatabase("VENDRIVE2_ANALYTICS_DB");q.onsuccess=resolve;q.onerror=()=>reject(q.error);q.onblocked=resolve});await api.ready();
+ await api.data.machineLinks.put({makerKey:"maker-sales",vendorNumber:"1001",machineId:"M1"});
+ const salesMatch=await api.bridge.findMachineCandidates({makerKey:"maker-sales",vendorNumber:"1001"});assert(salesMatch.status==="confirmed_mapping","sales mapping setup failed");
+ let visit=null,continued=0;
+ const options={ensureVisit:async r=>{if(!visit)visit=await api.data.visits.put({machineId:r.identity.machineId||null,vendorKey:null,startedAt:"2026-09-18T08:00:00+09:00",endedAt:null,status:"open",machineSnapshot:null});return visit.id},onContinueCapture:()=>{continued++},onFinishCapture:async()=>null};
+ const sales=review("sales","maker-sales","1001",salesPayload(true),salesMatch,"M1");
+ window.VENDRIVE2CompactOcrReview.mount(host,sales,options);await sleep(80);
+ assert(host.querySelector(".vdrEnhSoldouts"),"soldout card missing from compact sales review");assert(host.textContent.includes("売り切れ")&&host.textContent.includes("サンプル飲料")&&host.textContent.includes("列2")&&host.textContent.includes("3h"),"soldout compact details missing");
+ const noSold=review("sales","maker-sales","1001",salesPayload(false),salesMatch,"M1");window.VENDRIVE2CompactOcrReview.mount(empty,noSold,options);await sleep(50);assert(!empty.querySelector(".vdrEnhSoldouts")&&!empty.textContent.includes("売り切れ"),"empty soldout section should be hidden");
+ approveAndSave(host);await waitFor(()=>host.textContent.includes("下書きを作成しました"),"sales draft not created");button("下書きを確認",host).click();await waitFor(()=>!!button("投入・回収票を撮影",host),"sales post-confirm continuation missing");button("投入・回収票を撮影",host).click();assert(continued===1,"continuation callback not called");
+ const inputMatch=await api.bridge.findMachineCandidates({makerKey:"maker-input",vendorNumber:"2002"});assert(inputMatch.status==="management_match","input should be management_match before durable link");
+ const input=review("input","maker-input","2002",inputPayload("I1"),inputMatch,null);host.innerHTML="";window.VENDRIVE2CompactOcrReview.mount(host,input,options);await sleep(100);
+ assert(host.textContent.includes("この訪問の自販機を継続")&&host.textContent.includes("再紐づけ不要"),"continued machine context not shown");assert(!button("この自販機と紐づける",host),"continued paper still asks for durable re-link");
+ approveAndSave(host);await waitFor(()=>host.textContent.includes("下書きを作成しました"),"continued input draft not created");
+ const reports=await api.data.reports.list(),inputReport=reports.find(r=>r.type==="input"&&r.vendorNumber==="2002");assert(inputReport&&inputReport.machineId==="M1","continued input did not inherit exact visit machine");
+ const inputMatchAfter=await api.bridge.findMachineCandidates({makerKey:"maker-input",vendorNumber:"2002"});assert(inputMatchAfter.status==="management_match","continued visit must not auto-create durable vendor mapping");
+ button("下書きを確認",host).click();await waitFor(()=>!!button("回収票を撮影",host),"input post-confirm recovery continuation missing");button("回収票を撮影",host).click();
+ const recoveryMatch=await api.bridge.findMachineCandidates({makerKey:"maker-recovery",vendorNumber:"3003"});assert(recoveryMatch.status==="management_match","recovery conflict setup failed");const recovery=review("recovery","maker-recovery","3003",recoveryPayload("R1"),recoveryMatch,null);host.innerHTML="";window.VENDRIVE2CompactOcrReview.mount(host,recovery,options);await sleep(100);
+ assert(host.textContent.includes("この訪問で確定済みの自販機と、今回帳票の候補が一致しません"),"different-machine continuation conflict not shown");const conflictApproval=host.querySelector(".vdrCompactApproval input");assert(conflictApproval&&conflictApproval.disabled,"machine conflict did not fail closed in review UI");
+ assert(document.body.scrollWidth<=320,"320px layout overflow");out.textContent="PASS";
+})().catch(e=>{document.getElementById("out").textContent="FAIL: "+(e&&e.stack||e);console.error(e)});
+</script></body></html>
