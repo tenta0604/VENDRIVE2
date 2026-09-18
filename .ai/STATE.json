@@ -3,33 +3,31 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "OCR_COMPACT_SOLDOUT_VISIT_CONTEXT",
+  "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.18-FINAL.20",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "maintenance_preview_verified_awaiting_merge",
+  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Field maintenance — compact sold-out display + continued visit machine context",
-    "releaseStatus": "A FINAL.20 bounded field hotfix is preview-verified. Compact sales-journal review now shows a sold-out section only when OCR returned soldOuts. Same-visit continuation now carries the already-confirmed visit machine context into the next input/recovery review so the operator is not asked to create another durable vendor→machine link for the same visit. The later paper keeps its own maker/vendor identity; persistence re-reads the exact Analytics visit before draft creation, inherits its trusted machineId, and fails closed if the new paper's concrete machine candidate conflicts. No new durable machine mapping is created automatically. Dedicated soldout/visit-context, OCR field, visit-closeout/overlap, and same-visit continuation gates pass on the READY preview. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
+    "title": "Operational evidence accumulation — FINAL.20 compact OCR hotfix verified",
+    "releaseStatus": "The FINAL.20 compact OCR hotfix is merged and production/live verified. Compact sales-journal review shows sold-out rows only when OCR returns soldOuts. After explicit continue-capture from a confirmed report, the next input/recovery review carries the trusted visit machine context and does not ask for another durable re-link when there is no conflict. Draft save re-reads the exact Analytics visit and inherits its trusted machineId; the later paper keeps its own maker/vendor identity and no durable mapping is created automatically. A concrete different-machine candidate fails closed. PR #118 is merged, matching Vercel production is READY, and the dedicated gate passes on both production and GitHub Pages. Existing OCR field, visit-closeout/overlap, and same-visit continuation regressions passed on preview. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
     "scope": [
-      "Show sold-out rows in the compact sales review only when soldOuts is non-empty.",
-      "After explicit continue-capture from a confirmed report, display the same trusted visit machine on the next related paper and suppress redundant re-link UI when there is no conflict.",
-      "Before draft persistence, re-read the exact open visit and inherit its trusted machineId rather than relying on UI inference.",
-      "Do not create a durable mapping for the later paper's maker/vendor automatically.",
-      "Fail closed if a concrete candidate on the continued paper identifies a different machine.",
-      "Keep explicit paper approval, explicit formal confirmation, inventory semantics, Analytics engine, DB and schema unchanged."
+      "Use VENDRIVE normally; no active feature phase is open.",
+      "Compact sales review displays sold-out rows only when present.",
+      "Same-visit continued papers reuse the trusted visit machine without requiring another durable vendor→machine mapping.",
+      "A different concrete machine candidate still fails closed.",
+      "Keep explicit paper approval, explicit report confirmation, durable machine-link safety, inventory semantics, Analytics engine, DB and schema unchanged."
     ],
     "nextActions": [
-      "Merge the bounded hotfix after diff/status review.",
-      "Verify production/live sold-out display and same-visit no-relink behavior with regression gates.",
-      "Return to field use and real evidence accumulation."
+      "Continue normal field use and verify the sold-out compact display on a real sales journal when one appears.",
+      "Continue sales → input/recovery capture normally; repeated machine linking should not be necessary inside the same trusted visit.",
+      "Resume real evidence accumulation and reopen engineering only for new field friction or promotion-gate evidence."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production/live verification for this FINAL.20 hotfix is pending.",
     "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
