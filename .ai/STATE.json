@@ -3,34 +3,33 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "OCR_VISIT_FLOW_FIX",
+  "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.09.18-FINAL.18",
   "engineVersion": "AN14B3B3",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "maintenance_preview_verified_awaiting_merge",
+  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Field maintenance — OCR post-confirm flow + Today completion",
-    "releaseStatus": "FINAL.18 candidate is preview-verified. A real-device sales-journal path exposed that compact-review rerenders dropped the visit callbacks, so sales reports that required a field correction could confirm without showing the post-confirm capture/end choices. FINAL.18 preserves those callbacks across rerenders. Explicit OCR visit closeout now also routes the matched Today machine through the existing normal visit-completion flow, including the existing task checklist and order confirmation. Preview visit/overlap and OCR field regression gates pass. Analytics engine remains AN14B3B3; DB/schema remain 4.",
+    "title": "Operational evidence accumulation — FINAL.18 OCR visit-flow maintenance verified",
+    "releaseStatus": "FINAL.18 is merged and live-verified. Compact OCR rerenders now preserve the active visit callbacks, so corrected sales-journal reviews retain their Analytics visit and post-confirm continuation/end actions. Explicit OCR visit closeout now routes the trusted matching Today machine through the existing normal visit-completion flow; the existing task checklist and order confirmation remain authoritative. Closing the OCR modal alone does not complete Today. PR #108 is merged, the matching Vercel production deployment is READY, GitHub Pages serves FINAL.18, and both the visit-closeout/overlap gate and existing OCR field regression gate pass on production and live GitHub Pages. Analytics engine remains AN14B3B3; DB/schema remain 4.",
     "scope": [
-      "Preserve compact OCR mount callbacks across every material rerender so corrected sales journals keep the same visit session and post-confirm actions.",
-      "When the operator explicitly ends an OCR visit and the Analytics visit is linked to a machine in Today's target set, reuse the existing completeVisit flow to mark the Today machine visited.",
-      "Preserve the existing task confirmation before visit completion and the existing order handling/confirmation after task review.",
-      "Do not mark a Today machine visited merely by closing the OCR modal; only explicit OCR visit closeout triggers the legacy completion flow.",
-      "Do not infer a legacy machine when Analytics/OCR does not have a trusted machine link.",
-      "No numeric analytics change, auto-confirm, auto-link, or DB/schema migration."
+      "Use VENDRIVE normally in field operations; no active feature phase is open.",
+      "Corrected OCR reviews must preserve visit continuity and post-confirm actions across rerenders.",
+      "Explicit OCR visit closeout may complete the matching Today machine only through the existing normal visit-completion flow.",
+      "Keep task checklist and order confirmation behavior unchanged and authoritative.",
+      "Closing the OCR modal directly must not mark the Today machine visited.",
+      "Keep no auto-confirm, no auto-link, no numeric forecasting change, and no DB/schema migration."
     ],
     "nextActions": [
-      "Merge FINAL.18 after diff/check review.",
-      "Verify production deployment, GitHub Pages version, and both regression gates live.",
-      "Return to real-device field verification, specifically sales-journal correction followed by post-confirm choices and OCR visit end with task/order cases."
+      "Perform focused real-device confirmation of the sales-journal correction path and the explicit visit-end path.",
+      "Verify a Today machine becomes visited after OCR visit end, and that task/order cases show the usual confirmations.",
+      "Resume normal field use afterward; reopen engineering only for new observed friction or promotion-gate evidence."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/live verification for FINAL.18 is pending.",
-    "Numeric learning promotion remains gated on real held-out evidence."
+    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
