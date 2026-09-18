@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OCR review field fix gate</title><style>html,body{margin:0;width:320px;max-width:320px}body{overflow-x:hidden}</style></head>
+<body><pre id="out">RUNNING</pre><div id="a"></div><div id="b"></div><div id="c"></div><div id="d"></div><div id="e"></div>
+<script>
+window.VENDRIVE2ReadBridge=Object.freeze({
+  version:1,
+  normalizeManagementCode:function(v){return String(v||"").replace(/\\D/g,"")},
+  getMachinesSnapshot:function(){return [{id:"M1",name:"Sample Machine",managementCode:"4038404",managementCodeKey:"4038404",maker:"サントリー",makerKey:"suntory",address:"",lat:null,lng:null,days:[],cycle:null,weeklyCount:null,timeCondition:null}]},
+  getMachineSnapshot:function(id){return id==="M1"?this.getMachinesSnapshot()[0]:null},
+  getPlanningSnapshot:function(){return {version:1,today:"2026-09-18",todayDay:"金",restDays:[],todayIds:[],tomorrow:{date:"2026-09-19",day:"土",ids:[],manual:false},machines:[]}}
+});
+</script>
+<script src="../analytics.js"></script>
+<script src="../sales-review.js"></script>
+<script src="../input-recovery-review.js"></script>
+<script src="../ocr-review-compact.js?v=2026.09.18-FINAL.16"></script>
+<script>
+(async function(){
+  const out=document.getElementById("out"),api=window.VENDRIVE2Analytics;
+  function assert(v,m){if(!v)throw new Error(m)}
+  function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+  function baseReview(vendor,prev){
+    return {reviewVersion:2,status:"needs_review",image:{stored:false},ocr:{provider:"gate",requestId:"gate",imageStored:false,rawTextStored:false,warnings:[]},classification:{detectedType:"sales",selectedType:null,effectiveType:"sales",typeConfidence:1},identity:{occurredAt:"2026-09-18T08:00:00+09:00",makerKey:"suntory",vendorNumber:vendor,machineId:null},candidatePayload:{previousClearAt:prev,elapsedHours:24,totalQty:1,totalAmount:100,products:[{productCode:"P1",printedName:"Sample",temperature:"COLD",column:1,price:100,salesQty:1}],soldOuts:[],specialCircumstance:null},candidateValidation:{structureReady:true},machineMatch:{status:"no_match",candidates:[]}}
+  }
+  function cell(host,label){return Array.from(host.querySelectorAll(".vdrCompactMetaCell")).find(x=>{const s=x.querySelector("span");return s&&s.textContent===label})}
+  function button(host,text){return Array.from(host.querySelectorAll("button")).find(x=>x.textContent===text||x.textContent.includes(text))}
+  await api.ready();
+
+  const r1=baseReview("4038401","09/17 08:00"),h1=document.getElementById("a");
+  window.VENDRIVE2CompactOcrReview.mount(h1,r1);
+  let pc=cell(h1,"前回クリア");assert(pc&&pc.classList.contains("error"),"invalid previousClearAt is not blocked");
+  let approval=h1.querySelector(".vdrCompactApproval input"),create=button(h1,"この内容で下書きを作成");approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));assert(create.disabled,"draft button enabled with invalid previousClearAt");
+  pc.querySelector("button").click();let editInput=pc.querySelector(".vdrInlineEditor input");editInput.value="2026-09-17T08:00";pc.querySelector(".vdrInlineEditor .save").click();await sleep(80);
+  assert(r1.candidatePayload.previousClearAt==="2026-09-17T08:00:00+09:00","direct previousClearAt edit did not update review");
+  pc=cell(h1,"前回クリア");assert(pc&&!pc.classList.contains("error"),"valid previousClearAt remains blocked");
+
+  const r2=baseReview("4038401","2026-09-17T08:00:00+09:00"),h2=document.getElementById("b");
+  window.VENDRIVE2CompactOcrReview.mount(h2,r2);
+  let vc=cell(h2,"ベンダー");assert(vc&&vc.querySelector("button"),"vendor edit is not available on no-match");
+  vc.querySelector("button").click();editInput=vc.querySelector(".vdrInlineEditor input");editInput.value="4038404";vc.querySelector(".vdrInlineEditor .save").click();await sleep(120);
+  assert(r2.identity.vendorNumber==="4038404","vendor correction did not update reviewed identity");
+  assert(r2.machineMatch&&r2.machineMatch.status==="management_match","vendor correction did not re-run machine match");
+  assert(h2.textContent.includes("候補: Sample Machine"),"corrected vendor did not surface machine candidate");
+
+  const r3=baseReview("4038404","09/17 08:00"),h3=document.getElementById("c");
+  r3.machineMatch=await api.bridge.findMachineCandidates({makerKey:"suntory",vendorNumber:"4038404"});
+  window.VENDRIVE2CompactOcrReview.mount(h3,r3);
+  const open=button(h3,"全体を編集");open.click();await sleep(20);
+  assert(button(h3,"編集内容を反映して閉じる"),"detail editor does not expose apply-close action");
+  const fields=Array.from(h3.querySelectorAll(".vdrSalesField")),prevField=fields.find(x=>x.querySelector("label")&&x.querySelector("label").textContent==="前回クリア日時");
+  assert(prevField,"sales detail previousClearAt field missing");
+  const prevInput=prevField.querySelector("input");prevInput.value="2026-09-17T08:00";prevInput.dispatchEvent(new Event("input",{bubbles:true}));
+  button(h3,"編集内容を反映して閉じる").click();await sleep(120);
+  assert(r3.candidatePayload.previousClearAt==="2026-09-17T08:00:00+09:00","detail edit was not retained");
+  assert(!cell(h3,"前回クリア").classList.contains("error"),"detail edit was not revalidated in compact review");
+
+  const r4=baseReview("4038404","2026-09-17T08:00:00+09:00"),h4=document.getElementById("d");
+  r4.machineMatch=await api.bridge.findMachineCandidates({makerKey:"suntory",vendorNumber:"4038404"});
+  window.VENDRIVE2CompactOcrReview.mount(h4,r4);
+  approval=h4.querySelector(".vdrCompactApproval input");create=button(h4,"この内容で下書きを作成");approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));assert(!create.disabled,"valid draft unexpectedly disabled");
+  r4.candidatePayload.previousClearAt="bad-value";create.click();await sleep(120);
+  assert(!h4.textContent.includes("✓ 下書きを作成しました"),"save guard allowed stale invalid previousClearAt");
+  assert(cell(h4,"前回クリア").classList.contains("error"),"save guard did not rerender invalid field");
+
+  const r5=baseReview("4038404","2026-09-17T08:00:00+09:00"),h5=document.getElementById("e");
+  r5.machineMatch=await api.bridge.findMachineCandidates({makerKey:"suntory",vendorNumber:"4038404"});
+  window.VENDRIVE2CompactOcrReview.mount(h5,r5);
+  approval=h5.querySelector(".vdrCompactApproval input");create=button(h5,"この内容で下書きを作成");approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));create.click();
+  for(let i=0;i<30&&!h5.textContent.includes("✓ 下書きを作成しました");i++)await sleep(100);
+  assert(h5.textContent.includes("✓ 下書きを作成しました"),"valid corrected review did not create IndexedDB draft");
+  const reports=await api.data.reports.list(),saved=reports.find(x=>x.source&&x.source.method==="ocr"&&x.vendorNumber==="4038404");
+  assert(saved&&saved.status==="draft","saved OCR report is missing or not draft");
+  const mobileNodes=Array.from(document.querySelectorAll(".vdrCompact,.vdrCompactCard,.vdrCompactMeta,.vdrCompactMetaCell,.vdrCompactActions,.vdrDraftSuccess,.vdrSalesReview,.vdrSalesCard"));
+  const overflowing=mobileNodes.map(el=>({cls:el.className,sw:el.scrollWidth,cw:el.clientWidth,left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right)})).find(x=>x.sw>x.cw+1||x.left<0||x.right>320);
+  assert(document.body.scrollWidth<=320&&!overflowing,"VENDRIVE OCR review overflows 320px body: body="+document.body.scrollWidth+" item="+JSON.stringify(overflowing||null));
+
+  out.textContent="PASS";
+})().catch(function(e){document.getElementById("out").textContent="FAIL: "+(e&&e.stack||e);console.error(e)});
+</script></body></html>

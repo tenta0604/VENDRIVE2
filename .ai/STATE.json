@@ -5,28 +5,28 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.09.16-FINAL.15",
+  "appVersion": "2026.09.18-FINAL.16",
   "engineVersion": "AN14B3B2",
   "dbVersion": 4,
   "schemaVersion": 4,
   "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational evidence accumulation — no active feature development",
-    "releaseStatus": "AN15 foundations and lifecycle hardening are merged. AN15G2 Vercel runtime failure was diagnosed and fixed on 2026-09-17; production deployment is READY and /api/explain now reaches the route normally instead of FUNCTION_INVOCATION_FAILED. Production numeric forecasts remain unchanged. Active feature development is intentionally paused while real operational evidence accumulates.",
+    "title": "Operational evidence accumulation — bounded OCR field-maintenance fix preview-verified",
+    "releaseStatus": "Real field use on 2026-09-18 exposed two OCR-review friction points: malformed sales previousClearAt could reach draft creation, and a manually corrected vendor number lacked an explicit apply/revalidation path. FINAL.16 fixes both without changing Analytics numeric behavior, inventory semantics, or automatic-confirmation policy. The branch is browser/IndexedDB/mobile preview-verified and is pending merge plus production verification.",
     "scope": [
-      "Use VENDRIVE normally in field operations; do not add features merely to keep development moving.",
-      "Production listForecasts output is observed without changing forecast values.",
-      "Only complete, non-lower-bound machine/product forecasts are snapshotted as exact 24h evaluation candidates.",
-      "Only later confirmed sales reports with exact interval identity are scored; sold-out outcomes remain censored.",
-      "AN15B/C/D/D2/E/F numeric or optimization promotion remains disabled until real held-out evidence supports it.",
-      "AN15G2 runtime adapter mismatch was fixed by using Vercel POST/OPTIONS Web Request exports; production deployment is READY and the prior request.headers.get runtime crash is resolved.",
+      "Block invalid sales previousClearAt / occurredAt / elapsedHours before draft creation and revalidate again at save time.",
+      "Keep OCR identity fields directly editable; a corrected vendor number must update the reviewed candidate and immediately re-run vending-machine matching.",
+      "Full-editor corrections must be explicitly applied back to the compact review before draft creation.",
+      "A corrected vendor number may surface a machine candidate but must never auto-link it; explicit user linkage remains required.",
+      "Use VENDRIVE normally after this bounded maintenance fix; do not turn the observed friction into a broader feature phase.",
+      "Production listForecasts output remains unchanged and AN15 learned numeric corrections remain evaluation-only.",
       "OPS10C remains withdrawn; preserve existing Today nearest-machine ordering."
     ],
     "nextActions": [
-      "Accumulate real exact scored samples through ordinary use without changing production numeric decisions.",
-      "Treat field friction, incorrect proposals, missing information, failed evidence accumulation, or measured forecast error as evidence for the next improvement cycle.",
-      "Evaluate AN15B then AN15C then any pooling increment with no-lookahead held-out evidence only when enough real samples exist.",
-      "Promote only bounded, versioned, reversible corrections after sample/confidence and improvement gates pass."
+      "Merge FINAL.16 after the verified maintenance gates, then verify the production deployment and live browser gate.",
+      "Resume normal field use and accumulate real exact scored samples without changing production numeric decisions.",
+      "Treat further repeated field friction, incorrect proposals, missing information, failed evidence accumulation, or measured forecast error as evidence for a separately scoped maintenance cycle.",
+      "Promote learned numeric corrections only after the existing held-out/no-lookahead gates pass."
     ]
   },
   "requiredUserInput": [],
@@ -35,7 +35,14 @@
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
-    "readOrder": ["AGENTS.md", ".ai/STATE.json", "AI_ROADMAP.md", ".ai/LAST_RUN.json", ".ai/DECISIONS.md", ".ai/WORKFLOW.md"],
+    "readOrder": [
+      "AGENTS.md",
+      ".ai/STATE.json",
+      "AI_ROADMAP.md",
+      ".ai/LAST_RUN.json",
+      ".ai/DECISIONS.md",
+      ".ai/WORKFLOW.md"
+    ],
     "shortResumePrompt": "VENDRIVE続き"
   }
 }

@@ -128,6 +128,18 @@ This file records confirmed project decisions that must survive chat migration. 
 - OCR identity should be cross-checked against the active machine. Matching identity is positive evidence; mismatch must warn before association.
 - This is the current agreed design direction for the next implementation phase; do not regress to the earlier idea of treating the nearest ≤100m machine as automatically visiting.
 
+
+## OCR reviewed-field correction decision
+
+- A human correction made in OCR review is the authoritative value for that reviewed candidate; the stale OCR-read value must not silently replace it before draft creation.
+- Vendor number, maker, report time, and other review identity fields must remain directly correctable even when OCR returned a non-empty value.
+- Changing vendor number or maker must re-run vending-machine candidate matching before draft creation.
+- A corrected identity may surface a vending-machine candidate, but it must never auto-link the machine. The existing explicit user linkage action remains required.
+- For sales reports, malformed or missing required period data such as `previousClearAt`, report time, or elapsed hours must block draft creation in the review UI rather than failing only inside Analytics persistence.
+- Full-editor changes must have an explicit apply/revalidation path back to the compact review, and draft creation must perform a final blocking-field revalidation.
+- Re-rendering after a material correction may require the user to re-approve the paper comparison; preserving explicit human approval is more important than preserving a stale checked state.
+
+
 ## Finite verification decision
 
 - Verification must be finite and declared before execution.
