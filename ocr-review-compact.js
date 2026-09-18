@@ -24,6 +24,7 @@ function ensureStyle(){
     ".vdrCompactMachine{display:flex;justify-content:space-between;gap:8px;align-items:center}.vdrCompactMachineText{min-width:0}.vdrCompactMachineText b{font-size:11px}.vdrCompactMachineText span{display:block;font-size:9px;color:#70747a;margin-top:2px;overflow-wrap:anywhere}.vdrMachineFlag{font-size:8px;font-weight:950;color:#1d4ed8;margin-top:5px}",
     ".vdrCompactActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vdrCompactButton{border:1px solid #d7d9dd;border-radius:11px;background:#fff;padding:10px;font-size:10px;font-weight:900}.vdrCompactButton.primary{background:#111;color:#fff;border-color:#111}.vdrCompactButton:disabled{opacity:.4}",
     ".vdrCompactApproval{display:flex;gap:8px;align-items:flex-start;font-size:9px;font-weight:800;line-height:1.45;padding:9px;background:#fafafa;border-radius:10px}.vdrCompactStatus{font-size:9px;color:#666;line-height:1.5}.vdrDraftSuccess{display:grid;gap:7px;border:1px solid #a7e0b5;background:#f0fdf4;border-radius:12px;padding:11px;margin-top:8px}.vdrDraftSuccessTitle{font-size:12px;font-weight:950;color:#166534}.vdrDraftSuccessText{font-size:9px;line-height:1.5;color:#356044}.vdrDraftConfirmButton{border:0;border-radius:10px;background:#166534;color:#fff;padding:10px;font-size:10px;font-weight:950}.vdrDraftConfirmButton:disabled{opacity:.55}.vdrDraftSuccess.confirmed{background:#ecfdf3;border-color:#74c98a}",
+    ".vdrPostConfirm{display:grid;gap:7px;border-top:1px solid #b9dfc2;padding-top:9px;margin-top:2px}.vdrPostConfirmTitle{font-size:10px;font-weight:950;color:#174d2c}.vdrPostConfirmText{font-size:8.5px;line-height:1.45;color:#486354}.vdrPostConfirmActions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.vdrPostConfirmActions button{border:1px solid #9bc7a7;border-radius:10px;background:#fff;color:#174d2c;padding:9px 7px;font-size:9px;font-weight:950}.vdrPostConfirmActions button.primary{background:#166534;color:#fff;border-color:#166534}.vdrPostConfirmActions button:disabled{opacity:.5}",
     ".vdrCompactDetail[hidden]{display:none!important}.vdrCompactDetail{border-top:1px solid #ececef;padding-top:10px}.vdrCompactMuted{font-size:9px;color:#777}",
     "@media(max-width:350px){.vdrCompactActions{grid-template-columns:1fr}.vdrCompactRow{grid-template-columns:58px minmax(0,1fr) 48px}.vdrCompactItemName{font-size:10.5px}.vdrFieldEdit{padding:3px 5px}}"
   ].join("");document.head.appendChild(s);
@@ -122,8 +123,8 @@ function inlineEditor(anchor,title,spec,onSave){
   scope.appendChild(box);setTimeout(function(){input.focus();try{box.scrollIntoView({behavior:"smooth",block:"nearest"})}catch(error){}},0)
 }
 function machineInfo(review){var mm=review.machineMatch||null;if(!mm)return null;var candidates=Array.isArray(mm.candidates)?mm.candidates:[],candidate=null;if(mm.confirmedMapping)candidate=candidates.find(function(c){return c.machineId===mm.confirmedMapping.machineId})||null;if(!candidate&&candidates.length===1)candidate=candidates[0];return{match:mm,candidate:candidate,machine:candidate&&candidate.machine||null}}
-function mount(container,review){
-  ensureStyle();container.innerHTML="";
+function mount(container,review,options){
+  options=options||{};ensureStyle();container.innerHTML="";
   var type=review&&review.classification&&review.classification.effectiveType;
   if(["sales","input","recovery","input_recovery"].indexOf(type)<0||!review.candidatePayload){container.appendChild(el("div","vdrCompactCard","確認できるOCR候補がありません。"));return{mounted:false}}
   var issues=issuesFor(review,type),blocking=issues.filter(function(x){return x.severity==="error"}),ocrIssues=issues.filter(function(x){return x.category==="ocr"||x.category==="required"}),machineIssues=issues.filter(function(x){return x.category==="machine"}),consistencyIssues=issues.filter(function(x){return x.category==="consistency"}),globalIssues=issues.filter(function(x){return x.category==="ocr_global"}),root=el("div","vdrCompact"),card=el("div","vdrCompactCard"),top=el("div","vdrCompactTop"),titleWrap=el("div"),confidence=review.classification&&typeof review.classification.typeConfidence==="number"?Math.round(review.classification.typeConfidence*100)+"%":"—";
@@ -210,6 +211,31 @@ function mount(container,review){
     approval.disabled=true;approvalWrap.style.display="none";edit.disabled=true;save.disabled=true;save.textContent="作成済み";status.textContent="";
     var old=actionsCard.querySelector(".vdrDraftSuccess");if(old)old.remove();
     var card=el("div","vdrDraftSuccess"),title=el("div","vdrDraftSuccessTitle","✓ 下書きを作成しました"),effect=type==="sales"?"確定すると、この売上データが分析エンジンの対象になります。":"確定すると、この投入・回収データが在庫計算と分析の対象になります。",text=el("div","vdrDraftSuccessText","まだ正式確定ではありません。内容に問題がなければ、下のボタンで確定してください。 "+effect),confirmButton=el("button","vdrDraftConfirmButton","下書きを確認・確定する");
+    function nextActions(confirmedReport){
+      if(!confirmedReport||!confirmedReport.visitId||typeof options.onFinishCapture!=="function")return;
+      var api=global.VENDRIVE2Analytics,visits=api&&api.data&&api.data.visits,wrap=el("div","vdrPostConfirm"),nextTitle=el("div","vdrPostConfirmTitle","次にどうしますか？"),nextText=el("div","vdrPostConfirmText","この訪問の帳票を続けるか、作業内容を明示して終了できます。"),buttons=el("div","vdrPostConfirmActions");
+      wrap.appendChild(nextTitle);wrap.appendChild(nextText);wrap.appendChild(buttons);card.appendChild(wrap);
+      function add(label,primary,handler){var button=el("button",primary?"primary":"",label);button.type="button";button.onclick=function(){Array.prototype.forEach.call(buttons.querySelectorAll("button"),function(b){b.disabled=true});Promise.resolve(handler()).catch(function(){Array.prototype.forEach.call(buttons.querySelectorAll("button"),function(b){b.disabled=false})})};buttons.appendChild(button)}
+      function finish(opts){return options.onFinishCapture(opts||{})}
+      function continueCapture(){if(typeof options.onContinueCapture==="function")options.onContinueCapture();return Promise.resolve()}
+      var completeness=visits&&typeof visits.getCompleteness==="function"?Promise.resolve(visits.getCompleteness(confirmedReport.visitId)):Promise.resolve(null);
+      completeness.then(function(c){
+        var inputMissing=!c||!c.input||c.input.resolved!==true,recoveryMissing=!c||!c.recovery||c.recovery.resolved!==true;
+        if(type==="sales"){
+          add("投入・回収票を撮影",true,continueCapture);
+          if(inputMissing&&recoveryMissing)add("投入・回収なしで終了",false,function(){return finish({noInput:true,noRecovery:true,toast:"売上のみの訪問として終了しました"})});
+          else if(recoveryMissing)add("回収なしで終了",false,function(){return finish({noRecovery:true,toast:"回収なしで訪問を終了しました"})});
+          else if(inputMissing)add("投入なしで終了",false,function(){return finish({noInput:true,toast:"投入なしで訪問を終了しました"})});
+          else add("この訪問を終了",false,function(){return finish({toast:"訪問を終了しました"})});
+        }else if(type==="input"){
+          if(recoveryMissing){add("回収票を撮影",true,continueCapture);add("回収なしで終了",false,function(){return finish({noRecovery:true,toast:"回収なしで訪問を終了しました"})})}
+          else{add("別の帳票を撮影",true,continueCapture);add("この訪問を終了",false,function(){return finish({toast:"訪問を終了しました"})})}
+        }else if(type==="recovery"){
+          if(inputMissing){add("投入票を撮影",true,continueCapture);add("投入なしで終了",false,function(){return finish({noInput:true,toast:"投入なしで訪問を終了しました"})})}
+          else{add("別の帳票を撮影",true,continueCapture);add("この訪問を終了",false,function(){return finish({toast:"訪問を終了しました"})})}
+        }else{add("別の帳票を撮影",true,continueCapture);add("この訪問を終了",false,function(){return finish({toast:"訪問を終了しました"})})}
+      }).catch(function(){add("別の帳票を撮影",true,continueCapture);add("この訪問を終了",false,function(){return finish({toast:"訪問を終了しました"})})})
+    }
     confirmButton.type="button";card.appendChild(title);card.appendChild(text);card.appendChild(confirmButton);actionsCard.insertBefore(card,detail);
     confirmButton.onclick=function(){
       var api=global.VENDRIVE2Analytics;if(!api||!api.data||!api.data.reports||typeof api.data.reports.confirm!=="function")return;
@@ -218,12 +244,12 @@ function mount(container,review){
       confirmButton.disabled=true;confirmButton.textContent="確定しています…";
       Promise.resolve(api.data.reports.confirm(id)).then(function(out){
         if(!out||out.confirmed!==true){confirmButton.disabled=false;confirmButton.textContent="下書きを確認・確定する";text.textContent="まだ確定できません。内容を全体編集で確認してください。";return}
-        card.classList.add("confirmed");title.textContent="✓ 帳票を確定しました";text.textContent=type==="sales"?"売上データが分析エンジンの対象になりました。":"投入・回収データが在庫計算と分析の対象になりました。";confirmButton.textContent="確定済み";confirmButton.disabled=true;save.textContent="確定済み";
+        card.classList.add("confirmed");title.textContent="✓ 帳票を確定しました";text.textContent=type==="sales"?"売上データが分析エンジンの対象になりました。":"投入・回収データが在庫計算と分析の対象になりました。";confirmButton.textContent="確定済み";confirmButton.disabled=true;save.textContent="確定済み";nextActions(out.report||report);
       }).catch(function(error){confirmButton.disabled=false;confirmButton.textContent="下書きを確認・確定する";text.textContent="確定できませんでした："+(error&&error.message?error.message:"内容を確認してください")})
     }
   }
-  save.onclick=function(){if(save.disabled)return;var api=global.VENDRIVE2Analytics;if(!api||!api.capture||typeof api.capture.createDraftFromReview!=="function")return;save.disabled=true;status.textContent="編集内容を再確認しています…";Promise.resolve(refreshMachineMatch(review)).then(function(){var latestBlocking=issuesFor(review,type).filter(function(x){return x.severity==="error"});if(latestBlocking.length){rerender(container,review);return null}status.textContent="下書きを作成しています…";return api.capture.createDraftFromReview({review:clone(review),userApproved:true,visitId:null})}).then(function(result){if(result)showDraftSuccess(result)}).catch(function(error){status.textContent="下書きを作成できませんでした："+(error&&error.message?error.message:"内容を確認してください");update()})};
+  save.onclick=function(){if(save.disabled)return;var api=global.VENDRIVE2Analytics;if(!api||!api.capture||typeof api.capture.createDraftFromReview!=="function")return;save.disabled=true;status.textContent="編集内容を再確認しています…";Promise.resolve(refreshMachineMatch(review)).then(function(){var latestBlocking=issuesFor(review,type).filter(function(x){return x.severity==="error"});if(latestBlocking.length){rerender(container,review);return undefined}status.textContent="訪問情報を準備しています…";return typeof options.ensureVisit==="function"?Promise.resolve(options.ensureVisit(review)):Promise.resolve(null)}).then(function(visitId){if(visitId===undefined)return null;status.textContent="下書きを作成しています…";return api.capture.createDraftFromReview({review:clone(review),userApproved:true,visitId:visitId||null})}).then(function(result){if(result)showDraftSuccess(result)}).catch(function(error){status.textContent="下書きを作成できませんでした："+(error&&error.message?error.message:"内容を確認してください");update()})};
   update();container.appendChild(root);return{mounted:true,review:review,issues:issues}
 }
-global.VENDRIVE2CompactOcrReview=Object.freeze({version:2,mount:mount});
+global.VENDRIVE2CompactOcrReview=Object.freeze({version:3,mount:mount});
 })(window);

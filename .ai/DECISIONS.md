@@ -146,3 +146,15 @@ This file records confirmed project decisions that must survive chat migration. 
 - Once every required gate for the current scope passes, stop. Do not create an additional reassurance loop.
 - Re-run only gates affected by a real change to code, test methodology, deployment state, or another relevant precondition.
 - A later real-device problem opens a new scoped maintenance phase; it does not justify extending a completed verification loop indefinitely.
+
+## Sales-period continuity and visit closeout decision
+
+- A sales journal is a period observation, not evidence that product was physically input or recovered. Only confirmed input/recovery paper may create those inventory movements.
+- Before an OCR sales draft is created, and again before a sales report is confirmed, compare its `previousClearAt → occurredAt` interval with prior confirmed sales for the same maker/vendor. A materially overlapping interval must fail closed because it can represent a cumulative/reprinted journal and would otherwise double-count demand.
+- Adjacent sales periods are valid. A small boundary tolerance may absorb minor clock/print noise, but it must not turn materially overlapping periods into valid independent observations.
+- After a report is confirmed, the capture UI should explicitly ask whether to continue with related paper or end the visit instead of leaving the operator on a dead-end confirmed screen.
+- “No input” and “no recovery” are explicit visit facts, not synthetic zero-quantity reports. Do not invent an input/recovery report merely to make visit completeness pass.
+- A sales-only visit can be complete when the operator explicitly confirms both no input and no recovery. A visit with confirmed input can be complete when the operator explicitly confirms no recovery, and vice versa.
+- Closing the capture UI without making those explicit choices may leave the Analytics visit incomplete; safety is preferred over silently assuming no work occurred.
+- A later actual input/recovery report conflicts with an already confirmed corresponding “none” resolution until that resolution is explicitly cleared.
+

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Visit closeout and overlap gate</title><style>html,body{margin:0;width:320px;max-width:320px}body{overflow-x:hidden}</style></head>
+<body><pre id="out">RUNNING</pre><div id="ui"></div>
+<script>
+window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:v=>String(v||"").replace(/\D/g,""),getMachinesSnapshot:()=>[],getMachineSnapshot:()=>null,getPlanningSnapshot:()=>({version:1,today:"2026-09-18",todayDay:"金",restDays:[],todayIds:[],tomorrow:{date:"2026-09-19",day:"土",ids:[],manual:false},machines:[]})});
+window.confirm=()=>true;
+</script>
+<script src="../analytics.js"></script><script src="../sales-review.js"></script><script src="../input-recovery-review.js"></script><script src="../ocr-review-compact.js?v=2026.09.18-FINAL.17"></script>
+<script>
+(async function(){
+ const out=document.getElementById("out"),api=window.VENDRIVE2Analytics;
+ const assert=(v,m)=>{if(!v)throw new Error(m)},sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ api.close();await new Promise((resolve,reject)=>{const q=indexedDB.deleteDatabase("VENDRIVE2_ANALYTICS_DB");q.onsuccess=resolve;q.onerror=()=>reject(q.error);q.onblocked=resolve});await api.ready();
+ function salesPayload(prev,qty){return {previousClearAt:prev,elapsedHours:24,totalQty:qty,totalAmount:qty*100,products:[{productCode:"P1",printedName:"Sample",temperature:"COLD",column:1,price:100,salesQty:qty}],soldOuts:[],specialCircumstance:null}}
+ async function createConfirmedSales(vendor,prev,at,visitId){const r=await api.data.reports.create({type:"sales",status:"draft",makerKey:"suntory",vendorNumber:vendor,machineId:null,visitId:visitId||null,occurredAt:at,original:salesPayload(prev,1),current:salesPayload(prev,1),source:{method:"manual",imageStored:false}});const c=await api.data.reports.confirm(r.id);assert(c.confirmed,"sales confirm failed");return c.report}
+ async function createConfirmedInput(vendor,at,visitId){const p={totalQty:1,items:[{productCode:"P1",printedName:"Sample",temperature:"COLD",column:1,quantity:1}]};const r=await api.data.reports.create({type:"input",status:"draft",makerKey:"suntory",vendorNumber:vendor,machineId:null,visitId,occurredAt:at,original:p,current:p,source:{method:"manual",imageStored:false}});const c=await api.data.reports.confirm(r.id);assert(c.confirmed,"input confirm failed");return c.report}
+ await createConfirmedSales("A100","2026-09-10T08:00:00+09:00","2026-09-18T08:00:00+09:00",null);
+ let overlap=false;try{await api.data.reports.checkSalesPeriod({makerKey:"suntory",vendorNumber:"A100",occurredAt:"2026-09-20T08:00:00+09:00",payload:salesPayload("2026-09-10T08:00:00+09:00",2)})}catch(e){}
+ const chk=await api.data.reports.checkSalesPeriod({makerKey:"suntory",vendorNumber:"A100",occurredAt:"2026-09-20T08:00:00+09:00",payload:salesPayload("2026-09-10T08:00:00+09:00",2)});assert(!chk.ok&&chk.conflicts.length===1,"overlap not detected");
+ const adjacent=await api.data.reports.checkSalesPeriod({makerKey:"suntory",vendorNumber:"A100",occurredAt:"2026-09-20T08:00:00+09:00",payload:salesPayload("2026-09-18T08:00:00+09:00",2)});assert(adjacent.ok,"adjacent sales period incorrectly blocked");
+ const v1=await api.data.visits.put({machineId:null,vendorKey:null,startedAt:"2026-09-18T08:00:00+09:00",endedAt:null,status:"open",machineSnapshot:null});
+ await createConfirmedSales("B100","2026-09-17T08:00:00+09:00","2026-09-18T08:00:00+09:00",v1.id);
+ await api.data.visits.confirmNoInput(v1.id);await api.data.visits.confirmNoRecovery(v1.id);const f1=await api.data.visits.finalize(v1.id);assert(f1.completeness.complete&&f1.visit.status==="complete","sales-only no-service visit did not complete");
+ const v2=await api.data.visits.put({machineId:null,vendorKey:null,startedAt:"2026-09-18T09:00:00+09:00",endedAt:null,status:"open",machineSnapshot:null});
+ await createConfirmedSales("C100","2026-09-17T09:00:00+09:00","2026-09-18T09:00:00+09:00",v2.id);await createConfirmedInput("C100","2026-09-18T09:05:00+09:00",v2.id);await api.data.visits.confirmNoRecovery(v2.id);const f2=await api.data.visits.finalize(v2.id);assert(f2.completeness.complete&&f2.completeness.recovery.via==="confirmed_none","no-recovery visit did not complete");
+ const review={reviewVersion:2,status:"needs_review",image:{stored:false},ocr:{provider:"gate",requestId:"ui",imageStored:false,rawTextStored:false,warnings:[]},classification:{detectedType:"sales",selectedType:null,effectiveType:"sales",typeConfidence:1},identity:{occurredAt:"2026-09-18T11:00:00+09:00",makerKey:"suntory",vendorNumber:"D100",machineId:null},candidatePayload:salesPayload("2026-09-17T11:00:00+09:00",1),candidateValidation:{structureReady:true},machineMatch:{status:"no_match",candidates:[]}};
+ let uiVisit=null,finished=null,finishDone=false;const host=document.getElementById("ui");
+ window.VENDRIVE2CompactOcrReview.mount(host,review,{ensureVisit:async()=>{if(!uiVisit)uiVisit=await api.data.visits.put({machineId:null,vendorKey:null,startedAt:"2026-09-18T11:00:00+09:00",endedAt:null,status:"open",machineSnapshot:null});return uiVisit.id},onContinueCapture:()=>{},onFinishCapture:async opts=>{finished=opts;if(opts.noInput)await api.data.visits.confirmNoInput(uiVisit.id);if(opts.noRecovery)await api.data.visits.confirmNoRecovery(uiVisit.id);const done=await api.data.visits.finalize(uiVisit.id);finishDone=true;return done}});
+ const approval=host.querySelector(".vdrCompactApproval input"),create=Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("下書きを作成"));approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));create.click();
+ for(let i=0;i<30&&!host.textContent.includes("下書きを作成しました");i++)await sleep(50);assert(host.textContent.includes("下書きを作成しました"),"UI draft not created");
+ Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("下書きを確認")).click();
+ for(let i=0;i<30&&!host.textContent.includes("投入・回収なしで終了");i++)await sleep(50);assert(host.textContent.includes("投入・回収票を撮影")&&host.textContent.includes("投入・回収なしで終了"),"post-confirm choice missing");
+ Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("投入・回収なしで終了")).click();for(let i=0;i<30&&!finishDone;i++)await sleep(50);assert(finished&&finished.noInput&&finished.noRecovery,"no-service closeout options missing");assert(finishDone,"no-service closeout did not finish");
+ const uc=await api.data.visits.getCompleteness(uiVisit.id);assert(uc.complete,"UI no-service visit not complete");
+ const nodes=Array.from(document.querySelectorAll(".vdrCompact,.vdrCompactCard,.vdrPostConfirm,.vdrPostConfirmActions"));assert(document.body.scrollWidth<=320&&!nodes.some(x=>x.scrollWidth>x.clientWidth+1||x.getBoundingClientRect().right>320),"320px overflow");
+ out.textContent="PASS";
+})().catch(e=>{document.getElementById("out").textContent="FAIL: "+(e&&e.stack||e);console.error(e)});
+</script></body></html>
