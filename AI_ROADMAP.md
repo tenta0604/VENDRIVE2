@@ -29,7 +29,7 @@ AN1-AN14, FINAL, OPS-REAL-WORKFLOW, OPS10A, OPS10B1 and OPS10B2 remain the estab
 
 Do not invent another development phase merely because implementation capacity exists. The system now needs real use more than more features.
 
-Real field use on 2026-09-18 produced a bounded maintenance correction rather than a new feature phase: sales OCR period fields now fail closed before draft creation, and manual OCR identity corrections are explicitly applied/revalidated with machine rematching before save. After production verification, normal evidence accumulation resumes.
+Real field use on 2026-09-18 produced a bounded maintenance correction rather than a new feature phase: sales OCR period fields now fail closed before draft creation, and manual OCR identity corrections are explicitly applied/revalidated with machine rematching before save. FINAL.16 is merged and production/live verification passed, so normal evidence accumulation has resumed.
 
 During normal field use, treat these as evidence that can reopen engineering:
 
