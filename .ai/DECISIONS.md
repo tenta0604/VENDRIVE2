@@ -166,3 +166,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Merely closing the OCR modal is not equivalent to completing the Today visit.
 - If the linked machine cannot be trusted/resolved or is not a Today target, do not silently mark a legacy machine visited.
 
+## Per-machine vehicle bring recommendation opt-in decision
+
+- “車から持っていく本数の提案” is a per-machine explicit opt-in setting.
+- The default is OFF. Existing/legacy machine records with no setting are OFF, and newly created machines start OFF.
+- Only a machine whose setting is explicitly ON may produce machine bring-from-vehicle recommendations or contribute demand to the end-of-day next-workday vehicle-loading proposal.
+- OFF affects only these vehicle bring/loading proposals. It must not suppress raw sales observations, demand forecasting, generic sales recommendations, visit planning, tasks, orders, OCR capture, or normal visit completion.
+- Disabled machines are intentionally out of scope for the end-of-day loading proposal and must not be reported as missing/uncovered loading evidence.
+- The setting remains proposal-only. Turning it ON never authorizes automatic inventory movement, route/schedule mutation, report confirmation, or machine linkage.
+
