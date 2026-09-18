@@ -2,13 +2,15 @@
   "evidenceVersion": 10,
   "runType": "ocr_continuation_vendor_fix_maintenance",
   "phase": "OCR_CONTINUATION_VENDOR_FIX",
-  "status": "PREVIEW_VERIFIED_AWAITING_MERGE",
+  "status": "MERGED_DEPLOYED_LIVE_VERIFIED_OPERATIONAL_PAUSE",
   "base": {
     "preFixHead": "c7b3774628e0e95b363a3445255776878476293f",
     "safetyIssue": 113,
     "safetyTag": "backup-pre-OCR-CONTINUATION-VENDOR-FIX-20260918",
     "safetyTagTarget": "c7b3774628e0e95b363a3445255776878476293f",
-    "maintenanceBranch": "chatgpt/ocr-continuation-vendor-fix-20260918"
+    "maintenanceBranch": "chatgpt/ocr-continuation-vendor-fix-20260918",
+    "fixPullRequest": 114,
+    "productProductionHead": "4eb096279455d0f213c06897601a23b962f09b54"
   },
   "versions": {
     "app": "2026.09.18-FINAL.20",
@@ -17,7 +19,7 @@
     "schema": 4
   },
   "work": {
-    "summary": "Fix real-device same-visit continuation after sales confirmation. Analytics previously rejected a later input/recovery report when its maker/vendor identity differed from the visit's first vendorKey, even if the visit already had a trusted machine. FINAL.20 lets the trusted same-machine identity carry continuity while retaining each report's own vendor identity. It also starts OCR automatically immediately after image capture/selection and keeps the manual OCR control as retry-only.",
+    "summary": "Closed the bounded FINAL.20 OCR continuation maintenance cycle. Same-visit related papers may preserve different maker/vendor identities when they share a trusted machine, eliminating the real-device `Visit vendor mismatch` while retaining fail-closed behavior without same-machine evidence. OCR now starts automatically on capture and the read button is retry-only. PR #114 merged, production Vercel is READY, production affected gates/smoke pass, GitHub Pages serves FINAL.20, and the live continuation gate passes.",
     "implemented": [
       "Reordered report↔visit reconciliation to validate/inherit machineId before vendor-key enforcement.",
       "A report with no machineId inherits the visit's trusted machineId; once report and visit resolve to the same machine, differing vendorKey values are permitted without overwriting the report vendor identity.",
@@ -26,7 +28,15 @@
       "Capture selection now calls OCR automatically when the secure OCR adapter is available.",
       "The normal OCR button is hidden; it is exposed as `もう一度読み取る` only after OCR failure or when the adapter is unavailable.",
       "Added a dedicated browser/IndexedDB regression gate for same-machine/different-vendor continuation, fail-closed vendor mismatch without machine context, fail-closed machine mismatch, automatic OCR source wiring, FINAL.20, and 320px layout.",
-      "Aligned existing OCR, visit-closeout, and machine-bring regression gate cache markers to FINAL.20."
+      "Aligned existing OCR, visit-closeout, and machine-bring regression gate cache markers to FINAL.20.",
+      "Merged PR #114 to main at 4eb096279455d0f213c06897601a23b962f09b54.",
+      "Verified matching Vercel production deployment dpl_BwYsj8cF5iSnAa3AA1WpkJg2294n is READY.",
+      "Ran the production same-visit continuation/auto-OCR gate; PASS.",
+      "Ran the production OCR field regression gate; PASS.",
+      "Ran the production visit-closeout/overlap regression gate; PASS.",
+      "Ran the production app smoke; FINAL.20 loaded without script-fatal errors.",
+      "Verified live GitHub Pages version.json serves 2026.09.18-FINAL.20.",
+      "Ran the live GitHub Pages same-visit continuation/auto-OCR gate; PASS."
     ]
   },
   "gates": {
@@ -53,16 +63,30 @@
     "inventorySemanticsChange": "NONE",
     "learnedNumericForecastingChange": "NONE",
     "dbSchemaChange": "NONE",
-    "merge": "PENDING",
-    "productionVerification": "PENDING"
+    "merge": "PASS",
+    "productionVerification": "PASS",
+    "fixPullRequest": 114,
+    "vercelProductionDeploy": "PASS",
+    "vercelProductionDeploymentId": "dpl_BwYsj8cF5iSnAa3AA1WpkJg2294n",
+    "productionContinuationVendorGate": "PASS",
+    "productionContinuationVendorRunId": "8c78f8c9-9e84-479e-9f83-0e2a1d52c481",
+    "productionOcrFieldRegression": "PASS",
+    "productionOcrFieldRegressionRunId": "2e1820e6-fd82-4a43-b8e4-0629948d5c8b",
+    "productionVisitCloseoutOverlapRegression": "PASS",
+    "productionVisitCloseoutOverlapRunId": "6c272c23-13d0-440a-bfa3-3f505ed24499",
+    "productionAppSmoke": "PASS",
+    "productionAppSmokeRunId": "5f2986f0-3fe9-464f-b04c-9f9306d62ac3",
+    "githubPagesVersion": "PASS",
+    "githubPagesVersionValue": "2026.09.18-FINAL.20",
+    "liveContinuationVendorGate": "PASS",
+    "liveContinuationVendorRunId": "7b588bca-9f66-455b-b5e9-77e4e18eb77b"
   },
   "openItems": [
-    "Merge FINAL.20 and verify production/live deployment.",
-    "Focused real-device retest of sales → input/recovery continuation and automatic OCR start."
+    "Focused real-device retest of sales → input/recovery continuation and automatic OCR start.",
+    "Accumulate sufficient real exact scored samples before any learned numeric promotion."
   ],
-  "nextAction": "Open and merge the bounded maintenance PR, verify production/live gates, then ask for the focused real-device retest.",
+  "nextAction": "Have the operator retest the exact real-device sequence: sales journal confirm → 投入・回収票を撮影 → capture image. OCR should start automatically and same-machine draft creation should succeed without `Visit vendor mismatch`.",
   "unresolved": [
-    "Production/live verification is pending until merge.",
     "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
   ]
 }
