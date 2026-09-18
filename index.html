@@ -157,7 +157,7 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
 <div class="reportCapturePreviewWrap"><img id="reportCapturePreview" alt="選択した帳票画像のプレビュー"></div>
 <div class="reportCaptureFileMeta" id="reportCaptureFileMeta"></div>
 <div class="reportOcrControls">
-<button class="secondary reportOcrButton" id="runReportOcr" type="button">OCRで読み取る</button>
+<button class="secondary reportOcrButton hidden" id="runReportOcr" type="button">もう一度読み取る</button>
 <div class="reportOcrStatus" id="reportOcrStatus">OCR接続を確認中…</div>
 </div>
 <div id="reportOcrResult"></div>
@@ -314,7 +314,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.09.18-FINAL.19',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.09.18-FINAL.20',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -789,9 +789,9 @@ function finishReportCaptureSession(options){options=options||{};if(reportCaptur
 function closeReportCaptureReview(){return finishReportCaptureSession({})}
 function openReportCapturePicker(){reportCaptureVisitId=null;var input=$id('reportCaptureFile');if(!input)return;input.value='';input.click()}
 function continueReportCapturePicker(){var input=$id('reportCaptureFile');if(!input)return;input.value='';input.click()}
-function handleReportCaptureFile(file){if(!file)return;if(!file.type||file.type.indexOf('image/')!==0){toast('画像ファイルを選択してください');resetReportCapture();return}if(!Number.isInteger(file.size)||file.size<1||file.size>20*1024*1024){toast('画像は20MB以下にしてください');resetReportCapture();return}resetReportCapture();reportCaptureCurrentFile=file;reportCaptureObjectUrl=URL.createObjectURL(file);var preview=$id('reportCapturePreview'),meta=$id('reportCaptureFileMeta');preview.src=reportCaptureObjectUrl;preview.alt=file.name+' の一時プレビュー';meta.textContent=file.name+' · '+Math.max(1,Math.round(file.size/1024))+'KB · 端末内一時表示';openModal('reportCaptureModal');updateReportOcrAvailability()}
+function handleReportCaptureFile(file){if(!file)return;if(!file.type||file.type.indexOf('image/')!==0){toast('画像ファイルを選択してください');resetReportCapture();return}if(!Number.isInteger(file.size)||file.size<1||file.size>20*1024*1024){toast('画像は20MB以下にしてください');resetReportCapture();return}resetReportCapture();reportCaptureCurrentFile=file;reportCaptureObjectUrl=URL.createObjectURL(file);var preview=$id('reportCapturePreview'),meta=$id('reportCaptureFileMeta');preview.src=reportCaptureObjectUrl;preview.alt=file.name+' の一時プレビュー';meta.textContent=file.name+' · '+Math.max(1,Math.round(file.size/1024))+'KB · 端末内一時表示';openModal('reportCaptureModal');updateReportOcrAvailability();if(reportOcrAdapter())setTimeout(runReportOcr,0)}
 function reportOcrAdapter(){var adapter=window.VENDRIVE2OCRAdapter;if(!adapter||adapter.version!==1||typeof adapter.analyze!=='function')return null;return adapter}
-function updateReportOcrAvailability(){var status=$id('reportOcrStatus'),button=$id('runReportOcr'),adapter=reportOcrAdapter();if(!status||!button)return;if(adapter){status.textContent='安全なOCR Adapter 接続済み';button.disabled=false}else{status.textContent='OCR接続待ち · 画像は送信されません';button.disabled=false}}
+function updateReportOcrAvailability(){var status=$id('reportOcrStatus'),button=$id('runReportOcr'),adapter=reportOcrAdapter();if(!status||!button)return;if(adapter){status.textContent=reportCaptureCurrentFile?'撮影画像を自動で読み取ります':'安全なOCR Adapter 接続済み';button.disabled=false;button.textContent='もう一度読み取る';button.classList.add('hidden')}else{status.textContent='OCR接続待ち · 画像は送信されません';button.disabled=false;button.textContent='OCR接続を再確認';button.classList.remove('hidden')}}
 function reportOcrSummary(review){var cls=review.classification||{},validation=review.candidateValidation||{},confidence=typeof cls.typeConfidence==='number'?Math.round(cls.typeConfidence*100)+'%':'—';return'<div class="reportOcrCard"><div class="reportCaptureReviewRow"><span>帳票種別</span><b>'+analysisEscape(reportCaptureTypeLabel(cls.detectedType))+'</b></div><div class="reportCaptureReviewRow"><span>帳票種別の判定</span><b>'+analysisEscape(confidence)+'</b></div><div class="reportCaptureReviewRow"><span>構造チェック</span><b>'+(validation.structureReady?'確認可能':'要レビュー')+'</b></div></div>'}
 function reportOcrFailureCopy(error){var code=error&&error.code||"",message=error&&error.message||"";if(code==="provider_busy")return{status:"OCRサービス混雑 · 再試行済み",title:"OCRサービスが混雑しています",detail:"複数のOCRモデルへ自動で再試行しましたが完了できませんでした。少し待ってもう一度お試しください。画像は保存されていません。"};if(code==="provider_timeout"||code==="relay_timeout")return{status:"OCR応答タイムアウト",title:"OCRの応答に時間がかかりすぎました",detail:"自動再試行でも応答を得られませんでした。通信状況を確認してもう一度お試しください。画像は保存されていません。"};if(code==="provider_connection_failed")return{status:"OCR接続失敗",title:"OCRサービスへ接続できません",detail:"VENDRIVEのRelayからOCRサービスへの接続に失敗しました。画像は保存されていません。"};if(code==="structured_parse_failed"||code==="provider_invalid_data")return{status:"OCR構造化失敗",title:"読み取り結果を安全に構造化できませんでした",detail:"OCR自体は応答しましたが、VENDRIVEが安全に利用できる形式へ変換できませんでした。画像は保存されていません。"};if(code==="provider_auth_unavailable")return{status:"OCR設定エラー",title:"OCRサービスの認証を利用できません",detail:"サーバー側のOCR設定に問題があります。画像は保存されていません。"};if(code==="provider_rejected")return{status:"OCRリクエスト拒否",title:"OCRサービスがリクエストを受け付けませんでした",detail:"画像ではなくOCRサービス側の設定または対応形式が原因です。画像は保存されていません。"};return{status:"OCR候補を取得できませんでした",title:"OCR結果を利用できません",detail:message&&message!=="OCR relay request failed"?message+"。画像は保存されていません。":"接続またはOCR処理に失敗しました。画像は保存されていません。"}}
 function reportReviewWithMachineMatch(review){var api=window.VENDRIVE2Analytics,id=review&&review.identity||{};if(!review)return Promise.resolve(review);if(!api||!api.bridge||typeof api.bridge.findMachineCandidates!=='function'||!id.makerKey||!id.vendorNumber){review.machineMatch={status:'unavailable',candidates:[]};return Promise.resolve(review)}return Promise.resolve(api.bridge.findMachineCandidates({makerKey:id.makerKey,vendorNumber:id.vendorNumber})).then(function(match){review.machineMatch=match||{status:'no_match',candidates:[]};if(match&&match.status==='confirmed_mapping'&&match.confirmedMapping&&!match.confirmedMapping.missing)review.identity.machineId=match.confirmedMapping.machineId;return review}).catch(function(error){console.warn('OCR machine match unavailable',error);review.machineMatch={status:'unavailable',candidates:[]};return review})}
@@ -804,7 +804,7 @@ function runReportOcr(){
   var runToken=++reportCaptureOcrRunToken;
   function stale(){return runToken!==reportCaptureOcrRunToken}
   function staleError(){var error=new Error('stale OCR run');error.vendriveStaleOcr=true;return error}
-  button.disabled=true;
+  button.disabled=true;button.classList.add('hidden');button.textContent='もう一度読み取る';
   reportCaptureOcrResult=null;
   reportCaptureReview=null;
   if(reviewResult)reviewResult.innerHTML='';
@@ -833,6 +833,7 @@ function runReportOcr(){
       var copy=reportOcrFailureCopy(error);
       status.textContent=copy.status;
       result.innerHTML='<div class="analysisEmpty"><b>'+esc(copy.title)+'</b><span>'+esc(copy.detail)+'</span></div>';
+      button.classList.remove('hidden');button.textContent='もう一度読み取る';
     })
     .then(function(){progress.stop();if(!stale())button.disabled=false})
 }
@@ -1232,7 +1233,7 @@ try{window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:
 <script src="ocr-relay-adapter.js"></script>
 <script src="analytics.js"></script>
 <script src="sales-review.js"></script>
-<script src="input-recovery-review.js"></script>\n<script src="ocr-review-compact.js?v=2026.09.18-FINAL.19"></script>
+<script src="input-recovery-review.js"></script>\n<script src="ocr-review-compact.js?v=2026.09.18-FINAL.20"></script>
 <script src="ops10a-stocktake.js?v=2026.09.16-FINAL.10-ops10a-ui2"></script>
 </body>
 </html>
