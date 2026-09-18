@@ -175,3 +175,14 @@ This file records confirmed project decisions that must survive chat migration. 
 - Disabled machines are intentionally out of scope for the end-of-day loading proposal and must not be reported as missing/uncovered loading evidence.
 - The setting remains proposal-only. Turning it ON never authorizes automatic inventory movement, route/schedule mutation, report confirmation, or machine linkage.
 
+## Same-visit OCR identity continuity and automatic-read decision
+
+- A confirmed/explicitly established visit machine identity is the continuity anchor for related sales, input, and recovery papers captured through “次の帳票を撮影”.
+- Different paper types may retain different maker/vendor identities. A differing report `vendorKey` must not by itself split or reject the visit when report and visit resolve to the same trusted `machineId`.
+- If a continued report has no machineId but the open visit already has a trusted machineId, persistence may inherit that machineId for the report. This is visit continuity, not creation of a new durable vendor→machine mapping.
+- Vendor mismatch remains fail-closed when no trusted same-machine context exists. Machine mismatch remains fail-closed whenever report and visit identify different machines.
+- Human corrections to report maker/vendor remain authoritative for that report and must not be overwritten merely to make visit continuity pass.
+- Selecting/capturing a valid report image should immediately start OCR when the secure adapter is available. Do not require a separate initial “読み取る” tap.
+- The OCR action button is retry-only on the normal workflow: hide it while automatic OCR is available/running/successful, and expose “もう一度読み取る” only after OCR failure or when the adapter is unavailable.
+- Automatic OCR start does not change the human-review boundary: draft creation still requires explicit paper approval, and formal report confirmation remains explicit.
+

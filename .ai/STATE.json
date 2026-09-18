@@ -3,32 +3,36 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": null,
+  "activePhase": "OCR_CONTINUATION_VENDOR_FIX",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.09.18-FINAL.19",
-  "engineVersion": "AN14B3B4",
+  "appVersion": "2026.09.18-FINAL.20",
+  "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
+  "status": "maintenance_preview_verified_awaiting_merge",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.19 bring recommendation opt-in verified",
-    "releaseStatus": "FINAL.19 is merged and live-verified. The per-machine `車から持っていく本数の提案` control is restored as strict opt-in: existing/legacy unset machines are OFF, new machines start OFF, and only explicitly ON machines can produce bring-from-vehicle recommendations or contribute to the end-of-day next-workday loading proposal. Sales observations, forecasts, generic recommendations, visit planning, OCR, tasks, orders, and normal visit completion remain unaffected when OFF. PR #111 is merged, matching Vercel production is READY, production app smoke and the dedicated opt-in gate pass, GitHub Pages serves FINAL.19, and the live opt-in gate passes. Analytics engine is AN14B3B4; DB/schema remain 4.",
+    "title": "Field maintenance — same-visit OCR continuation + automatic OCR start",
+    "releaseStatus": "FINAL.20 candidate is preview-verified. Real-device use exposed `Visit vendor mismatch` when a confirmed sales journal was followed by input/recovery capture in the same visit. The root cause was Analytics requiring every report in a visit to share one vendorKey even when the visit already had a trusted machineId. FINAL.20 makes trusted same-machine identity authoritative for visit continuity while preserving each report's own maker/vendor identity; vendor mismatch still fails closed when no trusted same-machine context exists, and a different machineId still fails closed. Captured images now start OCR automatically; the OCR button is hidden on the normal path and appears only as retry after OCR failure/unavailability. Preview dedicated continuation/auto-OCR, OCR field, visit-closeout/overlap, machine-bring opt-in, and app smoke gates pass. Analytics engine is AN14B3B5; DB/schema remain 4.",
     "scope": [
-      "Use VENDRIVE normally; there is no active feature phase.",
-      "Leave bring recommendation OFF by default and enable only the machines where vehicle bring/load proposals are wanted.",
-      "OFF suppresses only bring-from-vehicle and end-of-day loading proposals; it does not suppress sales learning or visit planning.",
-      "Preserve proposal-only behavior with no automatic inventory movement, confirmation, route mutation, or machine link.",
-      "Keep Analytics DB/schema at 4 and learned numeric promotion disabled."
+      "Allow related reports with different vendor identities to share one visit only when they resolve to the same trusted machineId.",
+      "Inherit the trusted visit machineId onto a continued report before enforcing vendor mismatch.",
+      "Keep vendor mismatch fail-closed when neither side establishes the same trusted machine.",
+      "Keep machine mismatch fail-closed when report and visit point to different machines.",
+      "Start OCR automatically after a valid captured/selected image when the OCR adapter is available.",
+      "Hide the manual OCR control during the normal path; expose it only as retry when OCR is unavailable or fails.",
+      "Keep explicit draft approval and explicit report confirmation unchanged; do not auto-confirm or auto-link a new machine mapping.",
+      "Keep inventory semantics and Analytics DB/schema unchanged."
     ],
     "nextActions": [
-      "Use the machine detail setting to enable bring recommendations only for selected machines.",
-      "Continue focused real-device verification of the recent OCR visit-end flow when convenient.",
-      "Resume normal field evidence accumulation and reopen engineering only for new observed friction or promotion-gate evidence."
+      "Merge FINAL.20 after diff/status review.",
+      "Verify production Vercel, GitHub Pages FINAL.20, the dedicated continuation/auto-OCR gate, and affected OCR/visit regressions live.",
+      "Return to focused real-device retest of sales → input/recovery continuation; the image should begin reading immediately after capture."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
+    "Production merge/live verification for FINAL.20 is pending.",
+    "Numeric learning promotion still requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
