@@ -5,7 +5,7 @@
 window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:v=>String(v||"").replace(/\D/g,""),getMachinesSnapshot:()=>[],getMachineSnapshot:()=>null,getPlanningSnapshot:()=>({version:1,today:"2026-09-18",todayDay:"金",restDays:[],todayIds:[],tomorrow:{date:"2026-09-19",day:"土",ids:[],manual:false},machines:[]})});
 window.confirm=()=>true;
 </script>
-<script src="../analytics.js"></script><script src="../sales-review.js"></script><script src="../input-recovery-review.js"></script><script src="../ocr-review-compact.js?v=2026.09.18-FINAL.17"></script>
+<script src="../analytics.js"></script><script src="../sales-review.js"></script><script src="../input-recovery-review.js"></script><script src="../ocr-review-compact.js?v=2026.09.18-FINAL.18"></script>
 <script>
 (async function(){
  const out=document.getElementById("out"),api=window.VENDRIVE2Analytics;
@@ -23,10 +23,13 @@ window.confirm=()=>true;
  await api.data.visits.confirmNoInput(v1.id);await api.data.visits.confirmNoRecovery(v1.id);const f1=await api.data.visits.finalize(v1.id);assert(f1.completeness.complete&&f1.visit.status==="complete","sales-only no-service visit did not complete");
  const v2=await api.data.visits.put({machineId:null,vendorKey:null,startedAt:"2026-09-18T09:00:00+09:00",endedAt:null,status:"open",machineSnapshot:null});
  await createConfirmedSales("C100","2026-09-17T09:00:00+09:00","2026-09-18T09:00:00+09:00",v2.id);await createConfirmedInput("C100","2026-09-18T09:05:00+09:00",v2.id);await api.data.visits.confirmNoRecovery(v2.id);const f2=await api.data.visits.finalize(v2.id);assert(f2.completeness.complete&&f2.completeness.recovery.via==="confirmed_none","no-recovery visit did not complete");
- const review={reviewVersion:2,status:"needs_review",image:{stored:false},ocr:{provider:"gate",requestId:"ui",imageStored:false,rawTextStored:false,warnings:[]},classification:{detectedType:"sales",selectedType:null,effectiveType:"sales",typeConfidence:1},identity:{occurredAt:"2026-09-18T11:00:00+09:00",makerKey:"suntory",vendorNumber:"D100",machineId:null},candidatePayload:salesPayload("2026-09-17T11:00:00+09:00",1),candidateValidation:{structureReady:true},machineMatch:{status:"no_match",candidates:[]}};
+ const review={reviewVersion:2,status:"needs_review",image:{stored:false},ocr:{provider:"gate",requestId:"ui",imageStored:false,rawTextStored:false,warnings:[]},classification:{detectedType:"sales",selectedType:null,effectiveType:"sales",typeConfidence:1},identity:{occurredAt:"2026-09-18T11:00:00+09:00",makerKey:"suntory",vendorNumber:"D100",machineId:null},candidatePayload:salesPayload("09/17 11:00",1),candidateValidation:{structureReady:true},machineMatch:{status:"no_match",candidates:[]}};
  let uiVisit=null,finished=null,finishDone=false;const host=document.getElementById("ui");
  window.VENDRIVE2CompactOcrReview.mount(host,review,{ensureVisit:async()=>{if(!uiVisit)uiVisit=await api.data.visits.put({machineId:null,vendorKey:null,startedAt:"2026-09-18T11:00:00+09:00",endedAt:null,status:"open",machineSnapshot:null});return uiVisit.id},onContinueCapture:()=>{},onFinishCapture:async opts=>{finished=opts;if(opts.noInput)await api.data.visits.confirmNoInput(uiVisit.id);if(opts.noRecovery)await api.data.visits.confirmNoRecovery(uiVisit.id);const done=await api.data.visits.finalize(uiVisit.id);finishDone=true;return done}});
- const approval=host.querySelector(".vdrCompactApproval input"),create=Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("下書きを作成"));approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));create.click();
+ let prevCell=Array.from(host.querySelectorAll(".vdrCompactMetaCell")).find(x=>x.querySelector("span")&&x.querySelector("span").textContent==="前回クリア");assert(prevCell&&prevCell.classList.contains("error"),"sales rerender setup did not block invalid previous clear");
+ prevCell.querySelector("button").click();let editInput=prevCell.querySelector(".vdrInlineEditor input");editInput.value="2026-09-17T11:00";prevCell.querySelector(".vdrInlineEditor .save").click();await sleep(120);
+ assert(review.candidatePayload.previousClearAt==="2026-09-17T11:00:00+09:00","sales correction did not survive rerender");
+ let approval=host.querySelector(".vdrCompactApproval input"),create=Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("下書きを作成"));approval.checked=true;approval.dispatchEvent(new Event("change",{bubbles:true}));create.click();
  for(let i=0;i<30&&!host.textContent.includes("下書きを作成しました");i++)await sleep(50);assert(host.textContent.includes("下書きを作成しました"),"UI draft not created");
  Array.from(host.querySelectorAll("button")).find(b=>b.textContent.includes("下書きを確認")).click();
  for(let i=0;i<30&&!host.textContent.includes("投入・回収なしで終了");i++)await sleep(50);assert(host.textContent.includes("投入・回収票を撮影")&&host.textContent.includes("投入・回収なしで終了"),"post-confirm choice missing");
