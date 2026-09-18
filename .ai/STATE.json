@@ -3,33 +3,35 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": null,
+  "activePhase": "MACHINE_BRING_OPT_IN",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.09.18-FINAL.18",
-  "engineVersion": "AN14B3B3",
+  "appVersion": "2026.09.18-FINAL.19",
+  "engineVersion": "AN14B3B4",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
+  "status": "maintenance_preview_verified_awaiting_merge",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.18 OCR visit-flow maintenance verified",
-    "releaseStatus": "FINAL.18 is merged and live-verified. Compact OCR rerenders now preserve the active visit callbacks, so corrected sales-journal reviews retain their Analytics visit and post-confirm continuation/end actions. Explicit OCR visit closeout now routes the trusted matching Today machine through the existing normal visit-completion flow; the existing task checklist and order confirmation remain authoritative. Closing the OCR modal alone does not complete Today. PR #108 is merged, the matching Vercel production deployment is READY, GitHub Pages serves FINAL.18, and both the visit-closeout/overlap gate and existing OCR field regression gate pass on production and live GitHub Pages. Analytics engine remains AN14B3B3; DB/schema remain 4.",
+    "title": "Field maintenance — per-machine bring recommendation opt-in",
+    "releaseStatus": "FINAL.19 candidate is preview-verified. The per-machine vehicle bring recommendation control is restored with a strict default-OFF policy. Existing machines without the setting are treated as OFF; new machines start OFF; only machines explicitly switched ON can produce bring-from-vehicle recommendations or contribute to the end-of-day next-workday loading proposal. General sales learning, demand forecasts, visit planning, tasks, orders, and OCR behavior remain active regardless of this setting. The dedicated opt-in browser/IndexedDB gate, main-app smoke gate, visit closeout gate, and OCR field regression gate pass on the READY Vercel preview. Analytics engine is AN14B3B4; DB/schema remain 4.",
     "scope": [
-      "Use VENDRIVE normally in field operations; no active feature phase is open.",
-      "Corrected OCR reviews must preserve visit continuity and post-confirm actions across rerenders.",
-      "Explicit OCR visit closeout may complete the matching Today machine only through the existing normal visit-completion flow.",
-      "Keep task checklist and order confirmation behavior unchanged and authoritative.",
-      "Closing the OCR modal directly must not mark the Today machine visited.",
-      "Keep no auto-confirm, no auto-link, no numeric forecasting change, and no DB/schema migration."
+      "Expose an ON/OFF control in both existing-machine details and new-machine setup.",
+      "Treat missing legacy values as OFF and initialize every newly created machine to OFF.",
+      "Pass the explicit boolean through the read-only legacy-to-Analytics bridge.",
+      "Filter only machine bring-from-vehicle and end-of-day vehicle-loading proposals by this opt-in.",
+      "Do not disable sales observations, forecasts, generic sales recommendations, or visit planning when the setting is OFF.",
+      "Keep proposal-only behavior: no automatic inventory movement, schedule write, confirmation, or machine link.",
+      "Keep Analytics DB/schema at 4."
     ],
     "nextActions": [
-      "Perform focused real-device confirmation of the sales-journal correction path and the explicit visit-end path.",
-      "Verify a Today machine becomes visited after OCR visit end, and that task/order cases show the usual confirmations.",
-      "Resume normal field use afterward; reopen engineering only for new observed friction or promotion-gate evidence."
+      "Open and merge the bounded FINAL.19 maintenance PR after diff/status review.",
+      "Verify the matching production deployment, GitHub Pages FINAL.19, and live regression gates.",
+      "Return to field use; enable the setting only on machines where vehicle bring proposals are desired."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
+    "Production merge/live verification for FINAL.19 is pending.",
+    "Numeric learning promotion still requires sufficient real exact scored samples and held-out improvement evidence."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
