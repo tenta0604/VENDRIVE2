@@ -2,7 +2,7 @@
 
 ## Current state
 
-- Visible app baseline: **2026.09.18-FINAL.17** (bounded field-maintenance release; Analytics engine **AN14B3B3**, DB/schema remain 4).
+- Visible app candidate: **2026.09.18-FINAL.18** (bounded OCR visit-flow maintenance; Analytics engine **AN14B3B3**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
 - Active engineering phase: **None**. VENDRIVE is intentionally in an operational evidence phase rather than a feature-building phase.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
@@ -29,7 +29,7 @@ AN1-AN14, FINAL, OPS-REAL-WORKFLOW, OPS10A, OPS10B1 and OPS10B2 remain the estab
 
 Do not invent another development phase merely because implementation capacity exists. The system now needs real use more than more features.
 
-Real field use on 2026-09-18 produced bounded maintenance corrections rather than a new speculative feature phase. FINAL.16 hardened OCR period/identity correction. The FINAL.17 maintenance release adds explicit post-confirm visit closeout (including no-input/no-recovery facts without fabricated reports) and blocks materially overlapping sales periods that could double-count cumulative journals. PR #105 is merged and production/live browser verification passed, so normal evidence accumulation has resumed.
+Real field use on 2026-09-18 produced bounded maintenance corrections rather than a new speculative feature phase. FINAL.16 hardened OCR period/identity correction. The FINAL.17 maintenance release added explicit post-confirm visit closeout and sales-period overlap protection. Real-device use then exposed a narrower FINAL.18 maintenance issue: a compact-review rerender could drop visit callbacks, especially after correcting a sales-journal field, which removed the post-confirm continuation/end choices. FINAL.18 preserves those callbacks and connects explicit OCR visit closeout to the existing Today completion flow, including the existing task and order confirmations. Preview regression gates pass; production merge/live verification remains the release gate.
 
 During normal field use, treat these as evidence that can reopen engineering:
 
