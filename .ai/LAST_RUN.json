@@ -1,70 +1,66 @@
 {
-  "evidenceVersion": 6,
-  "runType": "ocr_review_field_fix_maintenance",
-  "phase": "OCR_REVIEW_FIELD_FIX",
-  "status": "MERGED_DEPLOYED_LIVE_VERIFIED_OPERATIONAL_PAUSE",
+  "evidenceVersion": 7,
+  "runType": "visit_closeout_overlap_guard_maintenance",
+  "phase": "VISIT_CLOSEOUT_OVERLAP_GUARD",
+  "status": "PREVIEW_VERIFIED_AWAITING_MERGE",
   "base": {
-    "preFixHead": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72",
-    "safetyTag": "backup-pre-OCR-REVIEW-FIELD-FIX-20260918",
-    "safetyTagTarget": "7bf9052bc50e0409df18caf8567fa7a1ea1a9c72",
-    "fixPullRequest": 102,
-    "productProductionHead": "4ff1159f06d4366341fb939e1b4064c822f3f04b"
+    "preFixHead": "c6074074dd780a9f2d2ff34cf3cb93ffa1013246",
+    "safetyIssue": 104,
+    "safetyTag": "backup-pre-VISIT-CLOSEOUT-OVERLAP-GUARD-20260918",
+    "safetyTagTarget": "c6074074dd780a9f2d2ff34cf3cb93ffa1013246",
+    "maintenanceBranch": "chatgpt/visit-closeout-overlap-guard-20260918"
   },
   "versions": {
-    "app": "2026.09.18-FINAL.16",
-    "engine": "AN14B3B2",
+    "app": "2026.09.18-FINAL.17",
+    "engine": "AN14B3B3",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Closed the bounded OCR review field-maintenance cycle caused by real field use. FINAL.16 now prevents malformed sales-period OCR data from reaching draft persistence and makes manual identity corrections—especially vendor number—apply, re-match, and revalidate before save. PR #102 merged, matching Vercel production deployment is READY, GitHub Pages serves FINAL.16, and the live regression gate passes.",
+    "summary": "Bounded field-maintenance prompted by real operator use: guide post-confirm paper flow, represent legitimate no-input/no-recovery visits explicitly, and fail closed on cumulative/overlapping sales periods before they can distort analysis.",
     "implemented": [
-      "Compact OCR review now validates sales previousClearAt, occurredAt, and elapsedHours before enabling draft creation.",
-      "Sales previousClearAt is directly editable in the compact review; other OCR identity fields including vendor number remain directly editable even when OCR returned a non-empty but wrong value.",
-      "Correcting vendor number or maker re-runs the existing machine-candidate lookup and refreshes the review.",
-      "The full editor now exposes an explicit '編集内容を反映して閉じる' path that re-matches and re-renders the compact review.",
-      "Draft creation performs a final fresh machine match plus blocking-issue recomputation before writing to IndexedDB.",
-      "Machine candidates are never auto-linked after a correction; the existing explicit user linkage action remains authoritative.",
-      "Added a browser regression gate covering invalid previousClearAt blocking/correction, vendor-number correction/rematch, full-editor apply, stale-save guard, actual IndexedDB draft creation, and 320px app-layout overflow.",
-      "Merged PR #102 to main at product production head 4ff1159f06d4366341fb939e1b4064c822f3f04b.",
-      "Verified matching Vercel production deployment dpl_AzAYfqAsvN88W1WDjva1mGS8PDBQ is READY.",
-      "Verified GitHub Pages version.json serves 2026.09.18-FINAL.16.",
-      "Ran the live GitHub Pages browser regression gate; it passed the invalid-period block/correction, vendor rematch, full-editor apply, stale-save guard, IndexedDB draft creation, and 320px app-layout checks."
+      "OCR report drafts now attach to a shared Analytics visit for the current capture session so follow-up sales/input/recovery papers can be resolved as one visit.",
+      "After explicit report confirmation, compact review offers context-sensitive follow-up actions such as continuing with input/recovery capture or explicitly ending with no input/no recovery.",
+      "Added explicit no-input visit resolution alongside the existing no-recovery concept; neither path fabricates a zero-quantity report.",
+      "Visit completeness now treats explicit confirmed-none input/recovery resolutions as resolved while preserving actual report movements when present.",
+      "Defined and validated the previously referenced recoveryResolution helper and added symmetric inputResolution normalization/validation.",
+      "Sales OCR draft creation checks the candidate previousClearAt→occurredAt interval against prior confirmed sales for the same maker/vendor and blocks true overlap.",
+      "Sales confirmation re-checks overlap, preventing a stale or manually-created overlapping draft from becoming confirmed.",
+      "Adjacent periods are allowed; a five-minute tolerance is limited to boundary/clock noise.",
+      "Analytics engine version bumped to AN14B3B3; DB/schema remain 4 and forecast numeric behavior is unchanged.",
+      "Added a dedicated browser/IndexedDB/mobile gate covering overlap detection, adjacent-period allowance, sales-only no-service completion, input-with-no-recovery completion, post-confirm choices, and 320px layout.",
+      "Aligned the existing OCR correction regression gate cache marker to FINAL.17."
     ]
   },
   "gates": {
     "safetyCheckpoint": "PASS",
-    "diffScope": "PASS",
     "previewDeployment": "PASS",
-    "previewDeploymentId": "dpl_E6Qq3D5pTmESjas3dQsDQgdTJ7CN",
-    "browserRegressionGate": "PASS",
-    "browserRegressionRunId": "2b32cbd8-a1e8-497c-bb00-cf339dbdfa1d",
-    "malformedPreviousClearBlocked": "PASS",
-    "vendorCorrectionRematch": "PASS",
-    "fullEditorApplyAndRevalidate": "PASS",
-    "staleSaveGuard": "PASS",
-    "indexedDbDraftCreation": "PASS",
+    "previewDeploymentId": "dpl_8od7GSz3VFRf5z8YNLmgM38CDSQH",
+    "visitCloseoutOverlapBrowserGate": "PASS",
+    "visitCloseoutOverlapBrowserRunId": "118a2a5b-b806-446f-8b5f-5c9849f6b100",
+    "salesOverlapBlocked": "PASS",
+    "adjacentSalesPeriodAllowed": "PASS",
+    "salesOnlyNoServiceVisitComplete": "PASS",
+    "inputNoRecoveryVisitComplete": "PASS",
+    "postConfirmChoiceUi": "PASS",
     "mobile320AppLayout": "PASS",
+    "existingOcrFieldRegressionGate": "PASS",
+    "existingOcrFieldRegressionRunId": "4e636cff-03a1-47a6-aa1e-67f344bfc97c",
     "automaticMachineLinking": "NOT_INTRODUCED",
     "automaticReportConfirmation": "NOT_INTRODUCED",
-    "numericAnalyticsChange": "NONE",
-    "merge": "PASS",
-    "fixPullRequest": 102,
-    "vercelProductionDeploy": "PASS",
-    "vercelProductionDeploymentId": "dpl_AzAYfqAsvN88W1WDjva1mGS8PDBQ",
-    "githubPagesVersion": "PASS",
-    "githubPagesVersionValue": "2026.09.18-FINAL.16",
-    "liveBrowserRegressionGate": "PASS",
-    "liveBrowserRegressionRunId": "83d65a88-d3a4-48fc-91d0-84399db1fe8b",
-    "productionDeploymentBrowserGate": "PASS",
-    "productionDeploymentBrowserRunId": "b5defc3a-8b84-4c5e-afff-17f717d4d3b1"
+    "fabricatedZeroReports": "NOT_INTRODUCED",
+    "numericForecastingChange": "NONE",
+    "dbSchemaChange": "NONE",
+    "merge": "PENDING",
+    "productionVerification": "PENDING"
   },
   "openItems": [
-    "Accumulate sufficient real exact scored samples before considering bounded numeric promotion.",
-    "Observe normal field use; reopen engineering only for new real friction or when the existing promotion gate has enough evidence."
+    "Open/merge maintenance PR and verify production/live deployment.",
+    "Accumulate sufficient real exact scored samples before any numeric promotion."
   ],
-  "nextAction": "Return to normal VENDRIVE field use and operational evidence accumulation. Reopen engineering only for observed field problems or when the real held-out numeric promotion gate has enough samples.",
+  "nextAction": "Open the bounded maintenance PR, merge after green checks, verify production Vercel/GitHub Pages/live regression, then return to normal field evidence accumulation.",
   "unresolved": [
+    "Production/live verification is pending until merge.",
     "Real evidence sample gate for learned numeric promotion remains intentionally unsatisfied."
   ]
 }
