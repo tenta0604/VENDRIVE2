@@ -7,30 +7,30 @@ function assert(v,m){if(!v)throw new Error(m)}function sleep(ms){return new Prom
 (async function(){try{
 await new Promise(function(resolve,reject){var r=indexedDB.deleteDatabase('VENDRIVE2_ANALYTICS_DB');r.onsuccess=resolve;r.onerror=function(){reject(r.error)};r.onblocked=resolve});
 await loadScript('analytics.js');await window.VENDRIVE2Analytics.ready();await loadScript('product-master-hf2.js');await loadScript('ops10a-stocktake.js');
-var a=window.VENDRIVE2Analytics,i=window.VENDRIVE2ProductIntelligence;assert(i&&typeof i.compareProducts==='function','product comparator unavailable');
-var synthetic=[
- {makerKey:'10',productCode:'1',displayName:'M10 P1 185ml'},
- {makerKey:'2',productCode:'20',displayName:'M2 P20 185ml'},
- {makerKey:'2',productCode:'3',displayName:'M2 P3 500ml'},
- {makerKey:'2',productCode:'3',displayName:'M2 P3 185ml'}
-].sort(i.compareProducts);
-assert(synthetic[0].makerKey==='2'&&synthetic[0].productCode==='3'&&synthetic[0].displayName.indexOf('185')>=0,'maker/product/size first row mismatch');
-assert(synthetic[1].makerKey==='2'&&synthetic[1].productCode==='3'&&synthetic[1].displayName.indexOf('500')>=0,'same product size order mismatch');
-assert(synthetic[2].makerKey==='2'&&synthetic[2].productCode==='20','natural product order inside maker mismatch');
-assert(synthetic[3].makerKey==='10'&&synthetic[3].productCode==='1','maker group natural order mismatch');
+var a=window.VENDRIVE2Analytics,i=window.VENDRIVE2ProductIntelligence;assert(i&&typeof i.sortProducts==='function','product group sorter unavailable');
+var synthetic=i.sortProducts([
+ {makerKey:'ALPHA',productCode:'2001',displayName:'ALPHA P2001 185ml'},
+ {makerKey:'ZETA',productCode:'1020',displayName:'ZETA P1020 185ml'},
+ {makerKey:'ZETA',productCode:'1003',displayName:'ZETA P1003 500ml'},
+ {makerKey:'ZETA',productCode:'1003',displayName:'ZETA P1003 185ml'}
+]);
+assert(synthetic[0].makerKey==='ZETA'&&synthetic[0].productCode==='1003'&&synthetic[0].displayName.indexOf('185')>=0,'maker/product/size first row mismatch');
+assert(synthetic[1].makerKey==='ZETA'&&synthetic[1].productCode==='1003'&&synthetic[1].displayName.indexOf('500')>=0,'same product size order mismatch');
+assert(synthetic[2].makerKey==='ZETA'&&synthetic[2].productCode==='1020','natural product order inside maker mismatch');
+assert(synthetic[3].makerKey==='ALPHA'&&synthetic[3].productCode==='2001','maker group rank by product number mismatch');
 var rows=[
- {makerKey:'10',productCode:'1',displayName:'メーカー10 商品1 185ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true},
- {makerKey:'2',productCode:'20',displayName:'メーカー2 商品20 185ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true},
- {makerKey:'2',productCode:'3',displayName:'メーカー2 商品3 500ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true},
- {makerKey:'2',productCode:'4',displayName:'メーカー2 商品4 185ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true}
+ {makerKey:'ALPHA',productCode:'2001',displayName:'ALPHA 商品2001 185ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true},
+ {makerKey:'ALPHA',productCode:'2004',displayName:'ALPHA 商品2004 185ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true},
+ {makerKey:'ZETA',productCode:'1020',displayName:'ZETA 商品1020 185ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true},
+ {makerKey:'ZETA',productCode:'1003',displayName:'ZETA 商品1003 500ml',receiptAliases:[],caseQuantity:null,category:null,temperatureModes:['COLD'],active:true}
 ];
 for(var n=0;n<rows.length;n++)await a.data.products.put(rows[n]);
-var list=await a.data.products.list();assert(list.map(function(p){return p.makerKey+'/'+p.productCode}).join(',')==='2/3,2/4,2/20,10/1','shared products.list maker grouping mismatch');
+var list=await a.data.products.list();assert(list.map(function(p){return p.makerKey+'/'+p.productCode}).join(',')==='ZETA/1003,ZETA/1020,ALPHA/2001,ALPHA/2004','shared products.list maker grouping mismatch');
 var productButton=document.querySelector('#hf2ProductPanel button');assert(productButton,'product master button missing');productButton.click();await waitFor(function(){return document.querySelectorAll('#hf2ProductMaster .hf2row').length===4},'product master rows mismatch');
-var masterOrder=Array.from(document.querySelectorAll('#hf2ProductMaster .hf2meta')).map(function(x){return x.textContent.trim()});assert(masterOrder.join('|')==='3 · 2|4 · 2|20 · 2|1 · 10','product master maker grouping mismatch: '+masterOrder.join('|'));
+var masterOrder=Array.from(document.querySelectorAll('#hf2ProductMaster .hf2meta')).map(function(x){return x.textContent.trim()});assert(masterOrder.join('|')==='1003 · ZETA|1020 · ZETA|2001 · ALPHA|2004 · ALPHA','product master maker grouping mismatch: '+masterOrder.join('|'));
 var status=document.querySelector('#hf2ProductMaster [data-status]').textContent;assert(status.indexOf('メーカー→商品番号→容器サイズ順')>=0,'product master sort label mismatch');window.closeModal('hf2ProductMaster');
 var fab=document.querySelector('.ops10a-fab');assert(fab,'stocktake button missing');fab.click();await waitFor(function(){return document.querySelectorAll('.ops10a-list .ops10a-row').length===4},'stocktake rows mismatch');
-var stockOrder=Array.from(document.querySelectorAll('.ops10a-list .ops10a-meta')).map(function(x){return x.textContent.trim().split(' / ').slice(0,2).join('/')});assert(stockOrder.join(',')==='2/3,2/4,2/20,10/1','stocktake maker grouping mismatch: '+stockOrder.join(','));
-document.getElementById('out').textContent='PASS\nmaker grouping: PASS\nmaker natural order: PASS\nproduct natural order: PASS\ncontainer size tie-break: PASS\nproduct master order: PASS\nstocktake order: PASS';
+var stockOrder=Array.from(document.querySelectorAll('.ops10a-list .ops10a-meta')).map(function(x){return x.textContent.trim().split(' / ').slice(0,2).join('/')});assert(stockOrder.join(',')==='ZETA/1003,ZETA/1020,ALPHA/2001,ALPHA/2004','stocktake maker grouping mismatch: '+stockOrder.join(','));
+document.getElementById('out').textContent='PASS\nmaker grouping: PASS\nmaker rank by lowest product number: PASS\nproduct natural order: PASS\ncontainer size tie-break: PASS\nproduct master order: PASS\nstocktake order: PASS';
 }catch(e){document.getElementById('out').textContent='FAIL\n'+(e&&e.stack||e);throw e}})();
 </script></body></html>
