@@ -11,22 +11,21 @@
   "schemaVersion": 4,
   "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.20 HF2D maker/size/code ordering verified",
-    "releaseStatus": "FINAL.20 HF2D is merged and production verified. Product ordering is now maker group first, then smaller detected container size, then younger/natural product number. Maker-group order remains based on each maker's youngest product number. The same order is enforced across Product Master, Analysis > Inventory vehicle stock, and vehicle stocktake. Product Master copy now shows メーカー→容器サイズ→商品番号順. PR #130 merged to main at d3fc44abe6cc552e380dba9998e3e91b6c85d148. PR browser regression run 35434708459 and main-push run 35434818294 passed all seven gates; GitHub Pages deployment run 35434817808 and Vercel production status also passed. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
+    "title": "Operational evidence accumulation — FINAL.20 HF2E real OCR size-prefix ordering verified",
+    "releaseStatus": "FINAL.20 HF2E is merged and production verified. The previous HF2D sorter recognized explicit units such as 500ml but did not recognize the real printed-name convention used by OCR-confirmed products, such as 185ボス..., 240カン..., 270P..., 280P..., 380B..., and 600P.... Those products were therefore treated as unknown-size, so the intended maker → smaller container size → younger product number order was not actually being applied in real data. HF2E recognizes plausible leading 3–4 digit capacity prefixes while preserving explicit-unit parsing. PR #133 merged to main at 47ee4c4d38cc85c057ff3315f6dff40acdff7c92. PR browser regression run 35440464231 and main-push run 35440546492 passed all eight gates, including the new real-prefix gate; GitHub Pages deployment run 35440545590 and Vercel production status passed. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
     "scope": [
       "Use VENDRIVE normally; no active feature phase is open.",
       "Group product lists by maker first; maker-group order uses each maker's youngest natural product number.",
       "Within a maker, sort known container sizes from smaller to larger before considering product number.",
+      "Recognize both explicit units such as 350ml/500ml and the real OCR printed-name prefix convention such as 185..., 240カン..., 270P..., 280P..., 380B..., and 600P....",
       "When two products have the same detected size, sort by younger/natural product number.",
       "Products whose size cannot be detected follow known-size products within the same maker.",
       "Apply the same order to Product Master, Analysis > Inventory vehicle stock, and vehicle stocktake.",
-      "Only confirmed OCR reports may add/update product-master discovery data; draft OCR candidates remain excluded.",
-      "Classification inference remains proposal-only until explicit human confirmation.",
-      "Use GitHub Actions + Playwright/Chromium as the standard deterministic browser regression path.",
+      "Use GitHub Actions + Playwright/Chromium as the standard deterministic browser regression path; the real-prefix ordering gate is part of the standard suite.",
       "Keep inventory movement semantics, OCR/report confirmation boundaries, learned numeric forecasting, Analytics engine, DB and schema unchanged."
     ],
     "nextActions": [
-      "Use the real app and confirm the visible product order matches maker → smaller container size → younger product number.",
+      "Use the real app and visually confirm that OCR product names such as 185..., 240..., 270..., 280..., 380..., and 600... now appear in maker → smaller container size → younger product-number order.",
       "Continue normal field evidence accumulation and classification confirmation where useful.",
       "Reopen engineering only for new field friction or when the numeric promotion gate has enough evidence."
     ]
