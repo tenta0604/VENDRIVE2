@@ -11,22 +11,24 @@
   "schemaVersion": 4,
   "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.20 HF2B product confirmation sync + browser CI verified",
-    "releaseStatus": "FINAL.20 HF2B is merged and production verified. Confirmed OCR report products now synchronize into Product Master in the same session before the explicit report-confirmation promise settles, so vehicle stocktake search can find a newly confirmed product immediately without reload or opening Product Master first. Draft/unconfirmed OCR reports remain excluded, product sync does not change inventory quantities, and classification heuristics remain proposals until explicit user confirmation. Product lists remain natural product-code order, then smaller detected package size, then maker/name. PR #124 merged at 3330d77d2266b9d3737cd14a9eab44ab382d21a1; Vercel production deployment dpl_C85doLkdPWMRhmNTg73WpxvvVFbx is READY. The new canonical GitHub Actions + Playwright/Chromium Browser regression gates workflow passed on the PR and again on the main push (run 35360634326), covering the product-master gate plus five existing OCR/visit/machine gates. TinyFish is no longer required for normal deterministic browser regression gates. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
+    "title": "Operational evidence accumulation — FINAL.20 HF2D maker/size/code ordering verified",
+    "releaseStatus": "FINAL.20 HF2D is merged and production verified. Product ordering is now maker group first, then smaller detected container size, then younger/natural product number. Maker-group order remains based on each maker's youngest product number. The same order is enforced across Product Master, Analysis > Inventory vehicle stock, and vehicle stocktake. Product Master copy now shows メーカー→容器サイズ→商品番号順. PR #130 merged to main at d3fc44abe6cc552e380dba9998e3e91b6c85d148. PR browser regression run 35434708459 and main-push run 35434818294 passed all seven gates; GitHub Pages deployment run 35434817808 and Vercel production status also passed. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
     "scope": [
       "Use VENDRIVE normally; no active feature phase is open.",
-      "Only confirmed OCR reports may add/update product-master discovery data; draft OCR candidates must not leak into the master.",
-      "After explicit report confirmation, synchronize confirmed product rows in the same session before the confirmation promise settles; synchronization failure must not undo or misreport the already-confirmed report.",
-      "Classification inference is proposal-only until explicit human confirmation.",
-      "Product master and vehicle stocktake search include synchronized confirmed OCR products.",
-      "Product lists use product-code natural order, then smaller detected size, then maker/name.",
-      "Use GitHub Actions + Playwright/Chromium as the standard browser regression path for deterministic local gate pages; add new reusable gates to tests/run-browser-gates.mjs instead of relying on paid TinyFish runs.",
-      "Keep inventory movement semantics, report confirmation boundaries, learned numeric forecasting, Analytics engine, DB and schema unchanged."
+      "Group product lists by maker first; maker-group order uses each maker's youngest natural product number.",
+      "Within a maker, sort known container sizes from smaller to larger before considering product number.",
+      "When two products have the same detected size, sort by younger/natural product number.",
+      "Products whose size cannot be detected follow known-size products within the same maker.",
+      "Apply the same order to Product Master, Analysis > Inventory vehicle stock, and vehicle stocktake.",
+      "Only confirmed OCR reports may add/update product-master discovery data; draft OCR candidates remain excluded.",
+      "Classification inference remains proposal-only until explicit human confirmation.",
+      "Use GitHub Actions + Playwright/Chromium as the standard deterministic browser regression path.",
+      "Keep inventory movement semantics, OCR/report confirmation boundaries, learned numeric forecasting, Analytics engine, DB and schema unchanged."
     ],
     "nextActions": [
-      "Use real field OCR-confirmed products and verify they appear immediately in vehicle stocktake search in the same app session.",
-      "Use the Product Master from Analysis > Inventory to search and confirm/correct classifications where useful.",
-      "Continue normal evidence accumulation; reopen engineering only for new field friction or when the numeric promotion gate has enough evidence."
+      "Use the real app and confirm the visible product order matches maker → smaller container size → younger product number.",
+      "Continue normal field evidence accumulation and classification confirmation where useful.",
+      "Reopen engineering only for new field friction or when the numeric promotion gate has enough evidence."
     ]
   },
   "requiredUserInput": [],
