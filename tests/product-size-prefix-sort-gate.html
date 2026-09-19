@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Product size prefix sort gate</title><style>body{font-family:sans-serif;width:min(100%,430px);margin:auto;padding:12px}</style></head><body><pre id="out">RUNNING</pre><script>
+function loadScript(src){return new Promise(function(resolve,reject){var s=document.createElement('script');s.src='../'+src+'?gate='+Date.now();s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}
+function assert(v,m){if(!v)throw new Error(m)}
+(async function(){try{
+await loadScript('analytics.js');await window.VENDRIVE2Analytics.ready();await loadScript('product-master-hf2.js');await loadScript('product-master-hf2c-integration.js');await loadScript('product-sort-hf2d.js');
+await new Promise(function(resolve,reject){var n=0,t=setInterval(function(){var i=window.VENDRIVE2ProductIntelligence;if(i&&i.__hf2dSizeFirst){clearInterval(t);resolve()}else if(++n>160){clearInterval(t);reject(new Error('sort hotfix unavailable'))}},50)});
+var i=window.VENDRIVE2ProductIntelligence;
+var rows=i.sortProducts([
+ {makerKey:'M1',productCode:'745001',displayName:'270Pノムブドウゼリー'},
+ {makerKey:'M1',productCode:'705907',displayName:'185ボスブラック'},
+ {makerKey:'M1',productCode:'744052',displayName:'280Pスタバキャラメルマキアート'},
+ {makerKey:'M1',productCode:'745453',displayName:'380Bスタバブラック'},
+ {makerKey:'M1',productCode:'734813',displayName:'600Pグリーンダカラ'},
+ {makerKey:'M1',productCode:'729274',displayName:'240カンデカビタシー'}
+]);
+var order=rows.map(function(p){return p.productCode}).join(',');
+assert(order==='705907,729274,745001,744052,745453,734813','printed-name leading size order mismatch: '+order);
+var equal=i.sortProducts([
+ {makerKey:'M1',productCode:'745285',displayName:'185ボスレキシキャンノビトウ'},
+ {makerKey:'M1',productCode:'717608',displayName:'185ボスゼイタクビトウ'}
+]);
+assert(equal.map(function(p){return p.productCode}).join(',')==='717608,745285','equal leading size must use younger product code');
+var explicit=i.sortProducts([
+ {makerKey:'M1',productCode:'900002',displayName:'テスト 500ml'},
+ {makerKey:'M1',productCode:'900001',displayName:'テスト 350ml'}
+]);
+assert(explicit.map(function(p){return p.productCode}).join(',')==='900001,900002','explicit unit size order regressed');
+document.getElementById('out').textContent='PASS\nprinted-name leading size: PASS\nequal-size product number: PASS\nexplicit-unit size: PASS';
+}catch(e){document.getElementById('out').textContent='FAIL\n'+(e&&e.stack||e);throw e}})();
+</script></body></html>
