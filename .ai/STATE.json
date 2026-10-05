@@ -5,34 +5,33 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.09.18-FINAL.20",
+  "appVersion": "2026.10.05-FINAL.21",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_real_evidence_accumulation_numeric_promotion_disabled",
+  "status": "operational_pause_field_workflow_simplified_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational evidence accumulation — FINAL.20 HF2E real OCR size-prefix ordering verified",
-    "releaseStatus": "FINAL.20 HF2E is merged and production verified. The previous HF2D sorter recognized explicit units such as 500ml but did not recognize the real printed-name convention used by OCR-confirmed products, such as 185ボス..., 240カン..., 270P..., 280P..., 380B..., and 600P.... Those products were therefore treated as unknown-size, so the intended maker → smaller container size → younger product number order was not actually being applied in real data. HF2E recognizes plausible leading 3–4 digit capacity prefixes while preserving explicit-unit parsing. PR #133 merged to main at 47ee4c4d38cc85c057ff3315f6dff40acdff7c92. PR browser regression run 35440464231 and main-push run 35440546492 passed all eight gates, including the new real-prefix gate; GitHub Pages deployment run 35440545590 and Vercel production status passed. App/engine/DB/schema remain FINAL.20 / AN14B3B5 / 4 / 4.",
+    "title": "Operational field use — FINAL.21 simplified workflow verified",
+    "releaseStatus": "FINAL.21 is merged and production verified. The user-facing report-photo/OCR entry point and Analysis tab/page were removed because field operation does not have time for photo capture. Historical Analytics data and code were preserved; no destructive data deletion or DB/schema migration occurred. Saved manual next-workday plans now carry into the actual workday by materializing planned additions/exclusions through the existing per-day force/skip mechanism. Urgent orders remain visible as the existing safety override. PR #136 merged to main at 344e97b0ae14c7487b8119c53892a95a3a7cd9c8. PR browser run 37290348056 and main run 37290505765 passed; GitHub Pages run 37290504048 and Vercel production status passed.",
     "scope": [
-      "Use VENDRIVE normally; no active feature phase is open.",
-      "Group product lists by maker first; maker-group order uses each maker's youngest natural product number.",
-      "Within a maker, sort known container sizes from smaller to larger before considering product number.",
-      "Recognize both explicit units such as 350ml/500ml and the real OCR printed-name prefix convention such as 185..., 240カン..., 270P..., 280P..., 380B..., and 600P....",
-      "When two products have the same detected size, sort by younger/natural product number.",
-      "Products whose size cannot be detected follow known-size products within the same maker.",
-      "Apply the same order to Product Master, Analysis > Inventory vehicle stock, and vehicle stocktake.",
-      "Use GitHub Actions + Playwright/Chromium as the standard deterministic browser regression path; the real-prefix ordering gate is part of the standard suite.",
-      "Keep inventory movement semantics, OCR/report confirmation boundaries, learned numeric forecasting, Analytics engine, DB and schema unchanged."
+      "Use VENDRIVE as a schedule/task/order/visit tool without the report-photo/OCR entry point.",
+      "Do not expose the Analysis tab/page in the field UI.",
+      "Preserve historical Analytics storage/code for compatibility and non-destructive rollback; do not collect new OCR data through the removed UI.",
+      "When a manual next-workday plan is saved, carry its additions/exclusions into that date using the existing force/skip semantics.",
+      "Do not allow a saved manual plan to suppress an urgent order; orders remain visible in Today.",
+      "Apply a matching saved plan once even if the old app already set the current-day marker before FINAL.21 first loads.",
+      "Keep task/order/visit completion semantics, Analytics engine AN14B3B5, DB 4 and schema 4 otherwise unchanged.",
+      "Use GitHub Actions + Playwright/Chromium as the deterministic browser regression path."
     ],
     "nextActions": [
-      "Use the real app and visually confirm that OCR product names such as 185..., 240..., 270..., 280..., 380..., and 600... now appear in maker → smaller container size → younger product-number order.",
-      "Continue normal field evidence accumulation and classification confirmation where useful.",
-      "Reopen engineering only for new field friction or when the numeric promotion gate has enough evidence."
+      "Use the simplified app normally and confirm the five-tab navigation has no Analysis tab and Today has no report-photo button.",
+      "At the next saved next-workday plan, confirm added/excluded machines appear correctly when that date becomes Today.",
+      "Reopen engineering only for new field friction or explicit product changes."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Numeric learning promotion requires sufficient real exact scored samples and held-out improvement evidence."
+    "Numeric learning promotion remains disabled; historical analysis evidence is preserved but the user-facing analysis workflow is withdrawn."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
