@@ -2,7 +2,7 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.05-FINAL.22** (field workflow simplified; five-tab width corrected; tasks support direct single-machine targets and configurable percentage auto-completion; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.05-FINAL.23** (field workflow simplified; tasks support arbitrary multi-machine selection targets plus manufacturer targeting and configurable percentage auto-completion; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
 - Active engineering phase: **None**. VENDRIVE is intentionally in an operational evidence phase rather than a feature-building phase.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
@@ -34,6 +34,8 @@ Real field use on 2026-09-18 produced bounded maintenance corrections rather tha
 FINAL.21 intentionally withdraws the user-facing report-photo/OCR and Analysis surfaces because the operator does not have time for photo capture in normal field work. Historical Analytics data/code remains preserved rather than destructively deleted. The same maintenance release also fixes manual next-workday plan carryover: saved additions/exclusions are applied to the actual workday through existing force/skip semantics, with urgent orders remaining visible as a safety override. PR #136 and both PR/main browser gates passed, along with GitHub Pages and Vercel production deployment.
 
 FINAL.22 adds task targeting and partial-rollout completion without reopening Analytics. The five-tab navigation now explicitly fills the full row. Task creation can target one vending machine directly as well as the existing all/manufacturer scope. Each task can use a 1–100% auto-completion threshold (legacy/default 100%), and existing active tasks can edit that threshold. Completion triggers on the exact completed/target ratio reaching the threshold. PR #139 and both PR/main browser gates passed, along with GitHub Pages and Vercel production deployment.
+
+FINAL.23 replaces the fixed one-machine task mode from FINAL.22 with a true selection-type workflow. Operators can choose any number of arbitrary vending machines via search, see/remove the selected set before save, or continue to use all/manufacturer-wide targeting. Existing single-machine/custom target sets migrate to selection semantics. Percentage auto-completion is unchanged. PR #142 and both PR/main browser gates passed, along with GitHub Pages and Vercel production deployment.
 
 During normal field use, treat these as evidence that can reopen engineering:
 
