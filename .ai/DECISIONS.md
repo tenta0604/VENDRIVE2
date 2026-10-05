@@ -209,3 +209,15 @@ This file records confirmed project decisions that must survive chat migration. 
 - Changing task targeting continues to use the existing explicit add/remove flow. Single-machine tasks that are later expanded may become custom individual-target tasks.
 - This feature does not change visit completion, order handling, Analytics engine, DB/schema, inventory semantics, or numeric learning behavior.
 
+## FINAL.23 arbitrary task-selection decision
+
+- The task target mode must not constrain explicit machine targeting to exactly one vending machine.
+- The two creation modes are manufacturer-based targeting and 選択型 targeting.
+- 選択型 allows any non-zero number of arbitrary vending machines to be chosen individually by search, regardless of maker.
+- The creation UI must show the current number/list of selected machines and allow a machine to be removed before the task is saved.
+- Existing all-manufacturer and one-manufacturer targeting remains available and unchanged.
+- FINAL.22 single-machine tasks and other custom individual target sets migrate to 選択型 while preserving their existing targetMachineIds.
+- If a manufacturer-based task's target set is manually changed in Task Detail, the resulting task becomes 選択型 because its actual scope is now an explicit machine set.
+- The 1–100% automatic completion threshold remains independent of target mode and continues to use exact completed-target / total-target ratio.
+- This change does not alter visit completion, order handling, task-per-machine completion facts, Analytics engine, DB/schema, inventory semantics, or numeric learning behavior.
+
