@@ -1,70 +1,71 @@
 {
-  "evidenceVersion": 16,
-  "runType": "simplify_no_analysis_tomorrow_plan_final21",
-  "phase": "FIELD_WORKFLOW_SIMPLIFICATION_FINAL21",
+  "evidenceVersion": 17,
+  "runType": "task_target_threshold_ux_final22",
+  "phase": "TASK_TARGET_THRESHOLD_UX_FINAL22",
   "status": "MERGED_DEPLOYED_MAIN_CI_VERIFIED_OPERATIONAL_PAUSE",
   "base": {
-    "preFixHead": "79d9b77738f43770ababf4a489e559c68a8322ba",
-    "safetyIssue": 135,
-    "safetyTag": "backup-pre-SIMPLIFY-NO-ANALYSIS-TOMORROW-PLAN-20261005",
-    "safetyTagTarget": "79d9b77738f43770ababf4a489e559c68a8322ba",
-    "maintenanceBranch": "chatgpt/simplify-no-analysis-tomorrow-plan-20261005",
-    "fixPullRequest": 136,
-    "productProductionHead": "344e97b0ae14c7487b8119c53892a95a3a7cd9c8"
+    "preFixHead": "2cb6812d9e0abff4f75df684f5dba5ee49f453a5",
+    "safetyIssue": 138,
+    "safetyTag": "backup-pre-TASK-TARGET-THRESHOLD-UX-20261005",
+    "safetyTagTarget": "2cb6812d9e0abff4f75df684f5dba5ee49f453a5",
+    "maintenanceBranch": "chatgpt/task-target-threshold-ux-20261005",
+    "fixPullRequest": 139,
+    "productProductionHead": "0533caa45dab9915a1628377a7543df3ca735efb"
   },
   "versions": {
-    "app": "2026.10.05-FINAL.21",
+    "app": "2026.10.05-FINAL.22",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Removed the user-facing report-photo/OCR entry point and Analysis tab/page, while preserving historical Analytics storage/code. Fixed the next-workday planning defect: a manually saved plan was previously shown in the tomorrow modal but ignored when that date became Today. FINAL.21 materializes the saved plan once into the established force/skip day overrides; urgent orders remain a safety override and are still shown.",
+    "summary": "Fixed the apparent unused right-side slot in the five-tab navigation and extended task management for field use. Tasks can now target one explicitly selected vending machine in addition to existing all/manufacturer-wide targeting. Each task can define a 1–100% completion threshold; legacy tasks default to 100%, existing tasks can edit it, and the parent task completes automatically as soon as completed-target ratio reaches or exceeds the threshold.",
     "implemented": [
-      "Removed 帳票撮影 section/button from Today.",
-      "Removed report-capture modal and its main-page event bindings.",
-      "Removed Analysis navigation tab/page and guarded render flow accordingly.",
-      "Changed navigation to five equal tabs.",
-      "Added savedManualPlanForToday/applySavedManualPlanForToday helpers.",
-      "A matching manual plan applies once via plan.appliedDate, including the same-day-upgrade case where vendrive2_last_day is already current.",
-      "Planned machines are forced for the day; excluded machines are skipped for the day; machines with urgent orders remain visible.",
-      "Added tests/simplified-ui-tomorrow-plan-gate.html and aligned the standard browser suite to the simplified field workflow.",
-      "PR #136 browser regression run 37290348056 PASS: simplified UI, manual-plan carryover, order safety, plus retained product integrity gates.",
-      "PR #136 merged to main at 344e97b0ae14c7487b8119c53892a95a3a7cd9c8.",
-      "Main browser regression run 37290505765 PASS, all 4 gates.",
-      "GitHub Pages deployment run 37290504048 PASS.",
-      "Vercel production status for main merge PASS."
+      "Changed top navigation to explicit flex distribution so all five remaining tabs consume the full row.",
+      "Added task target mode selector: manufacturer/all or single vending machine.",
+      "Added searchable single-machine picker to new task creation.",
+      "Added completionThresholdPercent to tasks with 1–100 normalization and legacy default 100.",
+      "Added load-time migration/default for existing tasks and a completion sweep for threshold-qualified tasks.",
+      "Added editable threshold to Task Detail for existing active tasks.",
+      "Updated task progress, history and target labels to show threshold/progress.",
+      "Auto-completion uses exact integer ratio comparison: done*100 >= threshold*total.",
+      "Added tests/task-target-threshold-ui-gate.html covering full-width five-tab navigation, single-machine task creation, legacy threshold editing, and 70% auto-completion.",
+      "PR #139 browser regression run 37318687576 passed all five gates.",
+      "PR #139 merged to main at 0533caa45dab9915a1628377a7543df3ca735efb.",
+      "Main browser regression run 37318820245 passed all five gates.",
+      "GitHub Pages deployment run 37318819474 passed.",
+      "Vercel production status for the main merge passed."
     ]
   },
   "gates": {
     "safetyCheckpoint": "PASS",
     "immutableSafetyTag": "PASS",
     "prBrowserRegressionGates": "PASS",
-    "prBrowserRegressionRunId": 37290348056,
-    "simplifiedUi": "PASS",
-    "manualTomorrowPlanCarryover": "PASS",
-    "urgentOrderSafetyOverride": "PASS",
-    "retainedProductIntegrityGates": "PASS",
+    "prBrowserRegressionRunId": 37318687576,
+    "fullWidthFiveTabNavigation": "PASS",
+    "singleMachineTaskCreation": "PASS",
+    "legacyTaskThresholdDefaultAndEdit": "PASS",
+    "seventyPercentAutoCompletion": "PASS",
+    "retainedRegressionGates": "PASS",
     "merge": "PASS",
-    "fixPullRequest": 136,
+    "fixPullRequest": 139,
     "mainPushGithubActionsBrowserGates": "PASS",
-    "mainPushGithubActionsRunId": 37290505765,
+    "mainPushGithubActionsRunId": 37318820245,
     "githubPagesDeployment": "PASS",
-    "githubPagesDeploymentRunId": 37290504048,
+    "githubPagesDeploymentRunId": 37318819474,
     "vercelProductionDeploy": "PASS",
     "analyticsHistoricalDataDeletion": "NONE",
-    "automaticReportConfirmation": "NOT_APPLICABLE_UI_REMOVED",
     "inventorySemanticsChange": "NONE",
     "learnedNumericForecastingChange": "NONE",
     "engineChange": "NONE",
     "dbSchemaChange": "NONE"
   },
   "openItems": [
-    "Real-device visual confirmation of the simplified five-tab UI.",
-    "Real-device confirmation on the next manually edited next-workday plan that additions/exclusions carry into Today."
+    "Real-device visual confirmation that the five navigation tabs fully use the row.",
+    "Real-device confirmation of one-machine task creation and percentage-based automatic completion."
   ],
-  "nextAction": "Return to normal field use with FINAL.21. The photo/OCR and Analysis surfaces are withdrawn; saved manual next-workday edits now become the actual Today plan while urgent orders remain visible.",
+  "nextAction": "Return to normal field use with FINAL.22. Use one-machine targeting when appropriate and set completion thresholds such as 70% for partial rollout tasks.",
   "unresolved": [
-    "Historical Analytics data/code remains preserved for compatibility; user-facing analysis/OCR workflow is intentionally withdrawn."
+    "Historical Analytics remains preserved; user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ]
 }
