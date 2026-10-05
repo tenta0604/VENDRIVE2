@@ -5,33 +5,33 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.05-FINAL.21",
+  "appVersion": "2026.10.05-FINAL.22",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_field_workflow_simplified_numeric_promotion_disabled",
+  "status": "operational_pause_task_target_threshold_verified_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational field use — FINAL.21 simplified workflow verified",
-    "releaseStatus": "FINAL.21 is merged and production verified. The user-facing report-photo/OCR entry point and Analysis tab/page were removed because field operation does not have time for photo capture. Historical Analytics data and code were preserved; no destructive data deletion or DB/schema migration occurred. Saved manual next-workday plans now carry into the actual workday by materializing planned additions/exclusions through the existing per-day force/skip mechanism. Urgent orders remain visible as the existing safety override. PR #136 merged to main at 344e97b0ae14c7487b8119c53892a95a3a7cd9c8. PR browser run 37290348056 and main run 37290505765 passed; GitHub Pages run 37290504048 and Vercel production status passed.",
+    "title": "Operational field use — FINAL.22 task targeting and threshold completion verified",
+    "releaseStatus": "FINAL.22 is merged and production verified. The five remaining top navigation tabs are now forced to share the full row without a leftover empty slot. Task creation keeps the existing all/manufacturer-wide target mode and adds direct single-vending-machine targeting with search. Tasks now have a configurable 1–100% auto-completion threshold, defaulting to 100% for legacy and new tasks. Existing tasks can edit this threshold in Task Detail; completion is triggered when completed target count / current target count reaches or exceeds the threshold. PR #139 merged to main at 0533caa45dab9915a1628377a7543df3ca735efb. PR browser run 37318687576 and main run 37318820245 passed all five gates; GitHub Pages run 37318819474 and Vercel production status passed. Analytics engine/DB/schema remain AN14B3B5 / 4 / 4.",
     "scope": [
-      "Use VENDRIVE as a schedule/task/order/visit tool without the report-photo/OCR entry point.",
-      "Do not expose the Analysis tab/page in the field UI.",
-      "Preserve historical Analytics storage/code for compatibility and non-destructive rollback; do not collect new OCR data through the removed UI.",
-      "When a manual next-workday plan is saved, carry its additions/exclusions into that date using the existing force/skip semantics.",
-      "Do not allow a saved manual plan to suppress an urgent order; orders remain visible in Today.",
-      "Apply a matching saved plan once even if the old app already set the current-day marker before FINAL.21 first loads.",
-      "Keep task/order/visit completion semantics, Analytics engine AN14B3B5, DB 4 and schema 4 otherwise unchanged.",
-      "Use GitHub Actions + Playwright/Chromium as the deterministic browser regression path."
+      "Use five equal-width top navigation tabs with no unused sixth-slot-like gap.",
+      "Create tasks for all manufacturers, one manufacturer, or one explicitly selected vending machine.",
+      "Search and select a single vending machine directly during task creation.",
+      "Set each task's auto-completion threshold from 1% to 100%; default 100% preserves legacy behavior.",
+      "Allow the threshold to be changed on existing active tasks from Task Detail.",
+      "Auto-complete when completed target count divided by current target count is greater than or equal to the configured threshold.",
+      "Show current progress and threshold on task cards/details/history.",
+      "Preserve existing per-task target add/remove editing, task completion per machine, visit checks, task history, task/order semantics, Analytics engine, DB and schema."
     ],
     "nextActions": [
-      "Use the simplified app normally and confirm the five-tab navigation has no Analysis tab and Today has no report-photo button.",
-      "At the next saved next-workday plan, confirm added/excluded machines appear correctly when that date becomes Today.",
+      "Use the task screen on the phone and confirm the five top tabs visually fill the width.",
+      "Create a one-machine task and a percentage task in real use; confirm threshold auto-completion feels correct.",
       "Reopen engineering only for new field friction or explicit product changes."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Numeric learning promotion remains disabled; historical analysis evidence is preserved but the user-facing analysis workflow is withdrawn."
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
