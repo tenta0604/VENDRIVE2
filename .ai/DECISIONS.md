@@ -196,3 +196,16 @@ This file records confirmed project decisions that must survive chat migration. 
 - Urgent orders remain an operational safety override and must still appear in Today even if they were not included in the saved manual next-workday plan.
 - The simplification does not otherwise change task, order, visit-completion, route, inventory, Analytics engine, DB, schema, or learned-numeric promotion behavior.
 
+## FINAL.22 task targeting and percentage-completion decision
+
+- The five remaining top navigation tabs must consume the full row; do not leave an unused Analysis-sized slot after the Analysis tab was withdrawn.
+- Task creation must preserve the existing all-manufacturer / one-manufacturer targeting flow and additionally support direct selection of exactly one vending machine.
+- Single-machine task selection must be searchable by the same practical machine identity fields used elsewhere (name, address, management code/id, maker).
+- Every task has an automatic-completion threshold from 1% through 100%.
+- New tasks default to 100%. Legacy tasks with no threshold also default to 100% so previous "all targeted machines must complete" behavior is preserved.
+- Existing active tasks must allow threshold changes from Task Detail.
+- A task auto-completes when completed target count / current target count is greater than or equal to the configured threshold. Use exact ratio comparison rather than rounded display percentage.
+- Task cards/details/history should show completion progress and the configured threshold so partial rollout tasks such as 70% deployments remain understandable.
+- Changing task targeting continues to use the existing explicit add/remove flow. Single-machine tasks that are later expanded may become custom individual-target tasks.
+- This feature does not change visit completion, order handling, Analytics engine, DB/schema, inventory semantics, or numeric learning behavior.
+
