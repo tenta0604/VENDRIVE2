@@ -186,3 +186,13 @@ This file records confirmed project decisions that must survive chat migration. 
 - The OCR action button is retry-only on the normal workflow: hide it while automatic OCR is available/running/successful, and expose “もう一度読み取る” only after OCR failure or when the adapter is unavailable.
 - Automatic OCR start does not change the human-review boundary: draft creation still requires explicit paper approval, and formal report confirmation remains explicit.
 
+## FINAL.21 field-workflow simplification decision
+
+- The field workflow no longer exposes report-photo/OCR capture. The Today screen must not show a 帳票撮影 button or report-capture entry point.
+- The field workflow no longer exposes the Analysis tab/page. This supersedes earlier user-facing analysis/OCR workflow decisions, but does not require destructive deletion of historical Analytics data or code.
+- Preserve historical Analytics storage and DB/schema compatibility so existing data is not silently destroyed and rollback remains possible.
+- A manually saved next-workday plan is operational intent, not a preview-only list. When its date becomes Today, its additions and exclusions must be materialized into the existing daily force/skip mechanism.
+- Apply that saved plan once per target date, including when FINAL.21 first loads after an older build already wrote the current-day marker.
+- Urgent orders remain an operational safety override and must still appear in Today even if they were not included in the saved manual next-workday plan.
+- The simplification does not otherwise change task, order, visit-completion, route, inventory, Analytics engine, DB, schema, or learned-numeric promotion behavior.
+
