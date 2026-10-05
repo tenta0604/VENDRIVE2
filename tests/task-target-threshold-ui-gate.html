@@ -28,6 +28,7 @@
   assert(navRect.right-last.right<=10.5,'right side still has an empty tab-sized gap');
 
   openTab('tasksPage');
+  await waitFor(()=>[...d.querySelectorAll('#taskList .taskCard')].some(x=>x.textContent.includes('Legacy threshold task')),'legacy task card did not render');
   let legacyCard=[...d.querySelectorAll('#taskList .taskCard')].find(x=>x.textContent.includes('Legacy threshold task'));click(legacyCard);
   assert(d.getElementById('taskDetailCompletionThreshold').value==='100','legacy task did not default to 100%');
   d.getElementById('taskDetailCompletionThreshold').value='25';click(d.getElementById('saveTaskDetail'));
