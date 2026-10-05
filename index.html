@@ -427,7 +427,7 @@ function maintainRestoredState(candidate){
 function finalizeLoadedState(){
   var dayKey='vendrive2_last_day',maintenanceChanged=false;
   try{var last=localStorage.getItem(dayKey),dayChanged=last!==today;if(dayChanged)state.machines.forEach(function(m){m.visited=false;m.skip=null;m.force=null});var planApplied=applySavedManualPlanForToday();if(dayChanged||planApplied){localStorage.setItem(dayKey,today);persist()}}catch(e){console.error('VENDRIVE2 day reset failed',e)}
-  ensureMakerColors();migrateCoordinates();var historyChanged=cleanupHistory(),taskHistoryChanged=cleanupTaskHistory();maintenanceChanged=historyChanged||taskHistoryChanged;if(maintenanceChanged)persist();
+  ensureMakerColors();migrateCoordinates();var historyChanged=cleanupHistory(),taskHistoryChanged=cleanupTaskHistory(),taskCompletionChanged=false;(state.tasks||[]).forEach(function(task){if(completeParentTaskIfDone(task))taskCompletionChanged=true});maintenanceChanged=historyChanged||taskHistoryChanged||taskCompletionChanged;if(maintenanceChanged)persist();
 }
 function recoverIndexedDb(done){
   if(!window.indexedDB){done(false);return}
@@ -1062,6 +1062,7 @@ function taskTargetLabel(task){
   var id=task.targetMachineId||(Array.isArray(task.targetMachineIds)&&task.targetMachineIds[0]),machine=state.machines.find(function(m){return m&&String(m.id)===String(id)});
   return machine?'自販機：'+machine.name:'自販機1台';
  }
+ if(task&&task.targetType==='custom')return'個別指定';
  return task&&task.target==='all'?'全メーカー':(task&&task.target||'未設定')
 }
 function migrateLegacyTaskTargets(candidate){
