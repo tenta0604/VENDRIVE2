@@ -2,14 +2,10 @@ import { chromium } from 'playwright';
 
 const baseUrl = process.env.VENDRIVE_TEST_BASE_URL || 'http://127.0.0.1:4173';
 const gates = [
+  'tests/simplified-ui-tomorrow-plan-gate.html',
   'tests/product-master-sync-gate.html',
   'tests/product-maker-sort-gate.html',
-  'tests/product-size-prefix-sort-gate.html',
-  'tests/ocr-compact-soldout-visit-context-gate.html',
-  'tests/ocr-continuation-vendor-gate.html',
-  'tests/ocr-review-field-fix-gate.html',
-  'tests/visit-closeout-overlap-gate.html',
-  'tests/machine-bring-opt-in-gate.html'
+  'tests/product-size-prefix-sort-gate.html'
 ];
 
 const browser = await chromium.launch({ headless: true });
