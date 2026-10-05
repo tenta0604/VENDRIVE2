@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Task target and threshold gate</title>
+<style>html,body{margin:0;width:430px;max-width:100%}iframe{width:430px;max-width:100%;height:932px;border:0}</style></head>
+<body><pre id="out">RUNNING</pre><iframe id="app" title="VENDRIVE test app"></iframe>
+<script>
+(async function(){
+  const out=document.getElementById('out'),assert=(v,m)=>{if(!v)throw new Error(m)},sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const now=new Date(),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),today=iso(now),WEEK=['日','月','火','水','木','金','土'],todayDay=WEEK[now.getDay()];
+  const machine=(id,name)=>({id,name,maker:'サントリー',makerGroup:'サントリー',code:id,address:'',lat:null,lng:null,days:[todayDay],cycle:'毎日',weeklyCount:null,last:'',visited:false,skip:null,force:null,order:null,timeCondition:{type:'none',start:'',end:''},temporaryVisitCycles:[],memo:'',sales:'',taskDone:{}});
+  const machines=[machine('M1','Machine 1'),machine('M2','Machine 2'),machine('M3','Machine 3'),machine('M4','Machine 4')];
+  machines[0].taskDone.LEGACY={completedAt:Date.now()-1000};
+  const state={machines,offices:[],history:[],tomorrowPlan:null,tasks:[{id:'LEGACY',text:'Legacy threshold task',target:'all',targetMachineIds:['M1','M2','M3','M4'],createdAt:Date.now()-5000,completed:false}],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:['サントリー'],makerColors:{},makerSettings:[]};
+  localStorage.setItem('vendrive2_v7_data',JSON.stringify(state));localStorage.setItem('vendrive2_last_day',today);
+
+  const frame=document.getElementById('app');frame.src='../index.html?gate='+Date.now();
+  for(let i=0;i<120;i++){await sleep(100);const d=frame.contentDocument;if(d&&d.getElementById('taskList')&&d.querySelector('.tabs button[data-page="tasksPage"]'))break}
+  const d=frame.contentDocument,w=frame.contentWindow;assert(d&&w,'app unavailable');
+  function click(el){assert(el,'missing clickable element');el.click()}
+  function fire(el,type){el.dispatchEvent(new Event(type,{bubbles:true}))}
+  function stored(){return JSON.parse(localStorage.getItem('vendrive2_v7_data'))}
+  function taskByText(text){return stored().tasks.find(t=>t.text===text)}
+  function openTab(page){click(d.querySelector('.tabs button[data-page="'+page+'"]'))}
+  async function waitFor(fn,label){for(let i=0;i<80;i++){if(fn())return;await sleep(50)}throw new Error(label||'wait timeout')}
+
+  // Five tabs must fill the full nav row instead of leaving a sixth-slot-looking gap.
+  const nav=d.querySelector('.tabs'),buttons=[...nav.querySelectorAll('button')],navRect=nav.getBoundingClientRect(),first=buttons[0].getBoundingClientRect(),last=buttons[buttons.length-1].getBoundingClientRect();
+  assert(buttons.length===5,'expected five tabs');
+  assert(first.left-navRect.left<=10.5,'left tab padding too large');
+  assert(navRect.right-last.right<=10.5,'right side still has an empty tab-sized gap');
+
+  // Existing legacy tasks default to 100%, and changing the threshold can auto-complete them.
+  openTab('tasksPage');
+  let legacyCard=[...d.querySelectorAll('#taskList .taskCard')].find(x=>x.textContent.includes('Legacy threshold task'));click(legacyCard);
+  assert(d.getElementById('taskDetailCompletionThreshold').value==='100','legacy task did not default to 100%');
+  d.getElementById('taskDetailCompletionThreshold').value='25';click(d.getElementById('saveTaskDetail'));
+  await waitFor(()=>taskByText('Legacy threshold task')&&taskByText('Legacy threshold task').completed===true,'legacy threshold edit did not auto-complete');
+  let st=stored(),hist=st.taskHistory.find(x=>x.taskId==='LEGACY');assert(hist&&hist.thresholdPercent===25&&hist.completedCount===1,'legacy completion history is missing threshold evidence');
+
+  // Create a single-machine task directly.
+  openTab('tasksPage');click(d.getElementById('addTask'));
+  d.getElementById('taskText').value='One machine task';d.getElementById('taskTargetMode').value='machine';fire(d.getElementById('taskTargetMode'),'change');
+  d.getElementById('taskMachineSearch').value='M2';fire(d.getElementById('taskMachineSearch'),'input');
+  let result=d.querySelector('#taskMachineResults .taskAddResult');click(result);
+  d.getElementById('taskCompletionThreshold').value='70';click(d.getElementById('saveTask'));
+  await waitFor(()=>!!taskByText('One machine task'),'single-machine task save');
+  let one=taskByText('One machine task');assert(one.targetType==='machine'&&one.targetMachineIds.length===1&&one.targetMachineIds[0]==='M2','single-machine task targeted more than one machine');assert(one.completionThresholdPercent===70,'single-machine threshold not persisted');
+
+  // Create a maker/all task with a 70% automatic completion threshold.
+  openTab('tasksPage');click(d.getElementById('addTask'));d.getElementById('taskText').value='70 percent task';d.getElementById('taskCompletionThreshold').value='70';click(d.getElementById('saveTask'));
+  await waitFor(()=>!!taskByText('70 percent task'),'70% task save');
+  let pct=taskByText('70 percent task');assert(pct.targetMachineIds.length===4&&pct.completionThresholdPercent===70,'maker task target or threshold incorrect');
+
+  async function completeNamedTaskOnMachine(code,taskText){
+    openTab('machinesPage');const q=d.getElementById('machineSearch');q.value=code;fire(q,'input');
+    const row=[...d.querySelectorAll('#machineResults .result')].find(x=>x.textContent.includes(code));click(row);
+    await waitFor(()=>d.getElementById('machineModal').classList.contains('open'),'machine modal did not open');
+    const taskRow=[...d.querySelectorAll('#detailTaskList > div')].find(x=>x.textContent.includes(taskText));assert(taskRow,'task not shown for '+code);click(taskRow.querySelector('button'));
+    await sleep(60);click(d.getElementById('closeMachine'));
+  }
+  await completeNamedTaskOnMachine('M1','70 percent task');
+  assert(taskByText('70 percent task').completed===false,'70% task completed at 25%');
+  await completeNamedTaskOnMachine('M2','70 percent task');
+  assert(taskByText('70 percent task').completed===false,'70% task completed at 50%');
+  await completeNamedTaskOnMachine('M3','70 percent task');
+  await waitFor(()=>taskByText('70 percent task').completed===true,'70% task did not auto-complete at 75%');
+  st=stored();hist=st.taskHistory.find(x=>x.taskId===taskByText('70 percent task').id);assert(hist&&hist.thresholdPercent===70&&hist.completedCount===3&&hist.targetCount===4,'70% completion history incorrect');
+  one=taskByText('One machine task');assert(one.completed===false,'unrelated single-machine task was changed');
+
+  out.textContent='PASS\nfull-width five-tab navigation: PASS\nsingle-machine task creation: PASS\nlegacy threshold editing: PASS\n70% auto-completion: PASS';
+})().catch(e=>{document.getElementById('out').textContent='FAIL: '+(e&&e.stack||e);console.error(e)});
+</script></body></html>

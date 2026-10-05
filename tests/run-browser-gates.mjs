@@ -3,6 +3,7 @@ import { chromium } from 'playwright';
 const baseUrl = process.env.VENDRIVE_TEST_BASE_URL || 'http://127.0.0.1:4173';
 const gates = [
   'tests/simplified-ui-tomorrow-plan-gate.html',
+  'tests/task-target-threshold-ui-gate.html',
   'tests/product-master-sync-gate.html',
   'tests/product-maker-sort-gate.html',
   'tests/product-size-prefix-sort-gate.html'
