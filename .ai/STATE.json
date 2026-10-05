@@ -5,27 +5,27 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": null,
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.05-FINAL.22",
+  "appVersion": "2026.10.05-FINAL.23",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_task_target_threshold_verified_numeric_promotion_disabled",
+  "status": "operational_pause_task_selection_targets_verified_numeric_promotion_disabled",
   "currentWork": {
-    "title": "Operational field use — FINAL.22 task targeting and threshold completion verified",
-    "releaseStatus": "FINAL.22 is merged and production verified. The five remaining top navigation tabs are now forced to share the full row without a leftover empty slot. Task creation keeps the existing all/manufacturer-wide target mode and adds direct single-vending-machine targeting with search. Tasks now have a configurable 1–100% auto-completion threshold, defaulting to 100% for legacy and new tasks. Existing tasks can edit this threshold in Task Detail; completion is triggered when completed target count / current target count reaches or exceeds the threshold. PR #139 merged to main at 0533caa45dab9915a1628377a7543df3ca735efb. PR browser run 37318687576 and main run 37318820245 passed all five gates; GitHub Pages run 37318819474 and Vercel production status passed. Analytics engine/DB/schema remain AN14B3B5 / 4 / 4.",
+    "title": "Operational field use — FINAL.23 arbitrary task selection verified",
+    "releaseStatus": "FINAL.23 is merged and production verified. The fixed 'one vending machine' task mode from FINAL.22 was replaced by a true selection-type target: the operator can search and choose any number of individual vending machines, while the existing all/manufacturer-wide target mode remains available. Selected machines are shown as a removable list with a count before task creation. Prior single-machine/custom task targets migrate to selection-type semantics, and Task Detail add/remove keeps customized tasks as selection-type. Percentage auto-completion remains unchanged. PR #142 merged to main at 1243c091afba07ba7945f9fb7cf339cc515d0988. PR browser run 37321748627 and main run 37321896627 passed all five gates; GitHub Pages run 37321895075 and Vercel production status passed. Analytics engine/DB/schema remain AN14B3B5 / 4 / 4.",
     "scope": [
-      "Use five equal-width top navigation tabs with no unused sixth-slot-like gap.",
-      "Create tasks for all manufacturers, one manufacturer, or one explicitly selected vending machine.",
-      "Search and select a single vending machine directly during task creation.",
-      "Set each task's auto-completion threshold from 1% to 100%; default 100% preserves legacy behavior.",
-      "Allow the threshold to be changed on existing active tasks from Task Detail.",
-      "Auto-complete when completed target count divided by current target count is greater than or equal to the configured threshold.",
-      "Show current progress and threshold on task cards/details/history.",
-      "Preserve existing per-task target add/remove editing, task completion per machine, visit checks, task history, task/order semantics, Analytics engine, DB and schema."
+      "Task target modes are manufacturer-based or selection-type; do not constrain selection-type to exactly one machine.",
+      "Selection-type task creation supports one or many arbitrary vending machines chosen via search.",
+      "Show selected machine count and allow removal before saving.",
+      "Keep existing all-manufacturer / one-manufacturer task targeting.",
+      "Migrate FINAL.22 single-machine/custom task target types to selection-type without losing targetMachineIds.",
+      "If Task Detail changes the target set, preserve the result as a selection-type task.",
+      "Keep the existing configurable 1–100% auto-completion threshold and exact ratio rule.",
+      "Keep task history, per-machine completion, visit task checks, order semantics, Analytics engine, DB and schema unchanged."
     ],
     "nextActions": [
-      "Use the task screen on the phone and confirm the five top tabs visually fill the width.",
-      "Create a one-machine task and a percentage task in real use; confirm threshold auto-completion feels correct.",
+      "Use selection-type task creation on the phone and confirm multiple arbitrary machines can be selected in one task.",
+      "Use manufacturer targeting when the entire manufacturer fleet is intended.",
       "Reopen engineering only for new field friction or explicit product changes."
     ]
   },
