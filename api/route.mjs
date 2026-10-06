@@ -5,7 +5,7 @@ const ENDPOINT = 'https://api.heigit.org/openrouteservice/v2/directions/driving-
 const MAX_BODY_BYTES = 4096;
 // Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
 const recent = [];
-function originAllowed(request,origin,allowed) {
+function originAllowed(request,origin) {
   if (ALLOWED_ORIGINS.has(origin)) return true;
   try { return !!origin && new URL(request.url).origin===origin; } catch { return false; }
 }
@@ -18,7 +18,7 @@ function headers(origin,allowed) {
 }
 function json(status,body,origin,allowed) { return new Response(JSON.stringify(body),{status,headers:headers(origin,allowed)}); }
 async function handle(request) {
-  const origin = request.headers.get('origin') || '',allowed=originAllowed(request,origin,allowed);
+  const origin = request.headers.get('origin') || '',allowed=originAllowed(request,origin);
   if (!allowed) return json(403,{ok:false,message:'許可されていない接続元です'},origin,false);
   if (request.method==='OPTIONS') return new Response(null,{status:204,headers:headers(origin,allowed)});
   if (request.method!=='POST') return json(405,{ok:false,message:'POSTで送信してください'},origin,allowed);
