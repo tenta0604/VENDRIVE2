@@ -3,43 +3,46 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "activePhase": "FINAL26_ROUTE_ORIENTATION_READY_FOR_RELEASE_APPROVAL",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.06-FINAL.25",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL25_ROUTE_GUIDANCE_PRODUCTION_VERIFIED",
+  "status": "FINAL26_VALIDATED_AWAITING_PRODUCTION_APPROVAL",
   "currentWork": {
-    "title": "FINAL.25 route guidance display — production released and verified",
-    "releaseStatus": "FINAL.25 is live on GitHub Pages. PR #147 merged to main at c8c5908a576c449b2832f226c622534a0a08ddc1. Vercel production deployment dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G is READY. Live version.json reports 2026.10.06-FINAL.25.",
+    "title": "FINAL.26 route mode/orientation — validated, awaiting production release approval",
+    "releaseStatus": "Production remains FINAL.25. PR #150 is validated on head 9ee560e71f986cb7ab1275b46e9760a4d88d77be and Vercel Preview dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg is READY. No FINAL.26 product code has been merged to main or released.",
     "scope": [
-      "Truck routes render ordinary-road sections in blue and ORS waycategory Highway (motorway/motorway_link) sections in orange.",
-      "Current position uses a direction arrow when heading is known: reported Geolocation heading first, otherwise bearing from meaningful movement; last reliable heading is retained when movement is too small to infer a new direction.",
-      "Displayed GPS motion is interpolated smoothly between fixes. Clearly poor fixes above 100m accuracy do not move the visual marker, while raw runtime GPS state is still preserved for existing route-position handling.",
-      "User-entered vehicle dimensions and gross weight remain per-user data; validation values are not hard-coded.",
-      "Analytics engine, DB/schema, tasks, orders, visits and user data remain unchanged."
+      "Preserve ORS waycategory motorway coloring: motorway/motorway_link sections orange and ordinary sections blue.",
+      "Make route state explicit with 高速区間あり/なし and 有料道路回避中/使用可 so an all-blue route is understandable.",
+      "Clarify that 有料道路を避ける ON makes expressway use unlikely; do not silently change the user's saved routing preference.",
+      "Non-MAP mobile screens are portrait-oriented when browser support allows, with an in-app landscape guard fallback.",
+      "MAP may rotate to landscape and has an app-managed fullscreen mode; native Fullscreen and landscape orientation lock are opportunistic enhancements.",
+      "Analytics engine, DB/schema, tasks, orders, visits, route vehicle settings and user data remain preserved."
     ],
     "verification": {
-      "safetyCheckpoint": "PASS under explicit user-approved one-phase exception: untouched backup branch backup-pre-FINAL25-route-heading-20261006 targets pre-edit main 398d1d9bd93b37092c6e780a0d0fe2445d8168b2. Annotated-tag creation was unavailable through the active write tool path; safety issues #146/#148 were closed after the checkpoint was established.",
-      "syntaxAndNode": "PASS: 13 Node tests on final clean head f3f78564bd985ab264cd9d04b8e868c650ed190a",
-      "edge320px390px": "PASS: Truck route readiness gates run 37478095863, including motorway/ordinary-road colors, heading arrow, smooth GPS animation and poor-accuracy display suppression",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37478095852; all five existing gates passed",
-      "liveProviderWaycategory": "PASS: Vercel Preview dpl_Anx6TNgqJ88QmMxxRqSRb33ueX3X exercised real ORS driving-hgv with extra_info waycategory. Known-good validation route returned 2133m / 181.4s / 46 coordinates / one waycategory span with value 0. Synthetic real-Edge fixture separately verified bit-1 motorway segmentation renders orange.",
-      "smokeCleanup": "PASS: temporary /api/final25-smoke removed; final clean Preview dpl_CBMMKmDEoC7cCdM15j2vFuH8rR6L READY and smoke path returns 404",
-      "productionMerge": "PASS: PR #147 -> c8c5908a576c449b2832f226c622534a0a08ddc1",
-      "productionDeployment": "PASS: dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G READY",
-      "mainPushRegression": "PASS: Browser regression gates run 37478367744",
-      "githubPages": "PASS: pages build/deployment run 37478364850; cache-busted live version.json reports 2026.10.06-FINAL.25 and live page contains 一般道 / 高速道路 legend",
-      "liveRelay": "PASS: production /api/route deployed; unsupported GET returns HTTP 405"
+      "safetyTag": "PASS: annotated tag backup-pre-FINAL26-MAP-ORIENTATION-20261006 targets b51ffe064e22e7096e74324578ff0f88ff9d300d",
+      "actualOrsMotorwayEvidence": "PASS: real Preview driving-hgv Nagoya IC -> Komaki IC returned 27025.3m / 1612s and waycategory [[0,1,3],[1,2,1],[2,63,3],[63,247,0],[247,381,3]]; values 1 and 3 contain the motorway bit",
+      "syntaxAndNode": "PASS: 13/13 tests on FINAL.26 validation head",
+      "edge320px390px": "PASS: Truck route readiness gates run 37483742121",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37483742234; truck-route run also reports all 5 existing gates passed",
+      "orientationAndFullscreen": "PASS in real Edge fixture: non-MAP landscape guard, MAP landscape access, app-managed fullscreen fallback when native requestFullscreen is rejected",
+      "preview": "PASS: dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg READY",
+      "temporaryProviderProbe": "PASS: probe removed before final validation head",
+      "production": "NOT_RELEASED"
     },
     "nextActions": [
-      "Resume AN15 real evidence accumulation and promotion gates; do not promote learned numeric corrections without the existing evidence requirements.",
-      "Treat any later routing or GPS-display issue found in field use as a new scoped maintenance phase."
+      "Obtain explicit production release approval for FINAL.26.",
+      "After approval, synchronize the validated branch with this documentation-only main update without altering validated product files.",
+      "Reconfirm required checks remain green, merge PR #150, verify Vercel production and GitHub Pages live FINAL.26, then close the maintenance phase."
     ]
   },
-  "requiredUserInput": [],
+  "requiredUserInput": [
+    "Explicit production release approval for FINAL.26."
+  ],
   "unresolved": [
+    "FINAL.26 production merge/deployment/live verification remain pending explicit approval.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {
