@@ -65,16 +65,6 @@ test('provider failures and malformed geometry fail closed without car/straight-
     globalThis.fetch=async()=>{throw new Error('provider down');};assert.equal((await POST(request())).status,502);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
-test('warm-instance quota guard caps upstream calls',async()=>{
-  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
-  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
-  try{
-    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
-    assert.equal(response.status,429);assert.ok(calls<=30);
-  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
-});
-
-
 test('highway ON prefers a motorway alternative over a surface optimal route',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
   const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.304],[136.81,35.31]]},properties:{summary:{distance:1600,duration:180},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
@@ -94,5 +84,14 @@ test('highway ON falls back cleanly when provider returns no highway candidate',
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
     const data=await response.json();assert.equal(data.selection,'highway-unavailable');assert.deepEqual(data.route.summary,{distance:1500,duration:170});
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('warm-instance quota guard caps upstream calls',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
+  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
+  try{
+    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
+    assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
