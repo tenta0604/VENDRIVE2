@@ -13,7 +13,7 @@
 ## Canonical project state and chat recovery
 
 - GitHub `main`, not the chat transcript, is the durable source of truth for project continuity.
-- The canonical recovery set is `AGENTS.md`, `.ai/STATE.json`, `AI_ROADMAP.md`, `.ai/LAST_RUN.json`, `.ai/DECISIONS.md`, and `.ai/WORKFLOW.md`.
+- The canonical recovery set is `AGENTS.md`, `.ai/STATE.json`, `.ai/HANDOFF.md`, `AI_ROADMAP.md`, `.ai/LAST_RUN.json`, `.ai/DECISIONS.md`, and `.ai/WORKFLOW.md`.
 - At the start of a new VENDRIVE2 chat, or whenever the user gives a short resume instruction such as `VENDRIVE続き`, fetch the latest `main` first and read the canonical recovery set before deciding what to do next.
 - Do not require the user to paste a long migration prompt, reconstruct progress manually, or summarize the previous chat when repository state can be recovered directly.
 - If the current chat becomes long enough that context loss or migration risk is increasing, proactively recommend moving to a new chat instead of waiting for the user to ask.

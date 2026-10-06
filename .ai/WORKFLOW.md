@@ -7,13 +7,14 @@ When a new chat starts with a short instruction such as `VENDRIVE続き`, do not
 1. Fetch latest `main` and verify its current HEAD.
 2. Read `AGENTS.md` completely, including `Autonomous continuation / hard terminal-state rule`, before taking or reporting any development action.
 3. Read `.ai/STATE.json` completely and validate it as JSON.
-4. Read `AI_ROADMAP.md` completely.
-5. Read `.ai/LAST_RUN.json` completely and validate it as JSON.
-6. Read `.ai/DECISIONS.md` completely.
-7. Read this `.ai/WORKFLOW.md` completely.
-8. Verify that STATE completed/next phase agrees with ROADMAP and that LAST_RUN/DECISIONS do not contradict STATE.
-9. Use STATE current work, required user input, unresolved items, and LAST_RUN next action to resume from the previous work boundary.
-10. Only ask the user for missing context when it cannot be recovered safely from repository evidence or connected tools.
+4. Read `.ai/HANDOFF.md` completely. Treat it as the human-readable migration checkpoint, but never let it override newer `main` evidence.
+5. Read `AI_ROADMAP.md` completely.
+6. Read `.ai/LAST_RUN.json` completely and validate it as JSON.
+7. Read `.ai/DECISIONS.md` completely.
+8. Read this `.ai/WORKFLOW.md` completely.
+9. Verify that STATE completed/next phase agrees with HANDOFF/ROADMAP and that LAST_RUN/DECISIONS do not contradict STATE.
+10. Use STATE current work, HANDOFF durable resume boundary, required user input, unresolved items, and LAST_RUN next action to resume from the previous work boundary.
+11. Only ask the user for missing context when it cannot be recovered safely from repository evidence or connected tools.
 
 The conversation transcript is not authoritative project memory. GitHub `main` plus the canonical files above is. The terminal-state rule in `AGENTS.md` is mandatory in every chat, including a freshly migrated chat.
 
@@ -51,11 +52,12 @@ When the current chat becomes long enough that context loss or migration risk is
 1. Do not wait for the user to request a migration prompt.
 2. Finish or safely stop the current atomic work item at one of the four hard terminal states.
 3. Update `.ai/STATE.json` with current implementation state, active phase, progress, required user input, and unresolved items.
-4. Update `.ai/LAST_RUN.json` with the most recent completed operation and exact next action.
-5. Update `AI_ROADMAP.md` only when development order/status actually changed.
-6. Update `.ai/DECISIONS.md` when a confirmed decision from the chat is not yet durable in GitHub.
-7. Verify all canonical files are internally consistent and on `main`.
-8. Proactively tell the user a new chat is recommended. The user should only need a short resume instruction such as `VENDRIVE続き`.
+4. Update `.ai/HANDOFF.md` with the exact durable resume boundary, completed release state, active branch/PR status if any, and the next safe action. Explicitly mark historical branches/PRs that must not be resumed.
+5. Update `.ai/LAST_RUN.json` with the most recent completed operation and exact next action.
+6. Update `AI_ROADMAP.md` only when development order/status actually changed.
+7. Update `.ai/DECISIONS.md` when a confirmed decision from the chat is not yet durable in GitHub.
+8. Verify all canonical files are internally consistent and on `main`.
+9. Proactively tell the user a new chat is recommended. The user should only need a short resume instruction such as `VENDRIVE続き`.
 
 Do not make the user manually summarize progress or maintain a long migration prompt. The next chat must reload the terminal-state rule from `AGENTS.md`, so continuity does not depend on conversational memory alone.
 

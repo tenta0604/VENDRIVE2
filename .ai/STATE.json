@@ -62,11 +62,14 @@
     "readOrder": [
       "AGENTS.md",
       ".ai/STATE.json",
+      ".ai/HANDOFF.md",
       "AI_ROADMAP.md",
       ".ai/LAST_RUN.json",
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き"
+    "shortResumePrompt": "VENDRIVE続き",
+    "handoffFile": ".ai/HANDOFF.md",
+    "handoffBoundary": "FINAL.32 is production-verified and complete. Do not resume PR #162 or its historical branch; latest synchronized main is authoritative. Resume from STATE.nextPhase unless the user reports new field evidence."
   }
 }
