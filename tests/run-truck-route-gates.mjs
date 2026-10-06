@@ -60,9 +60,10 @@ for(const width of [320,390]){
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
     assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=3);
     assert.ok(await roadPathCount('#2563eb')>=1);assert.ok(await roadPathCount('#dc2626')>=2);
-    await page.evaluate(()=>{var original=window.VENDRIVETruckRouting.routeSections;window.__routeSectionsCurrent=original;window.VENDRIVETruckRouting.routeSections=function(value){return original(value).map(function(section){return {motorway:section.motorway,tollway:section.tollway,coordinates:section.coordinates};});};renderMap();});
-    assert.ok(await roadPathCount('#dc2626')>=2,'legacy section objects without highlight must still render priority spans red');
-    await page.evaluate(()=>{window.VENDRIVETruckRouting.routeSections=window.__routeSectionsCurrent;delete window.__routeSectionsCurrent;renderMap();});
+    await page.evaluate(()=>{var original=window.VENDRIVETruckRouting.routeSections;window.__routeSectionsCurrent=original;window.VENDRIVETruckRouting.routeSections=function(value){return original(value).map(function(section){return {motorway:section.motorway,tollway:section.tollway,coordinates:section.coordinates};});};});
+    await page.locator('#allRoutes').click();assert.ok(await roadPathCount('#dc2626')>=2,'legacy section objects without highlight must still render priority spans red');
+    await page.evaluate(()=>{window.VENDRIVETruckRouting.routeSections=window.__routeSectionsCurrent;delete window.__routeSectionsCurrent;});
+    await page.locator('#allRoutes').click();
     assert.match(await page.locator('#truckRouteSummary').innerText(),/高速区間あり/);assert.match(await page.locator('#truckRouteSummary').innerText(),/有料道路使用可/);
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
     const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
