@@ -9,7 +9,7 @@ const gates = [
   'tests/product-size-prefix-sort-gate.html'
 ];
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, channel: process.env.VENDRIVE_TEST_BROWSER_CHANNEL || undefined });
 const failures = [];
 
 try {
