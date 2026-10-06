@@ -1,5 +1,5 @@
 {
-  "status": "FINAL31_PRODUCTION_VERIFIED",
+  "status": "FINAL32_VALIDATED_READY_FOR_PRODUCTION",
   "scope": "TRUCK_ROUTE_PRODUCTION_FINAL25",
   "baseline": "7e59bae140629fefe1ba96319b8bae169b41d95f",
   "remoteSafetyTag": "backup-pre-TRUCK-ROUTE-20261006",
@@ -8,7 +8,7 @@
   "safetyIssue": 144,
   "branch": "chatgpt/truck-route-20261006",
   "versions": {
-    "app": "2026.10.07-FINAL.31",
+    "app": "2026.10.07-FINAL.32",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
@@ -18,13 +18,13 @@
     "inlineScriptSyntax": "PASS",
     "nodeApiAndClientTests": {
       "status": "PASS",
-      "count": 11
+      "count": 22
     },
-    "realEdge320px390px": "PASS: FINAL.31 run 37536273305",
-    "existingBrowserRegression": "PASS: FINAL.31 run 37536273218",
-    "actualOrsRoute": "PASS: real ORS alternative_routes returned 3 HGV features for Nagoya IC -> Komaki IC; all motorway+tollway",
+    "realEdge320px390px": "PASS: FINAL.32 run 37539563883",
+    "existingBrowserRegression": "PASS: FINAL.32 run 37539563945",
+    "actualOrsRoute": "PASS: production route handler selected expressway-distance-preferred; motorway 16,818m, tollway 16,654m, priority 16,818m, route 27,027.6m / 1,669.1s",
     "deployment": "PASS: production dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm READY",
-    "vercelPreview": "PASS: clean preview dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL READY; temporary smoke path 404",
+    "vercelPreview": "PASS: clean preview dpl_9wcgk6rMFy8NL1QKRxEXGZBFs6Kw READY; temporary smoke path 404",
     "githubPages": "PASS: run 37536654747; live FINAL.31",
     "productionRelay": "PASS: /api/route deployed; unsupported GET 405"
   },
@@ -43,12 +43,12 @@
   ],
   "gateOutput": "✔ vehicle validation rejects missing, zero, nonnumeric and impossible axle values (1.136856ms)\n✔ origin/method/preflight/body gates reject before the upstream request (5.974218ms)\n✔ unconfigured relay has a usable nonsecret error (0.993109ms)\n✔ HGV request uses the new endpoint, lng/lat ordering, exact dimensions and no secret output (6.029897ms)\n✔ provider failures and malformed geometry fail closed without car/straight-line fallback (4.328623ms)\n✔ warm-instance quota guard caps upstream calls (5.188641ms)\n✔ unknown profile opens blank fields and blocks route calls; validation uses explicit converted units (7.12261ms)\n✔ profile save failure stays open and never routes on unpersisted values (0.444892ms)\n✔ route redraw does not call provider and invalidated destinations clear the route (2.227432ms)\n✔ late responses from ended/replaced routes cannot resurrect them (1.72881ms)\n✔ provider error or malformed geometry removes old geometry and supports manual retry (1.945958ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 104.442693\n",
   "requiredInput": [],
-  "nextAction": "Normal field use and AN15 evidence accumulation. If the same route still avoids highways, collect exact endpoints for direct ORS analysis.",
-  "productionChanged": true,
+  "nextAction": "Merge PR #162 and verify production/live FINAL.32.",
+  "productionChanged": false,
   "archivedPatch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
   "archivedPatchSha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9",
   "pullRequest": 145,
-  "validationHead": "9b9341deb58241ce79b698c9e5ea6cb98a9e4224",
+  "validationHead": "75832390bfd0d4c2c5995121dc11597d35e4d524",
   "browserFixes": [
     "Corrected the test selector so the blue route stroke and blue-filled destination marker are counted according to actual Leaflet SVG attributes.",
     "Fixed product UI refresh so a persisted routeVehicle profile is reflected after app reload.",
@@ -233,5 +233,41 @@
     "productionDeployment": "dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm",
     "pagesRun": 37536654747,
     "mainRegressionRun": 37536656828
+  },
+  "final32": {
+    "highwayPreference": {
+      "alternativeRoutes": {
+        "target_count": 3,
+        "share_factor": 0.95,
+        "weight_factor": 2
+      },
+      "rank": "longest eligible priorityMeters, then motorwayMeters, then lower duration/distance",
+      "detourGuard": {
+        "maxTime": "+35%, capped +15 min",
+        "maxDistance": "+50%, capped +20 km"
+      },
+      "providerSmoke": {
+        "deployment": "dpl_3tgBg6LfFmi1ri3Pn4ccWUYbs8ST",
+        "case": "Nagoya IC -> Komaki IC",
+        "selection": "expressway-distance-preferred",
+        "motorway_m": 16818,
+        "tollway_m": 16654,
+        "priority_m": 16818,
+        "distance_m": 27027.6,
+        "duration_s": 1669.1
+      }
+    },
+    "navigation": {
+      "progress": "GPS matched to route; monotonic progress clips already-travelled displayed geometry",
+      "offRoute": "3 consecutive accurate fixes beyond adaptive 60-100m threshold trigger auto recalc; 30s cooldown",
+      "gpsGuard": ">50m accuracy ignored for route progress/reroute",
+      "failureBehavior": "retain old route if automatic reroute fails"
+    },
+    "tests": {
+      "node": "22/22",
+      "truckRouteRun": 37539563883,
+      "regressionRun": 37539563945
+    },
+    "cleanPreview": "dpl_9wcgk6rMFy8NL1QKRxEXGZBFs6Kw"
   }
 }

@@ -357,3 +357,16 @@ This file records confirmed project decisions that must survive chat migration. 
 - Vercel production `dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm` is READY. Main browser regression run 37536656828 and Pages run 37536654747 passed. Live version and routing asset are FINAL.31.
 - Highway ON now means actual candidate preference: motorway > tollway-only > ordinary optimal fallback. If no motorway/toll candidate is returned, do not fabricate a highway route or bypass HGV restrictions.
 - FINAL.31 closes the current highway-selection maintenance scope and returns to AN15 real-evidence accumulation.
+
+## 2026-10-07 — FINAL.32 natural expressway preference and live route progress
+- Highway ON should prefer meaningful expressway usage, not merely the presence of any motorway/toll segment.
+- Rank eligible ORS HGV alternatives by actual priority-road distance first, then motorway distance, then duration/distance. The alternative search uses `target_count=3`, `share_factor=0.95`, `weight_factor=2.0`.
+- Do not select an expressway route just to maximize red line. A candidate is eligible only within +35% travel time capped at +15 minutes and +50% route distance capped at +20 km versus ORS primary.
+- Route progress is display-only state: raw route geometry remains intact internally while the rendered line starts at the nearest accepted progress point. Already-travelled line disappears progressively.
+- Navigation progress must be monotonic; do not jump backwards because of a later GPS fix.
+- GPS fixes worse than 50m accuracy do not change route progress or off-route counters.
+- Auto reroute requires three consecutive accurate fixes beyond the adaptive 60–100m remaining-route threshold, excludes positions within 100m of destination, and has a 30-second cooldown. Recalculation uses the current GPS position and the same HGV/highway setting.
+- If auto reroute fails, keep the previous route visible; never replace it with car routing or straight-line fallback.
+- Real provider evidence through FINAL.32 route handler: Nagoya IC → Komaki IC selected `expressway-distance-preferred` with motorway 16,818m / tollway 16,654m / route 27,027.6m.
+- Safety tag `backup-pre-FINAL32-NAV-PROGRESS-REROUTE-20261006` -> `d059ed2740ead98bd315e7fe7ad41ceb8bc04b17`.
+- PR #162 clean validation head `75832390bfd0d4c2c5995121dc11597d35e4d524` passed 22/22 Node tests, Edge 320/390 run 37539563883 and browser regression run 37539563945. Clean Preview `dpl_9wcgk6rMFy8NL1QKRxEXGZBFs6Kw` is READY; temporary smoke endpoint is removed.

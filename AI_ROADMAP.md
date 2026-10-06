@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.31** (highway ON requests alternative HGV routes and prefers motorway/toll candidates instead of merely allowing highways; FINAL.30 compact MAP toggle and prior routing behavior preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.07-FINAL.32** (distance-aware natural expressway preference, travelled-route line trimming, and sustained off-route automatic rerouting; prior highway toggle/classification/fullscreen behavior preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.31 highway-candidate preference maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
+- Active engineering phase: **FINAL.32 navigation/highway maintenance, validated and ready for production**. The AN15 real-evidence sequence remains next after release verification.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -125,3 +125,7 @@ FINAL.30 exposed the remaining semantic gap: highway ON only allowed expressways
 ## FINAL.31 highway-candidate preference production release (2026-10-07)
 
 FINAL.31 is released and production-verified. Highway ON now requests up to three ORS HGV alternatives and actively prefers motorway evidence, then tollway-only evidence, before using the ordinary optimal fallback. This closes the FINAL.30 semantic gap where highways were merely allowed. Real ORS Preview confirmed alternative-route support, 19/19 Node tests and real Edge 320/390 passed, all existing regressions passed, PR #160 merged, Vercel production is READY, GitHub Pages succeeded, and the live app/routing asset report `2026.10.07-FINAL.31`. If the operator's exact route still stays off expressways, exact endpoints are the next required evidence because the provider did not return a usable highway candidate under the registered HGV restrictions.
+
+## FINAL.32 natural highway + live navigation validation (2026-10-07)
+
+FINAL.31 still treated any motorway-bearing candidate as equivalent, so a short expressway segment could win even when another reasonable candidate used substantially more expressway. FINAL.32 measures actual motorway/toll distance and selects the longest eligible priority-road usage while bounding detours to +35% time (max +15 min) and +50% distance (max +20 km) versus the provider primary route. It also converts route display into live navigation behavior: accurate GPS progress clips already-travelled geometry from the visible line, and three sustained off-route fixes beyond an adaptive 60–100m threshold trigger automatic recalculation with a 30-second cooldown. Poor GPS (>50m accuracy) cannot advance or reroute. 22/22 Node tests, real Edge 320/390 and all five existing regressions pass. A real Preview call through the production route handler selected about 16.8 km of motorway on Nagoya IC → Komaki IC. Production remains FINAL.31 until PR #162 is merged and live-verified.

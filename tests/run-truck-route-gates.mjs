@@ -65,9 +65,13 @@ for(const width of [320,390]){
     await page.locator('#allRoutes').click();assert.ok(await roadPathCount('#dc2626')>=1,'legacy section objects without highlight must still render priority spans red');
     await page.evaluate(()=>{window.VENDRIVETruckRouting.routeSections=window.__routeSectionsCurrent;delete window.__routeSectionsCurrent;});
     await page.locator('#allRoutes').click();
-    assert.match(await page.locator('#truckRouteSummary').innerText(),/有料区間あり/);assert.match(await page.locator('#truckRouteSummary').innerText(),/高速優先ON/);
+    assert.match(await page.locator('#truckRouteSummary').innerText(),/有料 約/);assert.match(await page.locator('#truckRouteSummary').innerText(),/高速優先ON/);
     await page.locator('#mapHighwayToggle').click();await waitText('高速利用OFF');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);assert.equal((await stored()).routeVehicle.avoidTolls,true);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'false');assert.equal(await roadPathCount('#dc2626'),0);assert.ok(await roadPathCount('#2563eb')>=1);
     await page.locator('#mapHighwayToggle').click();await waitText('高速優先ON');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,3);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');assert.ok(await roadPathCount('#dc2626')>=1);
+    const routePathBefore=await page.locator('#map path[stroke="#2563eb"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3,longitude:136.804,accuracy:8,heading:90}}));await page.waitForTimeout(120);
+    const routePathAfter=await page.locator('#map path[stroke="#2563eb"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
+    assert.notEqual(routePathAfter,routePathBefore,'travelled route geometry should disappear from the displayed line');
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
     const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.304,longitude:136.802,accuracy:8,heading:null}}));
@@ -88,6 +92,11 @@ for(const width of [320,390]){
     mode='success';await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');
     await page.locator('#truckRouteVehicleSettings').click();await page.locator('#truckVehicleModal.open').waitFor();assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'4800');
     await page.locator('#truckVehicleCancel').click();assert.ok(await paths()>=2);
+    const beforeAutoReroute=count;
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.36,longitude:136.86,accuracy:8,heading:45}}));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3601,longitude:136.8601,accuracy:8,heading:45}}));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3602,longitude:136.8602,accuracy:8,heading:45}}));
+    await page.waitForTimeout(250);assert.equal(count,beforeAutoReroute+1,'three sustained off-route fixes should trigger one automatic reroute');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);
     // A cancelled in-flight response must never restore a cleared route.
     mode='held';const began=new Promise(resolve=>heldStarted=resolve),done=new Promise(resolve=>heldDone=resolve);
     await page.locator('#truckRouteRecalculate').click();await began;await page.locator('#truckRouteEnd').click();heldResolve();await done;
@@ -107,7 +116,7 @@ for(const width of [320,390]){
     let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
     await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
     assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
-    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','dedicated-tollways-extra-red-segmentation','map-highway-toggle','highway-off-avoidance','highway-on-fastest-mode','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','fullscreen-pin-machine-modal','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
+    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','dedicated-tollways-extra-red-segmentation','map-highway-toggle','highway-off-avoidance','highway-on-longer-expressway-preference','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','fullscreen-pin-machine-modal','heading-arrow','smooth-GPS-animation','travelled-line-disappears','off-route-auto-reroute','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
     console.log(`PASS truck route browser ${width}px`);
   }finally{await context.close();await rm(profile,{recursive:true,force:true});}
 }
