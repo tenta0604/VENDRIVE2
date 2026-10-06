@@ -3,16 +3,16 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "TRUCK_ROUTE_PENDING_BROWSER_VERIFICATION",
+  "activePhase": "TRUCK_ROUTE_READY_FOR_RELEASE_APPROVAL",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.05-FINAL.23",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "truck_route_draft_archived_for_normal_chat_resume",
+  "status": "truck_route_live_provider_verified_awaiting_release_approval",
   "currentWork": {
-    "title": "User-approved 2t truck route display — archived draft, resume in ordinary GPT",
-    "releaseStatus": "Production remains FINAL.23. No truck-route code has been merged or deployed. The user requested continuation in ordinary GPT on 2026-10-06; code and actual verification evidence are archived as inert continuity files on main. This is not a completed product phase.",
+    "title": "User-approved 2t truck route display — live ORS provider verified, awaiting production release approval",
+    "releaseStatus": "Production remains FINAL.23. Draft PR #145 is browser verified and live ORS provider verification passed on a Preview deployment. The final clean validation head is 61e801185fe0d1bc2a60a4b4f157d3e274e713af. No truck-route code has been merged to main or released.",
     "scope": [
       "Internal road-route display with actual vehicle conditions from the first release.",
       "Current location to one chosen vending machine; distance/estimated time, manual recalculation and end; existing external navigation retained.",
@@ -29,25 +29,24 @@
     "verification": {
       "syntax": "PASS",
       "nodeLogicTests": "PASS: 11 tests",
-      "edge320px390px": "BLOCKED locally before page load",
-      "existingBrowserRegression": "NOT_RUN",
-      "actualProviderAndDeployment": "NOT_RUN"
+      "edge320px390px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; Truck route readiness gates run 37470086935",
+      "existingBrowserRegression": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; Browser regression gates run 37470086847",
+      "actualProviderAndDeployment": "PASS: Preview-only ORS_API_KEY present as a Vercel Secret; real driving-hgv route returned LineString geometry for validation-only vehicle profile 5.57m x 1.88m x 2.38m, gross weight 6.095t. The temporary smoke probe was removed; clean preview dpl_HUGbAnovHz6cWEhBVUvGUA5VbW44 is READY and /api/route-smoke returns 404.",
+      "production": "NOT_RELEASED"
     },
     "nextActions": [
-      "Recover AGENTS.md and this archive from latest main in the ordinary GPT chat; no long user relay prompt is needed.",
-      "Do not reimplement the draft from conversation memory. Extract/apply the archived patch against the unchanged production files.",
-      "A validation-branch exception to the NO COMMIT/NO PUSH rule was requested but has not been explicitly granted. Do not invent approval from GitHub account permissions.",
-      "Once that exception is granted, create only a non-production validation branch/draft PR and run the prepared GitHub Actions finite Edge + regression gates to terminal evidence.",
-      "Before activating/releasing, configure a free Standard ORS key sensitively and confirm actual vehicle dimensions/gross weight; then verify actual routes and deployed behavior."
+      "Obtain explicit production release approval.",
+      "After approval, extend ORS_API_KEY from Preview-only to Production without revealing or rotating the secret value.",
+      "Merge draft PR #145 to main only after confirming all required gates remain green.",
+      "Verify the production Vercel deployment and the live GitHub Pages truck-route flow after merge.",
+      "Keep the validation vehicle values as test evidence only; do not hard-code them as application defaults. Each user must enter their own vehicle dimensions and gross weight."
     ]
   },
   "requiredUserInput": [
-    "Explicit exception for a non-production validation-branch commit/push before the pending browser gates (not granted yet).",
-    "Free Standard ORS API key configured as sensitive Vercel ORS_API_KEY; do not expose the key in chat/issues/client code.",
-    "Actual vehicle height, width, length and gross weight; axle load only if known."
+    "Explicit production release approval for the truck-route feature."
   ],
   "unresolved": [
-    "Truck route UI/browser regression, actual provider route and release verification are pending.",
+    "Production ORS_API_KEY target, merge, deployment, and live production verification remain pending approval.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "recovery": {
