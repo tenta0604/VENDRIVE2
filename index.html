@@ -446,7 +446,7 @@ function maintainRestoredState(candidate){
 function finalizeLoadedState(){
   var dayKey='vendrive2_last_day',maintenanceChanged=false;
   try{var last=localStorage.getItem(dayKey),dayChanged=last!==today;if(dayChanged)state.machines.forEach(function(m){m.visited=false;m.skip=null;m.force=null});var planApplied=applySavedManualPlanForToday();if(dayChanged||planApplied){localStorage.setItem(dayKey,today);persist()}}catch(e){console.error('VENDRIVE2 day reset failed',e)}
-  ensureMakerColors();migrateCoordinates();var historyChanged=cleanupHistory(),taskHistoryChanged=cleanupTaskHistory(),taskCompletionChanged=false;(state.tasks||[]).forEach(function(task){if(completeParentTaskIfDone(task))taskCompletionChanged=true});maintenanceChanged=historyChanged||taskHistoryChanged||taskCompletionChanged;if(maintenanceChanged)persist();
+  ensureMakerColors();migrateCoordinates();var historyChanged=cleanupHistory(),taskHistoryChanged=cleanupTaskHistory(),taskCompletionChanged=false;(state.tasks||[]).forEach(function(task){if(completeParentTaskIfDone(task))taskCompletionChanged=true});maintenanceChanged=historyChanged||taskHistoryChanged||taskCompletionChanged;if(maintenanceChanged)persist();truckRouting.refreshVehicle();
 }
 function recoverIndexedDb(done){
   if(!window.indexedDB){done(false);return}
