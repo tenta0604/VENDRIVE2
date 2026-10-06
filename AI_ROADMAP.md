@@ -4,7 +4,7 @@
 
 - Visible app baseline: **2026.10.05-FINAL.23** (field workflow simplified; tasks support arbitrary multi-machine selection targets plus manufacturer targeting and configurable percentage auto-completion; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **User-approved truck-route draft, pending browser verification**. Production remains FINAL.23; the draft is archived for continuation in ordinary GPT. The intelligence promotion sequence remains unchanged.
+- Active engineering phase: **User-approved truck-route draft, browser verified and pending activation inputs**. Draft PR #145 passed real Edge 320px/390px plus existing regression gates; production remains FINAL.23 and unmerged. The intelligence promotion sequence remains unchanged.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -80,4 +80,4 @@ Current work and blockers live in `.ai/STATE.json`; the most recent completed op
 
 ## Pending user-approved truck-route work (2026-10-06)
 
-Internal route geometry with actual 2t vehicle dimensions/weight was approved by the user. The working implementation and 11 passing Node tests are archived under `.ai/pending/`. Real Edge and regression verification could not run in the prior Work execution environment. This is not a released FINAL.24 or a completed intelligence phase. Resume from `.ai/STATE.json` and the archived patch/evidence in ordinary GPT; do not make the user relay local files or reconstruct prior code. The previously requested validation-branch gate exception remains ungranted, and activation requires a free Standard ORS key plus actual vehicle facts.
+Internal route geometry with actual 2t vehicle dimensions/weight was approved by the user. The archived implementation was restored on validation branch `chatgpt/truck-route-20261006`; draft PR #145 passed the real Edge 320px/390px route gates and all existing browser regressions after one harness correction and one persisted-profile UI refresh fix. This is still not a released FINAL.24 or a completed intelligence phase. Production remains FINAL.23. Activation now requires a free Standard ORS key plus actual vehicle facts, followed by an actual provider-route preview test and explicit production merge/release approval.

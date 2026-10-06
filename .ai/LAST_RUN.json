@@ -1,12 +1,15 @@
 {
-  "evidenceVersion": 19,
-  "runType": "truck_route_normal_chat_handoff",
-  "phase": "CONTINUITY_ONLY_TRUCK_ROUTE_ARCHIVE",
-  "status": "CONTINUITY_PASS_PRODUCT_PENDING",
+  "evidenceVersion": 20,
+  "runType": "truck_route_validation_branch_browser_gates",
+  "phase": "TRUCK_ROUTE_PENDING_ACTIVATION_INPUTS",
+  "status": "VALIDATION_PASS_PRODUCT_NOT_RELEASED",
   "base": {
-    "preEditHead": "7e59bae140629fefe1ba96319b8bae169b41d95f",
-    "productionSafetyTagRequired": false,
-    "reason": "Only canonical documentation and inert pending-patch/evidence files change; no runtime/production code changes."
+    "productionMain": "0697f7d0c306b5aa34caddc8396eba6838a1df37",
+    "safetyTag": "backup-pre-TRUCK-ROUTE-20261006",
+    "safetyTagTarget": "7e59bae140629fefe1ba96319b8bae169b41d95f",
+    "validationBranch": "chatgpt/truck-route-20261006",
+    "validationPullRequest": 145,
+    "validationHead": "b5568ff405f3407358b878fcc121f34271d66628"
   },
   "versions": {
     "app": "2026.10.05-FINAL.23",
@@ -15,49 +18,37 @@
     "schema": 4
   },
   "work": {
-    "summary": "Archived the unverified truck-route implementation and actual test evidence for the user-requested ordinary-GPT continuation. Kept production FINAL.23 and completed/next intelligence phase unchanged.",
-    "productStatus": "NOT_RELEASED_NOT_COMPLETE",
-    "archive": {
-      "patch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
-      "evidence": ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
-      "specification": ".ai/pending/TRUCK_ROUTING.md",
-      "baseSha": "7e59bae140629fefe1ba96319b8bae169b41d95f",
-      "sha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9"
-    }
+    "summary": "Restored the archived 2t truck-route implementation onto a non-production validation branch, opened draft PR #145, corrected one browser-harness selector defect, fixed stored truck-profile UI refresh after reload, and obtained terminal passing real-Edge plus existing-regression evidence. Production main remains unchanged.",
+    "productStatus": "BROWSER_VERIFIED_NOT_RELEASED",
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/145"
   },
   "gates": {
-    "synchronizedCleanMainPreflight": "PASS",
-    "jsonSyntax": "PASS",
-    "archiveAppliesToUnchangedProductionBaseline": "PASS",
-    "runtimeProductionFilesChanged": "NONE",
-    "versionsAndCompletedNextPhasePreserved": "PASS",
-    "canonicalConsistency": "PASS",
-    "diffCheck": "PASS",
-    "browserForDocumentationOnly": {
-      "status": "NOT_REQUIRED",
-      "reason": "This commit contains no runtime UI or data changes; pending product browser gates remain unresolved and are explicitly recorded."
-    },
-    "deploymentLiveProductVerification": {
-      "status": "NOT_REQUIRED",
-      "reason": "Documentation/archive handoff only; no product release or activation is performed."
-    }
+    "safetyTag": "PASS",
+    "archivedPatchRestored": "PASS",
+    "syntaxAndNodeTests": "PASS: 11 tests",
+    "realEdge320px": "PASS: Edge 154.0.4258.62, run 37462241766",
+    "realEdge390px": "PASS: Edge 154.0.4258.62, run 37462241766",
+    "truckRouteBrowserBehavior": "PASS: blank profile blocking, unit conversion, road geometry, GPS marker-only updates, rerender persistence, manual recalculation, quota/malformed errors, late-response cancellation, missing destination, persistence, external navigation, no horizontal overflow, no page errors",
+    "existingFiveBrowserRegressions": "PASS: run 37462241766; dedicated run 37462241873 also PASS",
+    "vercelPreviewStatus": "PASS for validation head; actual ORS route not exercised because activation inputs are absent",
+    "actualOrsRoute": "NOT_RUN",
+    "productionMerge": "NONE",
+    "productionDeployment": "NONE"
   },
   "openItems": [
-    "Explicit exception for a non-production validation-branch commit/push before the pending browser gates (not granted yet).",
-    "Free Standard ORS API key configured as sensitive Vercel ORS_API_KEY; do not expose the key in chat/issues/client code.",
-    "Actual vehicle height, width, length and gross weight; axle load only if known."
+    "Free Standard ORS key configured sensitively as Vercel ORS_API_KEY.",
+    "Actual vehicle height, width, length and gross weight; optional axle load.",
+    "Explicit production merge/release approval after live-provider preview verification."
   ],
-  "nextAction": "In ordinary GPT, recover latest main and .ai/pending/TRUCK_ROUTE_20261006.patch plus the evidence. Continue pending validation only within the documented authorization boundary.",
+  "nextAction": "Obtain the ORS key and actual vehicle facts, run an actual HGV provider route through the non-production preview, then request production merge/release approval if that live-provider gate passes.",
   "unresolved": [
-    "Truck route UI/browser regression, actual provider route and release verification are pending.",
+    "Actual ORS provider route and production release remain pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "changedFiles": [
-    ".ai/DECISIONS.md",
-    ".ai/LAST_RUN.json",
     ".ai/STATE.json",
-    ".ai/pending/.gitattributes",
-    ".ai/pending/TRUCK_ROUTE_20261006.patch",
+    ".ai/LAST_RUN.json",
+    ".ai/DECISIONS.md",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
     ".ai/pending/TRUCK_ROUTING.md",
     "AI_ROADMAP.md"

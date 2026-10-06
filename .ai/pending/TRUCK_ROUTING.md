@@ -23,11 +23,11 @@ The user approved internal road-route display with 2t vehicle conditions from th
 4. Existing five browser regressions (task selection/thresholds, tomorrow-plan/UI simplification, product master/maker/size sorting).
 5. Before activation/release only: configured free Standard ORS key, an explicitly confirmed real vehicle profile, actual provider route test, deployment terminal evidence, and live app/API verification.
 
-Local gates 1–2 passed. Gates 3–4 are blocked because both Edge binaries exit with SIGSEGV in the current execution environment, while agent-browser cannot bind its daemon socket (`Operation not permitted`). `.github/workflows/truck-route-gates.yml` is prepared to run these checks in GitHub Actions once an explicit exception permits saving unverified changes to a non-production validation branch. This does not authorize merge or production deployment.
+Local gates 1–2 passed. After the user granted a validation-branch exception, draft PR #145 ran the prepared GitHub Actions gates. Real Microsoft Edge 154.0.4258.62 passed the 320px and 390px truck-route checks, and all five existing browser regression gates passed in run `37462241766`; dedicated regression run `37462241873` also passed. One harness selector was corrected, and one real product defect was fixed so a persisted truck profile refreshes its UI summary after reload. Gates 3–4 are therefore complete. This still does not authorize merge or production deployment.
 
 ## Activation inputs and cost boundary
 
-- Create/use a free Standard key at https://account.heigit.org/ and configure `ORS_API_KEY` as a sensitive Vercel environment variable. Do not place it in client files, Git history, issues or chat.
+- Create/use a free Standard key at https://account.heigit.org/ and configure `ORS_API_KEY` as a sensitive Vercel environment variable. Do not place it in client files, Git history, issues or chat. This is now the next activation blocker before an actual provider-route preview test.
 - Confirm real vehicle height/width/length and gross weight; optional axle load remains unknown if unavailable.
 - This change does not purchase a plan, create paid resources, or silently upgrade an account. ORS imposes its free provider quota; the extra warm-instance 30/minute limiter is not a global distributed abuse limiter. Origin allowlisting is CORS/origin checking, not user authentication.
 - Existing Vercel hosting terms/plan suitability still require assessment before business deployment; no claim of unconditional free business hosting is made.
