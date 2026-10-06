@@ -277,3 +277,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Main push browser regression run 37487130052 passed.
 - Vercel production deployment `dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N` is READY for the merge SHA.
 - Live GitHub Pages still returned FINAL.25 at the first post-merge check, so FINAL.26 is not considered fully closed until Pages reports FINAL.26 and the new UI is visible.
+
+## 2026-10-06 — FINAL.26 production release complete
+- User explicitly approved production release.
+- PR #150 merged at `efd6ab30c6ac4937ff2cec482cbac450127ee75f` after latest-main integration head `991957c85f63948ae3a1ca4bb8975419bce0126a` passed truck-route run 37486967621 and browser regression run 37486967417.
+- Main push browser regression run 37487130052 passed.
+- Vercel production deployment `dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N` is READY. The later documentation deployment `dpl_3fEQkdY4Hacr6LKzeDk4ypv7UV3z` is also READY with unchanged runtime code.
+- GitHub Pages run 37487664235 completed successfully and the live version endpoint reports `2026.10.06-FINAL.26`.
+- Live page verification confirms the portrait guard, MAP-only landscape guidance, ⛶ full-screen control, general/highway color legend, route footnote and toll-avoidance explanation are present.
+- FINAL.26 closes the current routing/orientation maintenance phase. Return to AN15 real-evidence accumulation unless new field evidence opens another bounded maintenance scope.

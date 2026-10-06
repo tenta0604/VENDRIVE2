@@ -3,48 +3,42 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL26_PRODUCTION_PAGES_PENDING",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.06-FINAL.26",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL26_MERGED_VERCEL_READY_PAGES_PENDING",
+  "status": "FINAL26_ROUTE_ORIENTATION_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.26 route mode/orientation — merged, Pages propagation pending",
-    "releaseStatus": "PR #150 merged to main at efd6ab30c6ac4937ff2cec482cbac450127ee75f. Vercel production dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N is READY and main push browser regression run 37487130052 passed. GitHub Pages still served FINAL.25 at the latest live check, so release is not yet declared complete.",
+    "title": "FINAL.26 route mode/orientation — production released and verified",
+    "releaseStatus": "FINAL.26 is live. PR #150 merged to main at efd6ab30c6ac4937ff2cec482cbac450127ee75f. Vercel production dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N is READY. GitHub Pages deployment run 37487664235 succeeded from main 3b587e9993ff12c4e8947d9e36da87cd006845a6, and the live version endpoint reports 2026.10.06-FINAL.26.",
     "scope": [
-      "Preserve ORS waycategory motorway coloring: motorway/motorway_link sections orange and ordinary sections blue.",
-      "Make route state explicit with 高速区間あり/なし and 有料道路回避中/使用可 so an all-blue route is understandable.",
-      "Clarify that 有料道路を避ける ON makes expressway use unlikely; do not silently change the user's saved routing preference.",
-      "Non-MAP mobile screens are portrait-oriented when browser support allows, with an in-app landscape guard fallback.",
-      "MAP may rotate to landscape and has an app-managed fullscreen mode; native Fullscreen and landscape orientation lock are opportunistic enhancements.",
-      "Analytics engine, DB/schema, tasks, orders, visits, route vehicle settings and user data remain preserved."
+      "ORS motorway classification remains deterministic from waycategory bit 1; motorway/motorway_link sections render orange and ordinary road sections blue.",
+      "Route status explicitly shows whether the returned route contains a motorway section and whether toll avoidance is active.",
+      "The vehicle settings explain that toll avoidance ON tends to avoid expressways; the user's saved preference is not silently changed.",
+      "Non-MAP mobile screens are portrait-first with Screen Orientation lock when supported and an in-app landscape guard fallback.",
+      "MAP is landscape-capable and provides an app-managed full-viewport button, using native Fullscreen and landscape lock opportunistically when supported.",
+      "Analytics engine, DB/schema, tasks, orders, visits, route vehicle settings and user data remain unchanged."
     ],
     "verification": {
-      "safetyTag": "PASS: annotated tag backup-pre-FINAL26-MAP-ORIENTATION-20261006 targets b51ffe064e22e7096e74324578ff0f88ff9d300d",
-      "actualOrsMotorwayEvidence": "PASS: real Preview driving-hgv Nagoya IC -> Komaki IC returned 27025.3m / 1612s and waycategory [[0,1,3],[1,2,1],[2,63,3],[63,247,0],[247,381,3]]; values 1 and 3 contain the motorway bit",
-      "syntaxAndNode": "PASS: 13/13 tests on FINAL.26 validation head",
-      "edge320px390px": "PASS: Truck route readiness gates run 37483742121",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37483742234; truck-route run also reports all 5 existing gates passed",
-      "orientationAndFullscreen": "PASS in real Edge fixture: non-MAP landscape guard, MAP landscape access, app-managed fullscreen fallback when native requestFullscreen is rejected",
-      "preview": "PASS: dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg READY",
-      "temporaryProviderProbe": "PASS: probe removed before final validation head",
-      "production": "NOT_RELEASED",
+      "safetyTag": "PASS: annotated tag backup-pre-FINAL26-MAP-ORIENTATION-20261006 -> b51ffe064e22e7096e74324578ff0f88ff9d300d",
+      "actualOrsMotorwayEvidence": "PASS: real Preview driving-hgv Nagoya IC -> Komaki IC returned 27025.3m / 1612s and waycategory [[0,1,3],[1,2,1],[2,63,3],[63,247,0],[247,381,3]]; values 1 and 3 include the motorway bit",
+      "finalPrEdgeAndRegression": "PASS: integration head 991957c85f63948ae3a1ca4bb8975419bce0126a; truck-route run 37486967621 and browser regression run 37486967417",
       "productionMerge": "PASS: PR #150 -> efd6ab30c6ac4937ff2cec482cbac450127ee75f",
-      "productionVercel": "PASS: dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N READY",
       "mainPushRegression": "PASS: Browser regression gates run 37487130052",
-      "githubPages": "PENDING: latest live version check still returned 2026.10.06-FINAL.25"
+      "productionVercel": "PASS: dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N READY; later documentation deployment dpl_3fEQkdY4Hacr6LKzeDk4ypv7UV3z also READY with the same runtime code",
+      "githubPages": "PASS: pages build/deployment run 37487664235 completed success; live version.json reports 2026.10.06-FINAL.26",
+      "liveUi": "PASS: live page contains portrait guard text, MAP-only landscape guidance, ⛶ fullscreen control, ordinary/highway legend, FINAL.26 route footnote, and toll-avoidance clarification",
+      "liveRelay": "PASS: production /api/route remains deployed; unsupported GET returns HTTP 405"
     },
     "nextActions": [
-      "Wait for GitHub Pages to build the latest main and verify live version.json reports 2026.10.06-FINAL.26.",
-      "Verify live page contains the FINAL.26 fullscreen button, toll-avoidance clarification, and portrait guard markup.",
-      "Then close FINAL.26 and return to AN15 real evidence accumulation."
+      "Resume AN15 real evidence accumulation and promotion gates; do not promote learned numeric corrections without the established evidence requirements.",
+      "Treat any later motorway-color, orientation, fullscreen, or GPS-display issue found in field use as a new scoped maintenance phase."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "GitHub Pages propagation to FINAL.26 is pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {
