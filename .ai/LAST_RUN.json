@@ -1,54 +1,54 @@
 {
-  "evidenceVersion": 24,
-  "runType": "final25_route_guidance_production_release",
-  "phase": "FINAL25_ROUTE_GUIDANCE_PRODUCTION_VERIFIED",
-  "status": "PASS",
+  "evidenceVersion": 25,
+  "runType": "final26_route_orientation_validation",
+  "phase": "FINAL26_ROUTE_ORIENTATION_READY_FOR_RELEASE_APPROVAL",
+  "status": "VALIDATION_PASS_AWAITING_PRODUCTION_APPROVAL",
   "base": {
-    "productionMainBefore": "398d1d9bd93b37092c6e780a0d0fe2445d8168b2",
-    "safetyCheckpointType": "USER_APPROVED_BACKUP_BRANCH_EXCEPTION",
-    "safetyCheckpointBranch": "backup-pre-FINAL25-route-heading-20261006",
-    "safetyCheckpointTarget": "398d1d9bd93b37092c6e780a0d0fe2445d8168b2",
-    "pullRequest": 147,
-    "releaseHead": "f3f78564bd985ab264cd9d04b8e868c650ed190a",
-    "productionMerge": "c8c5908a576c449b2832f226c622534a0a08ddc1"
+    "productionMainBefore": "b51ffe064e22e7096e74324578ff0f88ff9d300d",
+    "safetyTag": "backup-pre-FINAL26-MAP-ORIENTATION-20261006",
+    "safetyTagObject": "064e185fde8049cebd3fa289d0781fb3633be03a",
+    "safetyTagTarget": "b51ffe064e22e7096e74324578ff0f88ff9d300d",
+    "pullRequest": 150,
+    "validationHead": "9ee560e71f986cb7ab1275b46e9760a4d88d77be"
   },
   "versions": {
     "app": "2026.10.06-FINAL.25",
+    "candidateApp": "2026.10.06-FINAL.26",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Released FINAL.25 map-guidance improvements: ORS waycategory motorway/motorway_link sections are orange while ordinary sections remain blue; current position shows heading with GPS-heading preference and movement-bearing fallback; marker and follow-map motion are smoothed; >100m-accuracy fixes do not visually jump the marker. Real ORS waycategory retrieval, final real Edge at 320/390, existing regressions, Vercel production and GitHub Pages were all verified.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/147",
-    "productionDeployment": "dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G"
+    "summary": "Investigated the report that motorway segments were not changing color. A real ORS driving-hgv Preview call between Nagoya IC and Komaki IC returned waycategory values containing motorway bit 1, confirming the color classifier is correct. FINAL.26 therefore preserves the classifier but makes route status and toll-avoidance state explicit, and adds portrait-only behavior for non-MAP mobile screens plus landscape/fullscreen MAP behavior with browser-compatible fallbacks.",
+    "productStatus": "VALIDATED_NOT_RELEASED",
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/150",
+    "previewDeployment": "dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg"
   },
   "gates": {
-    "safetyCheckpoint": "PASS: explicit user-approved backup-branch exception at 398d1d9bd93b37092c6e780a0d0fe2445d8168b2",
+    "safetyTag": "PASS: annotated immutable tag at pre-edit main",
+    "actualOrsMotorway": "PASS: Nagoya IC -> Komaki IC; 27025.3m / 1612s; waycategory values 3,1,3,0,3 include motorway bit",
     "nodeTests": "PASS: 13/13",
-    "finalRealEdge320px390px": "PASS: run 37478095863",
-    "finalExistingBrowserRegressions": "PASS: run 37478095852, 5/5",
-    "routeColorSegmentation": "PASS: ORS waycategory bit 1 -> orange; non-motorway -> blue; real Edge fixture exercised both",
-    "headingArrow": "PASS: reported heading and movement-bearing fallback tested",
-    "smoothGpsDisplay": "PASS: intermediate animation state, settled state and >100m poor-fix display suppression tested in real Edge",
-    "actualOrsWaycategory": "PASS: real driving-hgv Preview route; 2133m / 181.4s / 46 coordinates / waycategory value 0",
-    "temporarySmokeProbeCleanup": "PASS: removed; final clean preview returns 404 for probe path",
-    "productionMerge": "PASS: PR #147 -> c8c5908a576c449b2832f226c622534a0a08ddc1",
-    "productionVercel": "PASS: dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G READY",
-    "mainPushBrowserRegression": "PASS: run 37478367744",
-    "githubPages": "PASS: pages deployment run 37478364850; live FINAL.25 and route legend present",
-    "liveRelay": "PASS: /api/route deployed; unsupported GET returns 405"
+    "realEdge320px390px": "PASS: run 37483742121",
+    "existingFiveBrowserRegressions": "PASS: run 37483742234 and included 5/5 in truck-route gate",
+    "routeStatusClarity": "PASS: 高速区間あり/なし and 有料道路回避中/使用可 assertions",
+    "portraitNonMap": "PASS: mobile landscape guard fixture",
+    "landscapeMapFullscreen": "PASS: MAP landscape plus app-managed fullscreen fallback fixture",
+    "preview": "PASS: dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg READY",
+    "productionMerge": "NONE",
+    "productionDeployment": "NONE"
   },
-  "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. Keep FINAL.25 stable unless real field evidence identifies a concrete issue.",
+  "openItems": [
+    "Explicit production release approval for FINAL.26.",
+    "After approval, sync branch with documentation-only main change, merge PR #150, and verify production Vercel + live GitHub Pages."
+  ],
+  "nextAction": "Wait for explicit production release approval. Do not merge PR #150 before approval.",
   "unresolved": [
+    "FINAL.26 production release remains pending explicit approval.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
-    ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
     "AI_ROADMAP.md",
     ".ai/DECISIONS.md"
   ]
