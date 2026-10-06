@@ -1,0 +1,54 @@
+name: Truck route readiness gates
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'truck-routing.js'
+      - 'api/route.mjs'
+      - 'tests/*truck-route*'
+      - '.github/workflows/truck-route-gates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  truck-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Route syntax and logic checks
+        run: |
+          node --check truck-routing.js
+          node --check api/route.mjs
+          node --check tests/run-truck-route-gates.mjs
+          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs
+          git diff --check
+      - name: Install isolated browser test dependencies
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install msedge
+          curl --fail --retry 2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.js -o /tmp/leaflet.js
+          curl --fail --retry 2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.css -o /tmp/leaflet.css
+      - name: Start local fixture server
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/vendrive-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8000/version.json >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/vendrive-http.log
+          exit 1
+      - name: Real Edge route UI and existing regression
+        env:
+          VENDRIVE_EDGE_PATH: /opt/microsoft/msedge/msedge
+          VENDRIVE_TEST_BASE_URL: http://127.0.0.1:8000
+          VENDRIVE_TEST_LEAFLET_JS: /tmp/leaflet.js
+          VENDRIVE_TEST_LEAFLET_CSS: /tmp/leaflet.css
+          VENDRIVE_TEST_BROWSER_CHANNEL: msedge
+        run: |
+          node tests/run-truck-route-gates.mjs
+          node tests/run-browser-gates.mjs
+
