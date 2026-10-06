@@ -4,9 +4,9 @@ export async function GET() {
   if (process.env.VERCEL_ENV !== 'preview') return Response.json({ok:false,message:'preview only'},{status:404});
   const origin='https://final25-smoke.local';
   const payload={
-    origin:{lat:35.3045,lng:136.7930},
-    destination:{lat:35.1709,lng:136.8815},
-    vehicle:{height:2.38,width:1.88,length:5.57,weight:6.095,avoidTolls:false}
+    origin:{lat:35.3000,lng:136.8000},
+    destination:{lat:35.3100,lng:136.8100},
+    vehicle:{height:2.38,width:1.88,length:5.57,weight:6.095,avoidTolls:true}
   };
   const response=await POST(new Request(origin+'/api/route',{
     method:'POST',
