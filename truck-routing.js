@@ -102,7 +102,7 @@
     var doc=app.document,el=function(id){return doc.getElementById(id);};
     function draw(){if(destination&&app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();return;}app.draw(active,destination,progress);}
     function cancel(){sequence++;if(controller)controller.abort();controller=null;busy=false;}
-    function end(){cancel();destination=null;active=null;progress=null;offRouteHits=0;draw();el('truckRoutePanel').classList.add('hidden');}
+    function end(){cancel();destination=null;active=null;progress=null;offRouteHits=0;lastAutoRerouteAt=0;draw();el('truckRoutePanel').classList.add('hidden');}
     function panel(message){
       el('truckRoutePanel').classList.remove('hidden');
       el('truckRouteTitle').textContent=destination?destination.name||'自販機への経路':'トラック経路';
