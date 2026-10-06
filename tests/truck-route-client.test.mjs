@@ -6,12 +6,12 @@ const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3
 const target={id:'T1',name:'Test',lat:35.31,lng:136.81};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function harness(initial=vehicle){
-  let profile=initial,drawn=null,calls=0,saveOK=true,current=true,fetchImpl=async()=>Response.json({ok:true,route});
+  let profile=initial,drawn=null,drawProgress=null,calls=0,saveOK=true,current=true,fetchImpl=async()=>Response.json({ok:true,route});
   const nodes=new Map(),node=id=>{if(!nodes.has(id))nodes.set(id,{value:'',textContent:'',checked:false,disabled:false,classList:{hidden:true,add(){this.hidden=true;},remove(){this.hidden=false;}}});return nodes.get(id);};
   const getNode=node;const domNode=id=>{const result=getNode(id);if(!result.nativeValue){let value=String(result.value);Object.defineProperty(result,'value',{get(){return value;},set(next){value=String(next);},configurable:true});result.nativeValue=true;}return result;};
   const modals=new Set();
-  const client=routing.createClient({document:{getElementById:domNode},endpoint:'https://relay.test/api/route',geolocation:null,getPosition:()=>({lat:35.3,lng:136.8,accuracy:8,updatedAt:Date.now()}),getVehicle:()=>profile,saveVehicle:value=>{if(!saveOK)return false;profile=value;return true;},openModal:id=>modals.add(id),closeModal:id=>modals.delete(id),toast(){},showMap:()=>true,draw:value=>drawn=value,fit(){},external(){},isDestinationCurrent:()=>current,fetch:async(...args)=>{calls++;return fetchImpl(...args);}});
-  client.init();return {client,node:domNode,modals,get profile(){return profile;},get drawn(){return drawn;},get calls(){return calls;},setFetch(fn){fetchImpl=fn;},setSave(value){saveOK=value;},setCurrent(value){current=value;}};
+  const client=routing.createClient({document:{getElementById:domNode},endpoint:'https://relay.test/api/route',geolocation:null,getPosition:()=>({lat:35.3,lng:136.8,accuracy:8,updatedAt:Date.now()}),getVehicle:()=>profile,saveVehicle:value=>{if(!saveOK)return false;profile=value;return true;},openModal:id=>modals.add(id),closeModal:id=>modals.delete(id),toast(){},showMap:()=>true,draw:(value,target,progress)=>{drawn=value;drawProgress=progress;},fit(){},external(){},isDestinationCurrent:()=>current,fetch:async(...args)=>{calls++;return fetchImpl(...args);}});
+  client.init();return {client,node:domNode,modals,get profile(){return profile;},get drawn(){return drawn;},get drawProgress(){return drawProgress;},get calls(){return calls;},setFetch(fn){fetchImpl=fn;},setSave(value){saveOK=value;},setCurrent(value){current=value;}};
 }
 test('unknown profile opens blank fields and blocks route calls; validation uses explicit converted units',async()=>{
   const h=harness(null);h.client.start(target);assert.ok(h.modals.has('truckVehicleModal'));assert.equal(h.node('truckVehicle_weight').value,'');assert.equal(h.calls,0);
@@ -93,7 +93,7 @@ test('navigation progress redraws remaining line and sustained off-route fixes t
   let now=Date.now(),drawProgress=null,fetchOrigin=null;
   const h=harness();h.setFetch(async(url,options)=>{fetchOrigin=JSON.parse(options.body).origin;return Response.json({ok:true,route});});
   h.client.start(target);await tick();assert.equal(h.calls,1);
-  h.client.onPosition({lat:35.303,lng:136.805,accuracy:8,updatedAt:now});assert.ok(h.drawn); 
+  h.client.onPosition({lat:35.303,lng:136.805,accuracy:8,updatedAt:now});assert.ok(h.drawn);assert.ok(h.drawProgress&&h.drawProgress.edge>=1); 
   h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,updatedAt:now+1000});
   h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,updatedAt:now+2000});
   h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,updatedAt:now+3000});await tick();
