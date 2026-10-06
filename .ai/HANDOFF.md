@@ -105,6 +105,26 @@ On a fresh chat:
 6. If the user instead reports a fresh field issue, open a new bounded maintenance scope with a new immutable pre-edit safety tag before production-code edits.
 7. Continue under the hard terminal-state rule from `AGENTS.md`.
 
+## 2026-10-07 AN15 evidence-gate audit
+
+After recovering latest main and entering `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`, a repository-only reachability audit found a post-FINAL.21 continuity problem:
+
+- `ocr-config.js` still loads AN15A-G and `an15-lifecycle-integration.js`.
+- The lifecycle snapshot hook wraps the public `VENDRIVE2Analytics.analysis.sales.listForecasts()` call.
+- The shipped `index.html` no longer contains an `analysisPage` element or the `帳票撮影` entry point, so the former user-facing trigger is unreachable.
+- Normal recommendation/planning functions call the closure-level `listSalesForecasts()` inside `analytics.js`, bypassing the lifecycle wrapper.
+- Confirmed-sales scoring also depends on the withdrawn report-confirmation path.
+- The normal JSON backup contains core state and `vendrive2_last_day`, not the AN15 forecast/context localStorage ledgers.
+
+Therefore FINAL.32 remains complete, but AN15 promotion is now **HUMAN_REQUIRED** rather than something that will progress merely by normal use. Do not silently restore OCR/Analysis and do not weaken exact/no-lookahead interval matching just to manufacture samples.
+
+The required product decision is one of:
+
+1. keep AN15 learned numeric promotion paused for now; or
+2. authorize a bounded design/implementation for a lower-friction real sales-outcome/evidence capture path.
+
+Any production-code implementation after that decision must start from latest main and create a new immutable annotated safety tag.
+
 ## User-facing migration note
 
 A long migration prompt is optional. The repository is prepared so the shortest safe resume instruction is:

@@ -9,53 +9,45 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL32_NAV_PROGRESS_REROUTE_PRODUCTION_VERIFIED",
+  "status": "AN15_EVIDENCE_ACCUMULATION_HUMAN_DECISION_REQUIRED",
   "currentWork": {
-    "title": "FINAL.32 natural highway preference + live navigation — production released and verified",
-    "releaseStatus": "FINAL.32 is live. PR #162 merged to main at 2188bee148f3c6e93b817dd0fe1b5acccb366f2f. Vercel production dpl_AprtKGD6qT8f573vrGTYwhXGtfx1 is READY. Main browser regression run 37539937999 and GitHub Pages run 37539936859 passed. Live version.json and public truck-routing.js report FINAL.32.",
+    "title": "AN15 real evidence accumulation gate — normal-field evidence path audit",
+    "releaseStatus": "FINAL.32 remains complete and production-verified. AN15 numeric promotion remains disabled. Repository audit on 2026-10-07 found that after FINAL.21 withdrew the user-facing Analysis/OCR surfaces, the current normal UI no longer reaches the AN15 forecast-ledger snapshot trigger or a supported confirmed-sales outcome path.",
     "rootCause": [
-      "FINAL.31 considered any motorway-bearing candidate sufficient, so it could choose a route with only a short expressway segment.",
-      "The route display did not track navigation progress, so completed geometry remained visible.",
-      "Sustained route deviation did not automatically request a replacement HGV route."
+      "an15-lifecycle-integration.js snapshots forecasts by wrapping the public VENDRIVE2Analytics.analysis.sales.listForecasts() API.",
+      "The current index.html has no analysisPage DOM and no 帳票撮影 entry point after FINAL.21; its retained Analysis JavaScript is unreachable from the shipped UI.",
+      "Normal internal recommendation/planning code calls the analytics.js closure-level listSalesForecasts() directly, so it bypasses the AN15 public-API wrapper.",
+      "AN15 scoring requires a newly confirmed sales report whose exact previousClearAt -> observedAt interval matches the stored forecast asOf -> targetAt interval. The user-facing report-confirmation path is withdrawn.",
+      "The legacy JSON backup exports core state plus vendrive2_last_day only; AN15 forecast/context localStorage ledgers are not included."
     ],
     "scope": [
-      "Highway ON ranks eligible HGV alternatives by actual motorway/toll distance while applying bounded detour limits.",
-      "Alternative search uses target_count=3, share_factor=0.95 and weight_factor=2.0.",
-      "Expressway candidates are rejected if they exceed +35% time capped at +15 minutes or +50% distance capped at +20 km versus the provider primary.",
-      "Route summary exposes approximate highway/toll distance.",
-      "Accurate GPS progress removes already-travelled geometry from the displayed line while preserving the full raw route internally.",
-      "Three consecutive accurate off-route fixes beyond the adaptive 60–100m threshold trigger automatic HGV recalculation from current GPS with a 30-second cooldown.",
-      "GPS accuracy worse than 50m does not advance progress or trigger rerouting.",
-      "Auto-reroute failure retains the previous route.",
-      "FINAL.31 highway toggle, FINAL.29 classification/colors, fullscreen PIN behavior, HGV dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain preserved."
+      "No FINAL.32 gate was rerun because no FINAL.32 precondition changed.",
+      "No production code was changed in this audit.",
+      "No learned numeric correction was promoted.",
+      "Do not silently restore OCR/Analysis or weaken exact interval matching merely to increase sample count.",
+      "The next engineering action depends on a product decision about how real sales outcomes should be captured with acceptable field-work friction."
     ],
     "verification": {
-      "safetyTag": "PASS: backup-pre-FINAL32-NAV-PROGRESS-REROUTE-20261006 -> d059ed2740ead98bd315e7fe7ad41ceb8bc04b17",
-      "nodeTests": "PASS: 22/22",
-      "finalEdge320px390px": "PASS: Truck route readiness gates run 37539563883",
-      "travelledLine": "PASS: real Edge route geometry changes as accepted GPS progress advances",
-      "autoReroute": "PASS: real Edge sustained off-route sequence triggers one automatic route request",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37539563945",
-      "longerExpresswaySelection": "PASS: materially longer expressway usage wins inside the bounded detour; excessive detours are rejected",
-      "actualProviderRoute": "PASS: Preview route handler selected expressway-distance-preferred for Nagoya IC -> Komaki IC with motorway 16,818m / tollway 16,654m / route 27,027.6m / 1,669.1s",
-      "providerSafety": "PASS: additional public validation cases with no valid HGV route returned 422 instead of unsafe fallback",
-      "smokeCleanup": "PASS: temporary diagnostic endpoint removed; clean Preview dpl_9wcgk6rMFy8NL1QKRxEXGZBFs6Kw READY and smoke path 404",
-      "productionMerge": "PASS: PR #162 -> 2188bee148f3c6e93b817dd0fe1b5acccb366f2f",
-      "productionVercel": "PASS: dpl_AprtKGD6qT8f573vrGTYwhXGtfx1 READY",
-      "mainPushRegression": "PASS: Browser regression gates run 37539937999",
-      "githubPages": "PASS: pages build/deployment run 37539936859",
-      "liveVersion": "PASS: 2026.10.07-FINAL.32",
-      "liveRoutingAsset": "PASS: public truck-routing.js?v=2026.10.07-FINAL.32 serves FINAL.32; main runtime includes remainingRouteSections + sustained off-route auto-reroute logic",
-      "liveUi": "PASS: public app includes natural longer-highway preference wording",
-      "productionRelay": "PASS: /api/route deployed; unsupported GET returns HTTP 405"
+      "canonicalRecovery": "PASS: latest main 25b36b06d84967b9e63e017b880653df4d401de0 and canonical recovery set read in required order",
+      "final32Boundary": "PASS: FINAL.32 remains production-verified; PR #162 and historical branch are not resume sources",
+      "an15RuntimeLoad": "PASS: ocr-config.js dynamically loads AN15A-G and an15-lifecycle-integration.js",
+      "withdrawnAnalysisUi": "PASS: current index.html contains no analysisPage element",
+      "withdrawnCaptureEntry": "PASS: current index.html contains no 帳票撮影 entry point",
+      "snapshotReachability": "BLOCKED: shipped normal UI has no public analysis.sales.listForecasts() call path; internal forecast consumers bypass the lifecycle wrapper",
+      "outcomeReachability": "BLOCKED: user-facing confirmed-sales report capture is withdrawn",
+      "backupCoverage": "OBSERVED: legacy JSON backup does not include AN15 localStorage ledger/context keys"
     },
     "nextActions": [
-      "Resume AN15 real evidence accumulation and promotion gates."
+      "Human product decision required: keep AN15 learning paused, or authorize a low-friction real sales-outcome/evidence capture path that does not silently restore the withdrawn OCR/Analysis workflow.",
+      "If a new evidence path is authorized, treat it as a bounded AN15 maintenance scope, re-fetch latest main, create a new immutable annotated safety tag before production-code edits, preserve exact/no-lookahead rules, and add finite gates for evidence creation and backup durability."
     ]
   },
-  "requiredUserInput": [],
+  "requiredUserInput": [
+    "Choose the AN15 evidence strategy: (A) keep learned numeric promotion paused for now, or (B) authorize design/implementation of a low-friction real sales-outcome capture path. Do not re-enable the withdrawn OCR/Analysis UI by assumption."
+  ],
   "unresolved": [
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied.",
+    "Under the current shipped UI, new AN15 exact forecast/outcome evidence does not accumulate through normal field use; promotion cannot proceed until the evidence-input strategy is explicitly decided."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

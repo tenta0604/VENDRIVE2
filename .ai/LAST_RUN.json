@@ -1,16 +1,11 @@
 {
-  "evidenceVersion": 37,
-  "runType": "final32_nav_progress_reroute_production_release",
-  "phase": "FINAL32_NAV_PROGRESS_REROUTE_PRODUCTION_VERIFIED",
-  "status": "PASS",
+  "evidenceVersion": 38,
+  "runType": "an15_real_evidence_accumulation_preflight_audit",
+  "phase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "status": "HUMAN_REQUIRED",
   "base": {
-    "productionMainBefore": "d059ed2740ead98bd315e7fe7ad41ceb8bc04b17",
-    "safetyTag": "backup-pre-FINAL32-NAV-PROGRESS-REROUTE-20261006",
-    "safetyTagObject": "c5b183d90613235990c2ad7321e8952565e35d58",
-    "safetyTagTarget": "d059ed2740ead98bd315e7fe7ad41ceb8bc04b17",
-    "pullRequest": 162,
-    "finalValidationHead": "75832390bfd0d4c2c5995121dc11597d35e4d524",
-    "productionMerge": "2188bee148f3c6e93b817dd0fe1b5acccb366f2f"
+    "productionMainBefore": "25b36b06d84967b9e63e017b880653df4d401de0",
+    "safetyTag": "NOT_REQUIRED: repository audit / canonical documentation only; no production code changed"
   },
   "versions": {
     "app": "2026.10.07-FINAL.32",
@@ -19,43 +14,33 @@
     "schema": 4
   },
   "work": {
-    "summary": "Released FINAL.32: natural expressway preference ranks real motorway/toll distance within bounded detours, travelled route geometry disappears as GPS progress advances, and sustained accurate off-route movement automatically recalculates an HGV route while retaining the old route if rerouting fails.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/162",
-    "productionDeployment": "dpl_AprtKGD6qT8f573vrGTYwhXGtfx1",
-    "pagesRun": 37539936859
+    "summary": "Recovered latest main and audited whether AN15 real evidence can accumulate under the current post-FINAL.21 field workflow. The AN15 modules still load, but the shipped normal UI no longer reaches the forecast-ledger snapshot trigger or a user-facing confirmed-sales outcome path. No FINAL.32 gates were rerun and no numeric learning was promoted.",
+    "productStatus": "HUMAN_REQUIRED",
+    "productionCodeChanged": false
   },
   "gates": {
-    "safetyTag": "PASS",
-    "nodeTests": "PASS: 22/22",
-    "finalRealEdge320px390px": "PASS: run 37539563883",
-    "longerExpresswayDistancePreference": "PASS",
-    "excessiveDetourGuard": "PASS",
-    "travelledLineDisappears": "PASS",
-    "offRouteAutoReroute": "PASS",
-    "poorAccuracyNavigationGuard": "PASS",
-    "actualProviderExpresswayDistance": "PASS: motorway 16818m / tollway 16654m / route 27027.6m",
-    "providerUnsafeCases": "PASS: fail closed 422",
-    "finalExistingBrowserRegressions": "PASS: run 37539563945",
-    "temporarySmokeProbeCleanup": "PASS",
-    "productionMerge": "PASS: PR #162 -> 2188bee148f3c6e93b817dd0fe1b5acccb366f2f",
-    "productionVercel": "PASS: dpl_AprtKGD6qT8f573vrGTYwhXGtfx1 READY",
-    "mainPushBrowserRegression": "PASS: run 37539937999",
-    "githubPages": "PASS: run 37539936859",
-    "liveVersion": "PASS: FINAL.32",
-    "liveRoutingAsset": "PASS: FINAL.32 / route progress",
-    "liveRelay": "PASS: 405 on unsupported GET"
+    "canonicalRecovery": "PASS: required seven-file recovery set read from immutable main baseline",
+    "final32Precondition": "PASS: unchanged; prior FINAL.32 gates not rerun",
+    "an15RuntimeLoad": "PASS: AN15 scripts are dynamically loaded by ocr-config.js",
+    "withdrawnAnalysisUi": "PASS: no analysisPage DOM in shipped index.html",
+    "withdrawnCaptureEntry": "PASS: no 帳票撮影 entry point in shipped index.html",
+    "snapshotReachability": "HUMAN_REQUIRED: normal shipped UI does not call the wrapped public analysis.sales.listForecasts(); internal forecast consumers bypass it",
+    "confirmedOutcomeReachability": "HUMAN_REQUIRED: user-facing confirmed-sales report input was withdrawn in FINAL.21",
+    "backupDurability": "OBSERVED: current legacy JSON backup omits AN15 localStorage ledger/context keys"
   },
-  "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE.",
+  "openItems": [
+    "Decide whether AN15 learned numeric promotion should remain paused or whether to authorize a low-friction real sales-outcome/evidence capture path.",
+    "Do not silently restore OCR/Analysis and do not weaken exact interval/no-lookahead rules solely to increase sample count."
+  ],
+  "nextAction": "User product decision: keep AN15 promotion paused, or authorize a bounded low-friction evidence-capture maintenance scope.",
   "unresolved": [
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
+    "Historical Analytics is preserved; user-facing Analysis/OCR remains withdrawn.",
+    "AN15 real evidence cannot currently accumulate through normal shipped field use, so promotion remains disabled."
   ],
   "changedFiles": [
     ".ai/STATE.json",
+    ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
-    ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
+    "AI_ROADMAP.md"
   ]
 }
