@@ -1,0 +1,553 @@
+diff --git a/.github/workflows/truck-route-gates.yml b/.github/workflows/truck-route-gates.yml
+new file mode 100644
+index 0000000..ddb6776
+--- /dev/null
++++ b/.github/workflows/truck-route-gates.yml
+@@ -0,0 +1,53 @@
++name: Truck route readiness gates
++on:
++  pull_request:
++    paths:
++      - 'index.html'
++      - 'truck-routing.js'
++      - 'api/route.mjs'
++      - 'tests/*truck-route*'
++      - '.github/workflows/truck-route-gates.yml'
++  workflow_dispatch:
++permissions:
++  contents: read
++jobs:
++  truck-route:
++    runs-on: ubuntu-latest
++    timeout-minutes: 12
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: '22'
++      - name: Route syntax and logic checks
++        run: |
++          node --check truck-routing.js
++          node --check api/route.mjs
++          node --check tests/run-truck-route-gates.mjs
++          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs
++          git diff --check
++      - name: Install isolated browser test dependencies
++        run: |
++          npm install --no-save --ignore-scripts playwright@1.55.0
++          npx playwright install msedge
++          curl --fail --retry 2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.js -o /tmp/leaflet.js
++          curl --fail --retry 2 https://unpkg.com/leaflet@1.9.4/dist/leaflet.css -o /tmp/leaflet.css
++      - name: Start local fixture server
++        run: |
++          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/vendrive-http.log 2>&1 &
++          for i in {1..30}; do
++            if curl -fsS http://127.0.0.1:8000/version.json >/dev/null; then exit 0; fi
++            sleep 1
++          done
++          cat /tmp/vendrive-http.log
++          exit 1
++      - name: Real Edge route UI and existing regression
++        env:
++          VENDRIVE_EDGE_PATH: /opt/microsoft/msedge/msedge
++          VENDRIVE_TEST_BASE_URL: http://127.0.0.1:8000
++          VENDRIVE_TEST_LEAFLET_JS: /tmp/leaflet.js
++          VENDRIVE_TEST_LEAFLET_CSS: /tmp/leaflet.css
++          VENDRIVE_TEST_BROWSER_CHANNEL: msedge
++        run: |
++          node tests/run-truck-route-gates.mjs
++          node tests/run-browser-gates.mjs
+diff --git a/api/route.mjs b/api/route.mjs
+new file mode 100644
+index 0000000..7688276
+--- /dev/null
++++ b/api/route.mjs
+@@ -0,0 +1,56 @@
++import routing from '../truck-routing.js';
++
++const ALLOWED_ORIGINS = new Set(['https://tenta0604.github.io','http://localhost:8000','http://127.0.0.1:8000']);
++const ENDPOINT = 'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson';
++const MAX_BODY_BYTES = 4096;
++// Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
++const recent = [];
++function headers(origin) {
++  const result = {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Vary':'Origin','X-Content-Type-Options':'nosniff'};
++  if (ALLOWED_ORIGINS.has(origin)) result['Access-Control-Allow-Origin']=origin;
++  result['Access-Control-Allow-Methods']='POST, OPTIONS';
++  result['Access-Control-Allow-Headers']='Content-Type, Accept';
++  return result;
++}
++function json(status,body,origin) { return new Response(JSON.stringify(body),{status,headers:headers(origin)}); }
++async function handle(request) {
++  const origin = request.headers.get('origin') || '';
++  if (!ALLOWED_ORIGINS.has(origin)) return json(403,{ok:false,message:'許可されていない接続元です'},origin);
++  if (request.method==='OPTIONS') return new Response(null,{status:204,headers:headers(origin)});
++  if (request.method!=='POST') return json(405,{ok:false,message:'POSTで送信してください'},origin);
++  if (Number(request.headers.get('content-length')||0)>MAX_BODY_BYTES) return json(413,{ok:false,message:'リクエストが大きすぎます'},origin);
++  let body;
++  try {
++    const reader=request.body?.getReader();if(!reader)throw new Error('empty');
++    let size=0;const chunks=[];
++    while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>MAX_BODY_BYTES){await reader.cancel();return json(413,{ok:false,message:'リクエストが大きすぎます'},origin);}chunks.push(value);}
++    body=JSON.parse(Buffer.concat(chunks).toString('utf8'));
++  } catch { return json(400,{ok:false,message:'入力を確認してください'},origin); }
++  if (!routing.point(body?.origin)||!routing.point(body?.destination)) return json(400,{ok:false,message:'現在地・自販機の位置を確認してください'},origin);
++  let vehicle;
++  try { vehicle=routing.vehicle(body.vehicle); } catch(error) { return json(400,{ok:false,message:error.message},origin); }
++  const key=process.env.ORS_API_KEY?.trim();
++  if (!key) return json(503,{ok:false,message:'経路サービスの準備がまだ完了していません。外部ナビを利用できます'},origin);
++  const now=Date.now();while(recent.length&&recent[0]<=now-60000)recent.shift();
++  if (recent.length>=30) return json(429,{ok:false,message:'経路の取得回数が多いため、1分後に再計算してください'},origin);
++  recent.push(now);
++  const restrictions={height:vehicle.height,width:vehicle.width,length:vehicle.length,weight:vehicle.weight};
++  if (vehicle.axleload!==undefined)restrictions.axleload=vehicle.axleload;
++  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
++  try {
++    const response=await fetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},signal:controller.signal,body:JSON.stringify({coordinates:[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],instructions:false,options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','tollways']:['ferries'],profile_params:{restrictions}}})});
++    if (!response.ok) {
++      if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin);
++      if(response.status===401||response.status===403)return json(503,{ok:false,message:'経路サービスの認証を確認する必要があります'},origin);
++      if(response.status===400||response.status===404)return json(422,{ok:false,message:'車両条件に合う経路が見つかりません。位置と車両設定を確認してください'},origin);
++      return json(502,{ok:false,message:'経路サービスに接続できません。時間をおいて再計算してください'},origin);
++    }
++    const data=await response.json(),feature=data?.features?.[0];
++    const route=routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary});
++    return json(200,{ok:true,profile:'driving-hgv',route,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin);
++  } catch {
++    return json(502,{ok:false,message:controller.signal.aborted?'経路サービスがタイムアウトしました':'経路を取得できませんでした'},origin);
++  } finally { clearTimeout(timer); }
++}
++export async function POST(request) { return handle(request); }
++export async function OPTIONS(request) { return handle(request); }
+diff --git a/index.html b/index.html
+index ea9caa6..83bd7f5 100644
+--- a/index.html
++++ b/index.html
+@@ -77,7 +77,9 @@ html,body{overscroll-behavior-y:none;touch-action:pan-y}body{-webkit-user-select
+ <style>
+ .machineMapPin.outOfPlan{opacity:1}.machineMapPin.outOfPlan .machineMapPinBody{opacity:.26}.machineMapPinOutOfPlanMark{position:absolute;z-index:3;left:50%;top:22px;transform:translate(-50%,-50%) rotate(var(--fan-counter-angle,0deg));color:#fff;font-size:16px;font-weight:950;line-height:1;text-shadow:0 1px 3px #000d;pointer-events:none;opacity:.95}.machineMapPinCenterMark{display:block;transform:rotate(calc(45deg + var(--fan-counter-angle,0deg)));color:#fff;font-size:15px;font-weight:950;line-height:1;text-shadow:0 1px 2px #0007;pointer-events:none}
+ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{overflow:hidden;overscroll-behavior:contain}.sheet{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+-</style><link rel="stylesheet" href="analytics.css">
++</style><link rel="stylesheet" href="analytics.css"><style>
++.truckRoutePanel{margin:10px 0;padding:12px;border:1px solid #bfdbfe;border-radius:12px;background:#eff6ff}.truckRoutePanel b{display:block;font-size:13px;overflow-wrap:anywhere}.truckRoutePanel .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.truckRoutePanel .actions button{flex:1 1 80px;padding:10px 8px;font-size:11px}.truckVehicleGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.truckVehicleGrid input{min-width:0;width:100%;box-sizing:border-box}.truckVehicleGrid label{display:block;font-size:12px;margin-bottom:5px}.truckRouteFootnote{font-size:11px;line-height:1.6;margin-top:7px;color:#475569;overflow-wrap:anywhere}
++</style>
+ <link rel="stylesheet" href="ops10a-stocktake.css">
+ </head>
+ <body>
+@@ -110,6 +112,8 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
+ <div class="row"><div><div class="ey">MAP</div><div class="title">マップ</div><div class="subtitle">実際の地図・現在地・自販機位置を管理</div></div>
+ <div style="display:flex;gap:6px;align-items:center"><button class="secondary pill" id="officeAddTop">＋営業所</button><button class="pill" id="allRoutes">全ルート</button></div></div>
+ <div class="days" id="mapDays"></div><div class="search mapSearch"><span class="searchIcon">⌕</span><input id="addressSearch" placeholder="住所・施設名・緯度経度を検索" enterkeyhint="search"><button class="mapSearchButton" id="addressSearchButton" type="button">検索</button></div><div id="addressResults" class="results hidden"></div><div class="mapSearchAttribution">検索データ © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></div>
++<div class="section"><div class="sectionhead"><b>2tトラック車両</b><button class="pill" id="truckVehicleSettings">車両設定</button></div><div class="muted" id="truckVehicleSummary"></div></div>
++<div class="truckRoutePanel hidden" id="truckRoutePanel" role="status"><b id="truckRouteTitle"></b><div id="truckRouteSummary" style="font-size:12px;margin-top:5px"></div><div class="actions"><button class="primary" id="truckRouteRecalculate">再計算</button><button class="secondary" id="truckRouteOverview">全体表示</button><button class="secondary" id="truckRouteVehicleSettings">車両設定</button><button class="secondary" id="truckRouteExternal">外部ナビ</button><button class="secondary" id="truckRouteEnd">終了</button></div><div class="truckRouteFootnote">登録した寸法・重量を考慮した候補経路です。未登録の規制や現地状況は反映されないため、道路標識を優先してください。外部ナビは車両条件を引き継ぎません。<br>経路 © <a href="https://openrouteservice.org" target="_blank" rel="noreferrer">openrouteservice</a> / <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></div></div>
+ <div class="map" id="map"><div class="maptag" id="mapTag"></div>
+ <div class="mapTools"><button id="locateMe" title="現在地">⌖</button><button id="zoomIn">＋</button><button id="zoomOut">−</button><button id="mapFollowLocation" type="button" aria-pressed="false" title="現在位置追尾：OFF" aria-label="現在位置追尾：OFF">▷</button></div>
+ <div class="mapCrosshair hidden" id="mapCrosshair" aria-hidden="true"></div><div class="mapPositionBar hidden" id="mapPositionBar"><button class="secondary" id="mapPositionCancel" type="button">キャンセル</button><button class="primary" id="mapPositionConfirm" type="button">この位置に設定</button></div>
+@@ -176,7 +180,7 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
+ <div class="actions">
+   <button class="secondary" id="skipMachine">訪問スキップ</button>
+   <button class="secondary" id="forceMachine">臨時訪問</button>
+-  <button class="primary" id="machineRoute">経路</button>
++  <button class="primary" id="machineRoute">経路を表示</button><button class="secondary" id="machineExternalNav">外部ナビ</button>
+ </div>
+ <div id="machineExtra" class="hidden">
+   <div class="formGroup"><label>自販機名</label><input id="mName"></div><div class="formGroup"><label>メーカー</label><select id="mMaker"></select><input id="mMakerCustom" class="hidden" style="margin-top:7px" placeholder="メーカー名を入力"></div>
+@@ -247,9 +251,15 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
+ </div></div><div class="modal" id="restDaysModal"><div class="sheet"><div class="modalTop"><div><div class="ey">REST DAYS</div><div class="title">休み設定</div></div><button class="pill" id="closeRestDays">閉じる</button></div><div class="formGroup"><label>休み曜日</label><div class="dayPicker" id="restDaysPicker"><button type="button" data-day="月">月</button><button type="button" data-day="火">火</button><button type="button" data-day="水">水</button><button type="button" data-day="木">木</button><button type="button" data-day="金">金</button><button type="button" data-day="土">土</button><button type="button" data-day="日">日</button></div></div><div class="actions"><button class="secondary" id="cancelRestDays">キャンセル</button><button class="primary" id="saveRestDays">保存</button></div></div></div><div class="modal" id="visitPeriodsModal"><div class="sheet"><div class="modalTop"><div><div class="ey">VISIT PERIODS</div><div class="title">臨時期間設定</div></div><button class="pill" id="closeVisitPeriods">閉じる</button></div><div id="visitPeriodsList"></div><div class="formGroup"><label>期間名</label><input id="visitPeriodName" placeholder="例：夏期"></div><div class="timeConditionFields"><input id="visitPeriodStart" type="text" placeholder="開始 07-01" inputmode="numeric"><input id="visitPeriodEnd" type="text" placeholder="終了 09-30" inputmode="numeric"></div><div class="actions"><button class="secondary" id="cancelVisitPeriod">キャンセル</button><button class="primary" id="saveVisitPeriod">保存</button></div></div></div><div class="modal" id="temporaryCycleModal"><div class="sheet"><div class="modalTop"><div><div class="ey">TEMPORARY CYCLE</div><div class="title">臨時訪問周期を編集</div></div><button class="pill" id="closeTemporaryCycle">閉じる</button></div><div class="formGroup"><label>訪問周期</label><select id="temporaryCycleCycle"><option>毎日</option><option>週N回</option><option>1週間に1回</option><option>2週間に1回</option><option>3週間に1回</option><option>1ヶ月に1回</option></select></div><div class="formGroup" id="temporaryCycleDaysFields"><label>訪問曜日（複数可）</label><div class="dayPicker" id="temporaryCycleDaysPicker"><button type="button" data-day="月">月</button><button type="button" data-day="火">火</button><button type="button" data-day="水">水</button><button type="button" data-day="木">木</button><button type="button" data-day="金">金</button><button type="button" data-day="土">土</button><button type="button" data-day="日">日</button></div></div><div class="formGroup hidden" id="temporaryCycleWeeklyFields"><label>週何回</label><select id="temporaryCycleWeeklyCount" aria-label="週何回"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select></div><div class="actions"><button class="secondary" id="cancelTemporaryCycle">キャンセル</button><button class="primary" id="saveTemporaryCycle">保存</button></div></div></div><div class="modal" id="temporaryPeriodSelectModal"><div class="sheet"><div class="modalTop"><div><div class="ey">TEMPORARY PERIOD</div><div class="title">臨時期間を選択</div></div><button class="pill" id="closeTemporaryPeriodSelect">閉じる</button></div><div id="temporaryPeriodSelectList"></div><div class="actions"><button class="secondary" id="cancelTemporaryPeriodSelect">キャンセル</button></div></div></div><div class="modal" id="makerModal"><div class="sheet"><div class="modalTop"><div><div class="ey">MAKERS</div><div class="title">メーカー設定</div></div><button class="pill" id="closeMaker">閉じる</button></div>
+ <div id="makerSettingsHome"><div class="section"><div class="sectionhead"><b>使用メーカー</b></div><div id="makerList"></div></div><button class="primary" id="openMakerAdd" style="width:100%;margin-top:6px">＋メーカー追加</button></div>
+ <div id="makerEditor" class="makerEditor hidden"><div class="ey">MAKER</div><div class="makerEditorTitle" id="makerEditorTitle">メーカーを追加</div><div class="formGroup"><label>標準プリセット</label><select id="makerPreset"></select></div><div class="formGroup"><label>メーカー名</label><input id="makerName" placeholder="例：サントリー"></div><div class="formGroup"><label>表示</label><select id="makerVisibility"><option value="visible">表示</option><option value="hidden">非表示</option></select></div><div class="formGroup"><label>色</label><div id="makerColorChoices" class="colorChoices"></div><div class="colorSelected" id="makerColorSelected"></div><label class="colorPickerButton">その他の色を選ぶ<input id="makerColor" type="color" value="#2563eb" aria-label="その他の色を選ぶ"></label><div class="formHint" id="makerColorWarning"></div></div><div class="actions"><button class="secondary" id="cancelMakerEdit">キャンセル</button><button class="primary" id="saveMaker">保存</button></div><button class="dangerButton makerDeleteAction hidden" id="deleteMakerAction" style="width:100%;margin-top:10px">このメーカーを削除</button></div>
+-</div></div><div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
++</div></div><div class="modal" id="truckVehicleModal"><div class="sheet"><div class="modalTop"><div><div class="ey">TRUCK VEHICLE</div><div class="title">2tトラック車両設定</div></div><button class="pill" id="truckVehicleClose">閉じる</button></div>
++<div class="notice" style="margin:12px 0">車検証などで確認した実車の値を入力してください。「2t」は積載量の区分です。総重量には車両・荷物を含む車両総重量を使います。</div>
++<div class="truckVehicleGrid"><div><label for="truckVehicle_height">全高（cm）</label><input id="truckVehicle_height" inputmode="decimal" type="number" min="50" max="600" step="any"></div><div><label for="truckVehicle_width">全幅（cm）</label><input id="truckVehicle_width" inputmode="decimal" type="number" min="50" max="400" step="any"></div><div><label for="truckVehicle_length">全長（cm）</label><input id="truckVehicle_length" inputmode="decimal" type="number" min="100" max="3000" step="any"></div><div><label for="truckVehicle_weight">車両総重量（kg）</label><input id="truckVehicle_weight" inputmode="decimal" type="number" min="500" max="60000" step="any"></div><div><label for="truckVehicle_axleload">最大軸重（kg・任意）</label><input id="truckVehicle_axleload" inputmode="decimal" type="number" min="1" max="60000" step="any"></div></div>
++<div class="formHint">軸重が不明なら空欄にしてください。空欄の場合、軸重制限は計算に反映されません。</div><label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:12px"><input id="truckVehicleAvoidTolls" type="checkbox" style="width:auto">有料道路を避ける</label>
++<div id="truckVehicleError" role="alert" style="color:#b91c1c;font-size:12px;margin-top:8px"></div><div class="actions"><button class="secondary" id="truckVehicleCancel">キャンセル</button><button class="primary" id="truckVehicleSave">保存</button></div></div></div>
++<div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
+ 
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
++<script src="truck-routing.js?v=2026.10.06-TRUCK-ROUTE"></script>
+ <script>
+ (function(){
+ "use strict";
+@@ -260,6 +270,15 @@ var key='vendrive2_v7_data';
+ var state={machines:[],offices:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
+ var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null, routeLayer=null, currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,editingVisitPeriodId=null,latestUndoTransaction=null,undoTimer=null,mapPositionMode=null,reverseGeocodeToken=0,machineMapMarkers=[],machinePinFanFrame=null,mapFollowCurrentPosition=false,newTemporaryCycles=[],editingTemporaryCycles=[],editingTemporaryCycleContext=null,addressSearchSequence=0,addressSearchInFlight=false,addressSearchActiveQuery="",addressSearchLastRequestAt=0,addressSearchAbortController=null,lockedPageScrollY=null,runtimeCurrentPosition=null,currentPositionWatchId=null,todayPositionRenderTimer=null,lastTodayPositionRenderAt=0,currentLocationAddress="",currentLocationStatus="loading",currentLocationReverseLat=null,currentLocationReverseLng=null,currentLocationReverseAt=0,currentLocationReverseSequence=0,weatherCache={},weatherRequestSequence=0,weatherInFlightKey="",activeWeatherPointKey="",tomorrowWeatherRequestSequence=0,tomorrowWeatherActivePointKey="",tomorrowWeatherInFlightKey="",editingTask=null,editingTaskTargetIds=[],editingTaskResetIds={},selectedTaskCreateMachineIds=[],mapInitialCenterPending=true,mapInitialCenterConsumed=false,machineSortMode=false,machineSortDraft=[],machineSortDragSession=null;
+ 
++var truckRouting=window.VENDRIVETruckRouting.createClient({
++ document:document,geolocation:navigator.geolocation,endpoint:'https://vendrive2-ocr-relay.vercel.app/api/route',fetch:function(url,options){return fetch(url,options)},
++ getVehicle:function(){return state.routeVehicle},saveVehicle:function(vehicle){var previous=state.routeVehicle;state.routeVehicle=vehicle;persist();try{var saved=JSON.parse(localStorage.getItem(key));if(saved&&JSON.stringify(saved.routeVehicle)===JSON.stringify(vehicle))return true}catch(e){}if(previous===undefined)delete state.routeVehicle;else state.routeVehicle=previous;return false},getPosition:function(){return runtimeCurrentPosition},updatePosition:updateRuntimeCurrentPosition,isDestinationCurrent:function(target){var machine=state.machines.find(function(m){return m.id===target.id});return !!machine&&machine.lat===target.lat&&machine.lng===target.lng},
++ openModal:openModal,closeModal:closeModal,toast:toast,external:navigateToMachine,
++ showMap:function(){closeModal('machineModal');var tab=document.querySelector('.tabs button[data-page="mapPage"]');if(tab)tab.click();ensureMap();if(!leafletMap)return false;mapInitialCenterPending=false;leafletMap.invalidateSize({pan:false});return true},
++ draw:function(route,target){if(!routeLayer)return;routeLayer.clearLayers();if(!route||!target)return;L.geoJSON({type:'Feature',geometry:route.geometry,properties:{}},{style:{color:'#2563eb',weight:6,opacity:0.9},interactive:false}).addTo(routeLayer);L.circleMarker([target.lat,target.lng],{radius:9,color:'#fff',weight:3,fillColor:'#2563eb',fillOpacity:1}).bindTooltip(esc(target.name||'目的地'),{direction:'top'}).addTo(routeLayer)},
++ fit:function(route,target){if(!leafletMap)return;var points=route.geometry.coordinates.map(function(c){return [c[1],c[0]]});points.push([target.lat,target.lng]);leafletMap.fitBounds(L.latLngBounds(points),{padding:[35,35],maxZoom:17})}
++});
++truckRouting.init();
+ function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+ function diff(a,b){return Math.floor((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000)}
+ function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]})}
+@@ -369,7 +388,7 @@ function applyBackupRestore(){
+       try{restoreStorageValue(key,previousRaw);restoreStorageValue(key+'_version',previousVersion);restoreStorageValue('vendrive2_last_day',previousLastDay)}catch(rollbackError){}
+       toast('バックアップの復元に失敗しました');return;
+     }
+-    clearLatestUndo();selectedMachine=null;selectedOrderMachine=null;pendingBackupRestore=null;persist();closeModal('restoreBackupModal');$id('restoreBackupFile').value='';renderAll();toast('バックアップを復元しました');
++    truckRouting.end();truckRouting.refreshVehicle();clearLatestUndo();selectedMachine=null;selectedOrderMachine=null;pendingBackupRestore=null;persist();closeModal('restoreBackupModal');$id('restoreBackupFile').value='';renderAll();toast('バックアップを復元しました');
+   });
+ }
+ function persist(){
+@@ -704,7 +723,8 @@ function todayMapDayCandidates(){return state.machines.filter(function(machine){
+ function mapMachinesForMode(mode){if(mode==='all')return state.machines.slice();if(mode==='tomorrow'){var td=tomorrowDate(),tt=iso(td),plan=state.tomorrowPlan&&state.tomorrowPlan.date===tt?state.tomorrowPlan:null,ids=plan?plan.ids:state.machines.filter(eligibleTomorrow).map(function(m){return m.id});return state.machines.filter(function(m){return ids.indexOf(m.id)>=0})}if(mode==='today')return todayActualTargets();return state.machines.filter(function(machine){return machineMatchesMapWeekday(machine,selectedMapDay)})}function fitMapToMachines(machines){if(!leafletMap||mapPositionMode)return;var points=(machines||[]).filter(function(m){return typeof m.lat==='number'&&typeof m.lng==='number'}).map(function(m){return [m.lat,m.lng]});if(!points.length)return;if(points.length===1){leafletMap.setView(points[0],Math.max(leafletMap.getZoom(),17));return}leafletMap.fitBounds(L.latLngBounds(points),{padding:[30,30],maxZoom:17})}
+ function renderMap(){
+   ensureMap();if(!leafletMap)return;
+-  machineLayer.clearLayers();routeLayer.clearLayers();machineMapMarkers=[];
++  machineLayer.clearLayers();routeLayer.clearLayers();truckRouting.redraw();machineMapMarkers=[];
++  truckRouting.refreshVehicle();
+   var mode=currentMapMode();
+   $id('mapTag').textContent=mode==='all'?'MAP · 全ルート':mode==='today'?'MAP · 本日':mode==='tomorrow'?'MAP · 翌出勤の予定':'MAP · '+selectedMapDay+'曜';
+   var t=mapMachinesForMode(mode),display=t.map(function(machine){return {machine:machine,outOfPlan:false}});
+@@ -1180,7 +1200,7 @@ $id('officeAddTop').onclick=function(){startOfficeAdd();};
+   initDays();renderMap();setTimeout(function(){fitMapToMachines(mapMachinesForMode(currentMapMode()))},70);
+   toast('翌出勤の予定だけをMAPに表示しています');
+ };$id('tomorrowLater').onclick=function(){closeModal('tomorrowModal')};$id('tomorrowSave').onclick=function(){if(state.tomorrowPlan)state.tomorrowPlan.manual=true;persist();closeModal('tomorrowModal');toast('翌出勤の予定を保存しました')}
+-  $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('editMachinePosition').onclick=startMachinePositionEdit;$id('mapPositionCancel').onclick=cancelMapPositionMode;$id('mapPositionConfirm').onclick=confirmMapPositionMode;$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)location.href='https://www.google.com/maps/dir/?api=1&destination='+(typeof selectedMachine.lat==='number'&&typeof selectedMachine.lng==='number'?selectedMachine.lat+','+selectedMachine.lng:encodeURIComponent(selectedMachine.address||selectedMachine.name))}
++  $id('closeMachine').onclick=function(){closeModal('machineModal')};$id('editMachinePosition').onclick=startMachinePositionEdit;$id('mapPositionCancel').onclick=cancelMapPositionMode;$id('mapPositionConfirm').onclick=confirmMapPositionMode;$id('closeDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('cancelDeleteMachine').onclick=function(){deleteMachineTargetId=null;closeModal('deleteMachineModal')};$id('confirmDeleteMachine').onclick=deleteMachine;$id('detailMore').onclick=function(){var e=$id('machineExtra');e.classList.toggle('hidden');this.textContent=e.classList.contains('hidden')?'詳細表示':'詳細を閉じる'};$id('saveMachine').onclick=saveMachineData;$id('completeMachine').onclick=completeVisit;$id('skipMachine').onclick=skipVisit;$id('forceMachine').onclick=forceVisit;$id('machineRoute').onclick=function(){if(selectedMachine)truckRouting.start(selectedMachine)};$id('machineExternalNav').onclick=function(){if(selectedMachine)navigateToMachine(selectedMachine)}
+   $id('addOrder').onclick=openOrder;
+   $id('addTask').onclick=function(){resetTaskCreateForm();openModal('taskModal')};
+   $id('closeTask').onclick=function(){selectedTaskCreateMachineIds=[];closeModal('taskModal')};$id('cancelTask').onclick=function(){selectedTaskCreateMachineIds=[];closeModal('taskModal')};
+diff --git a/tests/run-browser-gates.mjs b/tests/run-browser-gates.mjs
+index 4b8f8c5..5a27fb9 100644
+--- a/tests/run-browser-gates.mjs
++++ b/tests/run-browser-gates.mjs
+@@ -9,7 +9,7 @@ const gates = [
+   'tests/product-size-prefix-sort-gate.html'
+ ];
+ 
+-const browser = await chromium.launch({ headless: true });
++const browser = await chromium.launch({ headless: true, channel: process.env.VENDRIVE_TEST_BROWSER_CHANNEL || undefined });
+ const failures = [];
+ 
+ try {
+diff --git a/tests/run-truck-route-gates.mjs b/tests/run-truck-route-gates.mjs
+new file mode 100644
+index 0000000..ad6ec48
+--- /dev/null
++++ b/tests/run-truck-route-gates.mjs
+@@ -0,0 +1,85 @@
++import assert from 'node:assert/strict';
++import { readFile, mkdtemp, rm } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++const { chromium } = await import(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES ? `${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright/index.mjs` : 'playwright');
++const base=process.env.VENDRIVE_TEST_BASE_URL||'http://127.0.0.1:8000';
++const leafletJs=process.env.VENDRIVE_TEST_LEAFLET_JS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_JS):null;
++const leafletCss=process.env.VENDRIVE_TEST_LEAFLET_CSS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_CSS):null;
++const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3],[136.805,35.31],[136.81,35.31]]},summary:{distance:1800,duration:280}};
++const evidence=[];
++for(const width of [320,390]){
++  const profile=await mkdtemp(join(tmpdir(),'vendrive-truck-edge-'));
++  const context=await chromium.launchPersistentContext(profile,{headless:true,executablePath:process.env.VENDRIVE_EDGE_PATH,channel:process.env.VENDRIVE_EDGE_PATH?undefined:'msedge',viewport:{width,height:932},args:['--no-sandbox']});
++  try{
++    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
++    await page.addInitScript(()=>{
++      const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
++      const machine=(id,name,lat,lng)=>({id,name,maker:'サントリー',code:id,address:'愛知県一宮市',lat,lng,days:['日','月','火','水','木','金','土'],cycle:'毎日',last:null,visited:false,skip:null,force:null,order:null,memo:'',sales:'',taskDone:{}});
++      const seed={machines:[machine('T1','Route test machine',35.31,136.81),machine('T2','No location',null,null)],offices:[],tasks:[],taskHistory:[],history:[],makers:['サントリー'],restDays:[]};
++      if(!localStorage.getItem('truckGateSeeded')){localStorage.setItem('vendrive2_v7_data',JSON.stringify(seed));localStorage.setItem('vendrive2_last_day',today);localStorage.setItem('truckGateSeeded','yes');}
++      const position={coords:{latitude:35.3,longitude:136.8,accuracy:8}};
++      Object.defineProperty(navigator,'geolocation',{value:{watchPosition(fn){window.__gpsSuccess=fn;setTimeout(()=>fn(position),0);return 1;},clearWatch(){},getCurrentPosition(fn){setTimeout(()=>fn(position),0);}}});
++    });
++    let count=0,mode='success',heldResolve,heldStarted,heldDone;
++    await page.route('**/*',async request=>{
++      const url=request.request().url();
++      if(url.includes('/api/route')){
++        count++;
++        const payload=request.request().postDataJSON();assert.equal(payload.vehicle.weight,4.8);assert.equal(payload.vehicle.height,2.85);
++        if(mode==='held'){
++          heldStarted();await new Promise(resolve=>heldResolve=resolve);
++          try{await request.fulfill({json:{ok:true,route}});}catch{}heldDone();return;
++        }
++        if(mode==='error'){await request.fulfill({status:429,json:{ok:false,message:'無料枠の取得上限です'}});return;}
++        if(mode==='bad'){await request.fulfill({json:{ok:true,route:{...route,geometry:{type:'LineString',coordinates:[]}}}});return;}
++        await request.fulfill({json:{ok:true,route}});return;
++      }
++      if(url.includes('unpkg.com/leaflet')&&url.includes('leaflet.js')&&leafletJs){await request.fulfill({body:leafletJs,contentType:'application/javascript'});return;}
++      if(url.includes('unpkg.com/leaflet')&&url.includes('leaflet.css')&&leafletCss){await request.fulfill({body:leafletCss,contentType:'text/css'});return;}
++      if(url.startsWith(base)){await request.continue();return;}
++      if(url.includes('unpkg.com/leaflet')){await request.continue();return;}
++      await request.abort();
++    });
++    const stored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
++    async function openMachine(code){await page.locator('.tabs button[data-page="machinesPage"]').click();await page.locator('#machineSearch').fill(code);await page.locator('#machineResults .result').first().click();await page.locator('#machineModal.open').waitFor();}
++    async function waitText(text){await page.waitForFunction(t=>document.getElementById('truckRouteSummary').textContent.includes(t),text);}
++    const paths=()=>page.locator('#map path[stroke="#2563eb"]').count();
++    await page.goto(base+'/index.html',{waitUntil:'load'});
++    await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
++    await openMachine('T1');await page.locator('#machineRoute').click();
++    await page.locator('#truckVehicleModal.open').waitFor();
++    assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'');assert.equal(count,0);
++    await page.locator('#truckVehicleSave').click();assert.match(await page.locator('#truckVehicleError').innerText(),/全高/);assert.equal(count,0);
++    for(const [field,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))await page.locator('#truckVehicle_'+field).fill(value);
++    await page.locator('#truckVehicleSave').click();await waitText('1.8km');
++    assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=2);
++    const afterSave=await stored();
++    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.304,longitude:136.802,accuracy:8}}));
++    await page.locator('#allRoutes').click();await page.locator('#zoomIn').click();
++    assert.equal(count,1);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
++    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'horizontal overflow');
++    await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);
++    mode='error';await page.locator('#truckRouteRecalculate').click();await waitText('無料枠');assert.equal(await paths(),0);
++    mode='bad';await page.locator('#truckRouteRecalculate').click();await waitText('経路データ');assert.equal(await paths(),0);
++    mode='success';await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');
++    await page.locator('#truckRouteVehicleSettings').click();await page.locator('#truckVehicleModal.open').waitFor();assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'4800');
++    await page.locator('#truckVehicleCancel').click();assert.ok(await paths()>=2);
++    // A cancelled in-flight response must never restore a cleared route.
++    mode='held';const began=new Promise(resolve=>heldStarted=resolve),done=new Promise(resolve=>heldDone=resolve);
++    await page.locator('#truckRouteRecalculate').click();await began;await page.locator('#truckRouteEnd').click();heldResolve();await done;
++    assert.equal(await page.locator('#truckRoutePanel').isVisible(),false);assert.equal(await paths(),0);
++    const beforeMissing=count;await openMachine('T2');await page.locator('#machineRoute').click();assert.equal(count,beforeMissing);await page.locator('#closeMachine').click();
++    // Persisted profile survives app reopen; no route request runs by itself.
++    await page.reload({waitUntil:'load'});await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
++    await page.locator('.tabs button[data-page="mapPage"]').click();assert.match(await page.locator('#truckVehicleSummary').innerText(),/4.8t/);assert.equal(count,beforeMissing);
++    await page.locator('#truckVehicleSettings').click();assert.equal(await page.locator('#truckVehicle_height').inputValue(),'285');await page.locator('#truckVehicleCancel').click();
++    // The existing explicit external-navigation path remains separate.
++    let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
++    await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
++    assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
++    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
++    console.log(`PASS truck route browser ${width}px`);
++  }finally{await context.close();await rm(profile,{recursive:true,force:true});}
++}
++console.log(JSON.stringify({status:'PASS',evidence},null,2));
+diff --git a/tests/truck-route-api.test.mjs b/tests/truck-route-api.test.mjs
+new file mode 100644
+index 0000000..72b5d5a
+--- /dev/null
++++ b/tests/truck-route-api.test.mjs
+@@ -0,0 +1,68 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { POST, OPTIONS } from '../api/route.mjs';
++import routing from '../truck-routing.js';
++
++const origin='https://tenta0604.github.io';
++const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
++const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehicle};
++const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280}}};
++const request=(body=input,options={})=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json',...options.headers},body:JSON.stringify(body)});
++test('vehicle validation rejects missing, zero, nonnumeric and impossible axle values',()=>{
++  for(const field of ['height','width','length','weight'])for(const value of [undefined,null,'',0,'2',NaN,Infinity])assert.throws(()=>routing.vehicle({...vehicle,[field]:value}));
++  assert.throws(()=>routing.vehicle({...vehicle,axleload:4.9}));
++  assert.equal(routing.vehicle({...vehicle,axleload:null}).axleload,undefined);
++  assert.equal(routing.vehicle({...vehicle,axleload:2.5}).axleload,2.5);
++});
++test('origin/method/preflight/body gates reject before the upstream request',async()=>{
++  assert.equal((await POST(request(input,{headers:{origin:'https://other.example'}}))).status,403);
++  assert.equal((await POST(new Request('http://localhost/api/route',{headers:{origin}}))).status,405);
++  const preflight=await OPTIONS(new Request('http://localhost/api/route',{method:'OPTIONS',headers:{origin}}));
++  assert.equal(preflight.status,204);assert.equal(preflight.headers.get('access-control-allow-origin'),origin);
++  assert.equal((await POST(request({...input,origin:{lat:'35',lng:136.8}}))).status,400);
++  assert.equal((await POST(request({...input,vehicle:{...vehicle,height:null}}))).status,400);
++  assert.equal((await POST(request({...input,padding:'x'.repeat(5000)}))).status,413);
++  assert.equal((await POST(new Request('http://localhost/api/route',{method:'POST',headers:{origin},body:'broken'}))).status,400);
++});
++test('unconfigured relay has a usable nonsecret error',async()=>{
++  const old=process.env.ORS_API_KEY;delete process.env.ORS_API_KEY;
++  try{const response=await POST(request());assert.equal(response.status,503);assert.match((await response.json()).message,/外部ナビ/);}finally{if(old!==undefined)process.env.ORS_API_KEY=old;}
++});
++test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and no secret output',async()=>{
++  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
++  let sent;
++  globalThis.fetch=async(url,options)=>{sent={url,options};return Response.json({features:[feature]});};
++  try{
++    const response=await POST(request({...input,vehicle:{...vehicle,axleload:2.5}}));assert.equal(response.status,200);
++    const data=await response.json(),body=JSON.parse(sent.options.body);
++    assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
++    assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
++    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);
++    assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
++    assert.deepEqual(body.options.avoid_features,['ferries','tollways']);
++    assert.deepEqual(data.route.summary,{distance:1800,duration:280});
++    assert.equal(JSON.stringify(data).includes('test-secret'),false);
++    assert.equal(response.headers.get('cache-control'),'no-store');
++    await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.deepEqual(JSON.parse(sent.options.body).options.avoid_features,['ferries']);
++  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
++});
++test('provider failures and malformed geometry fail closed without car/straight-line fallback',async()=>{
++  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
++  try{
++    for(const [upstream,expected] of [[429,429],[403,503],[401,503],[400,422],[404,422],[500,502]]){
++      globalThis.fetch=async()=>Response.json({error:'test-secret'}, {status:upstream});
++      const response=await POST(request());assert.equal(response.status,expected);assert.equal((await response.text()).includes('test-secret'),false);
++    }
++    globalThis.fetch=async()=>Response.json({features:[{...feature,geometry:{type:'LineString',coordinates:[[136.8,35.3]]}}]});
++    assert.equal((await POST(request())).status,502);
++    globalThis.fetch=async()=>{throw new Error('provider down');};assert.equal((await POST(request())).status,502);
++  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
++});
++test('warm-instance quota guard caps upstream calls',async()=>{
++  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
++  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
++  try{
++    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
++    assert.equal(response.status,429);assert.ok(calls<=30);
++  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
++});
+diff --git a/tests/truck-route-client.test.mjs b/tests/truck-route-client.test.mjs
+new file mode 100644
+index 0000000..0208cc1
+--- /dev/null
++++ b/tests/truck-route-client.test.mjs
+@@ -0,0 +1,44 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import routing from '../truck-routing.js';
++const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
++const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.81,35.31]]},summary:{distance:1800,duration:280}};
++const target={id:'T1',name:'Test',lat:35.31,lng:136.81};
++const tick=()=>new Promise(resolve=>setImmediate(resolve));
++function harness(initial=vehicle){
++  let profile=initial,drawn=null,calls=0,saveOK=true,current=true,fetchImpl=async()=>Response.json({ok:true,route});
++  const nodes=new Map(),node=id=>{if(!nodes.has(id))nodes.set(id,{value:'',textContent:'',checked:false,disabled:false,classList:{hidden:true,add(){this.hidden=true;},remove(){this.hidden=false;}}});return nodes.get(id);};
++  const getNode=node;const domNode=id=>{const result=getNode(id);if(!result.nativeValue){let value=String(result.value);Object.defineProperty(result,'value',{get(){return value;},set(next){value=String(next);},configurable:true});result.nativeValue=true;}return result;};
++  const modals=new Set();
++  const client=routing.createClient({document:{getElementById:domNode},endpoint:'https://relay.test/api/route',geolocation:null,getPosition:()=>({lat:35.3,lng:136.8,accuracy:8,updatedAt:Date.now()}),getVehicle:()=>profile,saveVehicle:value=>{if(!saveOK)return false;profile=value;return true;},openModal:id=>modals.add(id),closeModal:id=>modals.delete(id),toast(){},showMap:()=>true,draw:value=>drawn=value,fit(){},external(){},isDestinationCurrent:()=>current,fetch:async(...args)=>{calls++;return fetchImpl(...args);}});
++  client.init();return {client,node:domNode,modals,get profile(){return profile;},get drawn(){return drawn;},get calls(){return calls;},setFetch(fn){fetchImpl=fn;},setSave(value){saveOK=value;},setCurrent(value){current=value;}};
++}
++test('unknown profile opens blank fields and blocks route calls; validation uses explicit converted units',async()=>{
++  const h=harness(null);h.client.start(target);assert.ok(h.modals.has('truckVehicleModal'));assert.equal(h.node('truckVehicle_weight').value,'');assert.equal(h.calls,0);
++  h.node('truckVehicleSave').onclick();assert.match(h.node('truckVehicleError').textContent,/全高/);
++  for(const [key,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))h.node('truckVehicle_'+key).value=value;
++  h.node('truckVehicleAvoidTolls').checked=true;h.node('truckVehicleSave').onclick();await tick();
++  assert.deepEqual(h.profile,vehicle);assert.equal(h.calls,1);assert.ok(h.drawn);assert.match(h.node('truckRouteSummary').textContent,/1.8km/);
++});
++test('profile save failure stays open and never routes on unpersisted values',()=>{
++  const h=harness();h.node('truckVehicleSettings').onclick();h.setSave(false);h.node('truckVehicleSave').onclick();
++  assert.ok(h.modals.has('truckVehicleModal'));assert.match(h.node('truckVehicleError').textContent,/保存できません/);assert.equal(h.calls,0);
++});
++test('route redraw does not call provider and invalidated destinations clear the route',async()=>{
++  const h=harness();h.client.start(target);await tick();assert.equal(h.calls,1);assert.ok(h.drawn);
++  h.client.redraw();h.client.redraw();assert.equal(h.calls,1);
++  h.setCurrent(false);h.client.redraw();assert.equal(h.drawn,null);assert.equal(h.node('truckRoutePanel').classList.hidden,true);
++});
++test('late responses from ended/replaced routes cannot resurrect them',async()=>{
++  const h=harness();let release;
++  h.setFetch(()=>new Promise(resolve=>release=resolve));h.client.start(target);await tick();h.client.end();release(Response.json({ok:true,route}));await tick();
++  assert.equal(h.drawn,null);assert.equal(h.node('truckRoutePanel').classList.hidden,true);
++  let first;h.setFetch(()=>new Promise(resolve=>first=resolve));h.client.start(target);await tick();h.setFetch(async()=>Response.json({ok:true,route}));h.client.start({...target,id:'T3',name:'New target'});await tick();first(Response.json({ok:true,route:{...route,summary:{distance:99000,duration:99000}}}));await tick();
++  assert.equal(h.node('truckRouteTitle').textContent,'New target');assert.equal(h.drawn.summary.distance,1800);
++});
++test('provider error or malformed geometry removes old geometry and supports manual retry',async()=>{
++  const h=harness();h.client.start(target);await tick();assert.ok(h.drawn);
++  h.setFetch(async()=>Response.json({ok:false,message:'無料枠の上限'},{status:429}));h.node('truckRouteRecalculate').onclick();await tick();assert.equal(h.drawn,null);assert.match(h.node('truckRouteSummary').textContent,/無料枠/);assert.equal(h.node('truckRouteRecalculate').disabled,false);
++  h.setFetch(async()=>Response.json({ok:true,route:{geometry:{type:'LineString',coordinates:[]},summary:route.summary}}));h.node('truckRouteRecalculate').onclick();await tick();assert.equal(h.drawn,null);
++  h.setFetch(async()=>Response.json({ok:true,route}));h.node('truckRouteRecalculate').onclick();await tick();assert.ok(h.drawn);
++});
+diff --git a/truck-routing.js b/truck-routing.js
+new file mode 100644
+index 0000000..1bdfd91
+--- /dev/null
++++ b/truck-routing.js
+@@ -0,0 +1,104 @@
++(function(root,factory){
++  if(typeof module==='object'&&module.exports)module.exports=factory();
++  else root.VENDRIVETruckRouting=factory();
++})(typeof window!=='undefined'?window:globalThis,function(){
++  'use strict';
++  var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
++  function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
++  function vehicle(value){
++    if(!value||typeof value!=='object')throw new Error('車検証などで確認した車両の寸法・総重量を登録してください');
++    var result={};
++    Object.keys(fields).forEach(function(key){var rule=fields[key],n=value[key];if(typeof n!=='number'||!Number.isFinite(n)||n<rule[1]||n>rule[2])throw new Error(rule[0]+'を正しく入力してください');result[key]=n;});
++    if(value.axleload!==null&&value.axleload!==undefined){var axle=value.axleload;if(typeof axle!=='number'||!Number.isFinite(axle)||axle<=0||axle>result.weight)throw new Error('最大軸重は総重量以下の正しい値を入力してください');result.axleload=axle;}
++    result.avoidTolls=value.avoidTolls!==false;
++    return result;
++  }
++  function route(value){
++    var geometry=value&&value.geometry,summary=value&&value.summary;
++    if(!geometry||geometry.type!=='LineString'||!Array.isArray(geometry.coordinates)||geometry.coordinates.length<2||geometry.coordinates.length>100000||!geometry.coordinates.every(function(c){return Array.isArray(c)&&c.length>=2&&point({lng:c[0],lat:c[1]});})||!summary||typeof summary.distance!=='number'||!Number.isFinite(summary.distance)||summary.distance<0||typeof summary.duration!=='number'||!Number.isFinite(summary.duration)||summary.duration<0)throw new Error('経路データを確認できませんでした');
++    return {geometry:{type:'LineString',coordinates:geometry.coordinates.map(function(c){return [c[0],c[1]];})},summary:{distance:summary.distance,duration:summary.duration}};
++  }
++  function createClient(app){
++    var destination=null,active=null,sequence=0,controller=null,busy=false,settingsDestination=null;
++    var doc=app.document,el=function(id){return doc.getElementById(id);};
++    function draw(){if(destination&&app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();return;}app.draw(active,destination);}
++    function cancel(){sequence++;if(controller)controller.abort();controller=null;busy=false;}
++    function end(){cancel();destination=null;active=null;draw();el('truckRoutePanel').classList.add('hidden');}
++    function panel(message){
++      el('truckRoutePanel').classList.remove('hidden');
++      el('truckRouteTitle').textContent=destination?destination.name||'自販機への経路':'トラック経路';
++      el('truckRouteSummary').textContent=message;
++      el('truckRouteRecalculate').disabled=busy;
++      el('truckRouteOverview').disabled=!active;
++      el('truckRouteExternal').disabled=!destination;
++    }
++    function profile(){return vehicle(app.getVehicle());}
++    function summary(){var v;try{v=profile();}catch(e){el('truckVehicleSummary').textContent='未登録：実車の寸法・総重量を設定してください';return;}el('truckVehicleSummary').textContent='全高 '+v.height+'m / 全幅 '+v.width+'m / 全長 '+v.length+'m / 総重量 '+v.weight+'t'+(v.axleload?' / 軸重 '+v.axleload+'t':' / 軸重未設定');}
++    function openSettings(target){
++      settingsDestination=target||null;var v=app.getVehicle()||{};
++      ['height','width','length','weight','axleload'].forEach(function(key){el('truckVehicle_'+key).value=typeof v[key]==='number'?(key==='weight'||key==='axleload'?v[key]*1000:v[key]*100):'';});
++      el('truckVehicleAvoidTolls').checked=v.avoidTolls!==false;
++      el('truckVehicleError').textContent='';app.openModal('truckVehicleModal');
++    }
++    function number(id,scale){var raw=el(id).value.trim();return raw===''?null:Number(raw)/scale;}
++    function saveSettings(){
++      var v;
++      try{v=vehicle({height:number('truckVehicle_height',100),width:number('truckVehicle_width',100),length:number('truckVehicle_length',100),weight:number('truckVehicle_weight',1000),axleload:number('truckVehicle_axleload',1000),avoidTolls:el('truckVehicleAvoidTolls').checked});}
++      catch(e){el('truckVehicleError').textContent=e.message;return;}
++      if(app.saveVehicle(v)===false){el('truckVehicleError').textContent='保存できませんでした。端末の保存領域を確認してください';return;}summary();app.closeModal('truckVehicleModal');var target=settingsDestination;settingsDestination=null;
++      // A profile edit invalidates all geometry computed for the old vehicle.
++      end();app.toast('車両設定を保存しました');if(target)start(target);
++    }
++    function getPosition(signal){
++      var cached=app.getPosition();
++      if(point(cached)&&Date.now()-cached.updatedAt<=15000&&typeof cached.accuracy==='number'&&cached.accuracy>=0&&cached.accuracy<=100)return Promise.resolve(cached);
++      return new Promise(function(resolve,reject){
++        if(!app.geolocation){reject(new Error('現在地を取得できません。位置情報を許可してください'));return;}
++        var done=false,timer;
++        function finish(error,value){if(done)return;done=true;clearTimeout(timer);signal.removeEventListener('abort',abort);error?reject(error):resolve(value);}
++        function abort(){finish(new Error('cancelled'));}
++        signal.addEventListener('abort',abort,{once:true});
++        timer=setTimeout(function(){finish(new Error('現在地の取得がタイムアウトしました'));},12000);
++        app.geolocation.getCurrentPosition(function(p){var next={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,updatedAt:Date.now()};if(!point(next)||typeof next.accuracy!=='number'||!Number.isFinite(next.accuracy)||next.accuracy<0||next.accuracy>100){finish(new Error('現在地の精度が不足しています。屋外で再計算してください'));return;}app.updatePosition(p);finish(null,next);},function(){finish(new Error('現在地を取得できません。位置情報を許可してください'));},{enableHighAccuracy:true,maximumAge:5000,timeout:10000});
++      });
++    }
++    async function calculate(){
++      if(!destination||busy)return;
++      if(app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();app.toast('目的地の位置が変わったため経路を終了しました');return;}
++      var v;try{v=profile();}catch(e){var target=destination;end();openSettings(target);return;}
++      cancel();busy=true;active=null;draw();controller=new AbortController();var signal=controller.signal,token=sequence;
++      panel('現在地を取得中…');
++      var timer=null;
++      try{
++        var origin=await getPosition(signal);if(token!==sequence)return;
++        panel('車両条件に合う経路を取得中…');
++        timer=setTimeout(function(){if(token===sequence)controller.abort();},15000);
++        var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v}),signal:signal});
++        var data=await response.json();if(token!==sequence)return;
++        if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
++        active=route(data.route);draw();app.fit(active,destination);
++        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮）');
++      }catch(e){if(token!==sequence)return;active=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
++      finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
++    }
++    function start(target){
++      if(!point(target)){app.toast('自販機の位置を先に登録してください');return;}
++      var copy={lat:target.lat,lng:target.lng,name:target.name,id:target.id};
++      try{profile();}catch(e){openSettings(copy);return;}
++      if(!app.showMap()){app.toast('地図を読み込めませんでした');return;}
++      end();destination=copy;calculate();
++    }
++    function init(){
++      el('truckVehicleSettings').onclick=function(){openSettings(null);};
++      el('truckRouteVehicleSettings').onclick=function(){openSettings(destination);};
++      el('truckVehicleSave').onclick=saveSettings;
++      ['truckVehicleClose','truckVehicleCancel'].forEach(function(id){el(id).onclick=function(){settingsDestination=null;app.closeModal('truckVehicleModal');};});
++      el('truckRouteRecalculate').onclick=calculate;el('truckRouteEnd').onclick=end;
++      el('truckRouteOverview').onclick=function(){if(active)app.fit(active,destination);};
++      el('truckRouteExternal').onclick=function(){if(destination)app.external(destination);};
++      summary();
++    }
++    return {init:init,start:start,end:end,redraw:draw,refreshVehicle:summary};
++  }
++  return {point:point,vehicle:vehicle,route:route,createClient:createClient};
++});

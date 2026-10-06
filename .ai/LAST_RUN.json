@@ -1,16 +1,12 @@
 {
-  "evidenceVersion": 18,
-  "runType": "task_selection_targets_final23",
-  "phase": "TASK_SELECTION_TARGETS_FINAL23",
-  "status": "MERGED_DEPLOYED_MAIN_CI_VERIFIED_OPERATIONAL_PAUSE",
+  "evidenceVersion": 19,
+  "runType": "truck_route_normal_chat_handoff",
+  "phase": "CONTINUITY_ONLY_TRUCK_ROUTE_ARCHIVE",
+  "status": "CONTINUITY_PASS_PRODUCT_PENDING",
   "base": {
-    "preFixHead": "6f5b8ba72748a1958aa3fbb9f788044ba2269aa1",
-    "safetyIssue": 141,
-    "safetyTag": "backup-pre-TASK-SELECTION-TARGETS-20261005",
-    "safetyTagTarget": "6f5b8ba72748a1958aa3fbb9f788044ba2269aa1",
-    "maintenanceBranch": "chatgpt/task-selection-targets-20261005",
-    "fixPullRequest": 142,
-    "productProductionHead": "1243c091afba07ba7945f9fb7cf339cc515d0988"
+    "preEditHead": "7e59bae140629fefe1ba96319b8bae169b41d95f",
+    "productionSafetyTagRequired": false,
+    "reason": "Only canonical documentation and inert pending-patch/evidence files change; no runtime/production code changes."
   },
   "versions": {
     "app": "2026.10.05-FINAL.23",
@@ -19,56 +15,51 @@
     "schema": 4
   },
   "work": {
-    "summary": "Replaced FINAL.22's fixed single-vending-machine task mode with a true selection-type target. Operators can search and select any number of individual vending machines in one task, remove selections before save, and continue using the existing all/manufacturer-wide targeting. Existing single-machine/custom target types migrate to selection semantics without losing their machine IDs. Percentage auto-completion remains unchanged.",
-    "implemented": [
-      "Changed task target mode label/value from fixed '自販機1台' to '選択型'.",
-      "Changed task creation state from one selected machine ID to an arbitrary selectedMachineIds array.",
-      "Added a selected-machine count/list with remove controls before task save.",
-      "Search results can add multiple arbitrary machines without clearing prior selections.",
-      "Selection tasks persist targetType='selected' with all selected targetMachineIds.",
-      "Existing targetType machine/custom/selected values migrate to selected while preserving targetMachineIds.",
-      "Task Detail target changes convert customized target sets to selection-type while threshold-only edits leave manufacturer targeting intact.",
-      "Retained manufacturer/all task creation and FINAL.22 percentage auto-completion behavior.",
-      "Updated tests/task-target-threshold-ui-gate.html for multi-machine selection, manufacturer targeting, legacy threshold editing, 70% completion, and selected-target detail editing.",
-      "The first PR gate run 37321574425 exposed a test-harness render timing issue only; the gate was corrected to wait for initial task rendering.",
-      "PR #142 browser regression run 37321748627 then passed all five gates.",
-      "PR #142 merged to main at 1243c091afba07ba7945f9fb7cf339cc515d0988.",
-      "Main browser regression run 37321896627 passed all five gates.",
-      "GitHub Pages deployment run 37321895075 passed.",
-      "Vercel production status for the main merge passed."
-    ]
+    "summary": "Archived the unverified truck-route implementation and actual test evidence for the user-requested ordinary-GPT continuation. Kept production FINAL.23 and completed/next intelligence phase unchanged.",
+    "productStatus": "NOT_RELEASED_NOT_COMPLETE",
+    "archive": {
+      "patch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
+      "evidence": ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
+      "specification": ".ai/pending/TRUCK_ROUTING.md",
+      "baseSha": "7e59bae140629fefe1ba96319b8bae169b41d95f",
+      "sha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9"
+    }
   },
   "gates": {
-    "safetyCheckpoint": "PASS",
-    "immutableSafetyTag": "PASS",
-    "firstPrGateRun": "TEST_HARNESS_TIMING_FAILURE_FIXED",
-    "firstPrGateRunId": 37321574425,
-    "prBrowserRegressionGates": "PASS",
-    "prBrowserRegressionRunId": 37321748627,
-    "selectionTypeMultiMachineCreation": "PASS",
-    "manufacturerTargetingRetained": "PASS",
-    "legacyTaskThresholdDefaultAndEdit": "PASS",
-    "seventyPercentAutoCompletion": "PASS",
-    "selectionDetailEditing": "PASS",
-    "merge": "PASS",
-    "fixPullRequest": 142,
-    "mainPushGithubActionsBrowserGates": "PASS",
-    "mainPushGithubActionsRunId": 37321896627,
-    "githubPagesDeployment": "PASS",
-    "githubPagesDeploymentRunId": 37321895075,
-    "vercelProductionDeploy": "PASS",
-    "analyticsHistoricalDataDeletion": "NONE",
-    "inventorySemanticsChange": "NONE",
-    "learnedNumericForecastingChange": "NONE",
-    "engineChange": "NONE",
-    "dbSchemaChange": "NONE"
+    "synchronizedCleanMainPreflight": "PASS",
+    "jsonSyntax": "PASS",
+    "archiveAppliesToUnchangedProductionBaseline": "PASS",
+    "runtimeProductionFilesChanged": "NONE",
+    "versionsAndCompletedNextPhasePreserved": "PASS",
+    "canonicalConsistency": "PASS",
+    "diffCheck": "PASS",
+    "browserForDocumentationOnly": {
+      "status": "NOT_REQUIRED",
+      "reason": "This commit contains no runtime UI or data changes; pending product browser gates remain unresolved and are explicitly recorded."
+    },
+    "deploymentLiveProductVerification": {
+      "status": "NOT_REQUIRED",
+      "reason": "Documentation/archive handoff only; no product release or activation is performed."
+    }
   },
   "openItems": [
-    "Real-device confirmation that selection-type creation is convenient for choosing multiple arbitrary vending machines.",
-    "Real-device confirmation that percentage completion still behaves as expected with selection-type tasks."
+    "Explicit exception for a non-production validation-branch commit/push before the pending browser gates (not granted yet).",
+    "Free Standard ORS API key configured as sensitive Vercel ORS_API_KEY; do not expose the key in chat/issues/client code.",
+    "Actual vehicle height, width, length and gross weight; axle load only if known."
   ],
-  "nextAction": "Return to normal field use with FINAL.23. Choose 選択型 for any arbitrary set of one or more vending machines; use manufacturer mode when the whole manufacturer scope is intended.",
+  "nextAction": "In ordinary GPT, recover latest main and .ai/pending/TRUCK_ROUTE_20261006.patch plus the evidence. Continue pending validation only within the documented authorization boundary.",
   "unresolved": [
-    "Historical Analytics remains preserved; user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
+    "Truck route UI/browser regression, actual provider route and release verification are pending.",
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
+  ],
+  "changedFiles": [
+    ".ai/DECISIONS.md",
+    ".ai/LAST_RUN.json",
+    ".ai/STATE.json",
+    ".ai/pending/.gitattributes",
+    ".ai/pending/TRUCK_ROUTE_20261006.patch",
+    ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
+    ".ai/pending/TRUCK_ROUTING.md",
+    "AI_ROADMAP.md"
   ]
 }

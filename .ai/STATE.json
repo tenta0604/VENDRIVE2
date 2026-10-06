@@ -3,34 +3,51 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": null,
+  "activePhase": "TRUCK_ROUTE_PENDING_BROWSER_VERIFICATION",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.05-FINAL.23",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "operational_pause_task_selection_targets_verified_numeric_promotion_disabled",
+  "status": "truck_route_draft_archived_for_normal_chat_resume",
   "currentWork": {
-    "title": "Operational field use — FINAL.23 arbitrary task selection verified",
-    "releaseStatus": "FINAL.23 is merged and production verified. The fixed 'one vending machine' task mode from FINAL.22 was replaced by a true selection-type target: the operator can search and choose any number of individual vending machines, while the existing all/manufacturer-wide target mode remains available. Selected machines are shown as a removable list with a count before task creation. Prior single-machine/custom task targets migrate to selection-type semantics, and Task Detail add/remove keeps customized tasks as selection-type. Percentage auto-completion remains unchanged. PR #142 merged to main at 1243c091afba07ba7945f9fb7cf339cc515d0988. PR browser run 37321748627 and main run 37321896627 passed all five gates; GitHub Pages run 37321895075 and Vercel production status passed. Analytics engine/DB/schema remain AN14B3B5 / 4 / 4.",
+    "title": "User-approved 2t truck route display — archived draft, resume in ordinary GPT",
+    "releaseStatus": "Production remains FINAL.23. No truck-route code has been merged or deployed. The user requested continuation in ordinary GPT on 2026-10-06; code and actual verification evidence are archived as inert continuity files on main. This is not a completed product phase.",
     "scope": [
-      "Task target modes are manufacturer-based or selection-type; do not constrain selection-type to exactly one machine.",
-      "Selection-type task creation supports one or many arbitrary vending machines chosen via search.",
-      "Show selected machine count and allow removal before saving.",
-      "Keep existing all-manufacturer / one-manufacturer task targeting.",
-      "Migrate FINAL.22 single-machine/custom task target types to selection-type without losing targetMachineIds.",
-      "If Task Detail changes the target set, preserve the result as a selection-type task.",
-      "Keep the existing configurable 1–100% auto-completion threshold and exact ratio rule.",
-      "Keep task history, per-machine completion, visit task checks, order semantics, Analytics engine, DB and schema unchanged."
+      "Internal road-route display with actual vehicle conditions from the first release.",
+      "Current location to one chosen vending machine; distance/estimated time, manual recalculation and end; existing external navigation retained.",
+      "No guessed vehicle dimensions or routing gross weight of 2t; unknown optional axle load stays unset.",
+      "Preserve Analytics engine, DB/schema, tasks, orders, visit completion and all user data."
     ],
+    "archive": {
+      "patch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
+      "evidence": ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
+      "specification": ".ai/pending/TRUCK_ROUTING.md",
+      "baseSha": "7e59bae140629fefe1ba96319b8bae169b41d95f",
+      "sha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9"
+    },
+    "verification": {
+      "syntax": "PASS",
+      "nodeLogicTests": "PASS: 11 tests",
+      "edge320px390px": "BLOCKED locally before page load",
+      "existingBrowserRegression": "NOT_RUN",
+      "actualProviderAndDeployment": "NOT_RUN"
+    },
     "nextActions": [
-      "Use selection-type task creation on the phone and confirm multiple arbitrary machines can be selected in one task.",
-      "Use manufacturer targeting when the entire manufacturer fleet is intended.",
-      "Reopen engineering only for new field friction or explicit product changes."
+      "Recover AGENTS.md and this archive from latest main in the ordinary GPT chat; no long user relay prompt is needed.",
+      "Do not reimplement the draft from conversation memory. Extract/apply the archived patch against the unchanged production files.",
+      "A validation-branch exception to the NO COMMIT/NO PUSH rule was requested but has not been explicitly granted. Do not invent approval from GitHub account permissions.",
+      "Once that exception is granted, create only a non-production validation branch/draft PR and run the prepared GitHub Actions finite Edge + regression gates to terminal evidence.",
+      "Before activating/releasing, configure a free Standard ORS key sensitively and confirm actual vehicle dimensions/gross weight; then verify actual routes and deployed behavior."
     ]
   },
-  "requiredUserInput": [],
+  "requiredUserInput": [
+    "Explicit exception for a non-production validation-branch commit/push before the pending browser gates (not granted yet).",
+    "Free Standard ORS API key configured as sensitive Vercel ORS_API_KEY; do not expose the key in chat/issues/client code.",
+    "Actual vehicle height, width, length and gross weight; axle load only if known."
+  ],
   "unresolved": [
+    "Truck route UI/browser regression, actual provider route and release verification are pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "recovery": {

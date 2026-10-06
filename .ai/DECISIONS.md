@@ -221,3 +221,14 @@ This file records confirmed project decisions that must survive chat migration. 
 - The 1–100% automatic completion threshold remains independent of target mode and continues to use exact completed-target / total-target ratio.
 - This change does not alter visit completion, order handling, task-per-machine completion facts, Analytics engine, DB/schema, inventory semantics, or numeric learning behavior.
 
+
+## 2026-10-06 approved truck-route display decision (unreleased)
+
+- Provide road-following internal route geometry using explicit 2t vehicle conditions from the first release. Do not ship a car-only first version.
+- Require confirmed actual height/width/length and gross vehicle weight; 2t denotes payload class rather than the routing weight. Optional axle load remains unset when unknown.
+- Preserve external Google navigation as a separate action. It does not inherit the truck profile.
+- Scope is route geometry, existing GPS tracking, distance/estimated time and manual recalculation/end. No voice guidance, speculative multi-stop optimization or visit/schedule mutation.
+- Use the free Standard ORS key through a server relay; no paid-plan purchase/upgrade is authorized. Candidate routes cannot guarantee all local restrictions.
+- This working tree is not a released FINAL.24. Real-browser regression is blocked locally; all production versions and the completed intelligence phase remain unchanged. See .ai/pending/TRUCK_ROUTING.md and .ai/pending/TRUCK_ROUTE_EVIDENCE.json for exact evidence and the resume point.
+
+- The user prefers resuming this work in ordinary GPT. Mode cannot be switched by this agent. Archive the actual pending patch/evidence on main so ordinary chat can recover without manual code transfer; the archive is not a release or permission to merge unverified production code.
