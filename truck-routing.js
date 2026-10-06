@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.07-FINAL.29';
+  var ASSET_VERSION='2026.10.07-FINAL.30';
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
   function distanceMeters(a,b){if(!point(a)||!point(b))return Infinity;var rad=Math.PI/180,lat1=a.lat*rad,lat2=b.lat*rad,dlat=(b.lat-a.lat)*rad,dlng=(b.lng-a.lng)*rad,s=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)*Math.sin(dlng/2);return 6371000*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
@@ -70,17 +70,30 @@
       el('truckRouteExternal').disabled=!destination;
     }
     function profile(){return vehicle(app.getVehicle());}
-    function summary(){var v;try{v=profile();}catch(e){el('truckVehicleSummary').textContent='未登録：実車の寸法・総重量を設定してください';return;}el('truckVehicleSummary').textContent='全高 '+v.height+'m / 全幅 '+v.width+'m / 全長 '+v.length+'m / 総重量 '+v.weight+'t'+(v.axleload?' / 軸重 '+v.axleload+'t':' / 軸重未設定')+(v.avoidTolls?' / 有料道路回避':' / 有料道路使用可');}
+    function syncHighwayToggle(){
+      var button=el('mapHighwayToggle');if(!button)return;
+      var v;try{v=profile();}catch(e){button.disabled=true;button.textContent='高速\n--';button.classList.remove('active');if(button.setAttribute){button.setAttribute('aria-pressed','false');button.setAttribute('title','高速利用：車両未設定');button.setAttribute('aria-label','高速利用：車両未設定');}return;}
+      var enabled=v.avoidTolls===false;button.disabled=false;button.textContent='高速\n'+(enabled?'ON':'OFF');enabled?button.classList.add('active'):button.classList.remove('active');
+      if(button.setAttribute){button.setAttribute('aria-pressed',enabled?'true':'false');button.setAttribute('title','高速利用：'+(enabled?'ON':'OFF'));button.setAttribute('aria-label','高速利用：'+(enabled?'ON':'OFF'));}
+    }
+    function setHighwayEnabled(enabled){
+      var v;try{v=profile();}catch(e){openSettings(destination);return;}
+      var next=Object.assign({},v,{avoidTolls:!enabled});
+      if(app.saveVehicle(next)===false){app.toast('高速設定を保存できませんでした');syncHighwayToggle();return;}
+      var setting=el('truckVehicleAvoidTolls');if(setting)setting.checked=enabled;summary();
+      if(destination){cancel();active=null;draw();calculate();}else app.toast(enabled?'高速利用をONにしました':'高速利用をOFFにしました');
+    }
+    function summary(){var v;try{v=profile();}catch(e){el('truckVehicleSummary').textContent='未登録：実車の寸法・総重量を設定してください';syncHighwayToggle();return;}el('truckVehicleSummary').textContent='全高 '+v.height+'m / 全幅 '+v.width+'m / 全長 '+v.length+'m / 総重量 '+v.weight+'t'+(v.axleload?' / 軸重 '+v.axleload+'t':' / 軸重未設定')+(v.avoidTolls?' / 高速OFF':' / 高速ON');syncHighwayToggle();}
     function openSettings(target){
       settingsDestination=target||null;var v=app.getVehicle()||{};
       ['height','width','length','weight','axleload'].forEach(function(key){el('truckVehicle_'+key).value=typeof v[key]==='number'?(key==='weight'||key==='axleload'?v[key]*1000:v[key]*100):'';});
-      el('truckVehicleAvoidTolls').checked=v.avoidTolls!==false;
+      el('truckVehicleAvoidTolls').checked=v.avoidTolls===false;
       el('truckVehicleError').textContent='';app.openModal('truckVehicleModal');
     }
     function number(id,scale){var raw=el(id).value.trim();return raw===''?null:Number(raw)/scale;}
     function saveSettings(){
       var v;
-      try{v=vehicle({height:number('truckVehicle_height',100),width:number('truckVehicle_width',100),length:number('truckVehicle_length',100),weight:number('truckVehicle_weight',1000),axleload:number('truckVehicle_axleload',1000),avoidTolls:el('truckVehicleAvoidTolls').checked});}
+      try{v=vehicle({height:number('truckVehicle_height',100),width:number('truckVehicle_width',100),length:number('truckVehicle_length',100),weight:number('truckVehicle_weight',1000),axleload:number('truckVehicle_axleload',1000),avoidTolls:!el('truckVehicleAvoidTolls').checked});}
       catch(e){el('truckVehicleError').textContent=e.message;return;}
       if(app.saveVehicle(v)===false){el('truckVehicleError').textContent='保存できませんでした。端末の保存領域を確認してください';return;}summary();app.closeModal('truckVehicleModal');var target=settingsDestination;settingsDestination=null;
       // A profile edit invalidates all geometry computed for the old vehicle.
@@ -115,7 +128,7 @@
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
         active=route(data.route);draw();app.fit(active,destination);
         var sections=routeSections(active),hasMotorway=sections.some(function(section){return section.motorway;}),hasTollway=sections.some(function(section){return section.tollway;});
-        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+(hasMotorway?'高速区間あり':hasTollway?'有料区間あり':'高速・有料区間なし')+' ・ '+(v.avoidTolls?'有料道路回避中':'有料道路使用可'));
+        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+(hasMotorway?'高速区間あり':hasTollway?'有料区間あり':'高速・有料区間なし')+' ・ '+(v.avoidTolls?'高速利用OFF':'高速利用ON'));
       }catch(e){if(token!==sequence)return;active=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
       finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
     }
@@ -132,11 +145,12 @@
       el('truckVehicleSave').onclick=saveSettings;
       ['truckVehicleClose','truckVehicleCancel'].forEach(function(id){el(id).onclick=function(){settingsDestination=null;app.closeModal('truckVehicleModal');};});
       el('truckRouteRecalculate').onclick=calculate;el('truckRouteEnd').onclick=end;
+      el('mapHighwayToggle').onclick=function(){var v;try{v=profile();}catch(e){openSettings(destination);return;}setHighwayEnabled(v.avoidTolls!==false);};
       el('truckRouteOverview').onclick=function(){if(active)app.fit(active,destination);};
       el('truckRouteExternal').onclick=function(){if(destination)app.external(destination);};
-      summary();
+      summary();syncHighwayToggle();
     }
-    return {init:init,start:start,end:end,redraw:draw,refreshVehicle:summary};
+    return {init:init,start:start,end:end,redraw:draw,refreshVehicle:function(){summary();syncHighwayToggle();}};
   }
   return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
 });

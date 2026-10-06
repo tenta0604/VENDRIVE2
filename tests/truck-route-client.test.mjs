@@ -17,7 +17,7 @@ test('unknown profile opens blank fields and blocks route calls; validation uses
   const h=harness(null);h.client.start(target);assert.ok(h.modals.has('truckVehicleModal'));assert.equal(h.node('truckVehicle_weight').value,'');assert.equal(h.calls,0);
   h.node('truckVehicleSave').onclick();assert.match(h.node('truckVehicleError').textContent,/全高/);
   for(const [key,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))h.node('truckVehicle_'+key).value=value;
-  h.node('truckVehicleAvoidTolls').checked=true;h.node('truckVehicleSave').onclick();await tick();
+  h.node('truckVehicleAvoidTolls').checked=false;h.node('truckVehicleSave').onclick();await tick();
   assert.deepEqual(h.profile,vehicle);assert.equal(h.calls,1);assert.ok(h.drawn);assert.match(h.node('truckRouteSummary').textContent,/1.8km/);
 });
 test('profile save failure stays open and never routes on unpersisted values',()=>{
@@ -62,8 +62,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.29 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.07-FINAL.29');
+test('routing asset version matches FINAL.30 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.07-FINAL.30');
 });
 
 test('dedicated tollways extra highlights a route when waycategory reports no highway or toll bits',()=>{
@@ -71,4 +71,13 @@ test('dedicated tollways extra highlights a route when waycategory reports no hi
   assert.deepEqual(routing.routeSections(providerMismatch).map(s=>({motorway:s.motorway,tollway:s.tollway,highlight:s.highlight,count:s.coordinates.length})),[
     {motorway:false,tollway:false,highlight:false,count:2},{motorway:false,tollway:true,highlight:true,count:3}
   ]);
+});
+
+test('MAP highway toggle persists positive mode and recalculates an active route',async()=>{
+  const h=harness();h.client.start(target);await tick();
+  assert.equal(h.profile.avoidTolls,true);assert.match(h.node('mapHighwayToggle').textContent,/OFF/);assert.equal(h.calls,1);
+  h.node('mapHighwayToggle').onclick();await tick();
+  assert.equal(h.profile.avoidTolls,false);assert.match(h.node('mapHighwayToggle').textContent,/ON/);assert.match(h.node('truckRouteSummary').textContent,/高速利用ON/);assert.equal(h.calls,2);
+  h.node('mapHighwayToggle').onclick();await tick();
+  assert.equal(h.profile.avoidTolls,true);assert.match(h.node('mapHighwayToggle').textContent,/OFF/);assert.match(h.node('truckRouteSummary').textContent,/高速利用OFF/);assert.equal(h.calls,3);
 });
