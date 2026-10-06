@@ -1,5 +1,5 @@
 {
-  "status": "FINAL29_VALIDATED_READY_FOR_PRODUCTION",
+  "status": "FINAL29_PRODUCTION_VERIFIED",
   "scope": "TRUCK_ROUTE_PRODUCTION_FINAL25",
   "baseline": "7e59bae140629fefe1ba96319b8bae169b41d95f",
   "remoteSafetyTag": "backup-pre-TRUCK-ROUTE-20261006",
@@ -22,11 +22,11 @@
     },
     "realEdge320px390px": "PASS: FINAL.29 run 37499628848",
     "existingBrowserRegression": "PASS: FINAL.29 run 37499628758",
-    "actualOrsRoute": "PASS: real driving-hgv Preview requested waycategory+tollways; Nagoya IC -> Komaki IC returned tollways values [1,0] with 3 dedicated tollway spans",
-    "deployment": "PASS: production dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy READY",
+    "actualOrsRoute": "PASS: real driving-hgv Preview requested waycategory+tollways; Nagoya IC -> Komaki IC returned dedicated tollways values [1,0] with 3 tollway spans",
+    "deployment": "PASS: production dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv READY",
     "vercelPreview": "PASS: clean preview dpl_2rKPYSXETn64FteYT8hM85rUsoUL READY; temporary smoke path 404",
-    "githubPages": "PASS: run 37495335651; live FINAL.28",
-    "productionRelay": "PASS: /api/route deployed; unsupported GET returns 405"
+    "githubPages": "PASS: run 37500261666; live FINAL.29",
+    "productionRelay": "PASS: /api/route deployed; unsupported GET 405"
   },
   "changedFiles": [
     "index.html",
@@ -43,8 +43,8 @@
   ],
   "gateOutput": "✔ vehicle validation rejects missing, zero, nonnumeric and impossible axle values (1.136856ms)\n✔ origin/method/preflight/body gates reject before the upstream request (5.974218ms)\n✔ unconfigured relay has a usable nonsecret error (0.993109ms)\n✔ HGV request uses the new endpoint, lng/lat ordering, exact dimensions and no secret output (6.029897ms)\n✔ provider failures and malformed geometry fail closed without car/straight-line fallback (4.328623ms)\n✔ warm-instance quota guard caps upstream calls (5.188641ms)\n✔ unknown profile opens blank fields and blocks route calls; validation uses explicit converted units (7.12261ms)\n✔ profile save failure stays open and never routes on unpersisted values (0.444892ms)\n✔ route redraw does not call provider and invalidated destinations clear the route (2.227432ms)\n✔ late responses from ended/replaced routes cannot resurrect them (1.72881ms)\n✔ provider error or malformed geometry removes old geometry and supports manual retry (1.945958ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 104.442693\n",
   "requiredInput": [],
-  "nextAction": "Merge PR #156 and verify production/live FINAL.29. If the known field route still reports no classification, collect exact endpoints for upstream OSM/ORS evidence.",
-  "productionChanged": false,
+  "nextAction": "Normal field use and AN15 evidence accumulation. If the known route still reports no classification on FINAL.29, collect exact endpoints for upstream OSM/ORS analysis.",
+  "productionChanged": true,
   "archivedPatch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
   "archivedPatchSha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9",
   "pullRequest": 145,
@@ -64,7 +64,7 @@
     "axleload_t": null,
     "avoid_tolls": true
   },
-  "productionMerge": "676e2e12debe529f620895b3c5911d855ef14768",
+  "productionMerge": "e24d82fc10a53614493e041cdba29715b303963e",
   "final25": {
     "safetyCheckpoint": {
       "type": "user-approved backup-branch exception",
@@ -162,6 +162,9 @@
         "tollwaySpanCount": 3
       }
     },
-    "cleanPreview": "dpl_2rKPYSXETn64FteYT8hM85rUsoUL"
+    "cleanPreview": "dpl_2rKPYSXETn64FteYT8hM85rUsoUL",
+    "productionDeployment": "dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv",
+    "pagesRun": 37500261666,
+    "mainRegressionRun": 37500262557
   }
 }

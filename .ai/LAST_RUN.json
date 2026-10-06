@@ -1,15 +1,16 @@
 {
-  "evidenceVersion": 30,
-  "runType": "final29_tollways_extra_validation",
-  "phase": "FINAL29_TOLLWAYS_EXTRA_RELEASE",
-  "status": "VALIDATION_PASS_READY_FOR_PRODUCTION",
+  "evidenceVersion": 31,
+  "runType": "final29_tollways_extra_production_release",
+  "phase": "FINAL29_TOLLWAYS_EXTRA_PRODUCTION_VERIFIED",
+  "status": "PASS",
   "base": {
     "productionMainBefore": "99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
     "safetyTag": "backup-pre-FINAL29-TOLLWAYS-EXTRA-20261006",
     "safetyTagObject": "04098890a417085539050a1762459944c297eb8d",
     "safetyTagTarget": "99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
     "pullRequest": 156,
-    "finalValidationHead": "90c4a487a6d68b418029e4e9377e0bea177e1de3"
+    "finalValidationHead": "90c4a487a6d68b418029e4e9377e0bea177e1de3",
+    "productionMerge": "e24d82fc10a53614493e041cdba29715b303963e"
   },
   "versions": {
     "app": "2026.10.07-FINAL.29",
@@ -18,11 +19,11 @@
     "schema": 4
   },
   "work": {
-    "summary": "Field evidence on FINAL.28 showed the UI itself reported no highway/toll section, proving the remaining all-blue symptom was upstream classification input rather than rendering. FINAL.29 adds ORS dedicated tollways extra alongside waycategory, sanitizes and forwards both, and merges them at coordinate-span level. The real-provider Preview probe confirmed dedicated tollways data is available.",
-    "productStatus": "VALIDATED_NOT_RELEASED",
+    "summary": "Released FINAL.29 after field evidence showed the route itself reported no highway/toll classification. The relay now requests ORS dedicated tollways extra alongside waycategory, sanitizes both and merges them edge-by-edge. Real provider Preview evidence confirmed dedicated tollways spans, and production Vercel/Pages/live assets were verified.",
+    "productStatus": "PRODUCTION_VERIFIED",
     "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/156",
-    "previewDeployment": "dpl_2rKPYSXETn64FteYT8hM85rUsoUL",
-    "providerProbeDeployment": "dpl_Go54kJDgYbvTuoRKURRg88s3UzPG"
+    "productionDeployment": "dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv",
+    "pagesRun": 37500261666
   },
   "gates": {
     "safetyTag": "PASS",
@@ -30,29 +31,23 @@
     "finalRealEdge320px390px": "PASS: run 37499628848",
     "dedicatedTollwaysFixture": "PASS: waycategory 0 + tollways 1 -> red + 有料区間あり",
     "finalExistingBrowserRegressions": "PASS: run 37499628758",
-    "actualProviderTollways": "PASS: real driving-hgv probe; dedicated tollways values [1,0], Nagoya IC -> Komaki IC had 3 tollway spans",
-    "temporarySmokeProbeCleanup": "PASS: removed; final clean preview returns 404",
-    "preview": "PASS: dpl_2rKPYSXETn64FteYT8hM85rUsoUL READY",
-    "productionMerge": "NONE",
-    "productionDeployment": "NONE"
+    "actualProviderTollways": "PASS: real driving-hgv Preview; tollways [1,0], Nagoya IC -> Komaki IC had 3 tollway spans",
+    "temporarySmokeProbeCleanup": "PASS",
+    "productionMerge": "PASS: PR #156 -> e24d82fc10a53614493e041cdba29715b303963e",
+    "productionVercel": "PASS: dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv READY",
+    "mainPushBrowserRegression": "PASS: run 37500262557",
+    "githubPages": "PASS: run 37500261666",
+    "liveVersion": "PASS: 2026.10.07-FINAL.29",
+    "liveRoutingAsset": "PASS: FINAL.29 asset and dedicated tollways code",
+    "liveRelay": "PASS: production relay deployed, unsupported GET 405"
   },
-  "openItems": [
-    "Merge PR #156 and verify production Vercel, main regression, GitHub Pages and live FINAL.29 assets.",
-    "If the exact field route still lacks any classification after release, collect its origin/destination for provider/OSM investigation."
-  ],
-  "nextAction": "Merge PR #156, verify production/live FINAL.29, then close the maintenance scope.",
+  "openItems": [],
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If the same known field route still reports no classification, capture exact origin/destination for upstream provider/OSM analysis.",
   "unresolved": [
-    "Production release verification remains pending.",
+    "Exact route endpoints are required only if the same field route still fails on FINAL.29.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
-    "index.html",
-    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",

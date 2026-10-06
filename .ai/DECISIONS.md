@@ -315,3 +315,11 @@ This file records confirmed project decisions that must survive chat migration. 
 - Real provider evidence in Preview confirmed dedicated `tollways` is returned for `driving-hgv`: Nagoya IC → Komaki IC returned `[1,0]` values and three tollway spans.
 - Safety tag `backup-pre-FINAL29-TOLLWAYS-EXTRA-20261006` -> `99c49c38ff6f37d7e95d3353d52e3ea489daa6de`.
 - PR #156 final clean head `90c4a487a6d68b418029e4e9377e0bea177e1de3` passed 16/16 Node tests, Edge 320/390 run 37499628848 and browser regression run 37499628758. Clean Preview `dpl_2rKPYSXETn64FteYT8hM85rUsoUL` is READY; temporary provider probe is removed.
+
+## 2026-10-07 — FINAL.29 production release complete
+- PR #156 merged at `e24d82fc10a53614493e041cdba29715b303963e` after clean validation head `90c4a487a6d68b418029e4e9377e0bea177e1de3` passed 16/16 Node tests, Edge 320/390 run 37499628848, and browser regression run 37499628758.
+- Vercel production deployment `dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv` is READY. Main push browser regression run 37500262557 passed and GitHub Pages run 37500261666 completed successfully.
+- Live version is `2026.10.07-FINAL.29`; the public routing asset also reports FINAL.29 and contains dedicated tollways classification logic.
+- The production relay remains server-side and secure; unsupported GET returns 405. Real provider POST behavior was already verified in Preview with the exact same route code and Preview secret.
+- If the operator's exact field route still reports `高速・有料区間なし`, do not add broader guesses such as `waytype=1`; obtain exact route endpoints and inspect upstream OSM/ORS data for that route.
+- FINAL.29 closes the current routing-color maintenance scope and returns to AN15 real-evidence accumulation.
