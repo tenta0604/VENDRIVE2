@@ -54,3 +54,10 @@ test('heading prefers reported GPS direction and falls back to meaningful moveme
   assert.ok(Math.abs(routing.resolveHeading(a,east,null,null)-90)<1);
   assert.equal(routing.resolveHeading(a,{lat:35.300001,lng:136.800001},null,123),123);
 });
+
+test('route sections highlight both motorway and toll-only spans',()=>{
+  const mixed={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.301],[136.802,35.302],[136.803,35.303]]},summary:{distance:900,duration:120},waycategory:[[0,1,0],[1,2,2],[2,3,1]]};
+  assert.deepEqual(routing.routeSections(mixed).map(s=>({motorway:s.motorway,tollway:s.tollway,highlight:s.highlight})),[
+    {motorway:false,tollway:false,highlight:false},{motorway:false,tollway:true,highlight:true},{motorway:true,tollway:false,highlight:true}
+  ]);
+});
