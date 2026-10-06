@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.27** (keeps user-configurable HGV routing and adds motorway/ordinary-road color separation, directional current-position arrow, and smooth GPS marker motion; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.07-FINAL.28** (versioned routing asset cache fix; motorway/tollway red and fullscreen PIN interaction preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.27 route-color/fullscreen-PIN maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.28 routing-asset cache maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -97,3 +97,7 @@ FINAL.26 is released and production-verified. A real ORS HGV route from Nagoya I
 ## FINAL.27 route-color/fullscreen-PIN production release (2026-10-07)
 
 Repeated field feedback showed two concrete presentation defects. First, FINAL.25/26 used orange for motorway spans even though the desired operational distinction was red; it also highlighted only ORS Highway bit 1. FINAL.27 renders ordinary route spans blue and any Highway-bit or Tollways-bit span red, with legend/footnote text matching that meaning. Second, fullscreen MAP elevated the map above normal modal z-order and could use map-element native Fullscreen, which made PIN-opened machine details inaccessible. FINAL.27 uses app-managed full-viewport MAP as the authoritative fullscreen mode, places open modals above it, and keeps machine PIN wrappers pointer-interactive. Real Edge at 320/390 now explicitly taps a machine PIN during fullscreen and requires the machine detail modal to be visible. PR #152, Vercel production, main push regression and GitHub Pages all passed; live version is `2026.10.07-FINAL.27`.
+
+## FINAL.28 routing-asset cache production release (2026-10-07)
+
+The repeated all-blue field symptom exposed an asset-version defect rather than a new ORS classification defect. The app HTML had advanced through FINAL.27 while the external routing script URL remained fixed at `truck-routing.js?v=2026.10.06-TRUCK-ROUTE`. A client could therefore reuse an older routing module whose `routeSections` output lacked `highlight`, while FINAL.27's drawing code checked only `highlight`; that mixed-version state paints every span blue. FINAL.28 requests `truck-routing.js?v=2026.10.07-FINAL.28`, exports the same runtime `assetVersion`, verifies HTML/runtime/version.json agreement in real Edge, and falls back to `motorway || tollway` for legacy section objects. 15/15 Node tests, Edge 320/390, existing five regressions, Vercel production, main push regression and GitHub Pages all passed. Live version is `2026.10.07-FINAL.28`.

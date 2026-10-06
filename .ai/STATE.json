@@ -5,44 +5,44 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.27",
+  "appVersion": "2026.10.07-FINAL.28",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL27_ROUTE_COLOR_FULLSCREEN_PINS_PRODUCTION_VERIFIED",
+  "status": "FINAL28_ROUTING_ASSET_CACHE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.27 route color/fullscreen PIN fix — production released and verified",
-    "releaseStatus": "FINAL.27 is live. PR #152 merged to main at db781de00bf684e4fab0f4ba0aea7efbb9d67b1c. Vercel production deployment dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy is READY. GitHub Pages run 37492638028 succeeded and the live version endpoint reports 2026.10.07-FINAL.27.",
-    "rootCauses": [
-      "The prior motorway style was orange (#f97316), not red, so it could never satisfy the requested red highway display.",
-      "The prior highlight classifier only treated ORS Highway bit 1 as highlighted. FINAL.27 also highlights Tollways bit 2 because Japanese expressway/toll routing data can carry either or both bits; ordinary segments remain blue.",
-      "Fullscreen map mode elevated the map to z-index 15000 while machine modals remained at z-index 80, and the prior native element Fullscreen path could place only the map element in the fullscreen top layer. This could make PIN-opened details inaccessible or invisible."
+    "title": "FINAL.28 routing asset cache fix — production released and verified",
+    "releaseStatus": "FINAL.28 is live. PR #154 merged to main at 676e2e12debe529f620895b3c5911d855ef14768. Vercel production dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy is READY. GitHub Pages run 37495335651 succeeded, main push browser regression run 37495337396 passed, and the live version endpoint reports 2026.10.07-FINAL.28.",
+    "rootCause": [
+      "The app HTML version advanced through FINAL.27, but the external routing script URL remained fixed at truck-routing.js?v=2026.10.06-TRUCK-ROUTE.",
+      "A client could therefore load FINAL.27 HTML while reusing an older cached routing module. FINAL.27's route draw code expected section.highlight, while older routeSections output did not provide highlight. In that mixed-version state, every route span evaluates as non-priority and renders blue.",
+      "This is a client asset-version/cache compatibility defect, independent of the already-verified ORS waycategory Highway/Tollways bit semantics."
     ],
     "scope": [
-      "Ordinary route sections are blue (#2563eb). ORS motorway or tollway sections are red (#dc2626).",
-      "Legend and footnote explicitly say 高速・有料道路 / 赤.",
-      "Fullscreen MAP uses app-managed full-viewport mode as the authoritative path; no map-element native fullscreen request is required.",
-      "Open modals are raised above the fullscreen map and machine PIN wrappers are explicitly pointer-interactive.",
-      "Real Edge tests require tapping a machine PIN while fullscreen is active and observing the machine detail modal.",
-      "Existing HGV vehicle settings, Analytics engine, DB/schema, tasks, orders, visits and user data remain preserved."
+      "truck-routing.js is now requested with ?v=2026.10.07-FINAL.28, matching the application release.",
+      "truck-routing.js exports assetVersion=2026.10.07-FINAL.28.",
+      "Real Edge validation asserts version.json, HTML routing-script query and runtime routing assetVersion agree.",
+      "Route drawing has backward compatibility: a span is red when section.highlight, section.motorway or section.tollway is true, so legacy section objects do not turn known priority spans blue.",
+      "Highway/toll spans remain red (#dc2626), ordinary spans remain blue (#2563eb), and the FINAL.27 fullscreen PIN/detail fix remains unchanged.",
+      "Analytics engine, DB/schema, tasks, orders, visits, HGV profile and user data remain unchanged."
     ],
     "verification": {
-      "safetyTag": "PASS: annotated tag backup-pre-FINAL27-ROUTE-COLOR-FULLSCREEN-PINS-20261006 -> fb57b9bf4c58f825af83c6417f67521f28e262db",
-      "nodeTests": "PASS: 14/14",
-      "edge320px390px": "PASS: Truck route readiness gates run 37492389294",
-      "fullscreenPinInteraction": "PASS in real Edge 320px and 390px: fullscreen map -> machine PIN click -> machine detail modal visible while fullscreen state remains active",
-      "routeRedSegmentation": "PASS: browser fixture verifies ordinary blue plus toll-only and motorway spans red; unit test verifies Highway/Tollways flags",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37492389222 and the truck-route gate also reports all five browser regression gates passed",
-      "productionMerge": "PASS: PR #152 -> db781de00bf684e4fab0f4ba0aea7efbb9d67b1c",
-      "mainPushRegression": "PASS: Browser regression gates run 37492639670",
-      "productionVercel": "PASS: dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy READY",
-      "githubPages": "PASS: pages build/deployment run 37492638028",
-      "liveVersion": "PASS: 2026.10.07-FINAL.27",
-      "liveUi": "PASS: live page contains 高速・有料道路 legend, red-route explanation, fullscreen control and portrait guard"
+      "safetyTag": "PASS: annotated tag backup-pre-FINAL28-ROUTING-ASSET-CACHE-20261006 -> 3a510603de037c09dba04ae36c93d6c8a5938a7d",
+      "nodeTests": "PASS: 15/15",
+      "edge320px390px": "PASS: Truck route readiness gates run 37495132920",
+      "assetVersionMatch": "PASS in real Edge: script query and runtime VENDRIVETruckRouting.assetVersion equal version.json FINAL.28",
+      "staleSectionCompatibility": "PASS in real Edge: legacy-style section objects without highlight still render motorway/tollway priority spans red",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37495133094 and truck route gate reports all five browser regression gates passed",
+      "productionMerge": "PASS: PR #154 -> 676e2e12debe529f620895b3c5911d855ef14768",
+      "mainPushRegression": "PASS: Browser regression gates run 37495337396",
+      "productionVercel": "PASS: dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy READY",
+      "githubPages": "PASS: pages build/deployment run 37495335651",
+      "liveVersion": "PASS: 2026.10.07-FINAL.28",
+      "liveRoutingAsset": "PASS: public truck-routing.js?v=2026.10.07-FINAL.28 serves ASSET_VERSION=2026.10.07-FINAL.28"
     },
     "nextActions": [
       "Resume AN15 real evidence accumulation and promotion gates.",
-      "If a specific field route still appears blue where the operator knows a motorway/toll section exists, capture that exact origin/destination as a new evidence case rather than changing classification speculatively."
+      "If the same known expressway route is still blue after FINAL.28 is loaded, collect that exact route endpoint pair as field evidence because the client asset-version cause has now been removed."
     ]
   },
   "requiredUserInput": [],

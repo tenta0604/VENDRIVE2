@@ -296,3 +296,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Real Edge validation must include fullscreen -> actual machine PIN click -> visible machine detail modal; a synthetic event dispatch is not sufficient.
 - Safety tag `backup-pre-FINAL27-ROUTE-COLOR-FULLSCREEN-PINS-20261006` points to pre-edit main `fb57b9bf4c58f825af83c6417f67521f28e262db`.
 - PR #152 merged at `db781de00bf684e4fab0f4ba0aea7efbb9d67b1c`; final validation head `dba1dac3c888c9acae074d0932d69bb47d5d7b1e` passed 14/14 Node tests, real Edge 320/390 and all existing regressions. Production Vercel `dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy` and Pages run 37492638028 passed; live version is FINAL.27.
+
+## 2026-10-07 — FINAL.28 routing asset cache fix
+- Root cause of the repeated all-blue symptom: the app release changed but the external `truck-routing.js` URL kept the old fixed query `?v=2026.10.06-TRUCK-ROUTE`. This allowed a newer HTML draw implementation to run with an older cached routeSections implementation.
+- In the failing mixed-version combination, the HTML expects `section.highlight` while the older routing module does not provide it; all spans therefore fall through to blue. This failure mode is deterministic and is now covered by regression evidence.
+- `truck-routing.js` must use the same release version as `version.json`/APP_VERSION whenever its semantics change. FINAL.28 uses `?v=2026.10.07-FINAL.28` and exports `assetVersion='2026.10.07-FINAL.28'`.
+- Real Edge route gates must assert that the HTML script query, runtime routing `assetVersion`, and `version.json` all match.
+- Route rendering remains defensive: red priority is true when `highlight === true || motorway === true || tollway === true`. This preserves known motorway/tollway coloring if a legacy section object is ever encountered.
+- Safety tag `backup-pre-FINAL28-ROUTING-ASSET-CACHE-20261006` -> `3a510603de037c09dba04ae36c93d6c8a5938a7d`.
+- PR #154 merged at `676e2e12debe529f620895b3c5911d855ef14768`; validation head `5726577560c1eec81d5cb1de2639d1aff8295bbe` passed 15/15 Node tests, Edge 320/390 and all existing regressions. Production Vercel `dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy`, main regression 37495337396 and Pages 37495335651 passed; live version is FINAL.28.

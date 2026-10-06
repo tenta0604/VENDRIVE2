@@ -1,46 +1,48 @@
 {
-  "evidenceVersion": 28,
-  "runType": "final27_route_color_fullscreen_pins_release",
-  "phase": "FINAL27_ROUTE_COLOR_FULLSCREEN_PINS_PRODUCTION_VERIFIED",
+  "evidenceVersion": 29,
+  "runType": "final28_routing_asset_cache_release",
+  "phase": "FINAL28_ROUTING_ASSET_CACHE_PRODUCTION_VERIFIED",
   "status": "PASS",
   "base": {
-    "productionMainBefore": "fb57b9bf4c58f825af83c6417f67521f28e262db",
-    "safetyTag": "backup-pre-FINAL27-ROUTE-COLOR-FULLSCREEN-PINS-20261006",
-    "safetyTagObject": "e2b6d99d2afc803db6dc2d34c2aea4c416a5a1df",
-    "safetyTagTarget": "fb57b9bf4c58f825af83c6417f67521f28e262db",
-    "pullRequest": 152,
-    "finalValidationHead": "dba1dac3c888c9acae074d0932d69bb47d5d7b1e",
-    "productionMerge": "db781de00bf684e4fab0f4ba0aea7efbb9d67b1c"
+    "productionMainBefore": "3a510603de037c09dba04ae36c93d6c8a5938a7d",
+    "safetyTag": "backup-pre-FINAL28-ROUTING-ASSET-CACHE-20261006",
+    "safetyTagObject": "552ee73386a080e4d6d5d8667feb9f7e9b586815",
+    "safetyTagTarget": "3a510603de037c09dba04ae36c93d6c8a5938a7d",
+    "pullRequest": 154,
+    "finalValidationHead": "5726577560c1eec81d5cb1de2639d1aff8295bbe",
+    "productionMerge": "676e2e12debe529f620895b3c5911d855ef14768"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.27",
+    "app": "2026.10.07-FINAL.28",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Investigated the repeated field report that highway sections were not red and that fullscreen PINs were not usable. Found that the product intentionally used orange, not red, and that fullscreen map z-order/native element fullscreen could hide machine-detail UI. FINAL.27 uses red for motorway or tollway route spans, keeps ordinary roads blue, removes dependence on map-element native fullscreen, raises modals above the fullscreen map, and makes machine PIN wrappers explicitly interactive.",
+    "summary": "Fixed the repeated all-blue route symptom by removing the stale routing-asset version mismatch. The HTML had been updated while truck-routing.js kept a fixed old cache key, allowing FINAL.27 markup/draw logic to run with an older routing module that lacked section.highlight. FINAL.28 version-busts the asset, exports and validates an assetVersion, and keeps backward-compatible motorway/tollway red classification.",
     "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/152",
-    "productionDeployment": "dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy",
-    "pagesRun": 37492638028
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/154",
+    "productionDeployment": "dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy",
+    "pagesRun": 37495335651
   },
   "gates": {
     "safetyTag": "PASS",
-    "nodeTests": "PASS: 14/14",
-    "finalRealEdge320px390px": "PASS: run 37492389294",
-    "fullscreenPinMachineModal": "PASS: actual PIN click opens visible machineModal while fullscreen state is active",
-    "redRouteSegmentation": "PASS: ordinary blue; toll-only and motorway spans red",
-    "finalExistingBrowserRegressions": "PASS: run 37492389222",
-    "productionMerge": "PASS: PR #152 -> db781de00bf684e4fab0f4ba0aea7efbb9d67b1c",
-    "productionVercel": "PASS: dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy READY",
-    "mainPushBrowserRegression": "PASS: run 37492639670",
-    "githubPages": "PASS: run 37492638028",
-    "liveVersion": "PASS: 2026.10.07-FINAL.27",
-    "liveUi": "PASS: red-route meaning text / 高速・有料道路 legend / fullscreen control present"
+    "nodeTests": "PASS: 15/15",
+    "finalRealEdge320px390px": "PASS: run 37495132920",
+    "routingAssetVersionMatch": "PASS",
+    "staleSectionCompatibility": "PASS",
+    "redRouteSegmentation": "PASS",
+    "fullscreenPinMachineModal": "PASS: preserved from FINAL.27 and revalidated in route gate",
+    "finalExistingBrowserRegressions": "PASS: run 37495133094",
+    "productionMerge": "PASS: PR #154 -> 676e2e12debe529f620895b3c5911d855ef14768",
+    "productionVercel": "PASS: dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy READY",
+    "mainPushBrowserRegression": "PASS: run 37495337396",
+    "githubPages": "PASS: run 37495335651",
+    "liveVersion": "PASS: 2026.10.07-FINAL.28",
+    "liveRoutingAsset": "PASS: FINAL.28 query and ASSET_VERSION"
   },
   "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If a known motorway/toll section still renders blue in field use, record the exact route endpoints as new evidence.",
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If a known expressway still renders blue after FINAL.28 is loaded, capture the exact origin/destination as new evidence.",
   "unresolved": [
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
