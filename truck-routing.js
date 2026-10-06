@@ -28,7 +28,7 @@
     }
     return result;
   }
-  function routeSections(value){var normalized=route(value),coordinates=normalized.geometry.coordinates,info=normalized.waycategory;if(!info||!info.length)return [{motorway:false,coordinates:coordinates.map(function(c){return [c[0],c[1]];})}];var result=[];info.forEach(function(item){var points=coordinates.slice(item[0],item[1]+1),motorway=(item[2]&1)===1,last=result[result.length-1];if(last&&last.motorway===motorway){last.coordinates=last.coordinates.concat(points.slice(1).map(function(c){return [c[0],c[1]];}));}else result.push({motorway:motorway,coordinates:points.map(function(c){return [c[0],c[1]];})});});return result;}
+  function routeSections(value){var normalized=route(value),coordinates=normalized.geometry.coordinates,info=normalized.waycategory;if(!info||!info.length)return [{motorway:false,tollway:false,highlight:false,coordinates:coordinates.map(function(c){return [c[0],c[1]];})}];var result=[];info.forEach(function(item){var points=coordinates.slice(item[0],item[1]+1),motorway=(item[2]&1)===1,tollway=(item[2]&2)===2,highlight=motorway||tollway,last=result[result.length-1];if(last&&last.motorway===motorway&&last.tollway===tollway){last.coordinates=last.coordinates.concat(points.slice(1).map(function(c){return [c[0],c[1]];}));}else result.push({motorway:motorway,tollway:tollway,highlight:highlight,coordinates:points.map(function(c){return [c[0],c[1]];})});});return result;}
   function createClient(app){
     var destination=null,active=null,sequence=0,controller=null,busy=false,settingsDestination=null;
     var doc=app.document,el=function(id){return doc.getElementById(id);};
@@ -88,8 +88,8 @@
         var data=await response.json();if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
         active=route(data.route);draw();app.fit(active,destination);
-        var hasMotorway=routeSections(active).some(function(section){return section.motorway;});
-        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+(hasMotorway?'高速区間あり':'高速区間なし')+' ・ '+(v.avoidTolls?'有料道路回避中':'有料道路使用可'));
+        var sections=routeSections(active),hasMotorway=sections.some(function(section){return section.motorway;}),hasTollway=sections.some(function(section){return section.tollway;});
+        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+(hasMotorway?'高速区間あり':hasTollway?'有料区間あり':'高速・有料区間なし')+' ・ '+(v.avoidTolls?'有料道路回避中':'有料道路使用可'));
       }catch(e){if(token!==sequence)return;active=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
       finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
     }
