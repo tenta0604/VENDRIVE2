@@ -323,3 +323,14 @@ This file records confirmed project decisions that must survive chat migration. 
 - The production relay remains server-side and secure; unsupported GET returns 405. Real provider POST behavior was already verified in Preview with the exact same route code and Preview secret.
 - If the operator's exact field route still reports `高速・有料区間なし`, do not add broader guesses such as `waytype=1`; obtain exact route endpoints and inspect upstream OSM/ORS data for that route.
 - FINAL.29 closes the current routing-color maintenance scope and returns to AN15 real-evidence accumulation.
+
+## 2026-10-07 — FINAL.30 MAP highway mode
+- Highway use is an operator route-mode preference, not a vehicle dimension. The existing persisted `routeVehicle.avoidTolls` field remains the compatibility storage, but both UI surfaces present the mode positively as highway ON/OFF.
+- MAP contains a compact `高速 ON/OFF` control in the existing tool stack. It must not create a separate conflicting preference.
+- ON means `avoidTolls=false`: ORS HGV requests use `preference='fastest'`, allow highways/tollways, and still avoid ferries.
+- OFF means `avoidTolls=true`: ORS explicitly avoids `highways`, `tollways`, and ferries.
+- Changing the MAP toggle while a destination route exists must persist first, cancel stale in-flight/geometry state, and immediately recalculate using the new mode.
+- Vehicle settings use the same mode with positive wording `高速道路を使う`; checked=ON. Existing stored values remain compatible by inversion of `avoidTolls` only at presentation.
+- Real provider evidence for the same test route: ON returned motorway+tollway and four red sections; OFF returned neither motorway nor tollway and zero red sections.
+- Safety tag `backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006` -> `5d1727f653c5b5d3b41e547654ea5cc95fa247d8`.
+- PR #158 clean validation head `180ddcf056fd1ce44f2ef32fb93ee86b8e282076` passed 17/17 Node tests, Edge 320/390 run 37502908710 and browser regression run 37502908758. Clean Preview `dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B` is READY and the temporary probe is removed.
