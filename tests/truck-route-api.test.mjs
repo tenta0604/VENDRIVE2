@@ -87,14 +87,7 @@ test('highway ON falls back cleanly when provider returns no highway candidate',
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
-test('warm-instance quota guard caps upstream calls',async()=>{
-  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
-  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
-  try{
-    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
-    assert.equal(response.status,429);assert.ok(calls<=30);
-  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
-});
+
 
 test('highway ON rejects an excessive expressway detour',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
@@ -104,5 +97,14 @@ test('highway ON rejects an excessive expressway detour',async()=>{
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
     const data=await response.json();assert.equal(data.selection,'highway-unavailable');assert.deepEqual(data.route.summary,{distance:2000,duration:300});
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('warm-instance quota guard caps upstream calls',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
+  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
+  try{
+    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
+    assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
