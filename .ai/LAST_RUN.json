@@ -1,55 +1,53 @@
 {
-  "evidenceVersion": 27,
-  "runType": "final26_route_orientation_production_release",
-  "phase": "FINAL26_ROUTE_ORIENTATION_PRODUCTION_VERIFIED",
+  "evidenceVersion": 28,
+  "runType": "final27_route_color_fullscreen_pins_release",
+  "phase": "FINAL27_ROUTE_COLOR_FULLSCREEN_PINS_PRODUCTION_VERIFIED",
   "status": "PASS",
   "base": {
-    "productionMainBefore": "b51ffe064e22e7096e74324578ff0f88ff9d300d",
-    "safetyTag": "backup-pre-FINAL26-MAP-ORIENTATION-20261006",
-    "safetyTagObject": "064e185fde8049cebd3fa289d0781fb3633be03a",
-    "safetyTagTarget": "b51ffe064e22e7096e74324578ff0f88ff9d300d",
-    "pullRequest": 150,
-    "finalValidationHead": "991957c85f63948ae3a1ca4bb8975419bce0126a",
-    "productionMerge": "efd6ab30c6ac4937ff2cec482cbac450127ee75f"
+    "productionMainBefore": "fb57b9bf4c58f825af83c6417f67521f28e262db",
+    "safetyTag": "backup-pre-FINAL27-ROUTE-COLOR-FULLSCREEN-PINS-20261006",
+    "safetyTagObject": "e2b6d99d2afc803db6dc2d34c2aea4c416a5a1df",
+    "safetyTagTarget": "fb57b9bf4c58f825af83c6417f67521f28e262db",
+    "pullRequest": 152,
+    "finalValidationHead": "dba1dac3c888c9acae074d0932d69bb47d5d7b1e",
+    "productionMerge": "db781de00bf684e4fab0f4ba0aea7efbb9d67b1c"
   },
   "versions": {
-    "app": "2026.10.06-FINAL.26",
+    "app": "2026.10.07-FINAL.27",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Released FINAL.26 after investigating the reported motorway-color issue with a real ORS HGV route. The classifier was confirmed correct; FINAL.26 adds explicit motorway/toll-state messaging, clearer toll-avoidance guidance, portrait-first non-MAP behavior, and landscape/fullscreen MAP support. Final Edge/regression, Vercel production, GitHub Pages and live UI checks all passed.",
+    "summary": "Investigated the repeated field report that highway sections were not red and that fullscreen PINs were not usable. Found that the product intentionally used orange, not red, and that fullscreen map z-order/native element fullscreen could hide machine-detail UI. FINAL.27 uses red for motorway or tollway route spans, keeps ordinary roads blue, removes dependence on map-element native fullscreen, raises modals above the fullscreen map, and makes machine PIN wrappers explicitly interactive.",
     "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/150",
-    "productionDeployment": "dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N",
-    "pagesRun": 37487664235
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/152",
+    "productionDeployment": "dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy",
+    "pagesRun": 37492638028
   },
   "gates": {
-    "safetyTag": "PASS: immutable annotated pre-edit tag",
-    "actualOrsMotorway": "PASS: Nagoya IC -> Komaki IC; waycategory 3/1/3/0/3 includes motorway bit",
-    "nodeTests": "PASS: 13/13",
-    "finalRealEdge320px390px": "PASS: run 37486967621",
-    "finalExistingBrowserRegressions": "PASS: run 37486967417",
-    "routeStatusClarity": "PASS",
-    "portraitNonMap": "PASS",
-    "landscapeMapFullscreen": "PASS",
-    "productionMerge": "PASS: PR #150 -> efd6ab30c6ac4937ff2cec482cbac450127ee75f",
-    "productionVercel": "PASS: dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N READY",
-    "mainPushBrowserRegression": "PASS: run 37487130052",
-    "githubPages": "PASS: run 37487664235",
-    "liveVersion": "PASS: 2026.10.06-FINAL.26",
-    "liveUi": "PASS: portrait guard / MAP fullscreen / toll help / route legend visible",
-    "liveRelay": "PASS: production relay deployed, unsupported GET 405"
+    "safetyTag": "PASS",
+    "nodeTests": "PASS: 14/14",
+    "finalRealEdge320px390px": "PASS: run 37492389294",
+    "fullscreenPinMachineModal": "PASS: actual PIN click opens visible machineModal while fullscreen state is active",
+    "redRouteSegmentation": "PASS: ordinary blue; toll-only and motorway spans red",
+    "finalExistingBrowserRegressions": "PASS: run 37492389222",
+    "productionMerge": "PASS: PR #152 -> db781de00bf684e4fab0f4ba0aea7efbb9d67b1c",
+    "productionVercel": "PASS: dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy READY",
+    "mainPushBrowserRegression": "PASS: run 37492639670",
+    "githubPages": "PASS: run 37492638028",
+    "liveVersion": "PASS: 2026.10.07-FINAL.27",
+    "liveUi": "PASS: red-route meaning text / 高速・有料道路 legend / fullscreen control present"
   },
   "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. Keep FINAL.26 stable unless real field evidence identifies a concrete issue.",
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If a known motorway/toll section still renders blue in field use, record the exact route endpoints as new evidence.",
   "unresolved": [
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
+    ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
     "AI_ROADMAP.md",
     ".ai/DECISIONS.md"
   ]

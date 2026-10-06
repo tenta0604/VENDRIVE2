@@ -286,3 +286,13 @@ This file records confirmed project decisions that must survive chat migration. 
 - GitHub Pages run 37487664235 completed successfully and the live version endpoint reports `2026.10.06-FINAL.26`.
 - Live page verification confirms the portrait guard, MAP-only landscape guidance, ⛶ full-screen control, general/highway color legend, route footnote and toll-avoidance explanation are present.
 - FINAL.26 closes the current routing/orientation maintenance phase. Return to AN15 real-evidence accumulation unless new field evidence opens another bounded maintenance scope.
+
+## 2026-10-07 — FINAL.27 route red color and fullscreen PIN fix
+- Operational route colors are now explicit: ordinary road spans are blue `#2563eb`; spans whose ORS `waycategory` contains Highway bit 1 or Tollways bit 2 are red `#dc2626`.
+- This supersedes the earlier orange motorway-only presentation. The prior orange implementation was a direct mismatch with the requested red distinction.
+- Tollway-only spans are highlighted red as well because ORS represents Highway and Tollways as independent bit fields and Japanese toll/high-speed routing can contain either or both. The UI labels the red class `高速・有料道路` rather than pretending every red span is strictly an OSM motorway.
+- Fullscreen MAP is app-managed full-viewport mode. Do not rely on putting only `#map` into native Fullscreen, because PIN-triggered modal UI lives outside the map element.
+- While MAP fullscreen is active, open modals must remain above the map (modal z-index 25000 vs map 15000) and machine PIN wrappers remain pointer-interactive.
+- Real Edge validation must include fullscreen -> actual machine PIN click -> visible machine detail modal; a synthetic event dispatch is not sufficient.
+- Safety tag `backup-pre-FINAL27-ROUTE-COLOR-FULLSCREEN-PINS-20261006` points to pre-edit main `fb57b9bf4c58f825af83c6417f67521f28e262db`.
+- PR #152 merged at `db781de00bf684e4fab0f4ba0aea7efbb9d67b1c`; final validation head `dba1dac3c888c9acae074d0932d69bb47d5d7b1e` passed 14/14 Node tests, real Edge 320/390 and all existing regressions. Production Vercel `dpl_AxpA47bQjVqAk5K38ipVL8p6aVAy` and Pages run 37492638028 passed; live version is FINAL.27.
