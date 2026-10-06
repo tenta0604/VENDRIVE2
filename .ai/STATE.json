@@ -3,49 +3,52 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL31_HIGHWAY_CANDIDATE_PREFERENCE_RELEASE",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.07-FINAL.31",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL31_VALIDATED_READY_FOR_PRODUCTION",
+  "status": "FINAL31_HIGHWAY_CANDIDATE_PREFERENCE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.31 highway-candidate preference — validated, ready for production",
-    "releaseStatus": "PR #160 clean head 9b9341deb58241ce79b698c9e5ea6cb98a9e4224 is validated. Clean Preview dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL is READY and the temporary provider probe is removed.",
+    "title": "FINAL.31 highway-candidate preference — production released and verified",
+    "releaseStatus": "FINAL.31 is live. PR #160 merged to main at 00d8f0398680af4411a59fe393ceb43b5671a766. Vercel production dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm is READY. Main browser regression run 37536656828 and GitHub Pages run 37536654747 passed. Live version.json and public truck-routing.js report FINAL.31.",
     "rootCause": [
-      "FINAL.30 highway ON only allowed highways/tollways and requested fastest routing; it did not require or prefer a returned route that actually contained a motorway.",
-      "If ORS judged an all-surface route optimal, FINAL.30 accepted it unchanged even while the MAP control showed highway ON.",
-      "The public ORS API does not expose a direct prefer-highway weighting for driving-hgv, but it does support alternative route candidates."
+      "FINAL.30 highway ON only allowed expressways; it still accepted the single ORS fastest route when that route stayed entirely on surface roads.",
+      "The operator expectation is stronger: highway ON should prefer a route that actually contains motorway/tollway evidence when such a candidate exists."
     ],
     "scope": [
-      "Highway ON requests up to 3 ORS alternative HGV routes using target_count=3, share_factor=0.85 and weight_factor=1.8.",
-      "Selection priority is motorway candidate first, then tollway-only candidate, then the normal optimal route only when no highway/toll candidate exists.",
-      "Among candidates with the same priority, select the lowest duration and then lowest distance.",
-      "Highway OFF remains strict and requests no alternatives while avoiding highways+tollways+ferries.",
-      "Invalid optional alternative candidates are ignored; the primary route must still validate fail-closed.",
-      "FINAL.30 MAP toggle/persistence, FINAL.29 route classification/colors, fullscreen PIN behavior, HGV dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain unchanged."
+      "Highway ON requests up to 3 ORS alternative HGV routes.",
+      "Selection order is motorway candidate, then tollway-only candidate, then normal optimal fallback only when no highway/toll candidate exists.",
+      "Same-priority candidates are ordered by duration then distance.",
+      "Highway OFF remains strict with no alternatives and avoids highways+tollways+ferries.",
+      "FINAL.30 MAP toggle/persistence, FINAL.29 classification/colors, fullscreen PIN behavior, HGV dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain preserved."
     ],
     "verification": {
       "safetyTag": "PASS: backup-pre-FINAL31-HIGHWAY-CANDIDATE-PREFERENCE-20261006 -> 7620d348633f0de547110facc8c1de5073af4a6a",
       "nodeTests": "PASS: 19/19",
-      "edge320px390px": "PASS: Truck route readiness gates run 37536273305",
-      "candidateSelection": "PASS: API tests prove motorway alternative outranks faster surface and toll-only candidates; no-highway responses fall back cleanly",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37536273218 and truck-route gate reports all five existing browser regressions passed",
-      "actualProviderAlternatives": "PASS: Preview dpl_9F5T9oumpJUfdeELGW39bdKRRe3B returned 3 driving-hgv alternative features for Nagoya IC -> Komaki IC; all three contained motorway+tollway evidence",
-      "smokeCleanup": "PASS: temporary /api/final31-smoke removed; clean Preview dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL READY and smoke path 404",
-      "production": "NOT_RELEASED"
+      "finalEdge320px390px": "PASS: Truck route readiness gates run 37536273305",
+      "candidateSelection": "PASS: motorway alternative outranks faster surface and toll-only candidates; no-highway response falls back cleanly",
+      "actualProviderAlternatives": "PASS: Preview dpl_9F5T9oumpJUfdeELGW39bdKRRe3B returned 3 HGV alternatives for Nagoya IC -> Komaki IC; all contained motorway+tollway evidence",
+      "smokeCleanup": "PASS: temporary probe removed; clean Preview dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL READY",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37536273218",
+      "productionMerge": "PASS: PR #160 -> 00d8f0398680af4411a59fe393ceb43b5671a766",
+      "productionVercel": "PASS: dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm READY",
+      "mainPushRegression": "PASS: Browser regression gates run 37536656828",
+      "githubPages": "PASS: pages build/deployment run 37536654747",
+      "liveVersion": "PASS: 2026.10.07-FINAL.31",
+      "liveRoutingAsset": "PASS: public truck-routing.js?v=2026.10.07-FINAL.31 serves FINAL.31 and 高速優先ON logic",
+      "liveUi": "PASS: public app contains highway-candidate priority wording",
+      "productionRelay": "PASS: /api/route deployed; unsupported GET returns HTTP 405"
     },
     "nextActions": [
-      "Merge PR #160 to main.",
-      "Verify production Vercel, main browser regression, GitHub Pages, live FINAL.31 assets and production relay.",
-      "Close FINAL.31 and return to AN15 real evidence accumulation."
+      "Resume AN15 real evidence accumulation and promotion gates.",
+      "If the operator's same field route still does not use a highway on FINAL.31, collect the exact origin/destination because ORS did not return a usable motorway/tollway candidate for that route under the registered HGV restrictions."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/deployment/live verification for FINAL.31 remain pending.",
-    "If the operator's exact route still has no motorway/toll candidate after FINAL.31, exact origin/destination will be required to inspect that route directly.",
+    "Exact route endpoints are required only if the same field route still does not use a highway after FINAL.31.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {

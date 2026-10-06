@@ -1,15 +1,16 @@
 {
-  "evidenceVersion": 34,
-  "runType": "final31_highway_candidate_preference_validation",
-  "phase": "FINAL31_HIGHWAY_CANDIDATE_PREFERENCE_RELEASE",
-  "status": "VALIDATION_PASS_READY_FOR_PRODUCTION",
+  "evidenceVersion": 35,
+  "runType": "final31_highway_candidate_preference_production_release",
+  "phase": "FINAL31_HIGHWAY_CANDIDATE_PREFERENCE_PRODUCTION_VERIFIED",
+  "status": "PASS",
   "base": {
     "productionMainBefore": "7620d348633f0de547110facc8c1de5073af4a6a",
     "safetyTag": "backup-pre-FINAL31-HIGHWAY-CANDIDATE-PREFERENCE-20261006",
     "safetyTagObject": "939175e47f6ce93269f0960a85fef8034feef4fd",
     "safetyTagTarget": "7620d348633f0de547110facc8c1de5073af4a6a",
     "pullRequest": 160,
-    "finalValidationHead": "9b9341deb58241ce79b698c9e5ea6cb98a9e4224"
+    "finalValidationHead": "9b9341deb58241ce79b698c9e5ea6cb98a9e4224",
+    "productionMerge": "00d8f0398680af4411a59fe393ceb43b5671a766"
   },
   "versions": {
     "app": "2026.10.07-FINAL.31",
@@ -18,11 +19,11 @@
     "schema": 4
   },
   "work": {
-    "summary": "Fixed the remaining highway-ON semantics: instead of merely allowing highways, FINAL.31 asks ORS for up to three alternative HGV routes and prefers a candidate containing motorway evidence, then tollway evidence, before falling back to the optimal surface route only if no highway candidate exists.",
-    "productStatus": "VALIDATED_NOT_RELEASED",
+    "summary": "Released FINAL.31 so highway ON now actively prefers returned HGV candidates containing motorway/tollway evidence instead of merely allowing highways. ORS alternatives are requested and ranked motorway > tollway > optimal fallback.",
+    "productStatus": "PRODUCTION_VERIFIED",
     "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/160",
-    "previewDeployment": "dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL",
-    "providerProbeDeployment": "dpl_9F5T9oumpJUfdeELGW39bdKRRe3B"
+    "productionDeployment": "dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm",
+    "pagesRun": 37536654747
   },
   "gates": {
     "safetyTag": "PASS",
@@ -31,30 +32,24 @@
     "motorwayCandidatePriority": "PASS",
     "tollwayCandidateFallback": "PASS",
     "noHighwayFallback": "PASS",
+    "actualProviderAlternatives": "PASS: 3 real ORS HGV alternatives returned",
     "finalExistingBrowserRegressions": "PASS: run 37536273218",
-    "actualProviderAlternatives": "PASS: 3 HGV alternative features returned for Nagoya IC -> Komaki IC",
     "temporarySmokeProbeCleanup": "PASS",
-    "preview": "PASS: dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL READY",
-    "productionMerge": "NONE",
-    "productionDeployment": "NONE"
+    "productionMerge": "PASS: PR #160 -> 00d8f0398680af4411a59fe393ceb43b5671a766",
+    "productionVercel": "PASS: dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm READY",
+    "mainPushBrowserRegression": "PASS: run 37536656828",
+    "githubPages": "PASS: run 37536654747",
+    "liveVersion": "PASS: FINAL.31",
+    "liveRoutingAsset": "PASS: FINAL.31 / 高速優先ON",
+    "liveRelay": "PASS: 405 on unsupported GET"
   },
-  "openItems": [
-    "Merge PR #160 and verify production/live FINAL.31."
-  ],
-  "nextAction": "Merge PR #160, verify production/live FINAL.31, then close the maintenance scope.",
+  "openItems": [],
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If the same real route still avoids highways, collect exact endpoints for direct ORS route evidence.",
   "unresolved": [
-    "Production release verification remains pending.",
-    "Exact route endpoints are required only if the same field route still has no highway/toll candidate after FINAL.31.",
+    "Exact route endpoints are required only if the field route still fails on FINAL.31.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
-    "index.html",
-    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",

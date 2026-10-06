@@ -350,3 +350,10 @@ This file records confirmed project decisions that must survive chat migration. 
 - The existing compact MAP toggle remains the operator control and keeps the same persisted preference. Vehicle dimensions/weight restrictions remain applied to every candidate by ORS.
 - Safety tag `backup-pre-FINAL31-HIGHWAY-CANDIDATE-PREFERENCE-20261006` -> `7620d348633f0de547110facc8c1de5073af4a6a`.
 - PR #160 clean validation head `9b9341deb58241ce79b698c9e5ea6cb98a9e4224` passed 19/19 Node tests, Edge 320/390 run 37536273305 and browser regression run 37536273218. Real Preview deployment `dpl_9F5T9oumpJUfdeELGW39bdKRRe3B` confirmed three ORS HGV alternatives; clean Preview `dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL` is READY and the temporary probe is removed.
+
+## 2026-10-07 — FINAL.31 production release complete
+- PR #160 merged at `00d8f0398680af4411a59fe393ceb43b5671a766` after clean validation head `9b9341deb58241ce79b698c9e5ea6cb98a9e4224` passed 19/19 Node tests, Edge 320/390 run 37536273305, and browser regression run 37536273218.
+- Real ORS Preview confirmed `alternative_routes` on `driving-hgv`: Nagoya IC → Komaki IC returned three candidate features, all carrying motorway+tollway evidence.
+- Vercel production `dpl_2N4u6GfxFjYzg8ewB5zFLRgDvTJm` is READY. Main browser regression run 37536656828 and Pages run 37536654747 passed. Live version and routing asset are FINAL.31.
+- Highway ON now means actual candidate preference: motorway > tollway-only > ordinary optimal fallback. If no motorway/toll candidate is returned, do not fabricate a highway route or bypass HGV restrictions.
+- FINAL.31 closes the current highway-selection maintenance scope and returns to AN15 real-evidence accumulation.
