@@ -4,8 +4,7 @@ export async function GET() {
   if (process.env.VERCEL_ENV !== 'preview') return Response.json({ok:false,message:'preview only'},{status:404});
   const origin='https://final26-motorway-smoke.local';
   const cases=[
-    {name:'nagoya-hamamatsu',origin:{lat:35.1709,lng:136.8815},destination:{lat:34.7038,lng:137.7347}},
-    {name:'nagoya-shizuoka',origin:{lat:35.1709,lng:136.8815},destination:{lat:34.9756,lng:138.3828}}
+    {name:'nagoya-ic-komaki-ic',origin:{lat:35.17278,lng:137.01917},destination:{lat:35.301583,lng:136.908389}}
   ];
   const vehicle={height:2.38,width:1.88,length:5.57,weight:6.095,avoidTolls:false};
   const results=[];
