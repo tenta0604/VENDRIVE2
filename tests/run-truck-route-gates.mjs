@@ -44,7 +44,7 @@ for(const width of [320,390]){
     const stored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
     async function openMachine(code){await page.locator('.tabs button[data-page="machinesPage"]').click();await page.locator('#machineSearch').fill(code);await page.locator('#machineResults .result').first().click();await page.locator('#machineModal.open').waitFor();}
     async function waitText(text){await page.waitForFunction(t=>document.getElementById('truckRouteSummary').textContent.includes(t),text);}
-    const paths=()=>page.locator('#map path[stroke="#2563eb"]').count();
+    const paths=()=>page.locator('#map path[stroke="#2563eb"], #map path[fill="#2563eb"]').count();
     await page.goto(base+'/index.html',{waitUntil:'load'});
     await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
     await openMachine('T1');await page.locator('#machineRoute').click();
