@@ -43,12 +43,12 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);assert.equal(body.preference,'fastest');
     assert.deepEqual(body.extra_info,['waycategory','tollways']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
-    assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);
+    assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);assert.equal(body.alternative_routes,undefined);
     assert.deepEqual(data.route.summary,{distance:1800,duration:280});
     assert.deepEqual(data.route.waycategory,[[0,2,0]]);assert.deepEqual(data.route.tollways,[[0,1,0],[1,2,1]]);assert.deepEqual(routing.routeSections(data.route).map(x=>({motorway:x.motorway,tollway:x.tollway})),[{motorway:false,tollway:false},{motorway:false,tollway:true}]);
     assert.equal(JSON.stringify(data).includes('test-secret'),false);
     assert.equal(response.headers.get('cache-control'),'no-store');
-    await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.deepEqual(JSON.parse(sent.options.body).options.avoid_features,['ferries']);
+    await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));{const onBody=JSON.parse(sent.options.body);assert.deepEqual(onBody.options.avoid_features,['ferries']);assert.deepEqual(onBody.alternative_routes,{target_count:3,share_factor:0.85,weight_factor:1.8});}
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 test('provider failures and malformed geometry fail closed without car/straight-line fallback',async()=>{
@@ -74,3 +74,25 @@ test('warm-instance quota guard caps upstream calls',async()=>{
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
+
+test('highway ON prefers a motorway alternative over a surface optimal route',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.304],[136.81,35.31]]},properties:{summary:{distance:1600,duration:180},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const motorway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.802,35.301],[136.806,35.306],[136.81,35.31]]},properties:{summary:{distance:2100,duration:210},extras:{waycategory:{values:[[0,1,0],[1,3,1]]},tollways:{values:[[0,1,0],[1,3,1]]}}}};
+  const tollOnly={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.803,35.302],[136.807,35.307],[136.81,35.31]]},properties:{summary:{distance:1900,duration:195},extras:{waycategory:{values:[[0,3,0]]},tollways:{values:[[0,1,0],[1,3,1]]}}}};
+  globalThis.fetch=async()=>Response.json({features:[surface,tollOnly,motorway]});
+  try{
+    const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.selection,'motorway-preferred');assert.deepEqual(data.route.summary,{distance:2100,duration:210});
+    assert.equal(routing.routeSections(data.route).some(section=>section.motorway),true);
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+test('highway ON falls back cleanly when provider returns no highway candidate',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.305],[136.81,35.31]]},properties:{summary:{distance:1500,duration:170},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  globalThis.fetch=async()=>Response.json({features:[surface]});
+  try{
+    const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.selection,'highway-unavailable');assert.deepEqual(data.route.summary,{distance:1500,duration:170});
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
