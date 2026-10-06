@@ -4,7 +4,7 @@
 
 - Visible app baseline: **2026.10.07-FINAL.28** (versioned routing asset cache fix; motorway/tollway red and fullscreen PIN interaction preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.28 routing-asset cache maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
+- Active engineering phase: **FINAL.29 dedicated tollways-extra maintenance, validated and ready for production**. The AN15 real-evidence sequence remains next after release verification.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -101,3 +101,7 @@ Repeated field feedback showed two concrete presentation defects. First, FINAL.2
 ## FINAL.28 routing-asset cache production release (2026-10-07)
 
 The repeated all-blue field symptom exposed an asset-version defect rather than a new ORS classification defect. The app HTML had advanced through FINAL.27 while the external routing script URL remained fixed at `truck-routing.js?v=2026.10.06-TRUCK-ROUTE`. A client could therefore reuse an older routing module whose `routeSections` output lacked `highlight`, while FINAL.27's drawing code checked only `highlight`; that mixed-version state paints every span blue. FINAL.28 requests `truck-routing.js?v=2026.10.07-FINAL.28`, exports the same runtime `assetVersion`, verifies HTML/runtime/version.json agreement in real Edge, and falls back to `motorway || tollway` for legacy section objects. 15/15 Node tests, Edge 320/390, existing five regressions, Vercel production, main push regression and GitHub Pages all passed. Live version is `2026.10.07-FINAL.28`.
+
+## FINAL.29 dedicated tollways-extra validation (2026-10-07)
+
+FINAL.28 field evidence showed the route summary itself reported `高速・有料区間なし`, so the remaining all-blue symptom was no longer a draw/cache defect. The relay had requested only ORS `waycategory`, even though ORS exposes dedicated `tollways` extra information separately. FINAL.29 requests and sanitizes both sources, then marks a geometry span red when either waycategory Highway/Tollways evidence or dedicated `tollways=1` evidence exists. It intentionally does not use `waytype=1` as a red fallback because that bucket also includes primary/trunk roads. The browser fixture reproduces the field-shaped case `waycategory=0` plus `tollways=1` and requires a red span and `有料区間あり`. Final clean Edge 320/390 and all five existing browser regressions pass. A real Vercel Preview provider probe confirmed dedicated tollways values `[1,0]` and three tollway spans on Nagoya IC → Komaki IC. Production remains FINAL.28 until PR #156 is merged and live-verified.
