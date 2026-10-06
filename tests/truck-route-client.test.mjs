@@ -62,8 +62,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.30 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.07-FINAL.30');
+test('routing asset version matches FINAL.31 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.07-FINAL.31');
 });
 
 test('dedicated tollways extra highlights a route when waycategory reports no highway or toll bits',()=>{
@@ -77,7 +77,7 @@ test('MAP highway toggle persists positive mode and recalculates an active route
   const h=harness();h.client.start(target);await tick();
   assert.equal(h.profile.avoidTolls,true);assert.match(h.node('mapHighwayToggle').textContent,/OFF/);assert.equal(h.calls,1);
   h.node('mapHighwayToggle').onclick();await tick();
-  assert.equal(h.profile.avoidTolls,false);assert.match(h.node('mapHighwayToggle').textContent,/ON/);assert.match(h.node('truckRouteSummary').textContent,/高速利用ON/);assert.equal(h.calls,2);
+  assert.equal(h.profile.avoidTolls,false);assert.match(h.node('mapHighwayToggle').textContent,/ON/);assert.match(h.node('truckRouteSummary').textContent,/高速優先ON/);assert.equal(h.calls,2);
   h.node('mapHighwayToggle').onclick();await tick();
   assert.equal(h.profile.avoidTolls,true);assert.match(h.node('mapHighwayToggle').textContent,/OFF/);assert.match(h.node('truckRouteSummary').textContent,/高速利用OFF/);assert.equal(h.calls,3);
 });

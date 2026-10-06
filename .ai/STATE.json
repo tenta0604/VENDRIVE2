@@ -3,52 +3,49 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "activePhase": "FINAL31_HIGHWAY_CANDIDATE_PREFERENCE_RELEASE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.30",
+  "appVersion": "2026.10.07-FINAL.31",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL30_HIGHWAY_MAP_TOGGLE_PRODUCTION_VERIFIED",
+  "status": "FINAL31_VALIDATED_READY_FOR_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.30 MAP highway toggle — production released and verified",
-    "releaseStatus": "FINAL.30 is live. PR #158 merged to main at 5ba067cac0bd660d5908a5848716d591190453a8. Vercel production dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7 is READY. Main browser regression run 37503368121 and GitHub Pages run 37503366758 passed. Live version.json and public truck-routing.js report FINAL.30.",
+    "title": "FINAL.31 highway-candidate preference — validated, ready for production",
+    "releaseStatus": "PR #160 clean head 9b9341deb58241ce79b698c9e5ea6cb98a9e4224 is validated. Clean Preview dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL is READY and the temporary provider probe is removed.",
     "rootCause": [
-      "Field review showed the selected route was not entering an expressway; the missing control was route choice, not just route coloring.",
-      "The old vehicle preference was buried in settings and phrased inversely as avoiding tollways.",
-      "OFF did not explicitly avoid highways, while ON did not explicitly request fastest routing."
+      "FINAL.30 highway ON only allowed highways/tollways and requested fastest routing; it did not require or prefer a returned route that actually contained a motorway.",
+      "If ORS judged an all-surface route optimal, FINAL.30 accepted it unchanged even while the MAP control showed highway ON.",
+      "The public ORS API does not expose a direct prefer-highway weighting for driving-hgv, but it does support alternative route candidates."
     ],
     "scope": [
-      "Compact MAP 高速 ON/OFF control is in the existing map tool stack.",
-      "MAP and vehicle settings share the same persisted routeVehicle.avoidTolls preference.",
-      "ON uses preference=fastest and allows highways/tollways; OFF avoids highways+tollways+ferries.",
-      "Active route toggles persist and immediately recalculate.",
-      "Vehicle settings show the same mode positively as 高速道路を使う.",
-      "FINAL.29 toll classification/coloring, fullscreen PIN behavior, HGV dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain preserved."
+      "Highway ON requests up to 3 ORS alternative HGV routes using target_count=3, share_factor=0.85 and weight_factor=1.8.",
+      "Selection priority is motorway candidate first, then tollway-only candidate, then the normal optimal route only when no highway/toll candidate exists.",
+      "Among candidates with the same priority, select the lowest duration and then lowest distance.",
+      "Highway OFF remains strict and requests no alternatives while avoiding highways+tollways+ferries.",
+      "Invalid optional alternative candidates are ignored; the primary route must still validate fail-closed.",
+      "FINAL.30 MAP toggle/persistence, FINAL.29 route classification/colors, fullscreen PIN behavior, HGV dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain unchanged."
     ],
     "verification": {
-      "safetyTag": "PASS: backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006 -> 5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
-      "nodeTests": "PASS: 17/17",
-      "finalEdge320px390px": "PASS: Truck route readiness gates run 37502908710",
-      "mapToggle": "PASS: ON -> OFF -> ON saves and automatically recalculates in real Edge",
-      "providerOnOff": "PASS: same real ORS route; ON motorway+tollway/red4, OFF no motorway/tollway/red0",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37502908758",
-      "smokeCleanup": "PASS: temporary smoke removed; clean Preview dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B READY",
-      "productionMerge": "PASS: PR #158 -> 5ba067cac0bd660d5908a5848716d591190453a8",
-      "productionVercel": "PASS: dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7 READY",
-      "mainPushRegression": "PASS: Browser regression gates run 37503368121",
-      "githubPages": "PASS: pages build/deployment run 37503366758",
-      "liveVersion": "PASS: 2026.10.07-FINAL.30",
-      "liveRoutingAsset": "PASS: public truck-routing.js?v=2026.10.07-FINAL.30 serves FINAL.30 toggle logic",
-      "productionRelay": "PASS: /api/route deployed; unsupported GET returns HTTP 405",
-      "sourceHtml": "PASS: main index contains compact mapHighwayToggle and positive 高速道路を使う settings"
+      "safetyTag": "PASS: backup-pre-FINAL31-HIGHWAY-CANDIDATE-PREFERENCE-20261006 -> 7620d348633f0de547110facc8c1de5073af4a6a",
+      "nodeTests": "PASS: 19/19",
+      "edge320px390px": "PASS: Truck route readiness gates run 37536273305",
+      "candidateSelection": "PASS: API tests prove motorway alternative outranks faster surface and toll-only candidates; no-highway responses fall back cleanly",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37536273218 and truck-route gate reports all five existing browser regressions passed",
+      "actualProviderAlternatives": "PASS: Preview dpl_9F5T9oumpJUfdeELGW39bdKRRe3B returned 3 driving-hgv alternative features for Nagoya IC -> Komaki IC; all three contained motorway+tollway evidence",
+      "smokeCleanup": "PASS: temporary /api/final31-smoke removed; clean Preview dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL READY and smoke path 404",
+      "production": "NOT_RELEASED"
     },
     "nextActions": [
-      "Resume AN15 real evidence accumulation and promotion gates."
+      "Merge PR #160 to main.",
+      "Verify production Vercel, main browser regression, GitHub Pages, live FINAL.31 assets and production relay.",
+      "Close FINAL.31 and return to AN15 real evidence accumulation."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
+    "Production merge/deployment/live verification for FINAL.31 remain pending.",
+    "If the operator's exact route still has no motorway/toll candidate after FINAL.31, exact origin/destination will be required to inspect that route directly.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {

@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.30** (compact MAP highway ON/OFF control; ON fastest HGV with highways/tolls allowed, OFF avoids highways+tolls; FINAL.29 classification and prior fullscreen behavior preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.07-FINAL.31** (highway ON requests alternative HGV routes and prefers motorway/toll candidates instead of merely allowing highways; FINAL.30 compact MAP toggle and prior routing behavior preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.30 MAP highway-toggle maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
+- Active engineering phase: **FINAL.31 highway-candidate preference maintenance, validated and ready for production**. The AN15 real-evidence sequence remains next after release verification.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -117,3 +117,7 @@ Field use showed the practical issue was route choice: the displayed route was n
 ## FINAL.30 MAP highway-toggle production release (2026-10-07)
 
 FINAL.30 is released and production-verified. The MAP now has a compact `高速 ON/OFF` control sharing the same persisted preference as truck settings. ON requests fastest HGV routing with highways/tollways allowed; OFF explicitly avoids highways/tollways. Active routes recalculate immediately on toggle. Real provider comparison confirmed ON used motorway+tollway/red sections while OFF used no motorway/tollway/red sections. PR #158 merged, Vercel production is READY, main regression and GitHub Pages passed, and the live version/routing asset report `2026.10.07-FINAL.30`.
+
+## FINAL.31 highway-candidate preference validation (2026-10-07)
+
+FINAL.30 exposed the remaining semantic gap: highway ON only allowed expressways; ORS could still return an all-surface fastest route and VENDRIVE accepted it. FINAL.31 requests up to three HGV alternative routes when highway mode is ON, then selects motorway candidates first, tollway-only candidates second, and the normal optimal route only when no highway/toll candidate exists. Same-priority candidates are ordered by duration then distance. OFF remains strict and requests no alternatives while avoiding highways/tollways/ferries. 19/19 Node tests, real Edge 320/390, and all five existing browser regressions pass. A real Preview ORS probe returned three alternative HGV features for Nagoya IC → Komaki IC and all three contained motorway/tollway evidence. Production remains FINAL.30 until PR #160 is merged and live-verified.
