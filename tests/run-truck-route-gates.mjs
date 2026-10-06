@@ -53,9 +53,11 @@ for(const width of [320,390]){
     assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'');assert.equal(count,0);
     await page.locator('#truckVehicleSave').click();assert.match(await page.locator('#truckVehicleError').innerText(),/全高/);assert.equal(count,0);
     for(const [field,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))await page.locator('#truckVehicle_'+field).fill(value);
+    await page.locator('#truckVehicleAvoidTolls').uncheck();
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
     assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=3);
     assert.ok(await roadPathCount('#2563eb')>=1);assert.ok(await roadPathCount('#f97316')>=1);
+    assert.match(await page.locator('#truckRouteSummary').innerText(),/高速区間あり/);assert.match(await page.locator('#truckRouteSummary').innerText(),/有料道路使用可/);
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
     const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.304,longitude:136.802,accuracy:8,heading:null}}));
@@ -85,11 +87,17 @@ for(const width of [320,390]){
     await page.reload({waitUntil:'load'});await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
     await page.locator('.tabs button[data-page="mapPage"]').click();assert.match(await page.locator('#truckVehicleSummary').innerText(),/4.8t/);assert.equal(count,beforeMissing);
     await page.locator('#truckVehicleSettings').click();assert.equal(await page.locator('#truckVehicle_height').inputValue(),'285');await page.locator('#truckVehicleCancel').click();
+    // Non-map mobile landscape is portrait-guarded, while MAP remains landscape-capable and has a fullscreen fallback.
+    await page.evaluate(()=>document.body.classList.add('touchDevice'));await page.setViewportSize({width:932,height:430});await page.locator('.tabs button[data-page="todayPage"]').click();assert.equal(await page.locator('#portraitGuard').isVisible(),true);
+    await page.locator('#portraitOpenMap').click();assert.equal(await page.locator('#portraitGuard').isVisible(),false);
+    await page.evaluate(()=>{document.getElementById('map').requestFullscreen=()=>Promise.reject(new Error('fixture fullscreen unsupported'));});
+    await page.locator('#mapFullscreen').click();await page.waitForFunction(()=>document.body.classList.contains('mapFullscreen'));var fullBox=await page.locator('#map').boundingBox();assert.ok(fullBox&&fullBox.width>=920&&fullBox.height>=420,'map fullscreen should fill landscape viewport');
+    await page.locator('#mapFullscreen').click();await page.waitForFunction(()=>!document.body.classList.contains('mapFullscreen'));await page.setViewportSize({width,height:932});
     // The existing explicit external-navigation path remains separate.
     let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
     await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
     assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
-    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','motorway-color-segmentation','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
+    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','motorway-color-segmentation','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
     console.log(`PASS truck route browser ${width}px`);
   }finally{await context.close();await rm(profile,{recursive:true,force:true});}
 }
