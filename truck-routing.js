@@ -44,7 +44,7 @@
       el('truckRouteExternal').disabled=!destination;
     }
     function profile(){return vehicle(app.getVehicle());}
-    function summary(){var v;try{v=profile();}catch(e){el('truckVehicleSummary').textContent='未登録：実車の寸法・総重量を設定してください';return;}el('truckVehicleSummary').textContent='全高 '+v.height+'m / 全幅 '+v.width+'m / 全長 '+v.length+'m / 総重量 '+v.weight+'t'+(v.axleload?' / 軸重 '+v.axleload+'t':' / 軸重未設定');}
+    function summary(){var v;try{v=profile();}catch(e){el('truckVehicleSummary').textContent='未登録：実車の寸法・総重量を設定してください';return;}el('truckVehicleSummary').textContent='全高 '+v.height+'m / 全幅 '+v.width+'m / 全長 '+v.length+'m / 総重量 '+v.weight+'t'+(v.axleload?' / 軸重 '+v.axleload+'t':' / 軸重未設定')+(v.avoidTolls?' / 有料道路回避':' / 有料道路使用可');}
     function openSettings(target){
       settingsDestination=target||null;var v=app.getVehicle()||{};
       ['height','width','length','weight','axleload'].forEach(function(key){el('truckVehicle_'+key).value=typeof v[key]==='number'?(key==='weight'||key==='axleload'?v[key]*1000:v[key]*100):'';});
@@ -88,7 +88,8 @@
         var data=await response.json();if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
         active=route(data.route);draw();app.fit(active,destination);
-        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮）');
+        var hasMotorway=routeSections(active).some(function(section){return section.motorway;});
+        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+(hasMotorway?'高速区間あり':'高速区間なし')+' ・ '+(v.avoidTolls?'有料道路回避中':'有料道路使用可'));
       }catch(e){if(token!==sequence)return;active=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
       finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
     }
