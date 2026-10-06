@@ -1,53 +1,60 @@
 {
-  "evidenceVersion": 33,
-  "runType": "final30_highway_map_toggle_production_release",
-  "phase": "FINAL30_HIGHWAY_MAP_TOGGLE_PRODUCTION_VERIFIED",
-  "status": "PASS",
+  "evidenceVersion": 34,
+  "runType": "final31_highway_candidate_preference_validation",
+  "phase": "FINAL31_HIGHWAY_CANDIDATE_PREFERENCE_RELEASE",
+  "status": "VALIDATION_PASS_READY_FOR_PRODUCTION",
   "base": {
-    "productionMainBefore": "5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
-    "safetyTag": "backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006",
-    "safetyTagObject": "e56a7dc03b986f5ba5c833ccbb68292b894cd69a",
-    "safetyTagTarget": "5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
-    "pullRequest": 158,
-    "finalValidationHead": "180ddcf056fd1ce44f2ef32fb93ee86b8e282076",
-    "productionMerge": "5ba067cac0bd660d5908a5848716d591190453a8"
+    "productionMainBefore": "7620d348633f0de547110facc8c1de5073af4a6a",
+    "safetyTag": "backup-pre-FINAL31-HIGHWAY-CANDIDATE-PREFERENCE-20261006",
+    "safetyTagObject": "939175e47f6ce93269f0960a85fef8034feef4fd",
+    "safetyTagTarget": "7620d348633f0de547110facc8c1de5073af4a6a",
+    "pullRequest": 160,
+    "finalValidationHead": "9b9341deb58241ce79b698c9e5ea6cb98a9e4224"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.30",
+    "app": "2026.10.07-FINAL.31",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Released compact MAP highway ON/OFF control synchronized with truck settings. ON requests fastest HGV routing with highways/tolls allowed; OFF explicitly avoids highways and tollways. Active routes recalculate immediately. Real provider ON/OFF comparison confirmed route behavior changes.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/158",
-    "productionDeployment": "dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7",
-    "pagesRun": 37503366758
+    "summary": "Fixed the remaining highway-ON semantics: instead of merely allowing highways, FINAL.31 asks ORS for up to three alternative HGV routes and prefers a candidate containing motorway evidence, then tollway evidence, before falling back to the optimal surface route only if no highway candidate exists.",
+    "productStatus": "VALIDATED_NOT_RELEASED",
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/160",
+    "previewDeployment": "dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL",
+    "providerProbeDeployment": "dpl_9F5T9oumpJUfdeELGW39bdKRRe3B"
   },
   "gates": {
     "safetyTag": "PASS",
-    "nodeTests": "PASS: 17/17",
-    "finalRealEdge320px390px": "PASS: run 37502908710",
-    "mapHighwayToggle": "PASS",
-    "highwayOffAvoidance": "PASS",
-    "highwayOnFastestMode": "PASS",
-    "actualProviderOnOff": "PASS: ON motorway+tollway/red4; OFF no motorway/tollway/red0",
-    "finalExistingBrowserRegressions": "PASS: run 37502908758",
-    "productionMerge": "PASS: PR #158 -> 5ba067cac0bd660d5908a5848716d591190453a8",
-    "productionVercel": "PASS: dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7 READY",
-    "mainPushBrowserRegression": "PASS: run 37503368121",
-    "githubPages": "PASS: run 37503366758",
-    "liveVersion": "PASS: FINAL.30",
-    "liveRoutingAsset": "PASS: FINAL.30",
-    "liveRelay": "PASS: 405 on unsupported GET"
+    "nodeTests": "PASS: 19/19",
+    "finalRealEdge320px390px": "PASS: run 37536273305",
+    "motorwayCandidatePriority": "PASS",
+    "tollwayCandidateFallback": "PASS",
+    "noHighwayFallback": "PASS",
+    "finalExistingBrowserRegressions": "PASS: run 37536273218",
+    "actualProviderAlternatives": "PASS: 3 HGV alternative features returned for Nagoya IC -> Komaki IC",
+    "temporarySmokeProbeCleanup": "PASS",
+    "preview": "PASS: dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL READY",
+    "productionMerge": "NONE",
+    "productionDeployment": "NONE"
   },
-  "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE.",
+  "openItems": [
+    "Merge PR #160 and verify production/live FINAL.31."
+  ],
+  "nextAction": "Merge PR #160, verify production/live FINAL.31, then close the maintenance scope.",
   "unresolved": [
+    "Production release verification remains pending.",
+    "Exact route endpoints are required only if the same field route still has no highway/toll candidate after FINAL.31.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
+    "api/route.mjs",
+    "truck-routing.js",
+    "tests/truck-route-api.test.mjs",
+    "tests/truck-route-client.test.mjs",
+    "tests/run-truck-route-gates.mjs",
+    "index.html",
+    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",

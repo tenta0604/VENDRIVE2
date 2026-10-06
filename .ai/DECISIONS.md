@@ -340,3 +340,13 @@ This file records confirmed project decisions that must survive chat migration. 
 - Real ORS Preview comparison on the same route verified the routing control itself: ON returned motorway+tollway with four red sections; OFF returned neither motorway nor tollway and zero red sections.
 - Vercel production `dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7` is READY. Main browser regression run 37503368121 and Pages run 37503366758 passed. Live version and routing asset are FINAL.30.
 - FINAL.30 closes the highway-mode maintenance scope and returns to AN15 real-evidence accumulation.
+
+## 2026-10-07 — FINAL.31 highway candidate preference
+- Highway ON means prefer a route that actually contains expressway evidence, not merely permit expressways.
+- The public ORS API has no direct driving-hgv prefer-highway weighting, so ON requests `alternative_routes={target_count:3,share_factor:0.85,weight_factor:1.8}` on the fastest HGV calculation.
+- Candidate selection order is: motorway evidence first, then tollway-only evidence, then the normal optimal route only when no highway/toll candidate exists. Within the same class, choose lower duration then lower distance.
+- Highway OFF does not request alternatives and continues to avoid highways, tollways and ferries.
+- Invalid optional alternatives may be ignored, but the primary provider route must validate fail-closed; never fall back to car routing or straight-line geometry.
+- The existing compact MAP toggle remains the operator control and keeps the same persisted preference. Vehicle dimensions/weight restrictions remain applied to every candidate by ORS.
+- Safety tag `backup-pre-FINAL31-HIGHWAY-CANDIDATE-PREFERENCE-20261006` -> `7620d348633f0de547110facc8c1de5073af4a6a`.
+- PR #160 clean validation head `9b9341deb58241ce79b698c9e5ea6cb98a9e4224` passed 19/19 Node tests, Edge 320/390 run 37536273305 and browser regression run 37536273218. Real Preview deployment `dpl_9F5T9oumpJUfdeELGW39bdKRRe3B` confirmed three ORS HGV alternatives; clean Preview `dpl_6v1R5UBYRSuxw5utwiSDX6vXswaL` is READY and the temporary probe is removed.
