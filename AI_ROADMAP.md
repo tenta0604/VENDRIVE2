@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.05-FINAL.23** (field workflow simplified; tasks support arbitrary multi-machine selection targets plus manufacturer targeting and configurable percentage auto-completion; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.06-FINAL.24** (adds user-configurable 2t/HGV road-route display while preserving FINAL.23 task selection; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **User-approved truck-route draft, live provider verified and awaiting production release approval**. Draft PR #145 passed final real Edge 320px/390px, existing regression gates, and a real ORS driving-hgv Preview route. Production remains FINAL.23 and unmerged. The intelligence promotion sequence remains unchanged.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.24 truck routing is released and production-verified; no additional product phase is active without new field evidence.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -78,6 +78,6 @@ Field verification rejected the install-spot workflow. It was removed from produ
 
 Current work and blockers live in `.ai/STATE.json`; the most recent completed operation and next gate live in `.ai/LAST_RUN.json`; locked decisions live in `.ai/DECISIONS.md`.
 
-## Pending user-approved truck-route work (2026-10-06)
+## FINAL.24 truck-route release (2026-10-06)
 
-Internal route geometry with user-entered vehicle dimensions/weight was approved by the user. The implementation on validation branch `chatgpt/truck-route-20261006` now passes real Edge 320px/390px, all existing browser regressions, and a real HeiGIT/openrouteservice `driving-hgv` provider call in Vercel Preview. The 5.57m / 1.88m / 2.38m / 6.095t values are validation-only evidence and must never become hard-coded defaults; every user supplies their own vehicle profile. The final clean validation head is `61e801185fe0d1bc2a60a4b4f157d3e274e713af`. This is still not a released FINAL.24 or a completed intelligence phase. Production remains FINAL.23 until explicit release approval.
+FINAL.24 released user-configurable HGV routing. PR #145 merged, final real Edge and regression gates passed, a real HeiGIT/openrouteservice `driving-hgv` Preview route passed, Vercel production is READY, and live GitHub Pages reports `2026.10.06-FINAL.24`. The 5.57m / 1.88m / 2.38m / 6.095t values remain validation-only evidence and are not hard-coded defaults; every user supplies their own actual vehicle profile. Resume AN15 real-evidence work unless field use produces a new concrete routing defect or friction.

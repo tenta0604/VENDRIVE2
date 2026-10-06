@@ -1,50 +1,43 @@
 {
-  "evidenceVersion": 22,
-  "runType": "truck_route_live_provider_validation",
-  "phase": "TRUCK_ROUTE_READY_FOR_RELEASE_APPROVAL",
-  "status": "LIVE_PROVIDER_PASS_AWAITING_PRODUCTION_APPROVAL",
+  "evidenceVersion": 23,
+  "runType": "truck_route_final24_production_release",
+  "phase": "FINAL24_TRUCK_ROUTE_PRODUCTION_VERIFIED",
+  "status": "PASS",
   "base": {
-    "productionMain": "d96935f4ac63eb8850ccc22ca9ad9860214b0ab3",
+    "productionMerge": "e8ca88c9ebdea05ffa464ad22fd986a0172cb395",
     "safetyTag": "backup-pre-TRUCK-ROUTE-20261006",
     "safetyTagTarget": "7e59bae140629fefe1ba96319b8bae169b41d95f",
-    "validationBranch": "chatgpt/truck-route-20261006",
-    "validationPullRequest": 145,
-    "validationHead": "61e801185fe0d1bc2a60a4b4f157d3e274e713af"
+    "pullRequest": 145,
+    "releaseHead": "8751ef9114571f329b400e906a808ebe552d5e7c"
   },
   "versions": {
-    "app": "2026.10.05-FINAL.23",
+    "app": "2026.10.06-FINAL.24",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Fixed Preview routing so Vercel validation deployments use their own /api/route while GitHub Pages continues to use the production relay; added a same-origin preview CORS guard; reran all finite browser/regression gates; then used a temporary Preview-only smoke probe to exercise the deployed route handler against the real HeiGIT/openrouteservice driving-hgv provider with the user-supplied validation vehicle profile. The real provider returned a valid LineString route. The smoke probe was removed and the final clean preview is READY.",
-    "productStatus": "LIVE_PROVIDER_VERIFIED_NOT_RELEASED",
+    "summary": "Released the user-configurable 2t/HGV route display. Extended the existing ORS secret to Production without decrypting it, synchronized the validation branch with latest main via a merge commit, reran all required real-Edge and regression gates, bumped the app to FINAL.24, merged PR #145, and verified the Vercel production deployment plus live GitHub Pages version/UI. Validation-only vehicle dimensions remain test evidence, not defaults.",
+    "productStatus": "PRODUCTION_VERIFIED",
     "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/145",
-    "finalCleanPreview": "dpl_HUGbAnovHz6cWEhBVUvGUA5VbW44"
+    "productionDeployment": "dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq"
   },
   "gates": {
     "safetyTag": "PASS",
-    "archivedPatchRestored": "PASS",
     "syntaxAndNodeTests": "PASS: 11 tests",
-    "realEdge320px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af",
-    "realEdge390px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af",
-    "existingFiveBrowserRegressions": "PASS: run 37470086847; truck route run 37470086935 also green",
-    "orsPreviewSecret": "PASS: Preview-only sensitive variable exists; value not decrypted",
-    "actualOrsRoute": "PASS: driving-hgv, validation-only profile height 2.38m / width 1.88m / length 5.57m / gross weight 6.095t / avoid tolls true; response distance 2133m, duration 181.4s, LineString with 46 coordinates",
-    "temporarySmokeProbeCleanup": "PASS: removed from validation branch; final clean preview /api/route-smoke returns 404",
-    "productionMerge": "NONE",
-    "productionDeployment": "NONE"
+    "finalRealEdge320px390px": "PASS: truck route run 37471603821",
+    "finalExistingBrowserRegressions": "PASS: browser run 37471603824",
+    "actualOrsRoute": "PASS: real driving-hgv route; validation-only profile 5.57m length / 1.88m width / 2.38m height / 6.095t gross weight; 2133m / 181.4s / 46-point LineString",
+    "secretHandling": "PASS: ORS_API_KEY sensitive; Preview + Production; value not decrypted",
+    "productionMerge": "PASS: PR #145 -> e8ca88c9ebdea05ffa464ad22fd986a0172cb395",
+    "productionVercel": "PASS: dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq READY",
+    "githubPages": "PASS: live version.json = 2026.10.06-FINAL.24 and truck-route UI present",
+    "liveRelay": "PASS: production /api/route deployed; unsupported GET returns 405"
   },
-  "openItems": [
-    "Explicit production release approval.",
-    "After approval, extend the existing ORS_API_KEY secret to the Production target without exposing the value.",
-    "Merge PR #145, verify production deployment, and live-check the GitHub Pages route flow."
-  ],
-  "nextAction": "Wait for explicit production release approval. If approved, activate ORS_API_KEY for Production, merge PR #145, verify deployment and live route behavior, then close the phase.",
+  "openItems": [],
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. Keep production FINAL.24 stable unless real field evidence justifies another scoped maintenance phase.",
   "unresolved": [
-    "Production release remains pending explicit approval.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
     ".ai/STATE.json",

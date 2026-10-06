@@ -241,3 +241,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - These vehicle values are test evidence only. Never hard-code them as product defaults; each user must enter their own actual vehicle profile.
 - The temporary smoke probe was removed; final clean Preview is READY and the probe path returns 404.
 - Production ORS secret targeting, merge, deployment and live verification require explicit production release approval.
+
+## 2026-10-06 — FINAL.24 truck-route production release
+- User explicitly approved production release after the live-provider gate passed.
+- Release app version is `2026.10.06-FINAL.24`; Analytics engine remains `AN14B3B5`, DB/schema remain 4.
+- PR #145 merged to main at `e8ca88c9ebdea05ffa464ad22fd986a0172cb395` after final release-head gates passed (browser run 37471603824; truck-route run 37471603821).
+- `ORS_API_KEY` remains a Vercel sensitive secret targeted to Preview + Production. Its value was never decrypted, copied into Git, or exposed to the client.
+- Vercel production deployment `dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq` is READY. Live GitHub Pages reports FINAL.24 and contains the truck vehicle/routing UI.
+- Vehicle dimensions/weight are user-specific configuration. The validation values 5.57m length / 1.88m width / 2.38m height / 6.095t gross weight must never become application defaults.
+- Existing external Google navigation remains separate and does not inherit HGV profile. Road signs and local restrictions remain authoritative over route candidates.

@@ -3,51 +3,40 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "TRUCK_ROUTE_READY_FOR_RELEASE_APPROVAL",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.05-FINAL.23",
+  "appVersion": "2026.10.06-FINAL.24",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "truck_route_live_provider_verified_awaiting_release_approval",
+  "status": "FINAL24_TRUCK_ROUTE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "User-approved 2t truck route display — live ORS provider verified, awaiting production release approval",
-    "releaseStatus": "Production remains FINAL.23. Draft PR #145 is browser verified and live ORS provider verification passed on a Preview deployment. The final clean validation head is 61e801185fe0d1bc2a60a4b4f157d3e274e713af. No truck-route code has been merged to main or released.",
+    "title": "FINAL.24 2t truck route display — production released and verified",
+    "releaseStatus": "FINAL.24 is live on GitHub Pages. PR #145 merged to main at e8ca88c9ebdea05ffa464ad22fd986a0172cb395. Vercel production deployment dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq is READY. ORS_API_KEY remains a sensitive secret targeted to Preview and Production; its value was never decrypted. Live GitHub Pages version.json reports 2026.10.06-FINAL.24 and the route UI is present.",
     "scope": [
-      "Internal road-route display with actual vehicle conditions from the first release.",
-      "Current location to one chosen vending machine; distance/estimated time, manual recalculation and end; existing external navigation retained.",
-      "No guessed vehicle dimensions or routing gross weight of 2t; unknown optional axle load stays unset.",
-      "Preserve Analytics engine, DB/schema, tasks, orders, visit completion and all user data."
+      "User-entered truck height, width, length and gross vehicle weight drive HGV routing; optional axle load remains unset when unknown.",
+      "Current location to one chosen vending machine; road geometry, distance/estimated time, manual recalculation/end; external Google navigation remains separate.",
+      "Validation-only vehicle values are not product defaults and are not hard-coded.",
+      "Analytics engine, DB/schema, tasks, orders, visits and user data remain preserved."
     ],
-    "archive": {
-      "patch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
-      "evidence": ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
-      "specification": ".ai/pending/TRUCK_ROUTING.md",
-      "baseSha": "7e59bae140629fefe1ba96319b8bae169b41d95f",
-      "sha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9"
-    },
     "verification": {
       "syntax": "PASS",
       "nodeLogicTests": "PASS: 11 tests",
-      "edge320px390px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; Truck route readiness gates run 37470086935",
-      "existingBrowserRegression": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; Browser regression gates run 37470086847",
-      "actualProviderAndDeployment": "PASS: Preview-only ORS_API_KEY present as a Vercel Secret; real driving-hgv route returned LineString geometry for validation-only vehicle profile 5.57m x 1.88m x 2.38m, gross weight 6.095t. The temporary smoke probe was removed; clean preview dpl_HUGbAnovHz6cWEhBVUvGUA5VbW44 is READY and /api/route-smoke returns 404.",
-      "production": "NOT_RELEASED"
+      "finalEdgeAndRegression": "PASS: release head 8751ef9114571f329b400e906a808ebe552d5e7c; Browser regression gates run 37471603824 and Truck route readiness gates run 37471603821",
+      "liveProvider": "PASS: real ORS driving-hgv Preview route returned LineString 2133m / 181.4s / 46 coordinates for validation-only 5.57m x 1.88m x 2.38m / 6.095t profile",
+      "productionSecret": "PASS: ORS_API_KEY is sensitive and targeted to Preview + Production; value not decrypted",
+      "productionDeployment": "PASS: dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq READY for merge e8ca88c9ebdea05ffa464ad22fd986a0172cb395",
+      "livePages": "PASS: https://tenta0604.github.io/VENDRIVE2/version.json reports 2026.10.06-FINAL.24; live page contains 2t truck vehicle controls and route UI",
+      "liveRelay": "PASS: production /api/route endpoint is deployed and rejects unsupported GET with HTTP 405"
     },
     "nextActions": [
-      "Obtain explicit production release approval.",
-      "After approval, extend ORS_API_KEY from Preview-only to Production without revealing or rotating the secret value.",
-      "Merge draft PR #145 to main only after confirming all required gates remain green.",
-      "Verify the production Vercel deployment and the live GitHub Pages truck-route flow after merge.",
-      "Keep the validation vehicle values as test evidence only; do not hard-code them as application defaults. Each user must enter their own vehicle dimensions and gross weight."
+      "Resume AN15 real evidence accumulation and promotion gates; do not promote learned numeric corrections without the existing evidence requirements.",
+      "Treat future truck-routing changes as a new scoped maintenance phase with a fresh safety tag."
     ]
   },
-  "requiredUserInput": [
-    "Explicit production release approval for the truck-route feature."
-  ],
+  "requiredUserInput": [],
   "unresolved": [
-    "Production ORS_API_KEY target, merge, deployment, and live production verification remain pending approval.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
