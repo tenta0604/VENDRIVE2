@@ -93,7 +93,7 @@ test('navigation progress redraws remaining line and sustained off-route fixes t
   let now=Date.now(),drawProgress=null,fetchOrigin=null;
   const h=harness();h.setFetch(async(url,options)=>{fetchOrigin=JSON.parse(options.body).origin;return Response.json({ok:true,route});});
   h.client.start(target);await tick();assert.equal(h.calls,1);
-  h.client.onPosition({lat:35.303,lng:136.805,accuracy:8,updatedAt:now});assert.ok(h.drawn);assert.ok(h.drawProgress&&h.drawProgress.edge>=1); 
+  h.client.onPosition({lat:35.307,lng:136.807,accuracy:8,updatedAt:now});assert.ok(h.drawn);assert.ok(h.drawProgress&&h.drawProgress.edge>=1); 
   h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,updatedAt:now+1000});
   h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,updatedAt:now+2000});
   h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,updatedAt:now+3000});await tick();
