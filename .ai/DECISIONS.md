@@ -305,3 +305,13 @@ This file records confirmed project decisions that must survive chat migration. 
 - Route rendering remains defensive: red priority is true when `highlight === true || motorway === true || tollway === true`. This preserves known motorway/tollway coloring if a legacy section object is ever encountered.
 - Safety tag `backup-pre-FINAL28-ROUTING-ASSET-CACHE-20261006` -> `3a510603de037c09dba04ae36c93d6c8a5938a7d`.
 - PR #154 merged at `676e2e12debe529f620895b3c5911d855ef14768`; validation head `5726577560c1eec81d5cb1de2639d1aff8295bbe` passed 15/15 Node tests, Edge 320/390 and all existing regressions. Production Vercel `dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy`, main regression 37495337396 and Pages 37495335651 passed; live version is FINAL.28.
+
+## 2026-10-07 — FINAL.29 dedicated ORS tollways classification
+- FINAL.28 field evidence `高速・有料区間なし` means the remaining all-blue report is not explained by route paint or asset cache alone; the client received no priority classification from the data it was given.
+- The production relay must request both ORS `waycategory` and dedicated `tollways` extra information for HGV routes.
+- Red priority is true when waycategory contains Highway bit 1, waycategory contains Tollways bit 2, or dedicated tollways extra is 1. Ordinary spans remain blue.
+- Dedicated extras may have different span boundaries. Merge classification edge-by-edge across the route geometry rather than assuming the two span arrays align.
+- Do not use ORS `waytype=1` as a red fallback: the official bucket includes primary, primary_link, motorway, motorway_link, trunk and trunk_link, so using it would incorrectly color many ordinary major roads red.
+- Real provider evidence in Preview confirmed dedicated `tollways` is returned for `driving-hgv`: Nagoya IC → Komaki IC returned `[1,0]` values and three tollway spans.
+- Safety tag `backup-pre-FINAL29-TOLLWAYS-EXTRA-20261006` -> `99c49c38ff6f37d7e95d3353d52e3ea489daa6de`.
+- PR #156 final clean head `90c4a487a6d68b418029e4e9377e0bea177e1de3` passed 16/16 Node tests, Edge 320/390 run 37499628848 and browser regression run 37499628758. Clean Preview `dpl_2rKPYSXETn64FteYT8hM85rUsoUL` is READY; temporary provider probe is removed.

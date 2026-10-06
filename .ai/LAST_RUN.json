@@ -1,52 +1,58 @@
 {
-  "evidenceVersion": 29,
-  "runType": "final28_routing_asset_cache_release",
-  "phase": "FINAL28_ROUTING_ASSET_CACHE_PRODUCTION_VERIFIED",
-  "status": "PASS",
+  "evidenceVersion": 30,
+  "runType": "final29_tollways_extra_validation",
+  "phase": "FINAL29_TOLLWAYS_EXTRA_RELEASE",
+  "status": "VALIDATION_PASS_READY_FOR_PRODUCTION",
   "base": {
-    "productionMainBefore": "3a510603de037c09dba04ae36c93d6c8a5938a7d",
-    "safetyTag": "backup-pre-FINAL28-ROUTING-ASSET-CACHE-20261006",
-    "safetyTagObject": "552ee73386a080e4d6d5d8667feb9f7e9b586815",
-    "safetyTagTarget": "3a510603de037c09dba04ae36c93d6c8a5938a7d",
-    "pullRequest": 154,
-    "finalValidationHead": "5726577560c1eec81d5cb1de2639d1aff8295bbe",
-    "productionMerge": "676e2e12debe529f620895b3c5911d855ef14768"
+    "productionMainBefore": "99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
+    "safetyTag": "backup-pre-FINAL29-TOLLWAYS-EXTRA-20261006",
+    "safetyTagObject": "04098890a417085539050a1762459944c297eb8d",
+    "safetyTagTarget": "99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
+    "pullRequest": 156,
+    "finalValidationHead": "90c4a487a6d68b418029e4e9377e0bea177e1de3"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.28",
+    "app": "2026.10.07-FINAL.29",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Fixed the repeated all-blue route symptom by removing the stale routing-asset version mismatch. The HTML had been updated while truck-routing.js kept a fixed old cache key, allowing FINAL.27 markup/draw logic to run with an older routing module that lacked section.highlight. FINAL.28 version-busts the asset, exports and validates an assetVersion, and keeps backward-compatible motorway/tollway red classification.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/154",
-    "productionDeployment": "dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy",
-    "pagesRun": 37495335651
+    "summary": "Field evidence on FINAL.28 showed the UI itself reported no highway/toll section, proving the remaining all-blue symptom was upstream classification input rather than rendering. FINAL.29 adds ORS dedicated tollways extra alongside waycategory, sanitizes and forwards both, and merges them at coordinate-span level. The real-provider Preview probe confirmed dedicated tollways data is available.",
+    "productStatus": "VALIDATED_NOT_RELEASED",
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/156",
+    "previewDeployment": "dpl_2rKPYSXETn64FteYT8hM85rUsoUL",
+    "providerProbeDeployment": "dpl_Go54kJDgYbvTuoRKURRg88s3UzPG"
   },
   "gates": {
     "safetyTag": "PASS",
-    "nodeTests": "PASS: 15/15",
-    "finalRealEdge320px390px": "PASS: run 37495132920",
-    "routingAssetVersionMatch": "PASS",
-    "staleSectionCompatibility": "PASS",
-    "redRouteSegmentation": "PASS",
-    "fullscreenPinMachineModal": "PASS: preserved from FINAL.27 and revalidated in route gate",
-    "finalExistingBrowserRegressions": "PASS: run 37495133094",
-    "productionMerge": "PASS: PR #154 -> 676e2e12debe529f620895b3c5911d855ef14768",
-    "productionVercel": "PASS: dpl_F1zukXiJkKwxfKDgwjUBRqzusFAy READY",
-    "mainPushBrowserRegression": "PASS: run 37495337396",
-    "githubPages": "PASS: run 37495335651",
-    "liveVersion": "PASS: 2026.10.07-FINAL.28",
-    "liveRoutingAsset": "PASS: FINAL.28 query and ASSET_VERSION"
+    "nodeTests": "PASS: 16/16",
+    "finalRealEdge320px390px": "PASS: run 37499628848",
+    "dedicatedTollwaysFixture": "PASS: waycategory 0 + tollways 1 -> red + 有料区間あり",
+    "finalExistingBrowserRegressions": "PASS: run 37499628758",
+    "actualProviderTollways": "PASS: real driving-hgv probe; dedicated tollways values [1,0], Nagoya IC -> Komaki IC had 3 tollway spans",
+    "temporarySmokeProbeCleanup": "PASS: removed; final clean preview returns 404",
+    "preview": "PASS: dpl_2rKPYSXETn64FteYT8hM85rUsoUL READY",
+    "productionMerge": "NONE",
+    "productionDeployment": "NONE"
   },
-  "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If a known expressway still renders blue after FINAL.28 is loaded, capture the exact origin/destination as new evidence.",
+  "openItems": [
+    "Merge PR #156 and verify production Vercel, main regression, GitHub Pages and live FINAL.29 assets.",
+    "If the exact field route still lacks any classification after release, collect its origin/destination for provider/OSM investigation."
+  ],
+  "nextAction": "Merge PR #156, verify production/live FINAL.29, then close the maintenance scope.",
   "unresolved": [
+    "Production release verification remains pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
+    "api/route.mjs",
+    "truck-routing.js",
+    "tests/truck-route-api.test.mjs",
+    "tests/truck-route-client.test.mjs",
+    "tests/run-truck-route-gates.mjs",
+    "index.html",
+    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",

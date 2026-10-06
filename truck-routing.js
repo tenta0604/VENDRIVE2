@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.07-FINAL.28';
+  var ASSET_VERSION='2026.10.07-FINAL.29';
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
   function distanceMeters(a,b){if(!point(a)||!point(b))return Infinity;var rad=Math.PI/180,lat1=a.lat*rad,lat2=b.lat*rad,dlat=(b.lat-a.lat)*rad,dlng=(b.lng-a.lng)*rad,s=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)*Math.sin(dlng/2);return 6371000*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
@@ -18,18 +18,43 @@
     result.avoidTolls=value.avoidTolls!==false;
     return result;
   }
+  function cleanExtra(info,coordinateCount,label,valueValid){
+    if(info===undefined)return undefined;
+    if(!Array.isArray(info))throw new Error(label+'データを確認できませんでした');
+    var clean=[],previousEnd=null;
+    info.forEach(function(item){
+      if(!Array.isArray(item)||item.length<3||!Number.isInteger(item[0])||!Number.isInteger(item[1])||!Number.isInteger(item[2])||item[0]<0||item[1]<=item[0]||item[1]>=coordinateCount||!valueValid(item[2])||(previousEnd!==null&&item[0]!==previousEnd))throw new Error(label+'データを確認できませんでした');
+      clean.push([item[0],item[1],item[2]]);previousEnd=item[1];
+    });
+    if(clean.length&&(clean[0][0]!==0||clean[clean.length-1][1]!==coordinateCount-1))throw new Error(label+'データを確認できませんでした');
+    return clean;
+  }
   function route(value){
     var geometry=value&&value.geometry,summary=value&&value.summary;
     if(!geometry||geometry.type!=='LineString'||!Array.isArray(geometry.coordinates)||geometry.coordinates.length<2||geometry.coordinates.length>100000||!geometry.coordinates.every(function(c){return Array.isArray(c)&&c.length>=2&&point({lng:c[0],lat:c[1]});})||!summary||typeof summary.distance!=='number'||!Number.isFinite(summary.distance)||summary.distance<0||typeof summary.duration!=='number'||!Number.isFinite(summary.duration)||summary.duration<0)throw new Error('経路データを確認できませんでした');
-    var result={geometry:{type:'LineString',coordinates:geometry.coordinates.map(function(c){return [c[0],c[1]];})},summary:{distance:summary.distance,duration:summary.duration}},info=value&&value.waycategory;
-    if(info!==undefined){
-      if(!Array.isArray(info))throw new Error('道路種別データを確認できませんでした');var clean=[],previousEnd=null;
-      info.forEach(function(item){if(!Array.isArray(item)||item.length<3||!Number.isInteger(item[0])||!Number.isInteger(item[1])||!Number.isInteger(item[2])||item[0]<0||item[1]<=item[0]||item[1]>=geometry.coordinates.length||item[2]<0||(previousEnd!==null&&item[0]!==previousEnd))throw new Error('道路種別データを確認できませんでした');clean.push([item[0],item[1],item[2]]);previousEnd=item[1];});
-      if(clean.length&&(clean[0][0]!==0||clean[clean.length-1][1]!==geometry.coordinates.length-1))throw new Error('道路種別データを確認できませんでした');result.waycategory=clean;
+    var result={geometry:{type:'LineString',coordinates:geometry.coordinates.map(function(c){return [c[0],c[1]];})},summary:{distance:summary.distance,duration:summary.duration}};
+    var waycategory=cleanExtra(value&&value.waycategory,geometry.coordinates.length,'道路種別',function(v){return v>=0;});
+    var tollways=cleanExtra(value&&value.tollways,geometry.coordinates.length,'有料道路',function(v){return v===0||v===1;});
+    if(waycategory!==undefined)result.waycategory=waycategory;
+    if(tollways!==undefined)result.tollways=tollways;
+    return result;
+  }
+  function routeSections(value){
+    var normalized=route(value),coordinates=normalized.geometry.coordinates,waycategory=normalized.waycategory||[],tollways=normalized.tollways||[],result=[],wcIndex=0,tollIndex=0;
+    function spanValue(spans,index,edge){
+      while(index.value<spans.length&&edge>=spans[index.value][1])index.value++;
+      var item=spans[index.value];return item&&edge>=item[0]&&edge<item[1]?item[2]:0;
+    }
+    var wc={value:wcIndex},tw={value:tollIndex};
+    for(var edge=0;edge<coordinates.length-1;edge++){
+      var category=spanValue(waycategory,wc,edge),tollExtra=spanValue(tollways,tw,edge);
+      var motorway=(category&1)===1,tollway=(category&2)===2||tollExtra===1,highlight=motorway||tollway,last=result[result.length-1];
+      var next=[coordinates[edge+1][0],coordinates[edge+1][1]];
+      if(last&&last.motorway===motorway&&last.tollway===tollway)last.coordinates.push(next);
+      else result.push({motorway:motorway,tollway:tollway,highlight:highlight,coordinates:[[coordinates[edge][0],coordinates[edge][1]],next]});
     }
     return result;
   }
-  function routeSections(value){var normalized=route(value),coordinates=normalized.geometry.coordinates,info=normalized.waycategory;if(!info||!info.length)return [{motorway:false,tollway:false,highlight:false,coordinates:coordinates.map(function(c){return [c[0],c[1]];})}];var result=[];info.forEach(function(item){var points=coordinates.slice(item[0],item[1]+1),motorway=(item[2]&1)===1,tollway=(item[2]&2)===2,highlight=motorway||tollway,last=result[result.length-1];if(last&&last.motorway===motorway&&last.tollway===tollway){last.coordinates=last.coordinates.concat(points.slice(1).map(function(c){return [c[0],c[1]];}));}else result.push({motorway:motorway,tollway:tollway,highlight:highlight,coordinates:points.map(function(c){return [c[0],c[1]];})});});return result;}
   function createClient(app){
     var destination=null,active=null,sequence=0,controller=null,busy=false,settingsDestination=null;
     var doc=app.document,el=function(id){return doc.getElementById(id);};
