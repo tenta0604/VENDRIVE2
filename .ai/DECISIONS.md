@@ -370,3 +370,10 @@ This file records confirmed project decisions that must survive chat migration. 
 - Real provider evidence through FINAL.32 route handler: Nagoya IC → Komaki IC selected `expressway-distance-preferred` with motorway 16,818m / tollway 16,654m / route 27,027.6m.
 - Safety tag `backup-pre-FINAL32-NAV-PROGRESS-REROUTE-20261006` -> `d059ed2740ead98bd315e7fe7ad41ceb8bc04b17`.
 - PR #162 clean validation head `75832390bfd0d4c2c5995121dc11597d35e4d524` passed 22/22 Node tests, Edge 320/390 run 37539563883 and browser regression run 37539563945. Clean Preview `dpl_9wcgk6rMFy8NL1QKRxEXGZBFs6Kw` is READY; temporary smoke endpoint is removed.
+
+## 2026-10-07 — FINAL.32 production release complete
+- PR #162 merged at `2188bee148f3c6e93b817dd0fe1b5acccb366f2f` after clean validation head `75832390bfd0d4c2c5995121dc11597d35e4d524` passed 22/22 Node tests, Edge 320/390 run 37539563883, and browser regression run 37539563945.
+- Real ORS through the production route handler selected `expressway-distance-preferred` for Nagoya IC → Komaki IC with motorway 16,818m, tollway 16,654m, route 27,027.6m and duration 1,669.1s. Additional invalid HGV validation routes failed closed with 422.
+- Vercel production `dpl_AprtKGD6qT8f573vrGTYwhXGtfx1` is READY. Main browser regression run 37539937999 and Pages run 37539936859 passed. Live version and routing asset are FINAL.32.
+- Travelled route geometry is display-clipped only; raw route geometry remains intact for route matching and safety. Sustained off-route rerouting never falls back to car/straight-line guidance.
+- FINAL.32 closes the current navigation/highway maintenance scope and returns to AN15 real-evidence accumulation.
