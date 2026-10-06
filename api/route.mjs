@@ -42,7 +42,7 @@ async function handle(request) {
   if (vehicle.axleload!==undefined)restrictions.axleload=vehicle.axleload;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
   try {
-    const response=await fetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},signal:controller.signal,body:JSON.stringify({coordinates:[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],instructions:false,options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','tollways']:['ferries'],profile_params:{restrictions}}})});
+    const response=await fetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},signal:controller.signal,body:JSON.stringify({coordinates:[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],instructions:false,extra_info:['waycategory'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','tollways']:['ferries'],profile_params:{restrictions}}})});
     if (!response.ok) {
       if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin,allowed);
       if(response.status===401||response.status===403)return json(503,{ok:false,message:'経路サービスの認証を確認する必要があります'},origin,allowed);
@@ -50,7 +50,7 @@ async function handle(request) {
       return json(502,{ok:false,message:'経路サービスに接続できません。時間をおいて再計算してください'},origin,allowed);
     }
     const data=await response.json(),feature=data?.features?.[0];
-    const route=routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary});
+    const route=routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary,waycategory:feature?.properties?.extras?.waycategory?.values});
     return json(200,{ok:true,profile:'driving-hgv',route,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
   } catch {
     return json(502,{ok:false,message:controller.signal.aborted?'経路サービスがタイムアウトしました':'経路を取得できませんでした'},origin,allowed);

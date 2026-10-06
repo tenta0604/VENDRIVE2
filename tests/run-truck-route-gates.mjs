@@ -6,7 +6,7 @@ const { chromium } = await import(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES
 const base=process.env.VENDRIVE_TEST_BASE_URL||'http://127.0.0.1:8000';
 const leafletJs=process.env.VENDRIVE_TEST_LEAFLET_JS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_JS):null;
 const leafletCss=process.env.VENDRIVE_TEST_LEAFLET_CSS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_CSS):null;
-const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3],[136.805,35.31],[136.81,35.31]]},summary:{distance:1800,duration:280}};
+const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3],[136.805,35.31],[136.81,35.31]]},summary:{distance:1800,duration:280},waycategory:[[0,1,0],[1,3,1]]};
 const evidence=[];
 for(const width of [320,390]){
   const profile=await mkdtemp(join(tmpdir(),'vendrive-truck-edge-'));
@@ -18,7 +18,7 @@ for(const width of [320,390]){
       const machine=(id,name,lat,lng)=>({id,name,maker:'サントリー',code:id,address:'愛知県一宮市',lat,lng,days:['日','月','火','水','木','金','土'],cycle:'毎日',last:null,visited:false,skip:null,force:null,order:null,memo:'',sales:'',taskDone:{}});
       const seed={machines:[machine('T1','Route test machine',35.31,136.81),machine('T2','No location',null,null)],offices:[],tasks:[],taskHistory:[],history:[],makers:['サントリー'],restDays:[]};
       if(!localStorage.getItem('truckGateSeeded')){localStorage.setItem('vendrive2_v7_data',JSON.stringify(seed));localStorage.setItem('vendrive2_last_day',today);localStorage.setItem('truckGateSeeded','yes');}
-      const position={coords:{latitude:35.3,longitude:136.8,accuracy:8}};
+      const position={coords:{latitude:35.3,longitude:136.8,accuracy:8,heading:90}};
       Object.defineProperty(navigator,'geolocation',{value:{watchPosition(fn){window.__gpsSuccess=fn;setTimeout(()=>fn(position),0);return 1;},clearWatch(){},getCurrentPosition(fn){setTimeout(()=>fn(position),0);}}});
     });
     let count=0,mode='success',heldResolve,heldStarted,heldDone;
@@ -44,7 +44,8 @@ for(const width of [320,390]){
     const stored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
     async function openMachine(code){await page.locator('.tabs button[data-page="machinesPage"]').click();await page.locator('#machineSearch').fill(code);await page.locator('#machineResults .result').first().click();await page.locator('#machineModal.open').waitFor();}
     async function waitText(text){await page.waitForFunction(t=>document.getElementById('truckRouteSummary').textContent.includes(t),text);}
-    const paths=()=>page.locator('#map path[stroke="#2563eb"], #map path[fill="#2563eb"]').count();
+    const paths=()=>page.locator('#map path[stroke="#2563eb"], #map path[stroke="#f97316"], #map path[fill="#2563eb"]').count();
+    const roadPathCount=color=>page.locator(`#map path[stroke="${color}"]`).count();
     await page.goto(base+'/index.html',{waitUntil:'load'});
     await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
     await openMachine('T1');await page.locator('#machineRoute').click();
@@ -53,9 +54,19 @@ for(const width of [320,390]){
     await page.locator('#truckVehicleSave').click();assert.match(await page.locator('#truckVehicleError').innerText(),/全高/);assert.equal(count,0);
     for(const [field,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))await page.locator('#truckVehicle_'+field).fill(value);
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
-    assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=2);
+    assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=3);
+    assert.ok(await roadPathCount('#2563eb')>=1);assert.ok(await roadPathCount('#f97316')>=1);
+    await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
+    const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.304,longitude:136.802,accuracy:8,heading:null}}));
+    await page.waitForTimeout(80);
+    const midDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng),heading:Number(document.querySelector('.vendrive-current-position').dataset.heading)}));
+    assert.ok(midDisplay.lat>startDisplay.lat&&midDisplay.lat<35.304,'current location should animate between GPS points');assert.ok(Number.isFinite(midDisplay.heading));
+    await page.waitForFunction(()=>Math.abs(Number(document.querySelector('.vendrive-current-position').dataset.lat)-35.304)<0.000001);
+    const settled=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.33,longitude:136.83,accuracy:250,heading:45}}));await page.waitForTimeout(1300);
+    const afterPoor=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));assert.deepEqual(afterPoor,settled);
     const afterSave=await stored();
-    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.304,longitude:136.802,accuracy:8}}));
     await page.locator('#allRoutes').click();await page.locator('#zoomIn').click();
     assert.equal(count,1);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'horizontal overflow');
@@ -78,7 +89,7 @@ for(const width of [320,390]){
     let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
     await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
     assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
-    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
+    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','motorway-color-segmentation','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
     console.log(`PASS truck route browser ${width}px`);
   }finally{await context.close();await rm(profile,{recursive:true,force:true});}
 }

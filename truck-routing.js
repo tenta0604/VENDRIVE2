@@ -5,6 +5,10 @@
   'use strict';
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
+  function distanceMeters(a,b){if(!point(a)||!point(b))return Infinity;var rad=Math.PI/180,lat1=a.lat*rad,lat2=b.lat*rad,dlat=(b.lat-a.lat)*rad,dlng=(b.lng-a.lng)*rad,s=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)*Math.sin(dlng/2);return 6371000*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
+  function normalizeHeading(value){if(typeof value!=='number'||!Number.isFinite(value))return null;return ((value%360)+360)%360;}
+  function bearing(from,to){if(!point(from)||!point(to)||distanceMeters(from,to)<0.5)return null;var rad=Math.PI/180,lat1=from.lat*rad,lat2=to.lat*rad,dlng=(to.lng-from.lng)*rad,y=Math.sin(dlng)*Math.cos(lat2),x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dlng);return normalizeHeading(Math.atan2(y,x)/rad);}
+  function resolveHeading(previous,next,reported,last){var direct=normalizeHeading(reported);if(direct!==null)return direct;if(point(previous)&&point(next)&&distanceMeters(previous,next)>=4){var movement=bearing(previous,next);if(movement!==null)return movement;}return normalizeHeading(last);}
   function vehicle(value){
     if(!value||typeof value!=='object')throw new Error('車検証などで確認した車両の寸法・総重量を登録してください');
     var result={};
@@ -16,8 +20,15 @@
   function route(value){
     var geometry=value&&value.geometry,summary=value&&value.summary;
     if(!geometry||geometry.type!=='LineString'||!Array.isArray(geometry.coordinates)||geometry.coordinates.length<2||geometry.coordinates.length>100000||!geometry.coordinates.every(function(c){return Array.isArray(c)&&c.length>=2&&point({lng:c[0],lat:c[1]});})||!summary||typeof summary.distance!=='number'||!Number.isFinite(summary.distance)||summary.distance<0||typeof summary.duration!=='number'||!Number.isFinite(summary.duration)||summary.duration<0)throw new Error('経路データを確認できませんでした');
-    return {geometry:{type:'LineString',coordinates:geometry.coordinates.map(function(c){return [c[0],c[1]];})},summary:{distance:summary.distance,duration:summary.duration}};
+    var result={geometry:{type:'LineString',coordinates:geometry.coordinates.map(function(c){return [c[0],c[1]];})},summary:{distance:summary.distance,duration:summary.duration}},info=value&&value.waycategory;
+    if(info!==undefined){
+      if(!Array.isArray(info))throw new Error('道路種別データを確認できませんでした');var clean=[],previousEnd=null;
+      info.forEach(function(item){if(!Array.isArray(item)||item.length<3||!Number.isInteger(item[0])||!Number.isInteger(item[1])||!Number.isInteger(item[2])||item[0]<0||item[1]<=item[0]||item[1]>=geometry.coordinates.length||item[2]<0||(previousEnd!==null&&item[0]!==previousEnd))throw new Error('道路種別データを確認できませんでした');clean.push([item[0],item[1],item[2]]);previousEnd=item[1];});
+      if(clean.length&&(clean[0][0]!==0||clean[clean.length-1][1]!==geometry.coordinates.length-1))throw new Error('道路種別データを確認できませんでした');result.waycategory=clean;
+    }
+    return result;
   }
+  function routeSections(value){var normalized=route(value),coordinates=normalized.geometry.coordinates,info=normalized.waycategory;if(!info||!info.length)return [{motorway:false,coordinates:coordinates.map(function(c){return [c[0],c[1]];})}];var result=[];info.forEach(function(item){var points=coordinates.slice(item[0],item[1]+1),motorway=(item[2]&1)===1,last=result[result.length-1];if(last&&last.motorway===motorway){last.coordinates=last.coordinates.concat(points.slice(1).map(function(c){return [c[0],c[1]];}));}else result.push({motorway:motorway,coordinates:points.map(function(c){return [c[0],c[1]];})});});return result;}
   function createClient(app){
     var destination=null,active=null,sequence=0,controller=null,busy=false,settingsDestination=null;
     var doc=app.document,el=function(id){return doc.getElementById(id);};
@@ -100,6 +111,6 @@
     }
     return {init:init,start:start,end:end,redraw:draw,refreshVehicle:summary};
   }
-  return {point:point,vehicle:vehicle,route:route,createClient:createClient};
+  return {point:point,vehicle:vehicle,route:route,routeSections:routeSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
 });
 

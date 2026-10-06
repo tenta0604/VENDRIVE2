@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import routing from '../truck-routing.js';
 const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
-const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.81,35.31]]},summary:{distance:1800,duration:280}};
+const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.305],[136.81,35.31]]},summary:{distance:1800,duration:280},waycategory:[[0,1,0],[1,2,1]]};
 const target={id:'T1',name:'Test',lat:35.31,lng:136.81};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function harness(initial=vehicle){
@@ -43,3 +43,14 @@ test('provider error or malformed geometry removes old geometry and supports man
   h.setFetch(async()=>Response.json({ok:true,route}));h.node('truckRouteRecalculate').onclick();await tick();assert.ok(h.drawn);
 });
 
+
+test('route sections preserve motorway classification and reject malformed spans',()=>{
+  assert.deepEqual(routing.routeSections(route).map(section=>({motorway:section.motorway,count:section.coordinates.length})),[{motorway:false,count:2},{motorway:true,count:2}]);
+  assert.throws(()=>routing.route({...route,waycategory:[[0,99,1]]}),/道路種別/);
+});
+test('heading prefers reported GPS direction and falls back to meaningful movement',()=>{
+  const a={lat:35.3,lng:136.8},east={lat:35.3,lng:136.801};
+  assert.equal(routing.resolveHeading(a,east,450,null),90);
+  assert.ok(Math.abs(routing.resolveHeading(a,east,null,null)-90)<1);
+  assert.equal(routing.resolveHeading(a,{lat:35.300001,lng:136.800001},null,123),123);
+});
