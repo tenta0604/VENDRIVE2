@@ -19,6 +19,9 @@ test('origin/method/preflight/body gates reject before the upstream request',asy
   assert.equal((await POST(new Request('http://localhost/api/route',{headers:{origin}}))).status,405);
   const preflight=await OPTIONS(new Request('http://localhost/api/route',{method:'OPTIONS',headers:{origin}}));
   assert.equal(preflight.status,204);assert.equal(preflight.headers.get('access-control-allow-origin'),origin);
+  const previewOrigin='https://preview.example';
+  const sameOriginPreflight=await OPTIONS(new Request(previewOrigin+'/api/route',{method:'OPTIONS',headers:{origin:previewOrigin}}));
+  assert.equal(sameOriginPreflight.status,204);assert.equal(sameOriginPreflight.headers.get('access-control-allow-origin'),previewOrigin);
   assert.equal((await POST(request({...input,origin:{lat:'35',lng:136.8}}))).status,400);
   assert.equal((await POST(request({...input,vehicle:{...vehicle,height:null}}))).status,400);
   assert.equal((await POST(request({...input,padding:'x'.repeat(5000)}))).status,413);
