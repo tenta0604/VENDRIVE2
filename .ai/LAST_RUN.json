@@ -1,15 +1,16 @@
 {
-  "evidenceVersion": 32,
-  "runType": "final30_highway_map_toggle_validation",
-  "phase": "FINAL30_HIGHWAY_MAP_TOGGLE_RELEASE",
-  "status": "VALIDATION_PASS_READY_FOR_PRODUCTION",
+  "evidenceVersion": 33,
+  "runType": "final30_highway_map_toggle_production_release",
+  "phase": "FINAL30_HIGHWAY_MAP_TOGGLE_PRODUCTION_VERIFIED",
+  "status": "PASS",
   "base": {
     "productionMainBefore": "5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
     "safetyTag": "backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006",
     "safetyTagObject": "e56a7dc03b986f5ba5c833ccbb68292b894cd69a",
     "safetyTagTarget": "5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
     "pullRequest": 158,
-    "finalValidationHead": "180ddcf056fd1ce44f2ef32fb93ee86b8e282076"
+    "finalValidationHead": "180ddcf056fd1ce44f2ef32fb93ee86b8e282076",
+    "productionMerge": "5ba067cac0bd660d5908a5848716d591190453a8"
   },
   "versions": {
     "app": "2026.10.07-FINAL.30",
@@ -18,11 +19,11 @@
     "schema": 4
   },
   "work": {
-    "summary": "Added a compact positive MAP highway mode control synchronized with the existing truck route preference. ON allows highways/tolls and explicitly requests fastest HGV routing; OFF explicitly avoids highways and tollways. Active routes recalculate immediately when toggled.",
-    "productStatus": "VALIDATED_NOT_RELEASED",
+    "summary": "Released compact MAP highway ON/OFF control synchronized with truck settings. ON requests fastest HGV routing with highways/tolls allowed; OFF explicitly avoids highways and tollways. Active routes recalculate immediately. Real provider ON/OFF comparison confirmed route behavior changes.",
+    "productStatus": "PRODUCTION_VERIFIED",
     "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/158",
-    "previewDeployment": "dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B",
-    "providerProbeDeployment": "dpl_6cJ2rueVXv9piK1whk65x4BtAdcA"
+    "productionDeployment": "dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7",
+    "pagesRun": 37503366758
   },
   "gates": {
     "safetyTag": "PASS",
@@ -31,29 +32,22 @@
     "mapHighwayToggle": "PASS",
     "highwayOffAvoidance": "PASS",
     "highwayOnFastestMode": "PASS",
+    "actualProviderOnOff": "PASS: ON motorway+tollway/red4; OFF no motorway/tollway/red0",
     "finalExistingBrowserRegressions": "PASS: run 37502908758",
-    "actualProviderOnOff": "PASS: same route ON=highway/toll/red4; OFF=no highway/no toll/red0",
-    "temporarySmokeProbeCleanup": "PASS",
-    "preview": "PASS: dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B READY",
-    "productionMerge": "NONE",
-    "productionDeployment": "NONE"
+    "productionMerge": "PASS: PR #158 -> 5ba067cac0bd660d5908a5848716d591190453a8",
+    "productionVercel": "PASS: dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7 READY",
+    "mainPushBrowserRegression": "PASS: run 37503368121",
+    "githubPages": "PASS: run 37503366758",
+    "liveVersion": "PASS: FINAL.30",
+    "liveRoutingAsset": "PASS: FINAL.30",
+    "liveRelay": "PASS: 405 on unsupported GET"
   },
-  "openItems": [
-    "Merge PR #158 and verify production/live FINAL.30."
-  ],
-  "nextAction": "Merge PR #158, verify production/live FINAL.30, then close the maintenance scope.",
+  "openItems": [],
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE.",
   "unresolved": [
-    "Production release verification remains pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
-    "index.html",
-    "truck-routing.js",
-    "api/route.mjs",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
-    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",

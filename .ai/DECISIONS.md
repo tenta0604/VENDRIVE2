@@ -334,3 +334,9 @@ This file records confirmed project decisions that must survive chat migration. 
 - Real provider evidence for the same test route: ON returned motorway+tollway and four red sections; OFF returned neither motorway nor tollway and zero red sections.
 - Safety tag `backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006` -> `5d1727f653c5b5d3b41e547654ea5cc95fa247d8`.
 - PR #158 clean validation head `180ddcf056fd1ce44f2ef32fb93ee86b8e282076` passed 17/17 Node tests, Edge 320/390 run 37502908710 and browser regression run 37502908758. Clean Preview `dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B` is READY and the temporary probe is removed.
+
+## 2026-10-07 — FINAL.30 production release complete
+- PR #158 merged at `5ba067cac0bd660d5908a5848716d591190453a8` after clean validation head `180ddcf056fd1ce44f2ef32fb93ee86b8e282076` passed 17/17 Node tests, Edge 320/390 run 37502908710, and browser regression run 37502908758.
+- Real ORS Preview comparison on the same route verified the routing control itself: ON returned motorway+tollway with four red sections; OFF returned neither motorway nor tollway and zero red sections.
+- Vercel production `dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7` is READY. Main browser regression run 37503368121 and Pages run 37503366758 passed. Live version and routing asset are FINAL.30.
+- FINAL.30 closes the highway-mode maintenance scope and returns to AN15 real-evidence accumulation.

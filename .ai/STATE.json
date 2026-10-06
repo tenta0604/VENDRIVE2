@@ -3,51 +3,52 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL30_HIGHWAY_MAP_TOGGLE_RELEASE",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.07-FINAL.30",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL30_VALIDATED_READY_FOR_PRODUCTION",
+  "status": "FINAL30_HIGHWAY_MAP_TOGGLE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.30 MAP highway toggle — validated, ready for production",
-    "releaseStatus": "PR #158 clean head 180ddcf056fd1ce44f2ef32fb93ee86b8e282076 is validated. Clean Preview dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B is READY and the temporary smoke endpoint is removed.",
+    "title": "FINAL.30 MAP highway toggle — production released and verified",
+    "releaseStatus": "FINAL.30 is live. PR #158 merged to main at 5ba067cac0bd660d5908a5848716d591190453a8. Vercel production dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7 is READY. Main browser regression run 37503368121 and GitHub Pages run 37503366758 passed. Live version.json and public truck-routing.js report FINAL.30.",
     "rootCause": [
-      "Field review showed the route was not entering an expressway at all; previous work focused on coloring/classification rather than the route-choice control itself.",
-      "The old vehicle setting used inverse wording (avoid tollways) and was buried in settings, while the MAP had no direct route-mode control.",
-      "OFF previously avoided tollways only, not highways explicitly, and ON did not explicitly request fastest routing."
+      "Field review showed the selected route was not entering an expressway; the missing control was route choice, not just route coloring.",
+      "The old vehicle preference was buried in settings and phrased inversely as avoiding tollways.",
+      "OFF did not explicitly avoid highways, while ON did not explicitly request fastest routing."
     ],
     "scope": [
-      "Add compact MAP 高速 ON/OFF control inside the existing map tools without changing page layout.",
-      "Use the same persisted routeVehicle.avoidTolls value as vehicle settings; no duplicate preference state.",
-      "Vehicle settings now present the same option positively as 高速道路を使う.",
-      "ON persists avoidTolls=false, requests preference=fastest, and allows highways/tollways.",
-      "OFF persists avoidTolls=true and avoids highways+tollways+ferries.",
-      "Toggling with an active route immediately cancels stale geometry and recalculates.",
-      "FINAL.29 tollway classification/coloring, fullscreen PIN interaction, vehicle dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain unchanged."
+      "Compact MAP 高速 ON/OFF control is in the existing map tool stack.",
+      "MAP and vehicle settings share the same persisted routeVehicle.avoidTolls preference.",
+      "ON uses preference=fastest and allows highways/tollways; OFF avoids highways+tollways+ferries.",
+      "Active route toggles persist and immediately recalculate.",
+      "Vehicle settings show the same mode positively as 高速道路を使う.",
+      "FINAL.29 toll classification/coloring, fullscreen PIN behavior, HGV dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain preserved."
     ],
     "verification": {
       "safetyTag": "PASS: backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006 -> 5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
       "nodeTests": "PASS: 17/17",
-      "edge320px390px": "PASS: Truck route readiness gates run 37502908710",
-      "mapToggle": "PASS: ON -> OFF -> ON persists state and automatically recalculates active route in real Edge",
-      "offAvoidance": "PASS: OFF fixture contains no red motorway/toll spans",
-      "onRouting": "PASS: ON fixture restores red motorway/toll spans and summary 高速利用ON",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37502908758 and truck-route gate reports all five existing browser regressions passed",
-      "actualProviderComparison": "PASS: Preview provider probe dpl_6cJ2rueVXv9piK1whk65x4BtAdcA on same route: ON motorway=true/tollway=true/red sections=4; OFF motorway=false/tollway=false/red sections=0",
-      "smokeCleanup": "PASS: temporary /api/final30-smoke removed; clean Preview dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B READY and smoke path 404",
-      "production": "NOT_RELEASED"
+      "finalEdge320px390px": "PASS: Truck route readiness gates run 37502908710",
+      "mapToggle": "PASS: ON -> OFF -> ON saves and automatically recalculates in real Edge",
+      "providerOnOff": "PASS: same real ORS route; ON motorway+tollway/red4, OFF no motorway/tollway/red0",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37502908758",
+      "smokeCleanup": "PASS: temporary smoke removed; clean Preview dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B READY",
+      "productionMerge": "PASS: PR #158 -> 5ba067cac0bd660d5908a5848716d591190453a8",
+      "productionVercel": "PASS: dpl_4EUA1J2Qp8ZsderuHTYoodSzNSN7 READY",
+      "mainPushRegression": "PASS: Browser regression gates run 37503368121",
+      "githubPages": "PASS: pages build/deployment run 37503366758",
+      "liveVersion": "PASS: 2026.10.07-FINAL.30",
+      "liveRoutingAsset": "PASS: public truck-routing.js?v=2026.10.07-FINAL.30 serves FINAL.30 toggle logic",
+      "productionRelay": "PASS: /api/route deployed; unsupported GET returns HTTP 405",
+      "sourceHtml": "PASS: main index contains compact mapHighwayToggle and positive 高速道路を使う settings"
     },
     "nextActions": [
-      "Merge PR #158 to main.",
-      "Verify production Vercel, main browser regression, GitHub Pages, live FINAL.30 assets and production relay.",
-      "Close FINAL.30 and return to AN15 real evidence accumulation."
+      "Resume AN15 real evidence accumulation and promotion gates."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/deployment/live verification for FINAL.30 remain pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {
