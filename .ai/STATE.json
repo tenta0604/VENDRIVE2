@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "truck_route_browser_verified_awaiting_activation_inputs",
+  "status": "truck_route_preview_ready_awaiting_confirmed_vehicle_profile",
   "currentWork": {
     "title": "User-approved 2t truck route display — browser verified, awaiting activation inputs",
-    "releaseStatus": "Production remains FINAL.23. Validation-only draft PR #145 has passed the finite real-Edge and regression gates at validation head b5568ff405f3407358b878fcc121f34271d66628. No truck-route code has been merged to main or released.",
+    "releaseStatus": "Production remains FINAL.23. Draft PR #145 is browser verified. ORS_API_KEY is now configured as a Preview-only Vercel Secret and a fresh validation preview deployment from b5568ff405f3407358b878fcc121f34271d66628 reached READY. No production merge/release has occurred.",
     "scope": [
       "Internal road-route display with actual vehicle conditions from the first release.",
       "Current location to one chosen vending machine; distance/estimated time, manual recalculation and end; existing external navigation retained.",
@@ -31,22 +31,20 @@
       "nodeLogicTests": "PASS: 11 tests",
       "edge320px390px": "PASS: GitHub Actions run 37462241766 on Microsoft Edge 154.0.4258.62",
       "existingBrowserRegression": "PASS: truck-route run 37462241766 plus dedicated browser run 37462241873",
-      "actualProviderAndDeployment": "NOT_RUN: ORS_API_KEY and confirmed real vehicle profile are still required; production code remains unmerged"
+      "actualProviderAndDeployment": "PREVIEW READY WITH ORS SECRET; actual HGV provider-route validation is still NOT_RUN because the real vehicle profile is not yet fully confirmed."
     },
     "nextActions": [
-      "Create/use a free Standard ORS key and configure it only as sensitive Vercel ORS_API_KEY; never expose the value in chat, issues or client code.",
-      "Confirm actual vehicle height, width, length and gross vehicle weight; axle load remains optional when unknown.",
-      "With those activation inputs available, verify an actual ORS HGV route through the non-production preview before any production merge.",
-      "After the live-provider preview gate passes, obtain explicit production merge/release approval; do not merge PR #145 beforehand."
+      "Confirm the real vehicle profile from a reliable source: height, width, length and gross vehicle weight. The user has supplied approximate dimensions, but they are not yet treated as confirmed routing facts.",
+      "Use the confirmed vehicle profile to run an actual ORS driving-hgv route through the validation preview.",
+      "If the actual provider-route gate passes, obtain explicit production merge/release approval before merging PR #145."
     ]
   },
   "requiredUserInput": [
-    "Free Standard ORS API key configured as sensitive Vercel ORS_API_KEY; do not expose the key in chat/issues/client code.",
-    "Actual vehicle height, width, length and gross weight; axle load only if known.",
+    "Confirmed actual vehicle height, width, length and gross vehicle weight; axle load only if known. Approximate values are not sufficient for the release gate.",
     "Explicit production merge/release approval after live-provider preview verification passes."
   ],
   "unresolved": [
-    "Actual ORS provider route verification and production release remain pending.",
+    "Actual ORS provider-route validation with the confirmed vehicle profile remains pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "recovery": {

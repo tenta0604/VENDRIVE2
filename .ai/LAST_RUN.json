@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 20,
-  "runType": "truck_route_validation_branch_browser_gates",
-  "phase": "TRUCK_ROUTE_PENDING_ACTIVATION_INPUTS",
-  "status": "VALIDATION_PASS_PRODUCT_NOT_RELEASED",
+  "evidenceVersion": 21,
+  "runType": "truck_route_preview_secret_activation",
+  "phase": "TRUCK_ROUTE_PENDING_CONFIRMED_VEHICLE_PROFILE",
+  "status": "PREVIEW_READY_HUMAN_INPUT_REQUIRED_PRODUCT_NOT_RELEASED",
   "base": {
     "productionMain": "0697f7d0c306b5aa34caddc8396eba6838a1df37",
     "safetyTag": "backup-pre-TRUCK-ROUTE-20261006",
@@ -18,9 +18,10 @@
     "schema": 4
   },
   "work": {
-    "summary": "Restored the archived 2t truck-route implementation onto a non-production validation branch, opened draft PR #145, corrected one browser-harness selector defect, fixed stored truck-profile UI refresh after reload, and obtained terminal passing real-Edge plus existing-regression evidence. Production main remains unchanged.",
-    "productStatus": "BROWSER_VERIFIED_NOT_RELEASED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/145"
+    "summary": "Verified that ORS_API_KEY exists as a Preview-only sensitive Vercel environment variable without decrypting its value. Forced a fresh preview deployment of validation head b5568ff405f3407358b878fcc121f34271d66628 so the new secret is available at runtime; deployment dpl_7hYwdVAEAvqsmZLsi2y5w9WtiDfL reached READY. No production merge or release occurred.",
+    "productStatus": "BROWSER_VERIFIED_PREVIEW_READY_AWAITING_CONFIRMED_VEHICLE_PROFILE",
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/145",
+    "previewDeployment": "dpl_7hYwdVAEAvqsmZLsi2y5w9WtiDfL"
   },
   "gates": {
     "safetyTag": "PASS",
@@ -31,26 +32,24 @@
     "truckRouteBrowserBehavior": "PASS: blank profile blocking, unit conversion, road geometry, GPS marker-only updates, rerender persistence, manual recalculation, quota/malformed errors, late-response cancellation, missing destination, persistence, external navigation, no horizontal overflow, no page errors",
     "existingFiveBrowserRegressions": "PASS: run 37462241766; dedicated run 37462241873 also PASS",
     "vercelPreviewStatus": "PASS for validation head; actual ORS route not exercised because activation inputs are absent",
-    "actualOrsRoute": "NOT_RUN",
+    "actualOrsRoute": "NOT_RUN: confirmed real vehicle profile still incomplete",
     "productionMerge": "NONE",
-    "productionDeployment": "NONE"
+    "productionDeployment": "NONE",
+    "orsPreviewSecret": "PASS: Preview-only sensitive variable exists; value not decrypted",
+    "freshPreviewDeployment": "PASS: dpl_7hYwdVAEAvqsmZLsi2y5w9WtiDfL READY for validation head b5568ff405f3407358b878fcc121f34271d66628"
   },
   "openItems": [
-    "Free Standard ORS key configured sensitively as Vercel ORS_API_KEY.",
-    "Actual vehicle height, width, length and gross weight; optional axle load.",
-    "Explicit production merge/release approval after live-provider preview verification."
+    "Confirm actual vehicle height, width, length and gross vehicle weight from a reliable source; axle load optional.",
+    "Run an actual ORS HGV route through the validation preview.",
+    "Obtain explicit production merge/release approval only after the live-provider gate passes."
   ],
-  "nextAction": "Obtain the ORS key and actual vehicle facts, run an actual HGV provider route through the non-production preview, then request production merge/release approval if that live-provider gate passes.",
+  "nextAction": "Ask the user for the confirmed real vehicle dimensions and gross vehicle weight; then run the actual HGV provider-route preview gate. Do not merge or release before explicit approval.",
   "unresolved": [
-    "Actual ORS provider route and production release remain pending.",
+    "Actual ORS provider-route validation and production release remain pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "changedFiles": [
     ".ai/STATE.json",
-    ".ai/LAST_RUN.json",
-    ".ai/DECISIONS.md",
-    ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
-    ".ai/pending/TRUCK_ROUTING.md",
-    "AI_ROADMAP.md"
+    ".ai/LAST_RUN.json"
   ]
 }
