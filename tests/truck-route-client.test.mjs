@@ -61,3 +61,7 @@ test('route sections highlight both motorway and toll-only spans',()=>{
     {motorway:false,tollway:false,highlight:false},{motorway:false,tollway:true,highlight:true},{motorway:true,tollway:false,highlight:true}
   ]);
 });
+
+test('routing asset version matches FINAL.28 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.07-FINAL.28');
+});

@@ -7,6 +7,7 @@ const base=process.env.VENDRIVE_TEST_BASE_URL||'http://127.0.0.1:8000';
 const leafletJs=process.env.VENDRIVE_TEST_LEAFLET_JS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_JS):null;
 const leafletCss=process.env.VENDRIVE_TEST_LEAFLET_CSS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_CSS):null;
 const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3],[136.805,35.305],[136.805,35.31],[136.81,35.31]]},summary:{distance:1800,duration:280},waycategory:[[0,1,0],[1,2,2],[2,4,1]]};
+const appVersion=JSON.parse(await readFile(new URL('../version.json',import.meta.url),'utf8')).version;
 const evidence=[];
 for(const width of [320,390]){
   const profile=await mkdtemp(join(tmpdir(),'vendrive-truck-edge-'));
@@ -48,6 +49,8 @@ for(const width of [320,390]){
     const roadPathCount=color=>page.locator(`#map path[stroke="${color}"]`).count();
     await page.goto(base+'/index.html',{waitUntil:'load'});
     await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
+    const assetInfo=await page.evaluate(()=>{var script=document.querySelector('script[src^="truck-routing.js"]');var url=new URL(script.src);return {query:url.searchParams.get('v'),runtime:window.VENDRIVETruckRouting&&window.VENDRIVETruckRouting.assetVersion};});
+    assert.equal(assetInfo.query,appVersion,'truck-routing.js cache-buster must match app version');assert.equal(assetInfo.runtime,appVersion,'loaded truck-routing.js must match app version');
     await openMachine('T1');await page.locator('#machineRoute').click();
     await page.locator('#truckVehicleModal.open').waitFor();
     assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'');assert.equal(count,0);
@@ -57,6 +60,9 @@ for(const width of [320,390]){
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
     assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=3);
     assert.ok(await roadPathCount('#2563eb')>=1);assert.ok(await roadPathCount('#dc2626')>=2);
+    await page.evaluate(()=>{var original=window.VENDRIVETruckRouting.routeSections;window.__routeSectionsCurrent=original;window.VENDRIVETruckRouting.routeSections=function(value){return original(value).map(function(section){return {motorway:section.motorway,tollway:section.tollway,coordinates:section.coordinates};});};renderMap();});
+    assert.ok(await roadPathCount('#dc2626')>=2,'legacy section objects without highlight must still render priority spans red');
+    await page.evaluate(()=>{window.VENDRIVETruckRouting.routeSections=window.__routeSectionsCurrent;delete window.__routeSectionsCurrent;renderMap();});
     assert.match(await page.locator('#truckRouteSummary').innerText(),/高速区間あり/);assert.match(await page.locator('#truckRouteSummary').innerText(),/有料道路使用可/);
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
     const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
@@ -97,7 +103,7 @@ for(const width of [320,390]){
     let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
     await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
     assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
-    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','red-highway-and-toll-segmentation','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','fullscreen-pin-machine-modal','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
+    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','red-highway-and-toll-segmentation','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','fullscreen-pin-machine-modal','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
     console.log(`PASS truck route browser ${width}px`);
   }finally{await context.close();await rm(profile,{recursive:true,force:true});}
 }
