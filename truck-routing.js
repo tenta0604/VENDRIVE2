@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.07-FINAL.31';
+  var ASSET_VERSION='2026.10.07-FINAL.32';
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
   function distanceMeters(a,b){if(!point(a)||!point(b))return Infinity;var rad=Math.PI/180,lat1=a.lat*rad,lat2=b.lat*rad,dlat=(b.lat-a.lat)*rad,dlng=(b.lng-a.lng)*rad,s=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)*Math.sin(dlng/2);return 6371000*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
@@ -50,17 +50,59 @@
       var category=spanValue(waycategory,wc,edge),tollExtra=spanValue(tollways,tw,edge);
       var motorway=(category&1)===1,tollway=(category&2)===2||tollExtra===1,highlight=motorway||tollway,last=result[result.length-1];
       var next=[coordinates[edge+1][0],coordinates[edge+1][1]];
-      if(last&&last.motorway===motorway&&last.tollway===tollway)last.coordinates.push(next);
-      else result.push({motorway:motorway,tollway:tollway,highlight:highlight,coordinates:[[coordinates[edge][0],coordinates[edge][1]],next]});
+      if(last&&last.motorway===motorway&&last.tollway===tollway){last.coordinates.push(next);last.endEdge=edge+1;}
+      else result.push({motorway:motorway,tollway:tollway,highlight:highlight,startEdge:edge,endEdge:edge+1,coordinates:[[coordinates[edge][0],coordinates[edge][1]],next]});
     }
     return result;
   }
+  function polylineMeters(coordinates){
+    var total=0;
+    for(var i=1;i<coordinates.length;i++)total+=distanceMeters({lng:coordinates[i-1][0],lat:coordinates[i-1][1]},{lng:coordinates[i][0],lat:coordinates[i][1]});
+    return total;
+  }
+  function routeUsage(value){
+    var motorwayMeters=0,tollwayMeters=0,priorityMeters=0;
+    routeSections(value).forEach(function(section){var meters=polylineMeters(section.coordinates);if(section.motorway)motorwayMeters+=meters;if(section.tollway)tollwayMeters+=meters;if(section.highlight)priorityMeters+=meters;});
+    return {motorwayMeters:motorwayMeters,tollwayMeters:tollwayMeters,priorityMeters:priorityMeters};
+  }
+  function projectSegment(position,a,b){
+    var rad=Math.PI/180,lat=((a[1]+b[1])/2)*rad,xScale=111320*Math.max(0.15,Math.cos(lat)),yScale=110540;
+    var ax=(a[0]-position.lng)*xScale,ay=(a[1]-position.lat)*yScale,bx=(b[0]-position.lng)*xScale,by=(b[1]-position.lat)*yScale,dx=bx-ax,dy=by-ay,den=dx*dx+dy*dy;
+    var t=den>0?Math.max(0,Math.min(1,-(ax*dx+ay*dy)/den)):0;
+    var projected={lng:a[0]+(b[0]-a[0])*t,lat:a[1]+(b[1]-a[1])*t};
+    return {t:t,point:projected,distance:distanceMeters(position,projected)};
+  }
+  function routeProgress(value,position,startEdge){
+    if(!point(position))return null;
+    var normalized=route(value),coordinates=normalized.geometry.coordinates,start=Math.max(0,(Number.isInteger(startEdge)?startEdge:0)-3),best=null;
+    for(var edge=start;edge<coordinates.length-1;edge++){
+      var projected=projectSegment(position,coordinates[edge],coordinates[edge+1]);
+      if(!best||projected.distance<best.distance)best={edge:edge,t:projected.t,point:projected.point,distance:projected.distance};
+    }
+    return best;
+  }
+  function remainingRouteSections(value,progress){
+    var sections=routeSections(value);
+    if(!progress||!Number.isInteger(progress.edge)||!point(progress.point))return sections;
+    var result=[];
+    sections.forEach(function(section){
+      if(section.endEdge<=progress.edge)return;
+      var coordinates=section.coordinates.map(function(c){return [c[0],c[1]];});
+      var startEdge=section.startEdge;
+      if(progress.edge>=section.startEdge&&progress.edge<section.endEdge){
+        var offset=progress.edge-section.startEdge,tail=coordinates.slice(offset+1);
+        coordinates=[[progress.point.lng,progress.point.lat]].concat(tail);startEdge=progress.edge;
+      }
+      if(coordinates.length>=2)result.push({motorway:section.motorway,tollway:section.tollway,highlight:section.highlight,startEdge:startEdge,endEdge:section.endEdge,coordinates:coordinates});
+    });
+    return result;
+  }
   function createClient(app){
-    var destination=null,active=null,sequence=0,controller=null,busy=false,settingsDestination=null;
+    var destination=null,active=null,progress=null,sequence=0,controller=null,busy=false,settingsDestination=null,offRouteHits=0,lastAutoRerouteAt=0;
     var doc=app.document,el=function(id){return doc.getElementById(id);};
-    function draw(){if(destination&&app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();return;}app.draw(active,destination);}
+    function draw(){if(destination&&app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();return;}app.draw(active,destination,progress);}
     function cancel(){sequence++;if(controller)controller.abort();controller=null;busy=false;}
-    function end(){cancel();destination=null;active=null;draw();el('truckRoutePanel').classList.add('hidden');}
+    function end(){cancel();destination=null;active=null;progress=null;offRouteHits=0;draw();el('truckRoutePanel').classList.add('hidden');}
     function panel(message){
       el('truckRoutePanel').classList.remove('hidden');
       el('truckRouteTitle').textContent=destination?destination.name||'自販機への経路':'トラック経路';
@@ -81,7 +123,7 @@
       var next=Object.assign({},v,{avoidTolls:!enabled});
       if(app.saveVehicle(next)===false){app.toast('高速設定を保存できませんでした');syncHighwayToggle();return;}
       var setting=el('truckVehicleAvoidTolls');if(setting)setting.checked=enabled;summary();
-      if(destination){cancel();active=null;draw();calculate();}else app.toast(enabled?'高速利用をONにしました':'高速利用をOFFにしました');
+      if(destination){cancel();active=null;progress=null;offRouteHits=0;draw();calculate();}else app.toast(enabled?'高速優先をONにしました':'高速利用をOFFにしました');
     }
     function summary(){var v;try{v=profile();}catch(e){el('truckVehicleSummary').textContent='未登録：実車の寸法・総重量を設定してください';syncHighwayToggle();return;}el('truckVehicleSummary').textContent='全高 '+v.height+'m / 全幅 '+v.width+'m / 全長 '+v.length+'m / 総重量 '+v.weight+'t'+(v.axleload?' / 軸重 '+v.axleload+'t':' / 軸重未設定')+(v.avoidTolls?' / 高速OFF':' / 高速優先ON');syncHighwayToggle();}
     function openSettings(target){
@@ -96,7 +138,6 @@
       try{v=vehicle({height:number('truckVehicle_height',100),width:number('truckVehicle_width',100),length:number('truckVehicle_length',100),weight:number('truckVehicle_weight',1000),axleload:number('truckVehicle_axleload',1000),avoidTolls:!el('truckVehicleAvoidTolls').checked});}
       catch(e){el('truckVehicleError').textContent=e.message;return;}
       if(app.saveVehicle(v)===false){el('truckVehicleError').textContent='保存できませんでした。端末の保存領域を確認してください';return;}summary();app.closeModal('truckVehicleModal');var target=settingsDestination;settingsDestination=null;
-      // A profile edit invalidates all geometry computed for the old vehicle.
       end();app.toast('車両設定を保存しました');if(target)start(target);
     }
     function getPosition(signal){
@@ -112,25 +153,50 @@
         app.geolocation.getCurrentPosition(function(p){var next={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,updatedAt:Date.now()};if(!point(next)||typeof next.accuracy!=='number'||!Number.isFinite(next.accuracy)||next.accuracy<0||next.accuracy>100){finish(new Error('現在地の精度が不足しています。屋外で再計算してください'));return;}app.updatePosition(p);finish(null,next);},function(){finish(new Error('現在地を取得できません。位置情報を許可してください'));},{enableHighAccuracy:true,maximumAge:5000,timeout:10000});
       });
     }
-    async function calculate(){
+    function routeSummary(v){
+      var usage=routeUsage(active),label=usage.motorwayMeters>100?'高速 約'+(usage.motorwayMeters/1000).toFixed(1)+'km':usage.priorityMeters>100?'有料 約'+(usage.priorityMeters/1000).toFixed(1)+'km':'高速・有料区間なし';
+      return (active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+label+' ・ '+(v.avoidTolls?'高速利用OFF':'高速優先ON');
+    }
+    async function calculate(options){
+      options=options&&typeof options==='object'?options:{};
       if(!destination||busy)return;
       if(app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();app.toast('目的地の位置が変わったため経路を終了しました');return;}
       var v;try{v=profile();}catch(e){var target=destination;end();openSettings(target);return;}
-      cancel();busy=true;active=null;draw();controller=new AbortController();var signal=controller.signal,token=sequence;
-      panel('現在地を取得中…');
+      var auto=options.auto===true,previousActive=active,previousProgress=progress;
+      cancel();busy=true;if(!auto){active=null;progress=null;draw();}controller=new AbortController();var signal=controller.signal,token=sequence;
+      panel(auto?'ルートを再検索中…':'現在地を取得中…');
       var timer=null;
       try{
-        var origin=await getPosition(signal);if(token!==sequence)return;
-        panel('車両条件に合う経路を取得中…');
+        var origin=point(options.origin)?options.origin:await getPosition(signal);if(token!==sequence)return;
+        if(!auto)panel('車両条件に合う経路を取得中…');
         timer=setTimeout(function(){if(token===sequence)controller.abort();},15000);
         var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v}),signal:signal});
         var data=await response.json();if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
-        active=route(data.route);draw();app.fit(active,destination);
-        var sections=routeSections(active),hasMotorway=sections.some(function(section){return section.motorway;}),hasTollway=sections.some(function(section){return section.tollway;});
-        panel((active.summary.distance/1000).toFixed(1)+'km ・ 約'+Math.max(1,Math.ceil(active.summary.duration/60))+'分（渋滞未考慮） ・ '+(hasMotorway?'高速区間あり':hasTollway?'有料区間あり':'高速・有料区間なし')+' ・ '+(v.avoidTolls?'高速利用OFF':'高速優先ON'));
-      }catch(e){if(token!==sequence)return;active=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
-      finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
+        active=route(data.route);progress=null;offRouteHits=0;draw();if(!auto)app.fit(active,destination);else app.toast('新しい経路に更新しました');
+        panel(routeSummary(v));
+      }catch(e){
+        if(token!==sequence)return;
+        if(auto){active=previousActive;progress=previousProgress;draw();panel('ルート再検索に失敗しました。現在の経路を表示しています');}
+        else{active=null;progress=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
+      }finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
+    }
+    function onPosition(position){
+      if(!active||!destination||busy||!point(position))return;
+      var accuracy=typeof position.accuracy==='number'&&Number.isFinite(position.accuracy)?position.accuracy:Infinity;
+      if(accuracy>50)return;
+      var match=routeProgress(active,position,progress?progress.edge:0);if(!match)return;
+      var snapThreshold=Math.max(25,Math.min(50,accuracy*1.5+10)),offThreshold=Math.max(60,Math.min(100,accuracy*2+20));
+      if(match.distance<=snapThreshold){
+        offRouteHits=0;
+        if(!progress||match.edge>progress.edge||(match.edge===progress.edge&&match.t>progress.t+0.01)){progress=match;draw();}
+        return;
+      }
+      if(distanceMeters(position,destination)<=100){offRouteHits=0;return;}
+      if(match.distance>offThreshold)offRouteHits++;else offRouteHits=0;
+      if(offRouteHits>=3&&Date.now()-lastAutoRerouteAt>=30000){
+        offRouteHits=0;lastAutoRerouteAt=Date.now();app.toast('ルートを再検索します');calculate({auto:true,origin:position});
+      }
     }
     function start(target){
       if(!point(target)){app.toast('自販機の位置を先に登録してください');return;}
@@ -144,14 +210,14 @@
       el('truckRouteVehicleSettings').onclick=function(){openSettings(destination);};
       el('truckVehicleSave').onclick=saveSettings;
       ['truckVehicleClose','truckVehicleCancel'].forEach(function(id){el(id).onclick=function(){settingsDestination=null;app.closeModal('truckVehicleModal');};});
-      el('truckRouteRecalculate').onclick=calculate;el('truckRouteEnd').onclick=end;
+      el('truckRouteRecalculate').onclick=function(){calculate();};el('truckRouteEnd').onclick=end;
       el('mapHighwayToggle').onclick=function(){var v;try{v=profile();}catch(e){openSettings(destination);return;}setHighwayEnabled(v.avoidTolls!==false);};
       el('truckRouteOverview').onclick=function(){if(active)app.fit(active,destination);};
       el('truckRouteExternal').onclick=function(){if(destination)app.external(destination);};
       summary();syncHighwayToggle();
     }
-    return {init:init,start:start,end:end,redraw:draw,refreshVehicle:function(){summary();syncHighwayToggle();}};
+    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,refreshVehicle:function(){summary();syncHighwayToggle();}};
   }
-  return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
+  return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
 });
 

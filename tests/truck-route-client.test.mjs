@@ -62,8 +62,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.31 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.07-FINAL.31');
+test('routing asset version matches FINAL.32 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.07-FINAL.32');
 });
 
 test('dedicated tollways extra highlights a route when waycategory reports no highway or toll bits',()=>{
@@ -80,4 +80,22 @@ test('MAP highway toggle persists positive mode and recalculates an active route
   assert.equal(h.profile.avoidTolls,false);assert.match(h.node('mapHighwayToggle').textContent,/ON/);assert.match(h.node('truckRouteSummary').textContent,/高速優先ON/);assert.equal(h.calls,2);
   h.node('mapHighwayToggle').onclick();await tick();
   assert.equal(h.profile.avoidTolls,true);assert.match(h.node('mapHighwayToggle').textContent,/OFF/);assert.match(h.node('truckRouteSummary').textContent,/高速利用OFF/);assert.equal(h.calls,3);
+});
+
+test('route usage measures expressway distance and remaining sections drop travelled geometry',()=>{
+  const navRoute={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.802,35.3],[136.803,35.3]]},summary:{distance:300,duration:30},waycategory:[[0,1,0],[1,3,1]],tollways:[[0,1,0],[1,3,1]]};
+  const usage=routing.routeUsage(navRoute);assert.ok(usage.priorityMeters>150);assert.ok(usage.motorwayMeters>150);
+  const progress=routing.routeProgress(navRoute,{lat:35.3,lng:136.8015},0);assert.equal(progress.edge,1);assert.ok(progress.distance<2);
+  const remaining=routing.remainingRouteSections(navRoute,progress);assert.equal(remaining[0].startEdge,1);assert.ok(Math.abs(remaining[0].coordinates[0][0]-136.8015)<0.00001);
+  assert.ok(routing.routeUsage(navRoute).priorityMeters>routing.routeUsage({ ...navRoute, geometry:{type:'LineString',coordinates:[[136.802,35.3],[136.803,35.3]]}, waycategory:[[0,1,1]], tollways:[[0,1,1]] }).priorityMeters);
+});
+test('navigation progress redraws remaining line and sustained off-route fixes trigger one automatic reroute',async()=>{
+  let now=Date.now(),drawProgress=null,fetchOrigin=null;
+  const h=harness();h.setFetch(async(url,options)=>{fetchOrigin=JSON.parse(options.body).origin;return Response.json({ok:true,route});});
+  h.client.start(target);await tick();assert.equal(h.calls,1);
+  h.client.onPosition({lat:35.303,lng:136.805,accuracy:8,updatedAt:now});assert.ok(h.drawn); 
+  h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,updatedAt:now+1000});
+  h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,updatedAt:now+2000});
+  h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,updatedAt:now+3000});await tick();
+  assert.equal(h.calls,2);assert.ok(fetchOrigin&&Math.abs(fetchOrigin.lat-35.3502)<0.00001);
 });
