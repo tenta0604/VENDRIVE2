@@ -40,10 +40,10 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     const data=await response.json(),body=JSON.parse(sent.options.body);
     assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
     assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
-    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);
+    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);assert.equal(body.preference,'fastest');
     assert.deepEqual(body.extra_info,['waycategory','tollways']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
-    assert.deepEqual(body.options.avoid_features,['ferries','tollways']);
+    assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);
     assert.deepEqual(data.route.summary,{distance:1800,duration:280});
     assert.deepEqual(data.route.waycategory,[[0,2,0]]);assert.deepEqual(data.route.tollways,[[0,1,0],[1,2,1]]);assert.deepEqual(routing.routeSections(data.route).map(x=>({motorway:x.motorway,tollway:x.tollway})),[{motorway:false,tollway:false},{motorway:false,tollway:true}]);
     assert.equal(JSON.stringify(data).includes('test-secret'),false);

@@ -1,53 +1,59 @@
 {
-  "evidenceVersion": 31,
-  "runType": "final29_tollways_extra_production_release",
-  "phase": "FINAL29_TOLLWAYS_EXTRA_PRODUCTION_VERIFIED",
-  "status": "PASS",
+  "evidenceVersion": 32,
+  "runType": "final30_highway_map_toggle_validation",
+  "phase": "FINAL30_HIGHWAY_MAP_TOGGLE_RELEASE",
+  "status": "VALIDATION_PASS_READY_FOR_PRODUCTION",
   "base": {
-    "productionMainBefore": "99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
-    "safetyTag": "backup-pre-FINAL29-TOLLWAYS-EXTRA-20261006",
-    "safetyTagObject": "04098890a417085539050a1762459944c297eb8d",
-    "safetyTagTarget": "99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
-    "pullRequest": 156,
-    "finalValidationHead": "90c4a487a6d68b418029e4e9377e0bea177e1de3",
-    "productionMerge": "e24d82fc10a53614493e041cdba29715b303963e"
+    "productionMainBefore": "5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
+    "safetyTag": "backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006",
+    "safetyTagObject": "e56a7dc03b986f5ba5c833ccbb68292b894cd69a",
+    "safetyTagTarget": "5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
+    "pullRequest": 158,
+    "finalValidationHead": "180ddcf056fd1ce44f2ef32fb93ee86b8e282076"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.29",
+    "app": "2026.10.07-FINAL.30",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Released FINAL.29 after field evidence showed the route itself reported no highway/toll classification. The relay now requests ORS dedicated tollways extra alongside waycategory, sanitizes both and merges them edge-by-edge. Real provider Preview evidence confirmed dedicated tollways spans, and production Vercel/Pages/live assets were verified.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/156",
-    "productionDeployment": "dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv",
-    "pagesRun": 37500261666
+    "summary": "Added a compact positive MAP highway mode control synchronized with the existing truck route preference. ON allows highways/tolls and explicitly requests fastest HGV routing; OFF explicitly avoids highways and tollways. Active routes recalculate immediately when toggled.",
+    "productStatus": "VALIDATED_NOT_RELEASED",
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/158",
+    "previewDeployment": "dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B",
+    "providerProbeDeployment": "dpl_6cJ2rueVXv9piK1whk65x4BtAdcA"
   },
   "gates": {
     "safetyTag": "PASS",
-    "nodeTests": "PASS: 16/16",
-    "finalRealEdge320px390px": "PASS: run 37499628848",
-    "dedicatedTollwaysFixture": "PASS: waycategory 0 + tollways 1 -> red + 有料区間あり",
-    "finalExistingBrowserRegressions": "PASS: run 37499628758",
-    "actualProviderTollways": "PASS: real driving-hgv Preview; tollways [1,0], Nagoya IC -> Komaki IC had 3 tollway spans",
+    "nodeTests": "PASS: 17/17",
+    "finalRealEdge320px390px": "PASS: run 37502908710",
+    "mapHighwayToggle": "PASS",
+    "highwayOffAvoidance": "PASS",
+    "highwayOnFastestMode": "PASS",
+    "finalExistingBrowserRegressions": "PASS: run 37502908758",
+    "actualProviderOnOff": "PASS: same route ON=highway/toll/red4; OFF=no highway/no toll/red0",
     "temporarySmokeProbeCleanup": "PASS",
-    "productionMerge": "PASS: PR #156 -> e24d82fc10a53614493e041cdba29715b303963e",
-    "productionVercel": "PASS: dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv READY",
-    "mainPushBrowserRegression": "PASS: run 37500262557",
-    "githubPages": "PASS: run 37500261666",
-    "liveVersion": "PASS: 2026.10.07-FINAL.29",
-    "liveRoutingAsset": "PASS: FINAL.29 asset and dedicated tollways code",
-    "liveRelay": "PASS: production relay deployed, unsupported GET 405"
+    "preview": "PASS: dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B READY",
+    "productionMerge": "NONE",
+    "productionDeployment": "NONE"
   },
-  "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. If the same known field route still reports no classification, capture exact origin/destination for upstream provider/OSM analysis.",
+  "openItems": [
+    "Merge PR #158 and verify production/live FINAL.30."
+  ],
+  "nextAction": "Merge PR #158, verify production/live FINAL.30, then close the maintenance scope.",
   "unresolved": [
-    "Exact route endpoints are required only if the same field route still fails on FINAL.29.",
+    "Production release verification remains pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "changedFiles": [
+    "index.html",
+    "truck-routing.js",
+    "api/route.mjs",
+    "tests/truck-route-api.test.mjs",
+    "tests/truck-route-client.test.mjs",
+    "tests/run-truck-route-gates.mjs",
+    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",

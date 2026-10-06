@@ -3,54 +3,51 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "activePhase": "FINAL30_HIGHWAY_MAP_TOGGLE_RELEASE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.29",
+  "appVersion": "2026.10.07-FINAL.30",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL29_TOLLWAYS_EXTRA_PRODUCTION_VERIFIED",
+  "status": "FINAL30_VALIDATED_READY_FOR_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.29 dedicated tollways extra — production released and verified",
-    "releaseStatus": "FINAL.29 is live. PR #156 merged to main at e24d82fc10a53614493e041cdba29715b303963e. Vercel production deployment dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv is READY. Main browser regression run 37500262557 and GitHub Pages run 37500261666 passed. Live version.json and public truck-routing.js report FINAL.29.",
+    "title": "FINAL.30 MAP highway toggle — validated, ready for production",
+    "releaseStatus": "PR #158 clean head 180ddcf056fd1ce44f2ef32fb93ee86b8e282076 is validated. Clean Preview dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B is READY and the temporary smoke endpoint is removed.",
     "rootCause": [
-      "FINAL.28 field evidence showed the route summary itself said 高速・有料区間なし, so the remaining all-blue symptom was not a paint/cache defect.",
-      "The production relay requested only ORS waycategory even though ORS exposes dedicated tollways extra information separately.",
-      "The missing dedicated tollways source could cause a route to appear unclassified to the client even when provider toll-road metadata exists."
+      "Field review showed the route was not entering an expressway at all; previous work focused on coloring/classification rather than the route-choice control itself.",
+      "The old vehicle setting used inverse wording (avoid tollways) and was buried in settings, while the MAP had no direct route-mode control.",
+      "OFF previously avoided tollways only, not highways explicitly, and ON did not explicitly request fastest routing."
     ],
     "scope": [
-      "ORS HGV route requests now ask for both waycategory and tollways extras.",
-      "The relay validates and forwards dedicated tollways spans.",
-      "Route segmentation merges waycategory Highway/Tollways bits with tollways=1 evidence edge-by-edge, even when span boundaries differ.",
-      "Any motorway/tollway evidence renders red; ordinary spans remain blue.",
-      "waytype=1 is not used as a red fallback because it also includes primary/trunk roads and would create false positives.",
-      "FINAL.28 asset-version matching and FINAL.27 fullscreen PIN/detail behavior remain preserved.",
-      "Analytics engine, DB/schema, tasks, orders, visits, HGV profile and user data remain unchanged."
+      "Add compact MAP 高速 ON/OFF control inside the existing map tools without changing page layout.",
+      "Use the same persisted routeVehicle.avoidTolls value as vehicle settings; no duplicate preference state.",
+      "Vehicle settings now present the same option positively as 高速道路を使う.",
+      "ON persists avoidTolls=false, requests preference=fastest, and allows highways/tollways.",
+      "OFF persists avoidTolls=true and avoids highways+tollways+ferries.",
+      "Toggling with an active route immediately cancels stale geometry and recalculates.",
+      "FINAL.29 tollway classification/coloring, fullscreen PIN interaction, vehicle dimensions/weight, Analytics, DB/schema, tasks, orders, visits and user data remain unchanged."
     ],
     "verification": {
-      "safetyTag": "PASS: annotated tag backup-pre-FINAL29-TOLLWAYS-EXTRA-20261006 -> 99c49c38ff6f37d7e95d3353d52e3ea489daa6de",
-      "nodeTests": "PASS: 16/16",
-      "finalEdge320px390px": "PASS: Truck route readiness gates run 37499628848",
-      "fieldSymptomFixture": "PASS: waycategory=0 plus dedicated tollways=1 renders red and summary reports 有料区間あり",
-      "existingBrowserRegression": "PASS: Browser regression gates run 37499628758",
-      "actualProviderTollways": "PASS: real Preview driving-hgv probe returned tollways values [1,0]; Nagoya IC -> Komaki IC had 3 dedicated tollway spans",
-      "smokeCleanup": "PASS: temporary /api/final29-smoke removed; clean Preview dpl_2rKPYSXETn64FteYT8hM85rUsoUL READY and smoke path 404",
-      "productionMerge": "PASS: PR #156 -> e24d82fc10a53614493e041cdba29715b303963e",
-      "productionVercel": "PASS: dpl_6PyUsLB4QQEnyfjWkWG5kRu3VTqv READY",
-      "mainPushRegression": "PASS: Browser regression gates run 37500262557",
-      "githubPages": "PASS: pages build/deployment run 37500261666",
-      "liveVersion": "PASS: 2026.10.07-FINAL.29",
-      "liveRoutingAsset": "PASS: public truck-routing.js?v=2026.10.07-FINAL.29 serves ASSET_VERSION=2026.10.07-FINAL.29 and dedicated tollways logic",
-      "productionRelay": "PASS: /api/route deployed; unsupported GET returns HTTP 405"
+      "safetyTag": "PASS: backup-pre-FINAL30-HIGHWAY-MAP-TOGGLE-20261006 -> 5d1727f653c5b5d3b41e547654ea5cc95fa247d8",
+      "nodeTests": "PASS: 17/17",
+      "edge320px390px": "PASS: Truck route readiness gates run 37502908710",
+      "mapToggle": "PASS: ON -> OFF -> ON persists state and automatically recalculates active route in real Edge",
+      "offAvoidance": "PASS: OFF fixture contains no red motorway/toll spans",
+      "onRouting": "PASS: ON fixture restores red motorway/toll spans and summary 高速利用ON",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37502908758 and truck-route gate reports all five existing browser regressions passed",
+      "actualProviderComparison": "PASS: Preview provider probe dpl_6cJ2rueVXv9piK1whk65x4BtAdcA on same route: ON motorway=true/tollway=true/red sections=4; OFF motorway=false/tollway=false/red sections=0",
+      "smokeCleanup": "PASS: temporary /api/final30-smoke removed; clean Preview dpl_DSXZYZZW5PV6wcWHTd2oXYT5WL5B READY and smoke path 404",
+      "production": "NOT_RELEASED"
     },
     "nextActions": [
-      "Resume AN15 real evidence accumulation and promotion gates.",
-      "If the operator's same field route still reports 高速・有料区間なし on FINAL.29, collect its exact origin/destination so upstream OSM/ORS classification for that route can be inspected directly."
+      "Merge PR #158 to main.",
+      "Verify production Vercel, main browser regression, GitHub Pages, live FINAL.30 assets and production relay.",
+      "Close FINAL.30 and return to AN15 real evidence accumulation."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "If the exact field route still lacks any highway/toll classification on FINAL.29, exact route endpoints are required for provider/OSM investigation.",
+    "Production merge/deployment/live verification for FINAL.30 remain pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {

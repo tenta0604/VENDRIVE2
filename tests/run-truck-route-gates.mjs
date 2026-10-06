@@ -7,6 +7,7 @@ const base=process.env.VENDRIVE_TEST_BASE_URL||'http://127.0.0.1:8000';
 const leafletJs=process.env.VENDRIVE_TEST_LEAFLET_JS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_JS):null;
 const leafletCss=process.env.VENDRIVE_TEST_LEAFLET_CSS?await readFile(process.env.VENDRIVE_TEST_LEAFLET_CSS):null;
 const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3],[136.805,35.305],[136.805,35.31],[136.81,35.31]]},summary:{distance:1800,duration:280},waycategory:[[0,4,0]],tollways:[[0,1,0],[1,3,1],[3,4,0]]};
+const surfaceRoute={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.303],[136.807,35.306],[136.81,35.31]]},summary:{distance:1900,duration:310},waycategory:[[0,3,0]],tollways:[[0,3,0]]};
 const appVersion=JSON.parse(await readFile(new URL('../version.json',import.meta.url),'utf8')).version;
 const evidence=[];
 for(const width of [320,390]){
@@ -34,7 +35,7 @@ for(const width of [320,390]){
         }
         if(mode==='error'){await request.fulfill({status:429,json:{ok:false,message:'無料枠の取得上限です'}});return;}
         if(mode==='bad'){await request.fulfill({json:{ok:true,route:{...route,geometry:{type:'LineString',coordinates:[]}}}});return;}
-        await request.fulfill({json:{ok:true,route}});return;
+        await request.fulfill({json:{ok:true,route:payload.vehicle.avoidTolls?surfaceRoute:route}});return;
       }
       if(url.includes('unpkg.com/leaflet')&&url.includes('leaflet.js')&&leafletJs){await request.fulfill({body:leafletJs,contentType:'application/javascript'});return;}
       if(url.includes('unpkg.com/leaflet')&&url.includes('leaflet.css')&&leafletCss){await request.fulfill({body:leafletCss,contentType:'text/css'});return;}
@@ -56,15 +57,17 @@ for(const width of [320,390]){
     assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'');assert.equal(count,0);
     await page.locator('#truckVehicleSave').click();assert.match(await page.locator('#truckVehicleError').innerText(),/全高/);assert.equal(count,0);
     for(const [field,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))await page.locator('#truckVehicle_'+field).fill(value);
-    await page.locator('#truckVehicleAvoidTolls').uncheck();
+    await page.locator('#truckVehicleAvoidTolls').check();
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
-    assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.ok(await paths()>=3);
+    assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.ok(await paths()>=3);assert.match(await page.locator('#mapHighwayToggle').innerText(),/ON/);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');
     assert.ok(await roadPathCount('#2563eb')>=1);assert.ok(await roadPathCount('#dc2626')>=1);
     await page.evaluate(()=>{var original=window.VENDRIVETruckRouting.routeSections;window.__routeSectionsCurrent=original;window.VENDRIVETruckRouting.routeSections=function(value){return original(value).map(function(section){return {motorway:section.motorway,tollway:section.tollway,coordinates:section.coordinates};});};});
     await page.locator('#allRoutes').click();assert.ok(await roadPathCount('#dc2626')>=1,'legacy section objects without highlight must still render priority spans red');
     await page.evaluate(()=>{window.VENDRIVETruckRouting.routeSections=window.__routeSectionsCurrent;delete window.__routeSectionsCurrent;});
     await page.locator('#allRoutes').click();
-    assert.match(await page.locator('#truckRouteSummary').innerText(),/有料区間あり/);assert.match(await page.locator('#truckRouteSummary').innerText(),/有料道路使用可/);
+    assert.match(await page.locator('#truckRouteSummary').innerText(),/有料区間あり/);assert.match(await page.locator('#truckRouteSummary').innerText(),/高速利用ON/);
+    await page.locator('#mapHighwayToggle').click();await waitText('高速利用OFF');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);assert.equal((await stored()).routeVehicle.avoidTolls,true);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'false');assert.equal(await roadPathCount('#dc2626'),0);assert.ok(await roadPathCount('#2563eb')>=1);
+    await page.locator('#mapHighwayToggle').click();await waitText('高速利用ON');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,3);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');assert.ok(await roadPathCount('#dc2626')>=1);
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
     const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.304,longitude:136.802,accuracy:8,heading:null}}));
@@ -77,9 +80,9 @@ for(const width of [320,390]){
     const afterPoor=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));assert.ok(Math.abs(afterPoor.lat-35.304)<0.00001&&Math.abs(afterPoor.lng-136.802)<0.00001,'poor-accuracy GPS must not move the displayed marker');
     const afterSave=await stored();
     await page.locator('#allRoutes').click();await page.locator('#zoomIn').click();
-    assert.equal(count,1);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
+    assert.equal(count,3);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'horizontal overflow');
-    await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);
+    await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,4);
     mode='error';await page.locator('#truckRouteRecalculate').click();await waitText('無料枠');assert.equal(await paths(),0);
     mode='bad';await page.locator('#truckRouteRecalculate').click();await waitText('経路データ');assert.equal(await paths(),0);
     mode='success';await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');
@@ -93,7 +96,7 @@ for(const width of [320,390]){
     // Persisted profile survives app reopen; no route request runs by itself.
     await page.reload({waitUntil:'load'});await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
     await page.locator('.tabs button[data-page="mapPage"]').click();assert.match(await page.locator('#truckVehicleSummary').innerText(),/4.8t/);assert.equal(count,beforeMissing);
-    await page.locator('#truckVehicleSettings').click();assert.equal(await page.locator('#truckVehicle_height').inputValue(),'285');await page.locator('#truckVehicleCancel').click();
+    await page.locator('#truckVehicleSettings').click();assert.equal(await page.locator('#truckVehicle_height').inputValue(),'285');assert.equal(await page.locator('#truckVehicleAvoidTolls').isChecked(),true);await page.locator('#truckVehicleCancel').click();
     // Non-map mobile landscape is portrait-guarded, while MAP remains landscape-capable and has a fullscreen fallback.
     await page.evaluate(()=>document.body.classList.add('touchDevice'));await page.setViewportSize({width:932,height:430});await page.locator('.tabs button[data-page="todayPage"]').click();assert.equal(await page.locator('#portraitGuard').isVisible(),true);
     await page.locator('#portraitOpenMap').click();assert.equal(await page.locator('#portraitGuard').isVisible(),false);await page.locator('#allRoutes').click();await page.waitForTimeout(120);
@@ -104,7 +107,7 @@ for(const width of [320,390]){
     let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
     await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
     assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
-    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','dedicated-tollways-extra-red-segmentation','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','fullscreen-pin-machine-modal','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
+    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','dedicated-tollways-extra-red-segmentation','map-highway-toggle','highway-off-avoidance','highway-on-fastest-mode','route-highway-status','portrait-nonmap-guard','landscape-map-fullscreen','fullscreen-pin-machine-modal','heading-arrow','smooth-GPS-animation','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
     console.log(`PASS truck route browser ${width}px`);
   }finally{await context.close();await rm(profile,{recursive:true,force:true});}
 }

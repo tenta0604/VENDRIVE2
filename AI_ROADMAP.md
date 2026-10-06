@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.29** (dedicated ORS tollways extra merged with waycategory for route coloring; FINAL.28 asset-cache fix and fullscreen PIN interaction preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.07-FINAL.30** (compact MAP highway ON/OFF control; ON fastest HGV with highways/tolls allowed, OFF avoids highways+tolls; FINAL.29 classification and prior fullscreen behavior preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.29 dedicated tollways-extra maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
+- Active engineering phase: **FINAL.30 MAP highway-toggle maintenance, validated and ready for production**. The AN15 real-evidence sequence remains next after release verification.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -109,3 +109,7 @@ FINAL.28 field evidence showed the route summary itself reported `高速・有�
 ## FINAL.29 dedicated tollways-extra production release (2026-10-07)
 
 FINAL.29 is released and production-verified. The HGV relay requests both ORS `waycategory` and dedicated `tollways` extras, sanitizes each independently, and merges their classifications edge-by-edge so differing span boundaries are safe. A span is red when either source provides motorway/toll evidence; ordinary spans remain blue. The field-shaped fixture `waycategory=0` + `tollways=1` passes in real Edge, and a real Preview provider probe confirmed dedicated tollway spans. PR #156 merged, Vercel production is READY, main regression and GitHub Pages passed, and the live app/routing asset report `2026.10.07-FINAL.29`. Resume AN15 evidence accumulation unless the exact same field route still reports no classification; if it does, capture its endpoints for upstream OSM/ORS investigation.
+
+## FINAL.30 MAP highway-toggle validation (2026-10-07)
+
+Field use showed the practical issue was route choice: the displayed route was not entering an expressway. FINAL.30 adds a compact `高速 ON/OFF` control to the MAP tool stack and synchronizes it with the existing persisted truck preference. ON means highways/tollways are allowed and the HGV request uses `preference=fastest`; OFF explicitly avoids `highways`, `tollways`, and ferries. Toggling an active route immediately recalculates it. Vehicle settings use the same preference with positive wording `高速道路を使う`. Real Edge at 320/390 and all existing regressions pass. A real Preview provider comparison on the same origin/destination returned motorway+tollway with four red sections for ON, and no motorway/tollway/red sections for OFF. Production remains FINAL.29 until PR #158 is merged and live-verified.
