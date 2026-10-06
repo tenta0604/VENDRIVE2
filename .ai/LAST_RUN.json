@@ -1,41 +1,47 @@
 {
-  "evidenceVersion": 23,
-  "runType": "truck_route_final24_production_release",
-  "phase": "FINAL24_TRUCK_ROUTE_PRODUCTION_VERIFIED",
+  "evidenceVersion": 24,
+  "runType": "final25_route_guidance_production_release",
+  "phase": "FINAL25_ROUTE_GUIDANCE_PRODUCTION_VERIFIED",
   "status": "PASS",
   "base": {
-    "productionMerge": "e8ca88c9ebdea05ffa464ad22fd986a0172cb395",
-    "safetyTag": "backup-pre-TRUCK-ROUTE-20261006",
-    "safetyTagTarget": "7e59bae140629fefe1ba96319b8bae169b41d95f",
-    "pullRequest": 145,
-    "releaseHead": "8751ef9114571f329b400e906a808ebe552d5e7c"
+    "productionMainBefore": "398d1d9bd93b37092c6e780a0d0fe2445d8168b2",
+    "safetyCheckpointType": "USER_APPROVED_BACKUP_BRANCH_EXCEPTION",
+    "safetyCheckpointBranch": "backup-pre-FINAL25-route-heading-20261006",
+    "safetyCheckpointTarget": "398d1d9bd93b37092c6e780a0d0fe2445d8168b2",
+    "pullRequest": 147,
+    "releaseHead": "f3f78564bd985ab264cd9d04b8e868c650ed190a",
+    "productionMerge": "c8c5908a576c449b2832f226c622534a0a08ddc1"
   },
   "versions": {
-    "app": "2026.10.06-FINAL.24",
+    "app": "2026.10.06-FINAL.25",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Released the user-configurable 2t/HGV route display. Extended the existing ORS secret to Production without decrypting it, synchronized the validation branch with latest main via a merge commit, reran all required real-Edge and regression gates, bumped the app to FINAL.24, merged PR #145, and verified the Vercel production deployment plus live GitHub Pages version/UI. Validation-only vehicle dimensions remain test evidence, not defaults.",
+    "summary": "Released FINAL.25 map-guidance improvements: ORS waycategory motorway/motorway_link sections are orange while ordinary sections remain blue; current position shows heading with GPS-heading preference and movement-bearing fallback; marker and follow-map motion are smoothed; >100m-accuracy fixes do not visually jump the marker. Real ORS waycategory retrieval, final real Edge at 320/390, existing regressions, Vercel production and GitHub Pages were all verified.",
     "productStatus": "PRODUCTION_VERIFIED",
-    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/145",
-    "productionDeployment": "dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq"
+    "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/147",
+    "productionDeployment": "dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G"
   },
   "gates": {
-    "safetyTag": "PASS",
-    "syntaxAndNodeTests": "PASS: 11 tests",
-    "finalRealEdge320px390px": "PASS: truck route run 37471603821",
-    "finalExistingBrowserRegressions": "PASS: browser run 37471603824",
-    "actualOrsRoute": "PASS: real driving-hgv route; validation-only profile 5.57m length / 1.88m width / 2.38m height / 6.095t gross weight; 2133m / 181.4s / 46-point LineString",
-    "secretHandling": "PASS: ORS_API_KEY sensitive; Preview + Production; value not decrypted",
-    "productionMerge": "PASS: PR #145 -> e8ca88c9ebdea05ffa464ad22fd986a0172cb395",
-    "productionVercel": "PASS: dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq READY",
-    "githubPages": "PASS: live version.json = 2026.10.06-FINAL.24 and truck-route UI present",
-    "liveRelay": "PASS: production /api/route deployed; unsupported GET returns 405"
+    "safetyCheckpoint": "PASS: explicit user-approved backup-branch exception at 398d1d9bd93b37092c6e780a0d0fe2445d8168b2",
+    "nodeTests": "PASS: 13/13",
+    "finalRealEdge320px390px": "PASS: run 37478095863",
+    "finalExistingBrowserRegressions": "PASS: run 37478095852, 5/5",
+    "routeColorSegmentation": "PASS: ORS waycategory bit 1 -> orange; non-motorway -> blue; real Edge fixture exercised both",
+    "headingArrow": "PASS: reported heading and movement-bearing fallback tested",
+    "smoothGpsDisplay": "PASS: intermediate animation state, settled state and >100m poor-fix display suppression tested in real Edge",
+    "actualOrsWaycategory": "PASS: real driving-hgv Preview route; 2133m / 181.4s / 46 coordinates / waycategory value 0",
+    "temporarySmokeProbeCleanup": "PASS: removed; final clean preview returns 404 for probe path",
+    "productionMerge": "PASS: PR #147 -> c8c5908a576c449b2832f226c622534a0a08ddc1",
+    "productionVercel": "PASS: dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G READY",
+    "mainPushBrowserRegression": "PASS: run 37478367744",
+    "githubPages": "PASS: pages deployment run 37478364850; live FINAL.25 and route legend present",
+    "liveRelay": "PASS: /api/route deployed; unsupported GET returns 405"
   },
   "openItems": [],
-  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. Keep production FINAL.24 stable unless real field evidence justifies another scoped maintenance phase.",
+  "nextAction": "Return to AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE. Keep FINAL.25 stable unless real field evidence identifies a concrete issue.",
   "unresolved": [
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],

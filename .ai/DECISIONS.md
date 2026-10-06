@@ -250,3 +250,14 @@ This file records confirmed project decisions that must survive chat migration. 
 - Vercel production deployment `dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq` is READY. Live GitHub Pages reports FINAL.24 and contains the truck vehicle/routing UI.
 - Vehicle dimensions/weight are user-specific configuration. The validation values 5.57m length / 1.88m width / 2.38m height / 6.095t gross weight must never become application defaults.
 - Existing external Google navigation remains separate and does not inherit HGV profile. Road signs and local restrictions remain authoritative over route candidates.
+
+## 2026-10-06 — FINAL.25 route guidance display
+- Release version is `2026.10.06-FINAL.25`; Analytics engine remains `AN14B3B5`, DB/schema remain 4.
+- User-requested road styling is deterministic from ORS extra info: `waycategory` bit 1 means `highway=motorway` or `highway=motorway_link` and is drawn orange (`#f97316`); other route sections are blue (`#2563eb`). This is road class, not a guess from geometry or speed.
+- Current-position direction uses a finite browser Geolocation `heading` first. When unavailable, a bearing is inferred only after at least 4m of meaningful movement. If neither yields a new direction, the last reliable heading may remain visible.
+- Current-position display motion is visual interpolation only. It does not rewrite stored route geometry or invent GPS measurements. When an existing display position is available, fixes with accuracy worse than 100m do not move the visual marker; the raw runtime GPS fix is still retained for existing position handling.
+- The route-follow map pan is animated together with the marker when follow mode is ON.
+- Vehicle dimensions/weight remain user-specific. No validation vehicle dimensions are product defaults.
+- PR #147 merged at `c8c5908a576c449b2832f226c622534a0a08ddc1`. Final validation head `f3f78564bd985ab264cd9d04b8e868c650ed190a` passed truck-route run 37478095863 and browser regression run 37478095852; main push regression 37478367744 and Pages deployment 37478364850 also passed.
+- Real ORS Preview verification confirmed `extra_info: ["waycategory"]` is accepted and returned sanitized category spans. The known-good validation route returned 2133m / 181.4s / 46 coordinates / category value 0. Motorway bit-1 rendering was separately exercised in real Edge with a controlled fixture.
+- Pre-edit safety used the explicit user-approved one-phase exception: never-modified backup branch `backup-pre-FINAL25-route-heading-20261006` at `398d1d9bd93b37092c6e780a0d0fe2445d8168b2`. Do not move or repurpose that branch.

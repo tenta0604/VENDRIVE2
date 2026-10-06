@@ -5,33 +5,37 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.06-FINAL.24",
+  "appVersion": "2026.10.06-FINAL.25",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL24_TRUCK_ROUTE_PRODUCTION_VERIFIED",
+  "status": "FINAL25_ROUTE_GUIDANCE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.24 2t truck route display — production released and verified",
-    "releaseStatus": "FINAL.24 is live on GitHub Pages. PR #145 merged to main at e8ca88c9ebdea05ffa464ad22fd986a0172cb395. Vercel production deployment dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq is READY. ORS_API_KEY remains a sensitive secret targeted to Preview and Production; its value was never decrypted. Live GitHub Pages version.json reports 2026.10.06-FINAL.24 and the route UI is present.",
+    "title": "FINAL.25 route guidance display — production released and verified",
+    "releaseStatus": "FINAL.25 is live on GitHub Pages. PR #147 merged to main at c8c5908a576c449b2832f226c622534a0a08ddc1. Vercel production deployment dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G is READY. Live version.json reports 2026.10.06-FINAL.25.",
     "scope": [
-      "User-entered truck height, width, length and gross vehicle weight drive HGV routing; optional axle load remains unset when unknown.",
-      "Current location to one chosen vending machine; road geometry, distance/estimated time, manual recalculation/end; external Google navigation remains separate.",
-      "Validation-only vehicle values are not product defaults and are not hard-coded.",
-      "Analytics engine, DB/schema, tasks, orders, visits and user data remain preserved."
+      "Truck routes render ordinary-road sections in blue and ORS waycategory Highway (motorway/motorway_link) sections in orange.",
+      "Current position uses a direction arrow when heading is known: reported Geolocation heading first, otherwise bearing from meaningful movement; last reliable heading is retained when movement is too small to infer a new direction.",
+      "Displayed GPS motion is interpolated smoothly between fixes. Clearly poor fixes above 100m accuracy do not move the visual marker, while raw runtime GPS state is still preserved for existing route-position handling.",
+      "User-entered vehicle dimensions and gross weight remain per-user data; validation values are not hard-coded.",
+      "Analytics engine, DB/schema, tasks, orders, visits and user data remain unchanged."
     ],
     "verification": {
-      "syntax": "PASS",
-      "nodeLogicTests": "PASS: 11 tests",
-      "finalEdgeAndRegression": "PASS: release head 8751ef9114571f329b400e906a808ebe552d5e7c; Browser regression gates run 37471603824 and Truck route readiness gates run 37471603821",
-      "liveProvider": "PASS: real ORS driving-hgv Preview route returned LineString 2133m / 181.4s / 46 coordinates for validation-only 5.57m x 1.88m x 2.38m / 6.095t profile",
-      "productionSecret": "PASS: ORS_API_KEY is sensitive and targeted to Preview + Production; value not decrypted",
-      "productionDeployment": "PASS: dpl_H7tAaYtGc5uLahaaRK7yhN37CYdq READY for merge e8ca88c9ebdea05ffa464ad22fd986a0172cb395",
-      "livePages": "PASS: https://tenta0604.github.io/VENDRIVE2/version.json reports 2026.10.06-FINAL.24; live page contains 2t truck vehicle controls and route UI",
-      "liveRelay": "PASS: production /api/route endpoint is deployed and rejects unsupported GET with HTTP 405"
+      "safetyCheckpoint": "PASS under explicit user-approved one-phase exception: untouched backup branch backup-pre-FINAL25-route-heading-20261006 targets pre-edit main 398d1d9bd93b37092c6e780a0d0fe2445d8168b2. Annotated-tag creation was unavailable through the active write tool path; safety issues #146/#148 were closed after the checkpoint was established.",
+      "syntaxAndNode": "PASS: 13 Node tests on final clean head f3f78564bd985ab264cd9d04b8e868c650ed190a",
+      "edge320px390px": "PASS: Truck route readiness gates run 37478095863, including motorway/ordinary-road colors, heading arrow, smooth GPS animation and poor-accuracy display suppression",
+      "existingBrowserRegression": "PASS: Browser regression gates run 37478095852; all five existing gates passed",
+      "liveProviderWaycategory": "PASS: Vercel Preview dpl_Anx6TNgqJ88QmMxxRqSRb33ueX3X exercised real ORS driving-hgv with extra_info waycategory. Known-good validation route returned 2133m / 181.4s / 46 coordinates / one waycategory span with value 0. Synthetic real-Edge fixture separately verified bit-1 motorway segmentation renders orange.",
+      "smokeCleanup": "PASS: temporary /api/final25-smoke removed; final clean Preview dpl_CBMMKmDEoC7cCdM15j2vFuH8rR6L READY and smoke path returns 404",
+      "productionMerge": "PASS: PR #147 -> c8c5908a576c449b2832f226c622534a0a08ddc1",
+      "productionDeployment": "PASS: dpl_3xTUZDNv9yNAXfebar6tFWw1Zh3G READY",
+      "mainPushRegression": "PASS: Browser regression gates run 37478367744",
+      "githubPages": "PASS: pages build/deployment run 37478364850; cache-busted live version.json reports 2026.10.06-FINAL.25 and live page contains 一般道 / 高速道路 legend",
+      "liveRelay": "PASS: production /api/route deployed; unsupported GET returns HTTP 405"
     },
     "nextActions": [
       "Resume AN15 real evidence accumulation and promotion gates; do not promote learned numeric corrections without the existing evidence requirements.",
-      "Treat future truck-routing changes as a new scoped maintenance phase with a fresh safety tag."
+      "Treat any later routing or GPS-display issue found in field use as a new scoped maintenance phase."
     ]
   },
   "requiredUserInput": [],

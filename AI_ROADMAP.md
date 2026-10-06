@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.06-FINAL.24** (adds user-configurable 2t/HGV road-route display while preserving FINAL.23 task selection; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.06-FINAL.25** (keeps user-configurable HGV routing and adds motorway/ordinary-road color separation, directional current-position arrow, and smooth GPS marker motion; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.24 truck routing is released and production-verified; no additional product phase is active without new field evidence.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.25 route guidance display is released and production-verified; no additional product phase is active without new field evidence.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.
@@ -81,3 +81,7 @@ Current work and blockers live in `.ai/STATE.json`; the most recent completed op
 ## FINAL.24 truck-route release (2026-10-06)
 
 FINAL.24 released user-configurable HGV routing. PR #145 merged, final real Edge and regression gates passed, a real HeiGIT/openrouteservice `driving-hgv` Preview route passed, Vercel production is READY, and live GitHub Pages reports `2026.10.06-FINAL.24`. The 5.57m / 1.88m / 2.38m / 6.095t values remain validation-only evidence and are not hard-coded defaults; every user supplies their own actual vehicle profile. Resume AN15 real-evidence work unless field use produces a new concrete routing defect or friction.
+
+## FINAL.25 route-guidance display release (2026-10-06)
+
+FINAL.25 improves the released HGV route display without changing routing authority or vehicle-profile semantics. ORS `waycategory` bit 1 (`motorway` / `motorway_link`) is rendered orange and ordinary road sections remain blue. The current-position marker becomes a direction arrow when heading is known, preferring browser Geolocation heading and falling back to bearing from meaningful movement. Visual GPS movement is eased between fixes and clearly poor fixes over 100m accuracy do not visually jump an existing marker; raw runtime GPS state remains available to the existing route-position logic. PR #147 merged after 13/13 Node tests, real Microsoft Edge at 320/390, all five existing regressions, and a real ORS `waycategory` Preview call passed. Vercel production and GitHub Pages FINAL.25 were verified. The one-phase pre-edit safety exception used an untouched backup branch at `398d1d9bd93b37092c6e780a0d0fe2445d8168b2`, explicitly approved by the user because annotated-tag creation was unavailable through the active write path.
