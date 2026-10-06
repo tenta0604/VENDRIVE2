@@ -1,15 +1,15 @@
 {
-  "evidenceVersion": 21,
-  "runType": "truck_route_preview_secret_activation",
-  "phase": "TRUCK_ROUTE_PENDING_CONFIRMED_VEHICLE_PROFILE",
-  "status": "PREVIEW_READY_HUMAN_INPUT_REQUIRED_PRODUCT_NOT_RELEASED",
+  "evidenceVersion": 22,
+  "runType": "truck_route_live_provider_validation",
+  "phase": "TRUCK_ROUTE_READY_FOR_RELEASE_APPROVAL",
+  "status": "LIVE_PROVIDER_PASS_AWAITING_PRODUCTION_APPROVAL",
   "base": {
-    "productionMain": "0697f7d0c306b5aa34caddc8396eba6838a1df37",
+    "productionMain": "d96935f4ac63eb8850ccc22ca9ad9860214b0ab3",
     "safetyTag": "backup-pre-TRUCK-ROUTE-20261006",
     "safetyTagTarget": "7e59bae140629fefe1ba96319b8bae169b41d95f",
     "validationBranch": "chatgpt/truck-route-20261006",
     "validationPullRequest": 145,
-    "validationHead": "b5568ff405f3407358b878fcc121f34271d66628"
+    "validationHead": "61e801185fe0d1bc2a60a4b4f157d3e274e713af"
   },
   "versions": {
     "app": "2026.10.05-FINAL.23",
@@ -18,38 +18,39 @@
     "schema": 4
   },
   "work": {
-    "summary": "Verified that ORS_API_KEY exists as a Preview-only sensitive Vercel environment variable without decrypting its value. Forced a fresh preview deployment of validation head b5568ff405f3407358b878fcc121f34271d66628 so the new secret is available at runtime; deployment dpl_7hYwdVAEAvqsmZLsi2y5w9WtiDfL reached READY. No production merge or release occurred.",
-    "productStatus": "BROWSER_VERIFIED_PREVIEW_READY_AWAITING_CONFIRMED_VEHICLE_PROFILE",
+    "summary": "Fixed Preview routing so Vercel validation deployments use their own /api/route while GitHub Pages continues to use the production relay; added a same-origin preview CORS guard; reran all finite browser/regression gates; then used a temporary Preview-only smoke probe to exercise the deployed route handler against the real HeiGIT/openrouteservice driving-hgv provider with the user-supplied validation vehicle profile. The real provider returned a valid LineString route. The smoke probe was removed and the final clean preview is READY.",
+    "productStatus": "LIVE_PROVIDER_VERIFIED_NOT_RELEASED",
     "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/145",
-    "previewDeployment": "dpl_7hYwdVAEAvqsmZLsi2y5w9WtiDfL"
+    "finalCleanPreview": "dpl_HUGbAnovHz6cWEhBVUvGUA5VbW44"
   },
   "gates": {
     "safetyTag": "PASS",
     "archivedPatchRestored": "PASS",
     "syntaxAndNodeTests": "PASS: 11 tests",
-    "realEdge320px": "PASS: Edge 154.0.4258.62, run 37462241766",
-    "realEdge390px": "PASS: Edge 154.0.4258.62, run 37462241766",
-    "truckRouteBrowserBehavior": "PASS: blank profile blocking, unit conversion, road geometry, GPS marker-only updates, rerender persistence, manual recalculation, quota/malformed errors, late-response cancellation, missing destination, persistence, external navigation, no horizontal overflow, no page errors",
-    "existingFiveBrowserRegressions": "PASS: run 37462241766; dedicated run 37462241873 also PASS",
-    "vercelPreviewStatus": "PASS for validation head; actual ORS route not exercised because activation inputs are absent",
-    "actualOrsRoute": "NOT_RUN: confirmed real vehicle profile still incomplete",
-    "productionMerge": "NONE",
-    "productionDeployment": "NONE",
+    "realEdge320px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af",
+    "realEdge390px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af",
+    "existingFiveBrowserRegressions": "PASS: run 37470086847; truck route run 37470086935 also green",
     "orsPreviewSecret": "PASS: Preview-only sensitive variable exists; value not decrypted",
-    "freshPreviewDeployment": "PASS: dpl_7hYwdVAEAvqsmZLsi2y5w9WtiDfL READY for validation head b5568ff405f3407358b878fcc121f34271d66628"
+    "actualOrsRoute": "PASS: driving-hgv, validation-only profile height 2.38m / width 1.88m / length 5.57m / gross weight 6.095t / avoid tolls true; response distance 2133m, duration 181.4s, LineString with 46 coordinates",
+    "temporarySmokeProbeCleanup": "PASS: removed from validation branch; final clean preview /api/route-smoke returns 404",
+    "productionMerge": "NONE",
+    "productionDeployment": "NONE"
   },
   "openItems": [
-    "Confirm actual vehicle height, width, length and gross vehicle weight from a reliable source; axle load optional.",
-    "Run an actual ORS HGV route through the validation preview.",
-    "Obtain explicit production merge/release approval only after the live-provider gate passes."
+    "Explicit production release approval.",
+    "After approval, extend the existing ORS_API_KEY secret to the Production target without exposing the value.",
+    "Merge PR #145, verify production deployment, and live-check the GitHub Pages route flow."
   ],
-  "nextAction": "Ask the user for the confirmed real vehicle dimensions and gross vehicle weight; then run the actual HGV provider-route preview gate. Do not merge or release before explicit approval.",
+  "nextAction": "Wait for explicit production release approval. If approved, activate ORS_API_KEY for Production, merge PR #145, verify deployment and live route behavior, then close the phase.",
   "unresolved": [
-    "Actual ORS provider-route validation and production release remain pending.",
+    "Production release remains pending explicit approval.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "changedFiles": [
     ".ai/STATE.json",
-    ".ai/LAST_RUN.json"
+    ".ai/LAST_RUN.json",
+    ".ai/pending/TRUCK_ROUTE_EVIDENCE.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
   ]
 }

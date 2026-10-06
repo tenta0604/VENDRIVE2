@@ -3,16 +3,16 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "TRUCK_ROUTE_PENDING_ACTIVATION_INPUTS",
+  "activePhase": "TRUCK_ROUTE_READY_FOR_RELEASE_APPROVAL",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.05-FINAL.23",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "truck_route_preview_ready_awaiting_confirmed_vehicle_profile",
+  "status": "truck_route_live_provider_verified_awaiting_release_approval",
   "currentWork": {
-    "title": "User-approved 2t truck route display — browser verified, awaiting activation inputs",
-    "releaseStatus": "Production remains FINAL.23. Draft PR #145 is browser verified. ORS_API_KEY is now configured as a Preview-only Vercel Secret and a fresh validation preview deployment from b5568ff405f3407358b878fcc121f34271d66628 reached READY. No production merge/release has occurred.",
+    "title": "User-approved 2t truck route display — live ORS provider verified, awaiting production release approval",
+    "releaseStatus": "Production remains FINAL.23. Draft PR #145 is browser verified and live ORS provider verification passed on a Preview deployment. The final clean validation head is 61e801185fe0d1bc2a60a4b4f157d3e274e713af. No truck-route code has been merged to main or released.",
     "scope": [
       "Internal road-route display with actual vehicle conditions from the first release.",
       "Current location to one chosen vending machine; distance/estimated time, manual recalculation and end; existing external navigation retained.",
@@ -29,22 +29,24 @@
     "verification": {
       "syntax": "PASS",
       "nodeLogicTests": "PASS: 11 tests",
-      "edge320px390px": "PASS: GitHub Actions run 37462241766 on Microsoft Edge 154.0.4258.62",
-      "existingBrowserRegression": "PASS: truck-route run 37462241766 plus dedicated browser run 37462241873",
-      "actualProviderAndDeployment": "PREVIEW READY WITH ORS SECRET; actual HGV provider-route validation is still NOT_RUN because the real vehicle profile is not yet fully confirmed."
+      "edge320px390px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; Truck route readiness gates run 37470086935",
+      "existingBrowserRegression": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; Browser regression gates run 37470086847",
+      "actualProviderAndDeployment": "PASS: Preview-only ORS_API_KEY present as a Vercel Secret; real driving-hgv route returned LineString geometry for validation-only vehicle profile 5.57m x 1.88m x 2.38m, gross weight 6.095t. The temporary smoke probe was removed; clean preview dpl_HUGbAnovHz6cWEhBVUvGUA5VbW44 is READY and /api/route-smoke returns 404.",
+      "production": "NOT_RELEASED"
     },
     "nextActions": [
-      "Confirm the real vehicle profile from a reliable source: height, width, length and gross vehicle weight. The user has supplied approximate dimensions, but they are not yet treated as confirmed routing facts.",
-      "Use the confirmed vehicle profile to run an actual ORS driving-hgv route through the validation preview.",
-      "If the actual provider-route gate passes, obtain explicit production merge/release approval before merging PR #145."
+      "Obtain explicit production release approval.",
+      "After approval, extend ORS_API_KEY from Preview-only to Production without revealing or rotating the secret value.",
+      "Merge draft PR #145 to main only after confirming all required gates remain green.",
+      "Verify the production Vercel deployment and the live GitHub Pages truck-route flow after merge.",
+      "Keep the validation vehicle values as test evidence only; do not hard-code them as application defaults. Each user must enter their own vehicle dimensions and gross weight."
     ]
   },
   "requiredUserInput": [
-    "Confirmed actual vehicle height, width, length and gross vehicle weight; axle load only if known. Approximate values are not sufficient for the release gate.",
-    "Explicit production merge/release approval after live-provider preview verification passes."
+    "Explicit production release approval for the truck-route feature."
   ],
   "unresolved": [
-    "Actual ORS provider-route validation with the confirmed vehicle profile remains pending.",
+    "Production ORS_API_KEY target, merge, deployment, and live production verification remain pending approval.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled."
   ],
   "recovery": {

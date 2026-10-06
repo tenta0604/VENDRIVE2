@@ -232,3 +232,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - This work is not a released FINAL.24. Validation draft PR #145 has passed real Edge 320px/390px and existing browser regression gates; all production versions and the completed intelligence phase remain unchanged. Activation still requires the ORS key, actual vehicle facts, an actual provider-route preview test, and explicit production merge/release approval. See .ai/pending/TRUCK_ROUTING.md and .ai/pending/TRUCK_ROUTE_EVIDENCE.json for exact evidence and the resume point.
 
 - The user prefers resuming this work in ordinary GPT. The archived patch/evidence on main remains the continuity source, while draft PR #145 holds the browser-verified implementation. Passing validation is not permission to merge or release production code.
+
+## 2026-10-06 — Truck route live-provider validation
+- Final clean validation head: `61e801185fe0d1bc2a60a4b4f157d3e274e713af`; draft PR #145 remains unmerged.
+- Preview routing must use same-deployment `/api/route`; GitHub Pages production continues to use `https://vendrive2-ocr-relay.vercel.app/api/route`.
+- The API may accept the existing explicit allowed origins plus an exact same-origin request; do not broaden this to arbitrary Vercel origins.
+- Real provider gate passed through the Vercel Preview secret with validation-only vehicle values: length 5.57m, width 1.88m, height 2.38m, gross weight 6.095t, axle load unset, avoid tolls true. Returned driving-hgv LineString: 2133m, 181.4s, 46 coordinates.
+- These vehicle values are test evidence only. Never hard-code them as product defaults; each user must enter their own actual vehicle profile.
+- The temporary smoke probe was removed; final clean Preview is READY and the probe path returns 404.
+- Production ORS secret targeting, merge, deployment and live verification require explicit production release approval.

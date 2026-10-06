@@ -1,5 +1,5 @@
 {
-  "status": "BROWSER_VERIFIED_AWAITING_ACTIVATION_INPUTS_NOT_DEPLOYED",
+  "status": "LIVE_PROVIDER_VERIFIED_AWAITING_PRODUCTION_APPROVAL",
   "scope": "TRUCK_ROUTE_IMPLEMENTATION_PENDING_BROWSER_VERIFICATION",
   "baseline": "7e59bae140629fefe1ba96319b8bae169b41d95f",
   "remoteSafetyTag": "backup-pre-TRUCK-ROUTE-20261006",
@@ -20,11 +20,11 @@
       "status": "PASS",
       "count": 11
     },
-    "realEdge320px390px": "PASS: GitHub Actions run 37462241766; Microsoft Edge 154.0.4258.62; 320px and 390px",
-    "existingBrowserRegression": "PASS: all five gates in run 37462241766; dedicated Browser regression gates run 37462241873 also passed",
-    "actualOrsRoute": "NOT_RUN: ORS_API_KEY absent and real vehicle profile not yet supplied",
-    "deployment": "NOT_RUN: no production merge or deployment",
-    "vercelPreview": "PASS status for validation head; provider route not exercised"
+    "realEdge320px390px": "PASS: final validation head 61e801185fe0d1bc2a60a4b4f157d3e274e713af; runs 37470086935 and 37470086847",
+    "existingBrowserRegression": "PASS: all five gates on final validation head",
+    "actualOrsRoute": "PASS: real driving-hgv provider call in Vercel Preview using validation-only vehicle profile 5.57m length / 1.88m width / 2.38m height / 6.095t gross weight / no axle load / avoid tolls. Result: 2133m, 181.4s, LineString, 46 coordinates.",
+    "deployment": "PRODUCTION NOT_RUN",
+    "vercelPreview": "PASS: clean preview dpl_HUGbAnovHz6cWEhBVUvGUA5VbW44 READY"
   },
   "changedFiles": [
     "index.html",
@@ -41,18 +41,27 @@
   ],
   "gateOutput": "✔ vehicle validation rejects missing, zero, nonnumeric and impossible axle values (1.136856ms)\n✔ origin/method/preflight/body gates reject before the upstream request (5.974218ms)\n✔ unconfigured relay has a usable nonsecret error (0.993109ms)\n✔ HGV request uses the new endpoint, lng/lat ordering, exact dimensions and no secret output (6.029897ms)\n✔ provider failures and malformed geometry fail closed without car/straight-line fallback (4.328623ms)\n✔ warm-instance quota guard caps upstream calls (5.188641ms)\n✔ unknown profile opens blank fields and blocks route calls; validation uses explicit converted units (7.12261ms)\n✔ profile save failure stays open and never routes on unpersisted values (0.444892ms)\n✔ route redraw does not call provider and invalidated destinations clear the route (2.227432ms)\n✔ late responses from ended/replaced routes cannot resurrect them (1.72881ms)\n✔ provider error or malformed geometry removes old geometry and supports manual retry (1.945958ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 104.442693\n",
   "requiredInput": [
-    "A free Standard ORS key configured sensitively in Vercel; never publish its value.",
-    "Actual height/width/length and gross vehicle weight; optional axle load.",
-    "Explicit production merge/release approval after live-provider preview verification."
+    "Explicit production release approval."
   ],
-  "nextAction": "Run an actual HGV route through the non-production preview after ORS key and real vehicle facts are available; if that passes, request explicit production merge/release approval.",
+  "nextAction": "After explicit approval, extend ORS_API_KEY to Production, merge PR #145, verify the production Vercel deployment and live GitHub Pages truck-route behavior.",
   "productionChanged": false,
   "archivedPatch": ".ai/pending/TRUCK_ROUTE_20261006.patch",
   "archivedPatchSha256": "8382281dbf758c13abd00ba2ed22e77c24e0f112011cc64108f0118b6dfc13d9",
   "pullRequest": 145,
-  "validationHead": "b5568ff405f3407358b878fcc121f34271d66628",
+  "validationHead": "61e801185fe0d1bc2a60a4b4f157d3e274e713af",
   "browserFixes": [
     "Corrected the test selector so the blue route stroke and blue-filled destination marker are counted according to actual Leaflet SVG attributes.",
-    "Fixed product UI refresh so a persisted routeVehicle profile is reflected after app reload."
-  ]
+    "Fixed product UI refresh so a persisted routeVehicle profile is reflected after app reload.",
+    "Fixed validation deployment routing so Vercel Preview uses its own /api/route while the GitHub Pages app continues to use the production relay.",
+    "Allowed only exact same-origin requests for Vercel Preview in addition to the existing explicit production/local origin allowlist."
+  ],
+  "validationVehicle": {
+    "scope": "validation-only; never hard-code as application default",
+    "length_m": 5.57,
+    "width_m": 1.88,
+    "height_m": 2.38,
+    "gross_weight_t": 6.095,
+    "axleload_t": null,
+    "avoid_tolls": true
+  }
 }
