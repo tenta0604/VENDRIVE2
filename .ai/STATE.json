@@ -3,16 +3,16 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL26_ROUTE_ORIENTATION_READY_FOR_RELEASE_APPROVAL",
+  "activePhase": "FINAL26_PRODUCTION_PAGES_PENDING",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.06-FINAL.25",
+  "appVersion": "2026.10.06-FINAL.26",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL26_VALIDATED_AWAITING_PRODUCTION_APPROVAL",
+  "status": "FINAL26_MERGED_VERCEL_READY_PAGES_PENDING",
   "currentWork": {
-    "title": "FINAL.26 route mode/orientation — validated, awaiting production release approval",
-    "releaseStatus": "Production remains FINAL.25. PR #150 is validated on head 9ee560e71f986cb7ab1275b46e9760a4d88d77be and Vercel Preview dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg is READY. No FINAL.26 product code has been merged to main or released.",
+    "title": "FINAL.26 route mode/orientation — merged, Pages propagation pending",
+    "releaseStatus": "PR #150 merged to main at efd6ab30c6ac4937ff2cec482cbac450127ee75f. Vercel production dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N is READY and main push browser regression run 37487130052 passed. GitHub Pages still served FINAL.25 at the latest live check, so release is not yet declared complete.",
     "scope": [
       "Preserve ORS waycategory motorway coloring: motorway/motorway_link sections orange and ordinary sections blue.",
       "Make route state explicit with 高速区間あり/なし and 有料道路回避中/使用可 so an all-blue route is understandable.",
@@ -30,19 +30,21 @@
       "orientationAndFullscreen": "PASS in real Edge fixture: non-MAP landscape guard, MAP landscape access, app-managed fullscreen fallback when native requestFullscreen is rejected",
       "preview": "PASS: dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg READY",
       "temporaryProviderProbe": "PASS: probe removed before final validation head",
-      "production": "NOT_RELEASED"
+      "production": "NOT_RELEASED",
+      "productionMerge": "PASS: PR #150 -> efd6ab30c6ac4937ff2cec482cbac450127ee75f",
+      "productionVercel": "PASS: dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N READY",
+      "mainPushRegression": "PASS: Browser regression gates run 37487130052",
+      "githubPages": "PENDING: latest live version check still returned 2026.10.06-FINAL.25"
     },
     "nextActions": [
-      "Obtain explicit production release approval for FINAL.26.",
-      "After approval, synchronize the validated branch with this documentation-only main update without altering validated product files.",
-      "Reconfirm required checks remain green, merge PR #150, verify Vercel production and GitHub Pages live FINAL.26, then close the maintenance phase."
+      "Wait for GitHub Pages to build the latest main and verify live version.json reports 2026.10.06-FINAL.26.",
+      "Verify live page contains the FINAL.26 fullscreen button, toll-avoidance clarification, and portrait guard markup.",
+      "Then close FINAL.26 and return to AN15 real evidence accumulation."
     ]
   },
-  "requiredUserInput": [
-    "Explicit production release approval for FINAL.26."
-  ],
+  "requiredUserInput": [],
   "unresolved": [
-    "FINAL.26 production merge/deployment/live verification remain pending explicit approval.",
+    "GitHub Pages propagation to FINAL.26 is pending.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."
   ],
   "recovery": {

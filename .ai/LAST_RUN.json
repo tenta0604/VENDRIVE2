@@ -1,28 +1,30 @@
 {
-  "evidenceVersion": 25,
-  "runType": "final26_route_orientation_validation",
-  "phase": "FINAL26_ROUTE_ORIENTATION_READY_FOR_RELEASE_APPROVAL",
-  "status": "VALIDATION_PASS_AWAITING_PRODUCTION_APPROVAL",
+  "evidenceVersion": 26,
+  "runType": "final26_production_merge_pages_pending",
+  "phase": "FINAL26_PRODUCTION_PAGES_PENDING",
+  "status": "PRODUCTION_MERGED_PAGES_PENDING",
   "base": {
     "productionMainBefore": "b51ffe064e22e7096e74324578ff0f88ff9d300d",
     "safetyTag": "backup-pre-FINAL26-MAP-ORIENTATION-20261006",
     "safetyTagObject": "064e185fde8049cebd3fa289d0781fb3633be03a",
     "safetyTagTarget": "b51ffe064e22e7096e74324578ff0f88ff9d300d",
     "pullRequest": 150,
-    "validationHead": "9ee560e71f986cb7ab1275b46e9760a4d88d77be"
+    "validationHead": "9ee560e71f986cb7ab1275b46e9760a4d88d77be",
+    "productionMerge": "efd6ab30c6ac4937ff2cec482cbac450127ee75f"
   },
   "versions": {
-    "app": "2026.10.06-FINAL.25",
+    "app": "2026.10.06-FINAL.26",
     "candidateApp": "2026.10.06-FINAL.26",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Investigated the report that motorway segments were not changing color. A real ORS driving-hgv Preview call between Nagoya IC and Komaki IC returned waycategory values containing motorway bit 1, confirming the color classifier is correct. FINAL.26 therefore preserves the classifier but makes route status and toll-avoidance state explicit, and adds portrait-only behavior for non-MAP mobile screens plus landscape/fullscreen MAP behavior with browser-compatible fallbacks.",
-    "productStatus": "VALIDATED_NOT_RELEASED",
+    "summary": "FINAL.26 was approved and merged. Vercel production is READY and main push browser regression passed. GitHub Pages had not yet propagated beyond FINAL.25 at the latest live check, so the release remains open until live Pages verification is terminal.",
+    "productStatus": "MERGED_VERCEL_READY_PAGES_PENDING",
     "pullRequest": "https://github.com/tenta0604/VENDRIVE2/pull/150",
-    "previewDeployment": "dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg"
+    "previewDeployment": "dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg",
+    "productionDeployment": "dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N"
   },
   "gates": {
     "safetyTag": "PASS: annotated immutable tag at pre-edit main",
@@ -34,14 +36,16 @@
     "portraitNonMap": "PASS: mobile landscape guard fixture",
     "landscapeMapFullscreen": "PASS: MAP landscape plus app-managed fullscreen fallback fixture",
     "preview": "PASS: dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg READY",
-    "productionMerge": "NONE",
-    "productionDeployment": "NONE"
+    "productionMerge": "PASS: PR #150 -> efd6ab30c6ac4937ff2cec482cbac450127ee75f",
+    "productionDeployment": "NONE",
+    "productionVercel": "PASS: dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N READY",
+    "mainPushBrowserRegression": "PASS: run 37487130052",
+    "githubPages": "PENDING: live version still FINAL.25"
   },
   "openItems": [
-    "Explicit production release approval for FINAL.26.",
-    "After approval, sync branch with documentation-only main change, merge PR #150, and verify production Vercel + live GitHub Pages."
+    "GitHub Pages propagation and live FINAL.26 verification."
   ],
-  "nextAction": "Wait for explicit production release approval. Do not merge PR #150 before approval.",
+  "nextAction": "Verify GitHub Pages FINAL.26 live. Do not declare the phase complete until live version/UI evidence is terminal.",
   "unresolved": [
     "FINAL.26 production release remains pending explicit approval.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied."

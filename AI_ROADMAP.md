@@ -4,7 +4,7 @@
 
 - Visible app baseline: **2026.10.06-FINAL.25** (keeps user-configurable HGV routing and adds motorway/ordinary-road color separation, directional current-position arrow, and smooth GPS marker motion; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **FINAL.26 route-mode/orientation maintenance, validated and awaiting production release approval**. The AN15 real-evidence sequence remains the next intelligence phase after this maintenance release.
+- Active engineering phase: **FINAL.26 production propagation verification**. PR #150 is merged and Vercel production is READY; GitHub Pages propagation is the remaining finite release gate. The AN15 real-evidence sequence remains next afterward.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
 - OPS10C remains withdrawn. Preserve existing Today nearest-machine ordering.

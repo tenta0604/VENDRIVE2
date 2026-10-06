@@ -270,3 +270,10 @@ This file records confirmed project decisions that must survive chat migration. 
 - MAP is the sole landscape-capable operational page. It has an app-managed full-viewport mode that works without native Fullscreen API support. When native fullscreen and Screen Orientation landscape lock are available, use them opportunistically; failure must not break the fallback.
 - Annotated safety tag: `backup-pre-FINAL26-MAP-ORIENTATION-20261006` -> `b51ffe064e22e7096e74324578ff0f88ff9d300d`.
 - PR #150 validation head `9ee560e71f986cb7ab1275b46e9760a4d88d77be` passed truck-route run 37483742121 and browser regression run 37483742234. Vercel Preview `dpl_8KbaaM2BWvSGUMqE6MUsZKyf3AHg` is READY. Production release requires explicit approval.
+
+## 2026-10-06 — FINAL.26 production merge, Pages pending
+- User explicitly approved production release.
+- PR #150 merged to main at `efd6ab30c6ac4937ff2cec482cbac450127ee75f` after the latest-main integration head `991957c85f63948ae3a1ca4bb8975419bce0126a` passed truck-route run 37486967621 and browser regression run 37486967417.
+- Main push browser regression run 37487130052 passed.
+- Vercel production deployment `dpl_Ctz1iykQeqkf7idiDF9rCFQuBV4N` is READY for the merge SHA.
+- Live GitHub Pages still returned FINAL.25 at the first post-merge check, so FINAL.26 is not considered fully closed until Pages reports FINAL.26 and the new UI is visible.
