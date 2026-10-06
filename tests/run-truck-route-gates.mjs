@@ -96,7 +96,6 @@ for(const width of [320,390]){
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.36,longitude:136.86,accuracy:8,heading:45}}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3601,longitude:136.8601,accuracy:8,heading:45}}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3602,longitude:136.8602,accuracy:8,heading:45}}));
-    await page.waitForFunction(n=>window.__autoCountReady=(n),beforeAutoReroute).catch(()=>{});
     await page.waitForTimeout(250);assert.equal(count,beforeAutoReroute+1,'three sustained off-route fixes should trigger one automatic reroute');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);
     // A cancelled in-flight response must never restore a cleared route.
     mode='held';const began=new Promise(resolve=>heldStarted=resolve),done=new Promise(resolve=>heldDone=resolve);
