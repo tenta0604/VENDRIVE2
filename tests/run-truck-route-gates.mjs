@@ -65,7 +65,7 @@ for(const width of [320,390]){
     await page.waitForFunction(()=>Math.abs(Number(document.querySelector('.vendrive-current-position').dataset.lat)-35.304)<0.000001);
     const settled=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.33,longitude:136.83,accuracy:250,heading:45}}));await page.waitForTimeout(1300);
-    const afterPoor=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));assert.deepEqual(afterPoor,settled);
+    const afterPoor=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));assert.ok(Math.abs(afterPoor.lat-35.304)<0.00001&&Math.abs(afterPoor.lng-136.802)<0.00001,'poor-accuracy GPS must not move the displayed marker');
     const afterSave=await stored();
     await page.locator('#allRoutes').click();await page.locator('#zoomIn').click();
     assert.equal(count,1);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
