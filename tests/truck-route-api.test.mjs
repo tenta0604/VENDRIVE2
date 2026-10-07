@@ -40,7 +40,7 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     const data=await response.json(),body=JSON.parse(sent.options.body);
     assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
     assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
-    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);assert.equal(body.preference,'fastest');
+    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);assert.equal(body.preference,'recommended');
     assert.deepEqual(body.extra_info,['waycategory','tollways']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
     assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);assert.equal(body.alternative_routes,undefined);
@@ -48,7 +48,7 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     assert.deepEqual(data.route.waycategory,[[0,2,0]]);assert.deepEqual(data.route.tollways,[[0,1,0],[1,2,1]]);assert.deepEqual(routing.routeSections(data.route).map(x=>({motorway:x.motorway,tollway:x.tollway})),[{motorway:false,tollway:false},{motorway:false,tollway:true}]);
     assert.equal(JSON.stringify(data).includes('test-secret'),false);
     assert.equal(response.headers.get('cache-control'),'no-store');
-    await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));{const onBody=JSON.parse(sent.options.body);assert.deepEqual(onBody.options.avoid_features,['ferries']);assert.deepEqual(onBody.alternative_routes,{target_count:3,share_factor:0.95,weight_factor:2});}
+    await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));{const onBody=JSON.parse(sent.options.body);assert.deepEqual(onBody.options.avoid_features,['ferries']);assert.deepEqual(onBody.alternative_routes,{target_count:3,share_factor:0.85,weight_factor:1.6});}
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 test('provider failures and malformed geometry fail closed without car/straight-line fallback',async()=>{
@@ -65,7 +65,7 @@ test('provider failures and malformed geometry fail closed without car/straight-
     globalThis.fetch=async()=>{throw new Error('provider down');};assert.equal((await POST(request())).status,502);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
-test('highway ON prefers materially longer expressway use within bounded detour',async()=>{
+test('highway ON prefers more expressway use only among near-fast bounded candidates',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
   const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.304],[136.81,35.31]]},properties:{summary:{distance:1600,duration:180},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   const shortHighway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.301],[136.806,35.306],[136.81,35.31]]},properties:{summary:{distance:2000,duration:190},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,1,1],[1,3,0]]}}}};
@@ -73,8 +73,8 @@ test('highway ON prefers materially longer expressway use within bounded detour'
   globalThis.fetch=async()=>Response.json({features:[surface,shortHighway,longHighway]});
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
-    const data=await response.json();assert.equal(data.selection,'expressway-distance-preferred');assert.deepEqual(data.route.summary,{distance:2300,duration:225});
-    assert.ok(data.usage.priorityMeters>500);
+    const data=await response.json();assert.equal(data.selection,'expressway-natural-preferred');assert.deepEqual(data.route.summary,{distance:2000,duration:190});
+    assert.ok(data.usage.priorityMeters>100);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 test('highway ON falls back cleanly when provider returns no highway candidate',async()=>{
