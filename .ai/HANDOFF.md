@@ -388,3 +388,24 @@ FINAL.37 behavior:
 The next route-quality evidence should come from retesting the previously failing field route. If it still fails, capture that exact origin/destination rather than weakening HGV safety globally.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
+
+## 2026-10-07 FINAL.38 bounded highway adoption + fullscreen route persistence
+
+New real-device evidence after FINAL.37 showed two issues:
+- highway selection still appeared unchanged;
+- active route geometry could disappear after entering fullscreen MAP.
+
+Root cause and correction:
+- FINAL.37 could generate active via-IC HGV candidates but final selection still re-applied the old near-fast +2 minute band. FINAL.38 lets active IC candidates win when they stay inside the existing global detour envelope, while normal provider alternatives keep near-fast ranking.
+- active IC search continues until normal motorway use is materially sufficient, and via-IC candidates must contain meaningful motorway distance.
+- fullscreen/software-rotation viewport refresh now invalidates Leaflet size and explicitly redraws the active route at two settle points to cover iOS viewport settling.
+- no HGV restriction is weakened and no car/straight-line fallback is added.
+
+Safety tag: `backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007` -> `84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd`.
+
+PR #174 validation before canonical bookkeeping:
+- Truck route readiness / API / real Edge 320/390: `37639777479`, PASS.
+- Browser regression: `37639777130`, PASS.
+- Edge explicitly asserts the active route remains visible before fullscreen, after fullscreen viewport resize, and after software rotation.
+
+Do not call FINAL.38 production-complete until PR #174 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.38 evidence are terminal PASS.

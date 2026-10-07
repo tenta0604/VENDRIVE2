@@ -471,3 +471,14 @@ This file records confirmed project decisions that must survive chat migration. 
 - Live public version and routing asset report `2026.10.07-FINAL.37`; public UI describes active nearby-IC HGV highway search.
 - FINAL.37 is closed. The next evidence is real-device retest of the previously failing highway case; do not weaken HGV safety globally without an exact failing route.
 - Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.
+
+## 2026-10-07 — FINAL.38 highway adoption/fullscreen decisions
+- FINAL.37 field evidence proved that generating via-IC HGV candidates is insufficient if final ranking filters them through the old near-fast +2 minute window.
+- When highway ON active-IC candidates pass the existing global detour caps (+20% duration capped at +8min; +30% distance capped at +10km), prefer the active IC candidate with the strongest meaningful motorway use. Do not reapply the old near-fast +2min filter to those active candidates.
+- Normal/non-active ORS alternatives continue using the near-fast ranking rule.
+- Active IC search should continue until normal motorway usage is materially sufficient: target 55% of primary route distance, capped at 18km.
+- A generated via-IC candidate must have at least 1.5km motorway and at least 15% of the primary route distance as motorway.
+- Fullscreen and software-rotation viewport changes must preserve the active route. After Leaflet `invalidateSize`, explicitly redraw the route after both early and late viewport-settle delays.
+- Browser/Edge regression must directly assert route visibility before fullscreen, after fullscreen, and after software rotation.
+- HGV restrictions, provider caps, global detour caps, and the no-car/no-straight-line policy remain unchanged.
+- Safety tag: `backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007` -> `84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd`.

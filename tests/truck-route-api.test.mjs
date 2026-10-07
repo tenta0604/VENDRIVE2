@@ -107,7 +107,8 @@ test('highway ON actively searches motorway junctions and adopts a bounded HGV v
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
   const farInput={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
   const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const viaHighway={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.73,35.22],[136.86,35.33],[136.92,35.38],[136.95,35.40]]},properties:{summary:{distance:34000,duration:2250},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+  const modestHighway={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.75,35.24],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32500,duration:2320},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
+  const viaHighway={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.73,35.22],[136.86,35.33],[136.92,35.38],[136.95,35.40]]},properties:{summary:{distance:34000,duration:2750},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
   const junctions={elements:[
     {type:'node',id:101,lat:35.22,lon:136.73,tags:{highway:'motorway_junction',ref:'A'}},
     {type:'node',id:102,lat:35.38,lon:136.92,tags:{highway:'motorway_junction',ref:'B'}},
@@ -118,12 +119,12 @@ test('highway ON actively searches motorway junctions and adopts a bounded HGV v
   globalThis.fetch=async(url,options)=>{
     if(String(url).includes('overpass-api.de'))return Response.json(junctions);
     routeBodies.push(JSON.parse(options.body));
-    return Response.json({features:[routeBodies.length===1?surface:viaHighway]});
+    return Response.json({features:routeBodies.length===1?[surface,modestHighway]:[viaHighway]});
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
     const data=await response.json();assert.equal(data.selection,'active-ic-expressway-preferred');assert.equal(data.highwaySearch.attempted,true);assert.ok(data.highwaySearch.junctions>=4);assert.ok(data.highwaySearch.evaluated>=1);assert.ok(data.highwaySearch.accepted>=1);
-    assert.deepEqual(data.route.summary,{distance:34000,duration:2250});assert.ok(data.usage.motorwayMeters>10000);
+    assert.deepEqual(data.route.summary,{distance:34000,duration:2750});assert.ok(data.usage.motorwayMeters>10000);assert.ok(data.route.summary.duration>2320+120,'active IC route should be adopted even outside the old near-fast +2 minute window when it remains inside global detour bounds');
     const viaRequest=routeBodies.find(body=>body.coordinates.length===4);assert.ok(viaRequest,'active highway search must issue a waypoint HGV request');assert.equal(viaRequest.options.vehicle_type,'hgv');assert.deepEqual(viaRequest.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});assert.equal(viaRequest.alternative_routes,undefined);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
