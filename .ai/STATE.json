@@ -3,47 +3,58 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.38",
+  "activePhase": "FINAL39_ROUTE_ROBUSTNESS",
+  "nextPhase": "FINAL39_ROUTE_ROBUSTNESS",
+  "appVersion": "2026.10.08-FINAL.39",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL39_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.38 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.38 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
-    "releaseScope": [
-      "FINAL.37 active via-IC HGV candidates are no longer discarded solely by the older near-fast +2 minute filter.",
-      "When highway ON active-IC candidates pass the existing global detour envelope (+20% duration capped at +8min; +30% distance capped at +10km), the best meaningful active-IC motorway candidate can win.",
-      "Normal provider alternatives retain the near-fast ranking rule.",
-      "Active IC search continues until normal motorway use is materially sufficient and via-IC candidates require meaningful motorway distance.",
-      "Fullscreen/software-rotation viewport refresh explicitly redraws the active route after Leaflet size invalidation at two settle points.",
-      "No HGV restriction was weakened and no car/straight-line fallback was introduced."
+    "title": "FINAL.39 long-route highway + timeout + fullscreen visual fit",
+    "releaseStatus": "Implementation is validated on PR #177 and awaits production merge/live verification. FINAL.38 remains the current production release until merge.",
+    "fieldEvidence": [
+      "On iPhone, active route geometry still was not visibly present after entering fullscreen MAP despite DOM-path persistence tests passing.",
+      "Route acquisition sometimes timed out.",
+      "Longer destinations were less likely to use a practical highway than shorter destinations."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007 -> 84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd",
-      "pr": "PR #174 merged",
-      "mergeCommit": "f1987f5f2c73c0c642d36ce72959836233c885e1",
-      "finalPrTruckRoute": "37640151684 PASS",
-      "finalPrBrowserRegression": "37640151587 PASS",
-      "mainBrowserRegression": "37640387020 PASS",
-      "githubPages": "37640385887 PASS",
-      "vercel": "dpl_6j227M7n3db77s3hfFACap9M7XyM READY for exact merge commit",
-      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.38; public UI states bounded active-IC HGV highway routes are preferred when highway is ON"
+    "rootCause": [
+      "Fullscreen regression only counted SVG path elements; it did not prove the route was inside the visible MAP viewport. Viewport resize/rotation could leave route geometry out of frame.",
+      "Client aborted a route request after 15s while the bounded server path could spend up to about 9s on primary ORS, then Overpass discovery, then up to 6.5s on via-IC ORS. The client could therefore abort before the server completed.",
+      "Long-distance active highway discovery used an 18km motorway-sufficiency cap and an 18km combined entry/exit access prefilter, causing long routes to stop searching too early or reject useful farther IC pairs."
+    ],
+    "scope": [
+      "Expose fitActive() from the route client and fit the remaining active route, not travelled geometry.",
+      "After fullscreen/software-rotation viewport settling, invalidate Leaflet, redraw, then refit active remaining route unless follow-current-position mode is active.",
+      "Browser regression asserts route geometry overlaps the visible MAP rectangle before fullscreen, after fullscreen, and after software rotation.",
+      "Route client request budget increases from 15s to 20s.",
+      "OSM motorway-junction discovery starts in parallel with the baseline ORS request so it does not add its full latency after ORS.",
+      "Overpass wall timeout is reduced to 2.8s and via-IC ORS timeout to 5.5s.",
+      "Long-route junction radius can expand to 25km; per-end access can reach 25km and combined prefilter 35km.",
+      "Motorway sufficiency target can scale to 55% of the primary route up to 45km rather than stopping at 18km.",
+      "FINAL.36 final detour caps remain unchanged: +20% time capped +8min and +30% distance capped +10km.",
+      "Exact HGV restrictions, 30 route-call/min warm guard, max two active via routes, and no car/straight-line fallback remain unchanged."
+    ],
+    "verification": {
+      "preEditMain": "PASS: 170289c08866bf6120df46d5c9545ed22e3a9b35",
+      "safetyTag": "PASS: backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007 dereferences to pre-edit main",
+      "apiAndNode": "PASS: Truck route readiness run 37643412185",
+      "realEdge": "PASS: Edge 320/390 run 37643412185",
+      "browserRegression": "PASS: run 37643412287",
+      "longDistanceHighway": "PASS: API test proves search expands beyond old 18km radius/access and does not stop after only 18km motorway usage",
+      "fullscreenVisibleRoute": "PASS: real browser asserts active route overlaps visible MAP before fullscreen, after fullscreen, and after software rotation",
+      "timeoutBudget": "PASS: client 20s budget exceeds bounded server critical path; junction discovery runs in parallel and via timeout is 5.5s"
     },
     "nextActions": [
-      "Continue normal VENDRIVE field use on FINAL.38.",
-      "Retest the same highway case that failed on FINAL.37 and confirm route geometry remains visible in fullscreen and software-rotated fullscreen MAP.",
-      "If that exact route still avoids the expected highway, capture the specific origin/destination as new field evidence for provider/OSM IC investigation rather than globally weakening HGV safety.",
-      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
+      "Revalidate the final PR head after canonical bookkeeping.",
+      "Merge PR #177 only if required checks remain PASS.",
+      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.39.",
+      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "No unresolved FINAL.38 implementation/release issue. Real-device confirmation of the previously failing highway case remains the next evidence step.",
-    "AN15 learned numeric promotion remains intentionally paused.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "Production merge/deployment/live verification is still pending for FINAL.39."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

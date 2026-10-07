@@ -4,7 +4,7 @@
 
 - Visible app baseline: **2026.10.07-FINAL.38** (FINAL.37 active IC discovery plus bounded active-IC highway adoption and explicit route redraw across fullscreen/software-rotation viewport changes; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.38 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
+- Active engineering phase: **FINAL.39 route robustness**. PR #177 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -222,3 +222,9 @@ FINAL.38 is released and production-verified. Active via-IC HGV motorway candida
 Safety tag `backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007` -> `84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd`. PR #174 merged at `f1987f5f2c73c0c642d36ce72959836233c885e1`. Final PR runs `37640151684` and `37640151587`, main Browser regression `37640387020`, and Pages `37640385887` passed. Vercel production `dpl_6j227M7n3db77s3hfFACap9M7XyM` is READY for the exact merge SHA. Public version and routing asset report `2026.10.07-FINAL.38`.
 
 FINAL.38 closes this maintenance scope. Real-device retest should now focus on the previously failing highway route and fullscreen route persistence.
+
+## FINAL.39 route robustness validation (2026-10-08)
+
+FINAL.39 addresses three field failures together: fullscreen route not visibly in frame, occasional route timeout, and decreasing highway use on longer destinations. Remaining active route geometry is explicitly fit after fullscreen/rotation settle; client route budget is 20s while junction discovery is parallelized and bounded; long-distance IC radius/access/motorway-sufficiency thresholds scale beyond the old 18km limits. Final route detour caps and HGV restrictions remain unchanged.
+
+Safety tag `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`. PR #177 validation passed Truck route/API/Edge run `37643412185` and Browser regression run `37643412287`. Production release evidence is pending.
