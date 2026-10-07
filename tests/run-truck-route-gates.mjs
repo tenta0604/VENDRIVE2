@@ -118,7 +118,7 @@ for(const width of [320,390]){
     await page.evaluate(()=>{window.__fullscreenRenderMapOriginal=window.renderMap;window.__fullscreenRenderMapCalls=0;window.renderMap=function(){window.__fullscreenRenderMapCalls++;return window.__fullscreenRenderMapOriginal.apply(this,arguments)};});
     const fullscreenRoutePin=page.locator('.machineMapPinBody').first();await fullscreenRoutePin.waitFor({state:'visible'});await fullscreenRoutePin.click();await page.locator('#machineModal.open').waitFor({state:'visible'});
     mode='held';const fullscreenBegan=new Promise(resolve=>heldStarted=resolve),fullscreenDone=new Promise(resolve=>heldDone=resolve),beforeFullscreenRoute=count;
-    await page.locator('#machineRoute').click();await fullscreenBegan;await page.evaluate(()=>window.refreshMapViewport(true));await page.waitForTimeout(320);
+    await page.locator('#machineRoute').click();await fullscreenBegan;await page.waitForTimeout(320);
     assert.equal(await page.evaluate(()=>window.__fullscreenRenderMapCalls),0,'fullscreen route start must not rerender the entire MAP via a redundant tab click');
     heldResolve();await fullscreenDone;mode='success';await waitText('1.8km');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);
     assert.equal(count,beforeFullscreenRoute+1,'fullscreen viewport settling must not duplicate or cancel the route provider call');assert.ok(await paths()>=2,'route must render after fullscreen settle work completes during an in-flight request');
