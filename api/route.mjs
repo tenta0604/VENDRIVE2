@@ -42,8 +42,8 @@ async function handle(request) {
   if (vehicle.axleload!==undefined)restrictions.axleload=vehicle.axleload;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
   try {
-    const upstreamBody={coordinates:[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],instructions:false,preference:'fastest',extra_info:['waycategory','tollways'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'],profile_params:{restrictions}}};
-    if(!vehicle.avoidTolls)upstreamBody.alternative_routes={target_count:3,share_factor:0.95,weight_factor:2.0};
+    const upstreamBody={coordinates:[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],instructions:false,preference:'recommended',extra_info:['waycategory','tollways'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'],profile_params:{restrictions}}};
+    if(!vehicle.avoidTolls)upstreamBody.alternative_routes={target_count:3,share_factor:0.85,weight_factor:1.6};
     const response=await fetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},signal:controller.signal,body:JSON.stringify(upstreamBody)});
     if (!response.ok) {
       if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin,allowed);
@@ -60,12 +60,14 @@ async function handle(request) {
       const usage=routing.routeUsage(route);
       return {route,usage};
     }
-    const primaryItem=candidate(primary),maxDuration=primary.summary.duration+Math.min(900,primary.summary.duration*0.35),maxDistance=primary.summary.distance+Math.min(20000,primary.summary.distance*0.5);
+    const primaryItem=candidate(primary),maxDuration=primary.summary.duration+Math.min(480,primary.summary.duration*0.20),maxDistance=primary.summary.distance+Math.min(10000,primary.summary.distance*0.30);
     let route=primary,selection='optimal',usage=primaryItem.usage;
     if(!vehicle.avoidTolls){
-      const preferred=candidates.map(candidate).filter(item=>item.usage.priorityMeters>100&&item.route.summary.duration<=maxDuration&&item.route.summary.distance<=maxDistance).sort((a,b)=>b.usage.priorityMeters-a.usage.priorityMeters||b.usage.motorwayMeters-a.usage.motorwayMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
-      if(preferred.length){route=preferred[0].route;usage=preferred[0].usage;selection='expressway-distance-preferred';}
-      else selection='highway-unavailable';
+      const eligible=candidates.map(candidate).filter(item=>item.usage.priorityMeters>100&&item.route.summary.duration<=maxDuration&&item.route.summary.distance<=maxDistance).sort((a,b)=>a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
+      if(eligible.length){
+        const fastest=eligible[0],nearFast=eligible.filter(item=>item.route.summary.duration<=fastest.route.summary.duration+Math.min(120,fastest.route.summary.duration*0.10)&&item.route.summary.distance<=fastest.route.summary.distance+Math.min(3000,fastest.route.summary.distance*0.15)).sort((a,b)=>b.usage.priorityMeters-a.usage.priorityMeters||b.usage.motorwayMeters-a.usage.motorwayMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
+        route=nearFast[0].route;usage=nearFast[0].usage;selection='expressway-natural-preferred';
+      } else selection='highway-unavailable';
     }else selection='highway-avoided';
     return json(200,{ok:true,profile:'driving-hgv',route,selection,usage,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
   } catch {
