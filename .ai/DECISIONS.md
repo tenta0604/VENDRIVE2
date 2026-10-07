@@ -377,3 +377,14 @@ This file records confirmed project decisions that must survive chat migration. 
 - Vercel production `dpl_AprtKGD6qT8f573vrGTYwhXGtfx1` is READY. Main browser regression run 37539937999 and Pages run 37539936859 passed. Live version and routing asset are FINAL.32.
 - Travelled route geometry is display-clipped only; raw route geometry remains intact for route matching and safety. Sustained off-route rerouting never falls back to car/straight-line guidance.
 - FINAL.32 closes the current navigation/highway maintenance scope and returns to AN15 real-evidence accumulation.
+
+## 2026-10-07 — FINAL.33 arrival visit and MAP rotation decisions
+- Arrival authority is an accurate GPS fix: accuracy must be <=50m and straight-line distance to the active destination must be <=100m. Arrival ends the active in-app route before any further progress/reroute logic.
+- Arrival visit handling is one card at a time. Show the unvisited destination first, then other unvisited machines on today's active plan within 100m of the arrival position.
+- Arrival card left swipe means visit complete and MUST use the existing task-confirmation and order-confirmation flow. Do not create an arrival-only bypass.
+- Arrival card right swipe means today's visit skip. The standard Today list uses the same right-swipe skip; left swipe remains visit complete.
+- Already visited machines are not included in the arrival deck. Nearby non-destination machines are eligible only when they are on today's current visit plan and within 100m.
+- The old blocking landscape portrait guard is withdrawn. Normal pages and normal MAP remain portrait-width, the app requests portrait orientation when the platform supports it, and the manifest declares portrait preference.
+- Fullscreen MAP is the only surface with a manual orientation-view control. The fullscreen-only 🔄 button software-rotates the MAP 90 degrees; this is specifically the fallback for iPhone/other rotation-lock cases where Web APIs cannot override OS orientation lock.
+- Software rotation must keep the full MAP viewport filled and preserve machine PIN interaction plus modal visibility above the MAP.
+- Safety tag: `backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007` -> `42e9d4565e64a90abec6933d5b8d958e2e461983`.
