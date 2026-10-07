@@ -129,15 +129,15 @@ test('highway ON actively searches motorway junctions and adopts a bounded HGV v
 });
 test('active highway IC discovery fails open to the safe baseline HGV route',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const farInput={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
-  const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const farInput={origin:{lat:35.05,lng:136.50},destination:{lat:35.28,lng:136.78},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[136.50,35.05],[136.64,35.16],[136.78,35.28]]},properties:{summary:{distance:34000,duration:2500},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   globalThis.fetch=async(url)=>{
     if(String(url).includes('overpass-api.de'))throw new Error('overpass unavailable');
     return Response.json({features:[surface]});
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
-    const data=await response.json();assert.equal(data.selection,'active-highway-unavailable');assert.equal(data.highwaySearch.attempted,true);assert.equal(data.highwaySearch.status,'junction-search-unavailable');assert.deepEqual(data.route.summary,{distance:32000,duration:2400});
+    const data=await response.json();assert.equal(data.selection,'active-highway-unavailable');assert.equal(data.highwaySearch.attempted,true);assert.equal(data.highwaySearch.status,'junction-search-unavailable');assert.deepEqual(data.route.summary,{distance:34000,duration:2500});
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
