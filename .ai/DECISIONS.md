@@ -449,3 +449,16 @@ This file records confirmed project decisions that must survive chat migration. 
 - Live public version and routing asset report `2026.10.07-FINAL.36`.
 - FINAL.36 is closed. Remaining route-quality anomalies require exact field-route evidence; do not weaken HGV safety globally.
 - Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.
+
+## 2026-10-07 — FINAL.37 active highway search decisions
+- Highway ON must not rely solely on ORS alternative-route generation when field evidence shows a usable motorway route can be omitted entirely.
+- Normal ORS driving-hgv alternatives remain the first pass. Active IC discovery is triggered only when route distance is meaningful and the best normal candidate's motorway use is below the bounded target.
+- Active discovery uses OpenStreetMap `highway=motorway_junction` nodes via a bounded Overpass request around origin/destination.
+- Build at most two plausible entry/exit IC pairs. Extra routes use ordered ORS waypoints origin -> entry IC -> exit IC -> destination.
+- Every extra route MUST stay `driving-hgv` and carry the same registered vehicle height/width/length/weight/axleload restrictions. Ferries remain avoided.
+- Active IC routes are candidates, never mandatory. FINAL.36 maximum time/distance detour bounds and near-fast expressway ranking remain authoritative.
+- If Overpass is unavailable, no plausible IC pair exists, an extra ORS request fails, or the via route lacks meaningful motorway use, keep the normal HGV route.
+- Overpass discovery is deferred until normal alternatives are known to be insufficient and cached only briefly per warm instance.
+- At most two extra ORS route calls are allowed per route request; baseline and extra route calls share the 30/minute warm-instance upstream route-call guard.
+- No car or straight-line fallback is permitted.
+- Safety tag: `backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007` -> `77b7b437469e8100f94661fb4f5707acd1320e13`.

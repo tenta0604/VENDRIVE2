@@ -3,54 +3,50 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.36",
+  "activePhase": "FINAL37_ACTIVE_HIGHWAY_IC_SEARCH",
+  "nextPhase": "FINAL37_ACTIVE_HIGHWAY_IC_SEARCH",
+  "appVersion": "2026.10.07-FINAL.37",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL37_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.36 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.36 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
-    "releaseScope": [
-      "Initial HGV route origin now requires cached GPS <=5 seconds old and <=50m accuracy, otherwise a fresh maximumAge=0 fix <=50m.",
-      "Automatic reroute uses the median of three sustained accurate off-route fixes.",
-      "Extreme-distance automatic reroute replacements are rejected while the existing route remains visible.",
-      "ORS remains driving-hgv with exact vehicle restrictions, using recommended weighting rather than pure fastest.",
-      "Highway ON uses more diverse alternatives but tighter detour limits and only maximizes expressway distance among near-fast candidates.",
-      "Ordinary route line is fluorescent cyan over a dark casing; motorway/toll remains red over the same casing.",
-      "No car or straight-line fallback was introduced."
+    "title": "FINAL.37 active highway IC search",
+    "releaseStatus": "Implementation is validated on PR #172 and awaits production merge/live verification. FINAL.36 remains the current production release until merge.",
+    "fieldEvidence": [
+      "After FINAL.36, real-device use still showed routes that did not use a highway that should be practically available.",
+      "Root cause boundary: ORS alternatives can omit a useful motorway route entirely, leaving VENDRIVE nothing to rank."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007 -> beb9325938954a7fa8afec8a559d4b58ee5b44d6",
-      "pr": "PR #170 merged",
-      "mergeCommit": "c68a6a283cac5074916bd40a9ae0fb814d1eb9cb",
-      "finalPrTruckRoute": "37630470134 PASS",
-      "finalPrBrowserRegression": "37630470259 PASS",
-      "mainBrowserRegression": "37630690705 PASS",
-      "githubPages": "37630688603 PASS",
-      "vercel": "dpl_9q64prYCtNWhUysBRtRs5hGy2gzr READY for exact merge commit",
-      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.36"
+    "scope": [
+      "When highway ON and existing ORS alternatives contain insufficient motorway use, VENDRIVE actively discovers nearby OpenStreetMap highway=motorway_junction nodes through a bounded Overpass request.",
+      "VENDRIVE builds at most two plausible entry/exit IC pairs and requests additional ORS driving-hgv routes through those waypoints.",
+      "Every extra route preserves the exact registered HGV dimensions/weight/axleload restrictions and ferries avoidance.",
+      "Extra IC routes remain candidates only; FINAL.36 time/distance detour bounds and near-fast ranking remain authoritative.",
+      "If IC discovery or an extra route fails, navigation returns the normal safe HGV route.",
+      "Overpass discovery is cached briefly per warm instance and only runs after normal candidates prove highway use insufficient.",
+      "Additional ORS calls are capped at two and count toward the existing per-warm 30 route-call/minute guard.",
+      "No car routing or straight-line fallback is introduced."
+    ],
+    "verification": {
+      "preEditMain": "PASS: 77b7b437469e8100f94661fb4f5707acd1320e13",
+      "safetyTag": "PASS: backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007 dereferences to pre-edit main",
+      "apiAndNode": "PASS: Truck route readiness run 37636311481",
+      "realEdge": "PASS: Edge 320/390 existing route/UI regression in run 37636311481",
+      "browserRegression": "PASS: run 37636311451",
+      "activeIcRoute": "PASS: API test proves motorway junction discovery, four-coordinate HGV waypoint request, exact HGV restrictions, and active expressway selection",
+      "discoveryFailOpen": "PASS: API test proves unavailable IC discovery returns the normal baseline HGV route",
+      "boundedProviderUse": "PASS: active search adds at most two ORS route candidates and each call is included in the 30/minute warm-instance route-call guard"
     },
-    "decision": [
-      "Keep AN15 learned numeric promotion paused for now.",
-      "Do not add a new manual sales-outcome capture flow at this time.",
-      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
-      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
-      "Keep the deterministic production forecast baseline unchanged."
-    ],
     "nextActions": [
-      "Continue normal VENDRIVE field use on FINAL.36 and specifically watch previously problematic detour/highway cases.",
-      "If a specific route still detours, capture that exact origin/destination as new field evidence rather than broadening HGV fallbacks.",
-      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
+      "Revalidate the final PR head after canonical bookkeeping.",
+      "Merge PR #172 only if required checks remain PASS.",
+      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.37 assets.",
+      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "No unresolved FINAL.36 release issue. Exact field-route quality must still be judged from future real-device routes because no specific problematic origin/destination pair was supplied for provider-data reproduction.",
-    "AN15 learned numeric promotion remains intentionally paused.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "Production merge/deployment/live verification is still pending for FINAL.37."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

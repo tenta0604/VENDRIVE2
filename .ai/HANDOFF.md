@@ -336,3 +336,28 @@ FINAL.36 behavior:
 If future field use still shows an implausible route, collect that exact origin/destination and treat it as a new bounded routing evidence case rather than weakening HGV safety globally.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
+
+## 2026-10-07 FINAL.37 active highway IC search
+
+New real-device evidence after FINAL.36 showed that a practically usable highway route can still be absent because ORS's limited alternative set never returns that motorway path. Ranking cannot select a route that the provider never generated.
+
+FINAL.37 validated behavior:
+- highway ON first evaluates normal ORS driving-hgv alternatives;
+- only when motorway use is still insufficient does the server query nearby OpenStreetMap `highway=motorway_junction` nodes via Overpass;
+- it builds at most two plausible entry/exit IC pairs and requests additional four-point ORS driving-hgv routes: origin -> entry IC -> exit IC -> destination;
+- every extra request preserves registered height/width/length/weight/axleload restrictions and ferry avoidance;
+- added IC routes remain subject to FINAL.36 time/distance detour bounds and near-fast selection; they are not forced;
+- IC discovery or extra-route failure returns the normal baseline HGV route;
+- IC discovery is briefly cached per warm server instance and is deferred until normal alternatives prove insufficient;
+- baseline and extra ORS route requests all count toward the per-warm 30 route-call/minute guard;
+- no car/straight-line fallback exists.
+
+Safety tag: `backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007` -> `77b7b437469e8100f94661fb4f5707acd1320e13`.
+
+PR #172 validation before canonical bookkeeping:
+- Truck route readiness / API / real Edge 320/390: `37636311481`, PASS.
+- Browser regression: `37636311451`, PASS.
+- API tests explicitly prove active IC discovery + four-coordinate HGV routing and safe fallback when IC discovery is unavailable.
+- Earlier failures were test isolation only: quota state ordering, then warm IC-cache contamination.
+
+Do not call FINAL.37 production-complete until PR #172 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.37 evidence are terminal PASS.
