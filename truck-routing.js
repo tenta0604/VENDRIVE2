@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.08-FINAL.39';
+  var ASSET_VERSION='2026.10.08-FINAL.40';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -176,7 +176,7 @@
         if(!auto)panel('車両条件に合う経路を取得中…');
         timer=setTimeout(function(){if(token===sequence)controller.abort();},ROUTE_REQUEST_TIMEOUT_MS);
         var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v}),signal:signal});
-        var data=await response.json();if(token!==sequence)return;
+        var data=await response.json();clearTimeout(timer);timer=null;if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
         var nextRoute=route(data.route);
         if(auto&&previousActive){
@@ -226,7 +226,7 @@
       el('truckRouteExternal').onclick=function(){if(destination)app.external(destination);};
       summary();syncHighwayToggle();
     }
-    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,fitActive:fitActive,refreshVehicle:function(){summary();syncHighwayToggle();}};
+    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,fitActive:fitActive,isBusy:function(){return busy;},refreshVehicle:function(){summary();syncHighwayToggle();}};
   }
   return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
 });
