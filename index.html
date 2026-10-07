@@ -260,7 +260,7 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
 <div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="truck-routing.js?v=2026.10.08-FINAL.39"></script>
+<script src="truck-routing.js?v=2026.10.08-FINAL.40"></script>
 <script>
 (function(){
 "use strict";
@@ -277,7 +277,7 @@ var truckRouting=window.VENDRIVETruckRouting.createClient({
  document:document,geolocation:navigator.geolocation,endpoint:truckRouteEndpoint,fetch:function(url,options){return fetch(url,options)},
  getVehicle:function(){return state.routeVehicle},saveVehicle:function(vehicle){var previous=state.routeVehicle;state.routeVehicle=vehicle;persist();try{var saved=JSON.parse(localStorage.getItem(key));if(saved&&JSON.stringify(saved.routeVehicle)===JSON.stringify(vehicle))return true}catch(e){}if(previous===undefined)delete state.routeVehicle;else state.routeVehicle=previous;return false},getPosition:function(){return runtimeCurrentPosition},updatePosition:updateRuntimeCurrentPosition,isDestinationCurrent:function(target){var machine=state.machines.find(function(m){return m.id===target.id});return !!machine&&machine.lat===target.lat&&machine.lng===target.lng},
  openModal:openModal,closeModal:closeModal,toast:toast,external:navigateToMachine,onArrival:handleTruckRouteArrival,
- showMap:function(){closeModal('machineModal');var tab=document.querySelector('.tabs button[data-page="mapPage"]');if(tab)tab.click();ensureMap();if(!leafletMap)return false;mapInitialCenterPending=false;leafletMap.invalidateSize({pan:false});return true},
+ showMap:function(){closeModal('machineModal');var tab=document.querySelector('.tabs button[data-page="mapPage"]');if(!mapPageActive()&&tab)tab.click();ensureMap();if(!leafletMap)return false;mapInitialCenterPending=false;leafletMap.invalidateSize({pan:false});return true},
  draw:function(route,target,progress){if(!routeLayer)return;routeLayer.clearLayers();if(!route||!target)return;window.VENDRIVETruckRouting.remainingRouteSections(route,progress).forEach(function(section){var priority=section.highlight===true||section.motorway===true||section.tollway===true,points=section.coordinates.map(function(c){return [c[1],c[0]]});L.polyline(points,{color:'#0b132b',weight:10,opacity:0.62,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(routeLayer);L.polyline(points,{color:priority?'#dc2626':'#00e5ff',weight:6,opacity:1,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(routeLayer)});L.circleMarker([target.lat,target.lng],{radius:9,color:'#fff',weight:3,fillColor:'#00e5ff',fillOpacity:1}).bindTooltip(esc(target.name||'目的地'),{direction:'top'}).addTo(routeLayer)},
  fit:function(route,target,progress){if(!leafletMap)return;var sections=window.VENDRIVETruckRouting.remainingRouteSections(route,progress),points=[];sections.forEach(function(section){section.coordinates.forEach(function(c){points.push([c[1],c[0]])})});points.push([target.lat,target.lng]);if(points.length)leafletMap.fitBounds(L.latLngBounds(points),{padding:[35,35],maxZoom:17})}
 });
@@ -300,7 +300,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.10.08-FINAL.39',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.10.08-FINAL.40',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
