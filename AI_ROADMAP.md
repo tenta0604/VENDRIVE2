@@ -4,7 +4,7 @@
 
 - Visible app baseline: **2026.10.07-FINAL.33** (FINAL.32 HGV/highway/live-route behavior plus automatic 100m arrival closeout, one-card nearby visit handling, bidirectional visit swipe, and fullscreen MAP software rotation; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.33 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
+- Active engineering phase: **FINAL.34 rotated fullscreen MAP gesture + arrival-card orientation fix**. PR #166 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -152,3 +152,9 @@ The old landscape-blocking portrait guard is withdrawn. Normal app/MAP remain po
 Safety tag `backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007` -> `42e9d4565e64a90abec6933d5b8d958e2e461983`. PR #164 merged at `1e0c68b2829349a2d30ba93e0414b6194ceedc0b`. Final PR runs `37610172801` and `37610172731`, main Browser regression `37610334284`, and Pages `37610333585` passed. Vercel production `dpl_B7PYTGPGRCNHE56dG68uPtx8voPq` is READY for the exact merge SHA. Public version and routing asset report `2026.10.07-FINAL.33`.
 
 FINAL.33 closes this maintenance scope. Normal project state returns to the intentionally paused AN15 real-evidence/promotion gate.
+
+## FINAL.34 rotated fullscreen MAP gesture + arrival-card orientation validation (2026-10-07)
+
+Real-device evidence showed that FINAL.33's software-rotated MAP transformed pixels but not the Leaflet drag coordinate system, and its arrival visit sheet did not rotate with the MAP. FINAL.34 remaps fullscreen software-rotated pointer deltas by 90 degrees before Leaflet pan, while leaving normal MAP dragging untouched. The arrival visit sheet rotates only in this fullscreen software-rotated mode and its visible left/right swipes are interpreted on the rotated axis.
+
+Safety tag `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`. PR #166 final product validation passed Truck route readiness / real Edge 320/390 run `37612564670` and Browser regression run `37612564593`. Production release evidence is pending.
