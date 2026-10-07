@@ -236,3 +236,10 @@ FINAL.39 is released and production-verified. The active remaining route is refi
 Safety tag `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`. PR #177 merged at `6b843d988fddba509cedcd590c6fe71ba1afd6db`. Final PR runs `37643816604` and `37643816472`, main Browser regression `37644030491`, and Pages `37644029832` passed. Vercel production `dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4` is READY for the exact merge SHA. Public version and routing asset report `2026.10.08-FINAL.39`.
 
 FINAL.39 closes this maintenance scope. Retest the same field long-route/highway, timeout, and iPhone fullscreen cases; any remaining exact failure becomes a new bounded evidence case. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.
+
+
+## FINAL.40 iPhone fullscreen routing + diversified highway corridor validation (2026-10-08)
+
+Real-device evidence after FINAL.39 showed a fullscreen-specific iPhone route-acquisition timeout that did not reproduce in normal MAP, plus insufficient motorway use on longer routes that may require a different IC corridor and JCT transitions. FINAL.40 removes the redundant MAP-tab rerender on fullscreen route start, prevents fullscreen viewport-settle route redraw/refit from competing with an in-flight route request, and ends the client network timer once the response body arrives. Highway discovery keeps the maximum-two via-IC budget but uses one balanced probe plus one geographically distinct bounded corridor where available, allowing ORS driving-hgv to choose farther JCT-connected motorway paths. The long-route motorway search target may scale to 80km; FINAL.36 final detour caps and exact HGV restrictions remain unchanged.
+
+Safety tag `backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007` -> `9541bd9d1d8242ec880f87315ae4fcf05052b006`. PR #180 validation passed Truck route readiness / API / real Edge run `37699925874` and Browser regression run `37699925873`. Production release evidence is pending.
