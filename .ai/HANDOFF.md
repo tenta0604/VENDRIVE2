@@ -283,3 +283,30 @@ FINAL.35 behavior:
 - existing machine actions, rotated MAP dragging, rotated arrival-card handling, task/order checks and fullscreen PIN interaction remain preserved.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
+
+## 2026-10-07 FINAL.36 route sanity and visibility
+
+New real-device evidence after FINAL.35 opened a bounded routing maintenance scope. FINAL.35 remains completed history.
+
+Field evidence:
+- some HGV routes make unnecessary-looking detours even when the symptom is not related to highway selection;
+- highway ON can still miss plausible expressway candidates;
+- ordinary blue route geometry is visually weak on the base map.
+
+FINAL.36 validated behavior:
+- initial route calculation uses cached GPS only at <=5 seconds and <=50m accuracy; otherwise a new maximumAge=0 high-accuracy fix is required and >50m fixes are rejected;
+- automatic reroute uses the median of three consecutive accurate off-route fixes;
+- an extreme-distance automatic replacement route is rejected and the prior route stays visible;
+- the server remains `driving-hgv` with the exact registered restrictions, but uses ORS `recommended` rather than pure `fastest`;
+- highway ON requests more diverse alternatives (`share_factor=0.85`, `weight_factor=1.6`), uses tighter detour bounds, and only maximizes expressway distance among near-fast alternatives;
+- ordinary route geometry is fluorescent cyan `#00e5ff` over a dark `#0b132b` casing; motorway/toll remains red over the same casing;
+- no car/straight-line fallback was added.
+
+Safety tag: `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`.
+
+Validation evidence before canonical bookkeeping:
+- Truck route readiness / Node / API / real Edge 320/390 final test head: `37629834281`, PASS.
+- Browser regression on identical app/runtime product code: `37629618914`, PASS.
+- Earlier route run `37629619016` failed only because the browser gate still searched for legacy `#2563eb` after the intentional fluorescent-cyan change; only the test selector was changed.
+
+Do not call FINAL.36 production-complete until PR #170 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.36 evidence are terminal PASS.

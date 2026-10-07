@@ -3,49 +3,47 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.35",
+  "activePhase": "FINAL36_ROUTE_SANITY_VISIBILITY",
+  "nextPhase": "FINAL36_ROUTE_SANITY_VISIBILITY",
+  "appVersion": "2026.10.07-FINAL.36",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL36_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.35 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.35 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
-    "releaseScope": [
-      "A machine detail opened from a MAP PIN rotates 90 degrees only while fullscreen MAP software rotation is active.",
-      "Machine detail remains portrait in normal MAP and unrotated fullscreen MAP.",
-      "Existing machine-detail actions, FINAL.34 rotated MAP dragging, rotated arrival-card handling, task/order confirmations and PIN interaction remain preserved."
+    "title": "FINAL.36 route sanity, natural HGV selection, and fluorescent route visibility",
+    "releaseStatus": "Implementation is validated on PR #170 and awaits merge/production verification. FINAL.35 remains the current production release until merge.",
+    "fieldEvidence": [
+      "Operator reports some routes take unnecessary detours that do not appear related to highway preference.",
+      "Operator also reports highway ON can still miss plausible expressway use.",
+      "Ordinary blue route line is difficult to distinguish from the base map."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007 -> f5294949edca2783f45e7abbe3232b8249d70ced",
-      "pr": "PR #168 merged",
-      "mergeCommit": "0be90de6a25b779819a14ccf09b03718a9c44490",
-      "finalPrTruckRoute": "37614817452 PASS",
-      "finalPrBrowserRegression": "37614817466 PASS",
-      "mainBrowserRegression": "37614981166 PASS",
-      "githubPages": "37614979975 PASS",
-      "vercel": "dpl_9Zp3oos5JnPKHxvabRnubrhThjcU READY for exact merge commit",
-      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.35"
+    "scope": [
+      "Initial routing accepts cached GPS only when <=5 seconds old and <=50m accuracy; otherwise it requests a fresh high-accuracy fix with maximumAge=0 and rejects fixes worse than 50m.",
+      "Automatic reroute uses the median of the three sustained accurate off-route fixes rather than the final single fix.",
+      "Automatic reroute keeps the existing route when the replacement distance is an extreme detour versus remaining route plus reconnect distance.",
+      "ORS remains driving-hgv with all registered dimensions/weight restrictions, but base preference changes from fastest to recommended to reduce time-only distance detours.",
+      "Highway ON alternatives become more diverse (share_factor 0.85, weight_factor 1.6); admissible detour limits are tightened and expressway distance is maximized only among near-fast candidates.",
+      "Ordinary route rendering becomes fluorescent cyan (#00e5ff) over a dark casing; motorway/toll remains red over the same casing.",
+      "No car routing, straight-line fallback, or weakening of HGV restrictions is introduced."
+    ],
+    "verification": {
+      "preEditMain": "PASS: beb9325938954a7fa8afec8a559d4b58ee5b44d6",
+      "safetyTag": "PASS: backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007 dereferences to pre-edit main",
+      "syntaxApiNode": "PASS: Truck route readiness final product/test head run 37629834281",
+      "realEdge": "PASS: run 37629834281 after updating only stale route-color test selectors",
+      "browserRegressionProductHead": "PASS: run 37629618914 on the same app/runtime code; the later commit changed only tests/run-truck-route-gates.mjs selectors"
     },
-    "decision": [
-      "Keep AN15 learned numeric promotion paused for now.",
-      "Do not add a new manual sales-outcome capture flow at this time.",
-      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
-      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
-      "Keep the deterministic production forecast baseline unchanged."
-    ],
     "nextActions": [
-      "Continue normal VENDRIVE use on FINAL.35.",
-      "If new real-device evidence reveals a defect or operator friction, open a new bounded maintenance scope with a new immutable pre-edit safety tag.",
-      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
+      "Run the required final-head checks after canonical bookkeeping.",
+      "Merge PR #170 only if the required finite gates remain PASS.",
+      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.36 assets.",
+      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "AN15 learned numeric promotion is intentionally paused because normal shipped use does not provide the exact authorized real outcome evidence required for promotion.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "Production merge/deployment/live verification is still pending for FINAL.36."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

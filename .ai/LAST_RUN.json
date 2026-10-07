@@ -1,61 +1,54 @@
 {
-  "evidenceVersion": 45,
-  "runType": "final35_production_release_closeout",
-  "phase": "FINAL35_ROTATED_MACHINE_CARD",
-  "status": "COMPLETE",
+  "evidenceVersion": 46,
+  "runType": "final36_route_sanity_visibility_validation",
+  "phase": "FINAL36_ROUTE_SANITY_VISIBILITY",
+  "status": "PASS",
   "base": {
-    "productionMainBefore": "f5294949edca2783f45e7abbe3232b8249d70ced",
-    "safetyTag": "backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007",
-    "safetyTagTarget": "f5294949edca2783f45e7abbe3232b8249d70ced"
+    "productionMainBefore": "beb9325938954a7fa8afec8a559d4b58ee5b44d6",
+    "safetyTag": "backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007",
+    "safetyTagTarget": "beb9325938954a7fa8afec8a559d4b58ee5b44d6"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.35",
+    "app": "2026.10.07-FINAL.36",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.35 is production-complete: PIN-opened machine detail now follows software-rotated fullscreen MAP orientation only in that mode and remains portrait elsewhere, with existing controls and FINAL.34 behavior preserved.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "productionCodeChanged": true,
-    "closeoutCommitChangesDocumentationOnly": true
+    "summary": "Implemented FINAL.36 route sanity improvements: fresher initial GPS, median off-route reroute origin, extreme auto-reroute replacement guard, ORS HGV recommended weighting, more diverse but more tightly bounded highway alternatives, and fluorescent cyan cased ordinary-route rendering.",
+    "productStatus": "VALIDATED_PENDING_PRODUCTION",
+    "productionCodeChanged": true
   },
   "gates": {
-    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before implementation",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007 -> f5294949edca2783f45e7abbe3232b8249d70ced",
-    "finalPrTruckRoute": "PASS: workflow 37614817452",
-    "finalPrBrowserRegression": "PASS: workflow 37614817466",
-    "rotatedMachineCardOrientation": "PASS: final Edge 320/390 validation",
-    "unrotatedMachineCardPreserved": "PASS: final Edge 320/390 validation",
-    "fullscreenPinInteraction": "PASS: final Edge 320/390 validation",
-    "merge": "PASS: PR #168 -> 0be90de6a25b779819a14ccf09b03718a9c44490",
-    "mainBrowserRegression": "PASS: workflow 37614981166",
-    "githubPages": "PASS: workflow 37614979975",
-    "vercelProduction": "PASS: dpl_9Zp3oos5JnPKHxvabRnubrhThjcU READY, target production, Git SHA 0be90de6a25b779819a14ccf09b03718a9c44490",
-    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.35",
-    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.35"
+    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before edits",
+    "immutableSafetyTag": "PASS: backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007 -> beb9325938954a7fa8afec8a559d4b58ee5b44d6",
+    "apiAndNode": "PASS: workflow 37629834281",
+    "freshGpsOrigin": "PASS: stale/coarse cached positions force a fresh high-accuracy request",
+    "medianRerouteOrigin": "PASS: three off-route fixes produce median reroute origin rather than last-fix origin",
+    "extremeRerouteGuard": "PASS: excessive auto-reroute replacement retains previous route",
+    "hgvRestrictions": "PASS: driving-hgv and exact dimensions/weight restrictions preserved; no car/straight fallback",
+    "naturalHgvWeighting": "PASS: API request uses ORS recommended weighting",
+    "highwayCandidateBounds": "PASS: alternatives 0.85/1.6 with tighter primary bounds and near-fast ranking",
+    "fluorescentRouteRendering": "PASS: Edge test follows #00e5ff route plus #0b132b casing and red priority route",
+    "realEdge320390": "PASS: workflow 37629834281",
+    "browserRegression": "PASS: workflow 37629618914 on identical app/runtime code; subsequent commit changed test selectors only",
+    "firstEdgeFailure": "RESOLVED: workflow 37629619016 referenced legacy #2563eb in its test selector after the intentional cyan color change; test-only selector update fixed it"
   },
   "openItems": [
-    "AN15 learned numeric promotion remains intentionally paused until explicitly reopened or an authorized real outcome source becomes available."
+    "Merge/deploy/live verification remains pending."
   ],
-  "nextAction": "Continue normal FINAL.35 field use. Resume the intentionally paused AN15 evidence gate only when explicitly reopened or a usable authorized real outcome source becomes available.",
+  "nextAction": "Run final-head finite checks, merge PR #170, verify production/live FINAL.36, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
   "unresolved": [
-    "No unresolved FINAL.35 release issue.",
-    "AN15 evidence/promotion remains an intentional paused state."
-  ],
-  "releaseChangedFiles": [
-    "index.html",
-    "truck-routing.js",
-    "version.json",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
-    ".ai/STATE.json",
-    ".ai/HANDOFF.md",
-    ".ai/LAST_RUN.json",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
+    "FINAL.36 is validated but not yet production-verified."
   ],
   "changedFiles": [
+    "index.html",
+    "truck-routing.js",
+    "api/route.mjs",
+    "version.json",
+    "tests/truck-route-client.test.mjs",
+    "tests/truck-route-api.test.mjs",
+    "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

@@ -428,3 +428,15 @@ This file records confirmed project decisions that must survive chat migration. 
 - Vercel production deployment `dpl_9Zp3oos5JnPKHxvabRnubrhThjcU` is READY for the exact merge SHA.
 - Live public version and routing asset report `2026.10.07-FINAL.35`.
 - FINAL.35 is closed. Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a new bounded maintenance scope.
+
+## 2026-10-07 — FINAL.36 route sanity decisions
+- Non-highway route detours are treated independently from expressway preference; do not assume every detour is caused by highway ranking.
+- Initial routing must not use a cached GPS position older than 5 seconds or worse than 50m accuracy. If the cache is not good enough, request a fresh high-accuracy fix with `maximumAge=0`; reject >50m for route origin.
+- Sustained off-route automatic rerouting keeps the existing three-fix trigger but uses the median of the three accurate fixes as the recalculation origin rather than trusting the final single sample.
+- If an automatic replacement route is an extreme distance detour relative to the remaining existing route plus reconnect distance, keep the old route and tell the operator rather than silently replacing it.
+- Routing stays `driving-hgv`; registered height/width/length/weight/axleload restrictions remain authoritative. Never fix detours by falling back to car routing or straight-line guidance.
+- ORS base weighting changes from `fastest` to `recommended` to reduce pure travel-time detours while retaining HGV restrictions.
+- Highway ON alternative generation uses `target_count=3, share_factor=0.85, weight_factor=1.6` to seek more distinct alternatives without permitting the broad FINAL.32 detour envelope.
+- Highway ON candidate admissibility is tightened to +20% travel time capped at +8 minutes and +30% distance capped at +10km versus ORS primary. Expressway distance is maximized only inside a near-fast subset (within +10% / +2min and +15% / +3km of the fastest eligible highway candidate).
+- Ordinary route geometry is fluorescent cyan `#00e5ff` over a dark `#0b132b` casing; motorway/toll remains red over the same casing.
+- Safety tag: `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`.
