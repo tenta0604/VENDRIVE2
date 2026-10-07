@@ -2,7 +2,7 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.38** (FINAL.37 active IC discovery plus bounded active-IC highway adoption and explicit route redraw across fullscreen/software-rotation viewport changes; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.08-FINAL.39** (FINAL.38 highway adoption plus visible fullscreen remaining-route fit, aligned route timeout budgets, and long-distance highway discovery beyond the old 18km caps; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
 - Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.39 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
