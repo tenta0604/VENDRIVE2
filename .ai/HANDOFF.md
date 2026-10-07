@@ -132,3 +132,19 @@ A long migration prompt is optional. The repository is prepared so the shortest 
 `VENDRIVE続き`
 
 If a longer prompt is supplied, it should still instruct the new chat to recover from latest `main` first rather than trusting the pasted prompt over GitHub.
+
+## 2026-10-07 AN15 product decision — promotion paused
+
+The user chose option A: keep AN15 learned numeric promotion paused for now.
+
+This resolves the prior HUMAN_REQUIRED decision without changing production behavior:
+
+- FINAL.32 remains complete and production-verified.
+- No new sales-outcome entry flow is authorized at this time.
+- Do not restore the withdrawn OCR/Analysis UI by assumption.
+- Do not weaken exact interval, no-lookahead, or censored-outcome safeguards to manufacture samples.
+- Keep the deterministic production forecast baseline unchanged.
+- Preserve AN15 code and historical Analytics for future use.
+- Reopen AN15 evidence-capture design only when the user explicitly authorizes it or a genuinely usable authorized real outcome source becomes available.
+
+This is an intentional product pause, not a FINAL.32 defect and not an unfinished implementation task.

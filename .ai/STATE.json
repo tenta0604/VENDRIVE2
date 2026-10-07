@@ -9,45 +9,40 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_EVIDENCE_ACCUMULATION_HUMAN_DECISION_REQUIRED",
+  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
   "currentWork": {
-    "title": "AN15 real evidence accumulation gate — normal-field evidence path audit",
-    "releaseStatus": "FINAL.32 remains complete and production-verified. AN15 numeric promotion remains disabled. Repository audit on 2026-10-07 found that after FINAL.21 withdrew the user-facing Analysis/OCR surfaces, the current normal UI no longer reaches the AN15 forecast-ledger snapshot trigger or a supported confirmed-sales outcome path.",
-    "rootCause": [
-      "an15-lifecycle-integration.js snapshots forecasts by wrapping the public VENDRIVE2Analytics.analysis.sales.listForecasts() API.",
-      "The current index.html has no analysisPage DOM and no 帳票撮影 entry point after FINAL.21; its retained Analysis JavaScript is unreachable from the shipped UI.",
-      "Normal internal recommendation/planning code calls the analytics.js closure-level listSalesForecasts() directly, so it bypasses the AN15 public-API wrapper.",
-      "AN15 scoring requires a newly confirmed sales report whose exact previousClearAt -> observedAt interval matches the stored forecast asOf -> targetAt interval. The user-facing report-confirmation path is withdrawn.",
-      "The legacy JSON backup exports core state plus vendrive2_last_day only; AN15 forecast/context localStorage ledgers are not included."
+    "title": "AN15 learned numeric promotion paused by product decision",
+    "releaseStatus": "FINAL.32 remains complete and production-verified. On 2026-10-07 the user chose to pause AN15 learned numeric promotion because the current field workflow does not provide an authorized low-friction real sales-outcome source.",
+    "decision": [
+      "Keep AN15 learned numeric promotion paused for now.",
+      "Do not add a new manual sales-outcome capture flow at this time.",
+      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
+      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
+      "Keep the deterministic production forecast baseline unchanged."
     ],
     "scope": [
-      "No FINAL.32 gate was rerun because no FINAL.32 precondition changed.",
-      "No production code was changed in this audit.",
-      "No learned numeric correction was promoted.",
-      "Do not silently restore OCR/Analysis or weaken exact interval matching merely to increase sample count.",
-      "The next engineering action depends on a product decision about how real sales outcomes should be captured with acceptable field-work friction."
+      "Documentation/state only; no production code changed.",
+      "FINAL.32 remains untouched and complete.",
+      "AN15 runtime code and historical Analytics remain preserved.",
+      "Reopen AN15 evidence capture only when the user explicitly authorizes it or a genuinely usable authorized real outcome source becomes available."
     ],
     "verification": {
-      "canonicalRecovery": "PASS: latest main 25b36b06d84967b9e63e017b880653df4d401de0 and canonical recovery set read in required order",
-      "final32Boundary": "PASS: FINAL.32 remains production-verified; PR #162 and historical branch are not resume sources",
-      "an15RuntimeLoad": "PASS: ocr-config.js dynamically loads AN15A-G and an15-lifecycle-integration.js",
-      "withdrawnAnalysisUi": "PASS: current index.html contains no analysisPage element",
-      "withdrawnCaptureEntry": "PASS: current index.html contains no 帳票撮影 entry point",
-      "snapshotReachability": "BLOCKED: shipped normal UI has no public analysis.sales.listForecasts() call path; internal forecast consumers bypass the lifecycle wrapper",
-      "outcomeReachability": "BLOCKED: user-facing confirmed-sales report capture is withdrawn",
-      "backupCoverage": "OBSERVED: legacy JSON backup does not include AN15 localStorage ledger/context keys"
+      "canonicalMain": "PASS: decision recorded from current synchronized main a9044307eb916c20889a8c1c677e30257c54ade7",
+      "final32Boundary": "PASS: FINAL.32 remains production-verified and was not reopened",
+      "productionCode": "PASS: no production code changed",
+      "numericPromotion": "PASS: remains disabled",
+      "evidencePolicy": "PASS: exact/no-lookahead and censored-outcome safeguards remain unchanged"
     },
     "nextActions": [
-      "Human product decision required: keep AN15 learning paused, or authorize a low-friction real sales-outcome/evidence capture path that does not silently restore the withdrawn OCR/Analysis workflow.",
-      "If a new evidence path is authorized, treat it as a bounded AN15 maintenance scope, re-fetch latest main, create a new immutable annotated safety tag before production-code edits, preserve exact/no-lookahead rules, and add finite gates for evidence creation and backup durability."
+      "Continue normal VENDRIVE use with the deterministic production forecast baseline.",
+      "If future field evidence reveals a separate defect or friction, open a new bounded maintenance scope.",
+      "Revisit AN15 promotion only after an authorized real outcome source is available or the user explicitly reopens evidence-capture design."
     ]
   },
-  "requiredUserInput": [
-    "Choose the AN15 evidence strategy: (A) keep learned numeric promotion paused for now, or (B) authorize design/implementation of a low-friction real sales-outcome capture path. Do not re-enable the withdrawn OCR/Analysis UI by assumption."
-  ],
+  "requiredUserInput": [],
   "unresolved": [
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn; numeric learning promotion remains disabled until AN15 real-evidence gates are satisfied.",
-    "Under the current shipped UI, new AN15 exact forecast/outcome evidence does not accumulate through normal field use; promotion cannot proceed until the evidence-input strategy is explicitly decided."
+    "AN15 learned numeric promotion is intentionally paused; current shipped normal use does not accumulate the exact real outcome evidence required for promotion.",
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

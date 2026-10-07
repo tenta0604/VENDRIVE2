@@ -1,11 +1,11 @@
 {
-  "evidenceVersion": 38,
-  "runType": "an15_real_evidence_accumulation_preflight_audit",
+  "evidenceVersion": 39,
+  "runType": "an15_evidence_strategy_product_decision",
   "phase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "status": "HUMAN_REQUIRED",
+  "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "25b36b06d84967b9e63e017b880653df4d401de0",
-    "safetyTag": "NOT_REQUIRED: repository audit / canonical documentation only; no production code changed"
+    "productionMainBefore": "a9044307eb916c20889a8c1c677e30257c54ade7",
+    "safetyTag": "NOT_REQUIRED: product decision / canonical documentation only; no production code changed"
   },
   "versions": {
     "app": "2026.10.07-FINAL.32",
@@ -14,28 +14,23 @@
     "schema": 4
   },
   "work": {
-    "summary": "Recovered latest main and audited whether AN15 real evidence can accumulate under the current post-FINAL.21 field workflow. The AN15 modules still load, but the shipped normal UI no longer reaches the forecast-ledger snapshot trigger or a user-facing confirmed-sales outcome path. No FINAL.32 gates were rerun and no numeric learning was promoted.",
-    "productStatus": "HUMAN_REQUIRED",
+    "summary": "Recorded the user's decision to pause AN15 learned numeric promotion for now because there is no currently authorized low-friction source of real sales outcomes. No evidence-capture UI was added, OCR/Analysis was not restored, and no production code changed.",
+    "productStatus": "COMPLETE",
     "productionCodeChanged": false
   },
   "gates": {
-    "canonicalRecovery": "PASS: required seven-file recovery set read from immutable main baseline",
-    "final32Precondition": "PASS: unchanged; prior FINAL.32 gates not rerun",
-    "an15RuntimeLoad": "PASS: AN15 scripts are dynamically loaded by ocr-config.js",
-    "withdrawnAnalysisUi": "PASS: no analysisPage DOM in shipped index.html",
-    "withdrawnCaptureEntry": "PASS: no 帳票撮影 entry point in shipped index.html",
-    "snapshotReachability": "HUMAN_REQUIRED: normal shipped UI does not call the wrapped public analysis.sales.listForecasts(); internal forecast consumers bypass it",
-    "confirmedOutcomeReachability": "HUMAN_REQUIRED: user-facing confirmed-sales report input was withdrawn in FINAL.21",
-    "backupDurability": "OBSERVED: current legacy JSON backup omits AN15 localStorage ledger/context keys"
+    "canonicalMain": "PASS: current synchronized main a9044307eb916c20889a8c1c677e30257c54ade7",
+    "final32Boundary": "PASS: unchanged; FINAL.32 remains complete and production-verified",
+    "productDecision": "PASS: option A selected — keep AN15 learned numeric promotion paused",
+    "productionCode": "PASS: no production code changes",
+    "safetyPolicy": "PASS: exact/no-lookahead/censoring safeguards remain unchanged"
   },
   "openItems": [
-    "Decide whether AN15 learned numeric promotion should remain paused or whether to authorize a low-friction real sales-outcome/evidence capture path.",
-    "Do not silently restore OCR/Analysis and do not weaken exact interval/no-lookahead rules solely to increase sample count."
+    "AN15 promotion remains intentionally paused until the user explicitly reopens the scope or an authorized real sales-outcome source becomes available."
   ],
-  "nextAction": "User product decision: keep AN15 promotion paused, or authorize a bounded low-friction evidence-capture maintenance scope.",
+  "nextAction": "Continue normal VENDRIVE use. Do not create AN15 evidence-capture UX or promote learned numeric corrections unless the scope is explicitly reopened.",
   "unresolved": [
-    "Historical Analytics is preserved; user-facing Analysis/OCR remains withdrawn.",
-    "AN15 real evidence cannot currently accumulate through normal shipped field use, so promotion remains disabled."
+    "Normal shipped field use still does not accumulate the exact AN15 evidence required for promotion; this is now an accepted paused state rather than an active blocker."
   ],
   "changedFiles": [
     ".ai/STATE.json",
