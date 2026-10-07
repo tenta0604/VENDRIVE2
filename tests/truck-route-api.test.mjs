@@ -142,6 +142,34 @@ test('active highway IC discovery fails open to the safe baseline HGV route',asy
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
+
+test('long-distance highway ON still searches farther IC access and does not stop after only 18km of motorway',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const farInput={origin:{lat:35.00,lng:136.00},destination:{lat:35.80,lng:137.00},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.50,35.40],[137.00,35.80]]},properties:{summary:{distance:120000,duration:7200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const modestHighway={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.20,35.15],[136.50,35.40],[137.00,35.80]]},properties:{summary:{distance:121000,duration:7000},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
+  const viaHighway={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.08,35.08],[136.50,35.40],[136.92,35.72],[137.00,35.80]]},properties:{summary:{distance:125000,duration:7600},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+  const junctions={elements:[
+    {type:'node',id:501,lat:35.08,lon:136.08,tags:{highway:'motorway_junction',ref:'LONG-A'}},
+    {type:'node',id:502,lat:35.72,lon:136.92,tags:{highway:'motorway_junction',ref:'LONG-B'}},
+    {type:'node',id:503,lat:35.085,lon:136.085,tags:{highway:'motorway_junction',ref:'LONG-A2'}},
+    {type:'node',id:504,lat:35.715,lon:136.915,tags:{highway:'motorway_junction',ref:'LONG-B2'}}
+  ]};
+  const routeBodies=[];let overpassBody='';
+  globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('overpass-api.de')){overpassBody=String(options.body||'');return Response.json(junctions);}
+    routeBodies.push(JSON.parse(options.body));
+    return Response.json({features:routeBodies.length===1?[surface,modestHighway]:[viaHighway]});
+  };
+  try{
+    const response=await POST(request(farInput));assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.highwaySearch.attempted,true);assert.ok(data.highwaySearch.radiusMeters>18000);assert.ok(data.highwaySearch.accepted>=1);assert.equal(data.selection,'active-ic-expressway-preferred');
+    assert.deepEqual(data.route.summary,{distance:125000,duration:7600});assert.ok(data.usage.motorwayMeters>45000);
+    assert.ok(decodeURIComponent(overpassBody).includes('around:25000'),'long-distance search should expand beyond the old 18km radius');
+    assert.ok(routeBodies.some(body=>body.coordinates.length===4),'a long-distance via-IC HGV route must be evaluated even when endpoint IC access exceeds the old combined 18km cap');
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
 test('warm-instance quota guard caps upstream calls',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
   globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};

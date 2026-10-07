@@ -3,7 +3,8 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.07-FINAL.38';
+  var ASSET_VERSION='2026.10.08-FINAL.39';
+  var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
   function distanceMeters(a,b){if(!point(a)||!point(b))return Infinity;var rad=Math.PI/180,lat1=a.lat*rad,lat2=b.lat*rad,dlat=(b.lat-a.lat)*rad,dlng=(b.lng-a.lng)*rad,s=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)*Math.sin(dlng/2);return 6371000*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
@@ -101,6 +102,7 @@
     var destination=null,active=null,progress=null,sequence=0,controller=null,busy=false,settingsDestination=null,offRouteHits=0,offRouteSamples=[],lastAutoRerouteAt=0;
     var doc=app.document,el=function(id){return doc.getElementById(id);};
     function draw(){if(destination&&app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();return;}app.draw(active,destination,progress);}
+    function fitActive(){if(active&&destination&&typeof app.fit==='function')app.fit(active,destination,progress);}
     function cancel(){sequence++;if(controller)controller.abort();controller=null;busy=false;}
     function end(){cancel();destination=null;active=null;progress=null;offRouteHits=0;offRouteSamples=[];lastAutoRerouteAt=0;draw();el('truckRoutePanel').classList.add('hidden');}
     function panel(message){
@@ -172,7 +174,7 @@
       try{
         var origin=point(options.origin)?options.origin:await getPosition(signal);if(token!==sequence)return;
         if(!auto)panel('車両条件に合う経路を取得中…');
-        timer=setTimeout(function(){if(token===sequence)controller.abort();},15000);
+        timer=setTimeout(function(){if(token===sequence)controller.abort();},ROUTE_REQUEST_TIMEOUT_MS);
         var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v}),signal:signal});
         var data=await response.json();if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
@@ -181,7 +183,7 @@
           var baseline=remainingMeters(previousActive,previousProgress)+(previousProgress&&point(previousProgress.point)?distanceMeters(origin,previousProgress.point):0),detourLimit=baseline+Math.max(3000,baseline*0.5);
           if(baseline>500&&nextRoute.summary.distance>detourLimit){active=previousActive;progress=previousProgress;offRouteHits=0;offRouteSamples=[];draw();panel('再検索した経路が大きく迂回するため、現在の経路を保持しています');app.toast('大きく迂回する再検索結果を採用しませんでした');return;}
         }
-        active=nextRoute;progress=null;offRouteHits=0;offRouteSamples=[];draw();if(!auto)app.fit(active,destination);else app.toast('新しい経路に更新しました');
+        active=nextRoute;progress=null;offRouteHits=0;offRouteSamples=[];draw();if(!auto)fitActive();else app.toast('新しい経路に更新しました');
         panel(routeSummary(v));
       }catch(e){
         if(token!==sequence)return;
@@ -220,11 +222,11 @@
       ['truckVehicleClose','truckVehicleCancel'].forEach(function(id){el(id).onclick=function(){settingsDestination=null;app.closeModal('truckVehicleModal');};});
       el('truckRouteRecalculate').onclick=function(){calculate();};el('truckRouteEnd').onclick=end;
       el('mapHighwayToggle').onclick=function(){var v;try{v=profile();}catch(e){openSettings(destination);return;}setHighwayEnabled(v.avoidTolls!==false);};
-      el('truckRouteOverview').onclick=function(){if(active)app.fit(active,destination);};
+      el('truckRouteOverview').onclick=fitActive;
       el('truckRouteExternal').onclick=function(){if(destination)app.external(destination);};
       summary();syncHighwayToggle();
     }
-    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,refreshVehicle:function(){summary();syncHighwayToggle();}};
+    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,fitActive:fitActive,refreshVehicle:function(){summary();syncHighwayToggle();}};
   }
   return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
 });

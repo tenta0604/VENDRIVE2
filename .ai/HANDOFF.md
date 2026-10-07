@@ -430,3 +430,26 @@ FINAL.38 closes the two field regressions reported after FINAL.37:
 The next evidence step is real-device retest of the same highway case and fullscreen route visibility. If the exact highway still does not appear, capture the concrete origin/destination and investigate provider/OSM IC data rather than weakening HGV safety globally.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
+
+## 2026-10-08 FINAL.39 route robustness
+
+New field evidence after FINAL.38 showed:
+- active route geometry could still be invisible in fullscreen MAP even though SVG path elements existed;
+- route acquisition sometimes timed out;
+- longer destinations were less likely to use a practical highway.
+
+Root causes and corrections:
+- regression had asserted DOM path persistence, not visible viewport overlap. FINAL.39 exposes `fitActive()` and refits the remaining active route after fullscreen/software-rotation viewport settle.
+- client timeout was 15s while server work could exceed that. FINAL.39 uses a 20s client route budget, starts bounded junction discovery in parallel with baseline ORS, caps Overpass at 2.8s, and caps via-IC ORS at 5.5s.
+- long-route discovery stopped too early because motorway sufficiency was capped at 18km and combined IC access at 18km. FINAL.39 lets motorway target scale to 45km, junction radius to 25km, per-end access to 25km, and combined prefilter to 35km.
+- FINAL.36 final detour safety caps remain unchanged; exact HGV restrictions and no-car fallback remain intact.
+
+Safety tag: `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`.
+
+PR #177 validation before canonical bookkeeping:
+- Truck route readiness / API / real Edge 320/390: `37643412185`, PASS.
+- Browser regression: `37643412287`, PASS.
+- Browser now asserts route geometry is actually inside the visible MAP before fullscreen, after fullscreen, and after software rotation.
+- API test proves a long route still performs active IC search when normal motorway usage already exceeds the old 18km cap and the useful IC pair exceeds the old combined 18km access prefilter.
+
+Do not call FINAL.39 production-complete until PR #177 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.39 evidence are terminal PASS.

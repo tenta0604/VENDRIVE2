@@ -491,3 +491,13 @@ This file records confirmed project decisions that must survive chat migration. 
 - Live public version and routing asset report `2026.10.07-FINAL.38`.
 - FINAL.38 is closed. The next evidence is real-device retest of the previously failing highway route and fullscreen route persistence.
 - Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.
+
+## 2026-10-08 — FINAL.39 route robustness decisions
+- Fullscreen route correctness means visible geometry, not merely DOM path persistence. After fullscreen/software-rotation viewport settle, refit the remaining active route into the visible MAP unless follow-current-position mode is active.
+- Route client timeout must exceed the bounded server critical path. Use a 20s client route budget; run OSM junction discovery in parallel with baseline ORS; cap Overpass at 2.8s and via-IC ORS at 5.5s.
+- Long-distance highway discovery must not stop after a fixed 18km motorway amount. Scale target to 55% of primary route up to 45km.
+- Long-distance endpoint IC discovery may use radius up to 25km, per-end access up to 25km, and combined prefilter up to 35km.
+- These are candidate-discovery bounds only. FINAL.36 final route safety caps remain authoritative: +20% duration capped at +8min and +30% distance capped at +10km.
+- Preserve exact registered HGV restrictions, maximum two active via-route candidates, 30 route-call/min warm guard, and no car/straight-line fallback.
+- Browser/Edge regression must assert active route overlap with the visible MAP rectangle before fullscreen, after fullscreen, and after software rotation.
+- Safety tag: `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`.
