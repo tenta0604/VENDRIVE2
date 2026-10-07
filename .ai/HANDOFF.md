@@ -478,3 +478,164 @@ FINAL.39 behavior:
 Next evidence: retest the same long-route/highway, timeout, and iPhone fullscreen cases.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
+
+## 2026-10-08 NEW CHAT HANDOFF CHECKPOINT — resume from here
+
+This checkpoint exists specifically so a fresh ChatGPT conversation can continue VENDRIVE without relying on chat history.
+
+### Authority and exact recovery order
+The authoritative source is **latest synchronized `main` plus canonical repository files**, not prior chat messages, old PR branches, or remembered version numbers.
+
+At the start of a new chat:
+1. fetch latest `main`;
+2. read `AGENTS.md`;
+3. read `.ai/STATE.json`;
+4. read `.ai/HANDOFF.md`;
+5. read `AI_ROADMAP.md`;
+6. read `.ai/LAST_RUN.json`;
+7. read `.ai/DECISIONS.md`;
+8. read `.ai/WORKFLOW.md`;
+9. only then decide whether any implementation work is actually open.
+
+Do not resume from historical PRs or branches. FINAL.37 PR #172, FINAL.38 PR #174, and FINAL.39 PR #177 are completed history.
+
+### Current production baseline
+- Public app: **2026.10.08-FINAL.39**.
+- Analytics engine: **AN14B3B5**.
+- DB/schema: **4 / 4**.
+- FINAL.39 product merge: `6b843d988fddba509cedcd590c6fe71ba1afd6db`.
+- FINAL.39 closeout commit before this continuity checkpoint: `d0d9f6668043793a50f0a1225dd5726e8da137af`.
+- PR #177: merged.
+- Vercel production: `dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4`, READY for the exact product merge SHA.
+- GitHub Pages: run `37644029832`, PASS.
+- Main Browser regression: run `37644030491`, PASS.
+- Final PR Truck route/API/real Edge: `37643816604`, PASS.
+- Final PR Browser regression: `37643816472`, PASS.
+- Immutable pre-edit tag: `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`.
+- Public `version.json` and `truck-routing.js` were live-verified as `2026.10.08-FINAL.39`.
+
+### Why FINAL.39 exists
+The user real-device-tested FINAL.38 and reported three concrete field failures:
+1. the route line still was not visible after entering fullscreen MAP;
+2. route acquisition sometimes timed out;
+3. longer-distance destinations appeared **more likely** to avoid usable highways.
+
+These observations superseded the earlier assumption that FINAL.38 had solved the field problem.
+
+### FINAL.39 root causes and implemented corrections
+**Fullscreen route**
+- Previous regression only proved that route SVG paths still existed in the DOM.
+- That did not prove the route was actually inside the visible MAP viewport.
+- FINAL.39 exposes route-client `fitActive()`.
+- Fullscreen and software-rotation viewport settling now:
+  - invalidates Leaflet size,
+  - redraws the active route,
+  - then refits the **remaining active route** into the visible MAP unless follow-current-position mode is active.
+- The browser regression now checks actual geometric overlap between route path bounds and the visible MAP rectangle before fullscreen, after fullscreen, and after software rotation.
+
+**Timeout**
+- FINAL.38 client timeout was 15 seconds.
+- Server-side bounded work could legitimately take longer: baseline ORS plus junction discovery plus via-IC ORS.
+- FINAL.39 client route request budget is **20 seconds**.
+- OSM motorway-junction discovery starts in parallel with the baseline ORS request.
+- Overpass wall timeout is **2.8 seconds**.
+- Via-IC ORS timeout is **5.5 seconds**.
+- This removes the known client-before-server timeout mismatch without making requests unbounded.
+
+**Long-distance highway bias**
+- FINAL.38 motorway sufficiency stopped active discovery once normal candidates contained up to 18km motorway.
+- Entry/exit IC access filtering also had an 18km combined cap.
+- These fixed limits disproportionately hurt long routes.
+- FINAL.39 changes candidate discovery bounds:
+  - motorway sufficiency target: 55% of primary distance, capped at **45km**;
+  - junction search radius: up to **25km**;
+  - per-end IC access: up to **25km**;
+  - combined entry+exit access prefilter: up to **35km**.
+- These are only discovery/candidate-generation bounds.
+
+### Safety constraints that were NOT weakened
+Keep all of these unless the user explicitly authorizes a new design and it is proven safe:
+- routing profile stays `driving-hgv`;
+- preserve registered height / width / length / gross weight / optional axleload;
+- ferries avoided;
+- highway OFF avoids highways/tollways;
+- no car fallback;
+- no straight-line fallback;
+- at most two active via-IC route candidates;
+- all ORS route calls share the warm-instance 30 route-call/minute guard;
+- FINAL.36 final detour envelope remains authoritative:
+  - max duration = primary + min(20%, 8 minutes);
+  - max distance = primary + min(30%, 10km);
+- do not globally loosen HGV safety merely to force highway use.
+
+### What automated verification currently proves
+FINAL.39 automated tests prove:
+- long routes can still trigger active IC discovery even when normal motorway usage already exceeds the old 18km cap;
+- useful IC pairs beyond the old combined 18km access filter can be evaluated;
+- active via-IC routes still carry exact HGV restrictions;
+- final global detour caps remain;
+- route acquisition/client logic passes Node/API tests;
+- real Edge 320/390 regressions pass;
+- route geometry is inside the visible MAP viewport after fullscreen and software rotation in the automated browser fixture.
+
+Automated PASS does **not** replace real iPhone field confirmation.
+
+### Exact next user-facing evidence required
+The user has **not yet re-tested FINAL.39 on the real iPhone after production release**.
+
+The next step is therefore NOT more speculative code changes. Ask the user to re-test the same field cases and report:
+1. on the same long-distance destination, does highway ON now use the expected highway more often / correctly?
+2. does route acquisition still time out?
+3. after route is visible in normal MAP, does entering fullscreen immediately show the route?
+4. if fullscreen is software-rotated with the 🔄 button, does the route remain visible?
+
+If all four are good, no routing maintenance is open.
+
+If any one still fails, treat it as **new real-device evidence** and open a new bounded maintenance phase. Before production edits:
+- fetch latest main again;
+- create a new immutable annotated `backup-pre-...` safety tag at the exact current main;
+- reproduce/instrument the exact failing condition;
+- do not rerun unrelated FINAL.39 gates unless a prerequisite changed;
+- do not blindly widen route constraints.
+
+### If highway still fails after FINAL.39
+Do not keep adjusting generic thresholds first.
+Prefer evidence from the **exact failing origin/destination** and inspect:
+- whether active highway search actually attempted;
+- junction count / evaluated pair count / accepted pair count;
+- selection value;
+- motorway meters in normal and active candidates;
+- whether a via-IC route was rejected by the unchanged final time/distance safety envelope;
+- whether OSM motorway_junction data around origin/destination is incomplete;
+- whether ORS rejects or reshapes the via-IC HGV route because of vehicle restrictions.
+
+If necessary, add bounded diagnostic telemetry that exposes non-sensitive routing decision metadata. Never fabricate or infer a safe HGV route that the provider did not return.
+
+### Fullscreen failure if it persists on iPhone
+If real iPhone still shows no route in fullscreen despite FINAL.39 browser overlap PASS, treat this as an iOS/Safari rendering/viewport-specific issue rather than assuming route data is absent.
+Investigate, in this order:
+1. actual route layer/path computed bounds after fullscreen settle;
+2. Leaflet map container size and map pane transform;
+3. software-rotation CSS transform and transform-origin;
+4. clipping/overflow of SVG/overlay panes;
+5. whether refit occurs while viewport dimensions are transient;
+6. whether a later iOS visual-viewport resize moves the map after the 260ms settle pass.
+
+A future fix may need listening to `visualViewport.resize` / `orientationchange` or a longer event-driven settle, but do **not** implement that by assumption without reproducing the field behavior.
+
+### AN15 status
+Normal project phase is still `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`, but it is **intentionally paused by product decision**.
+Do not reopen AN15 just because a new chat starts.
+Do not restore the withdrawn OCR/Analysis UI.
+Do not add a manual sales-outcome capture workflow unless the user explicitly reopens that scope.
+Do not weaken exact interval / no-lookahead evidence rules.
+
+### User continuation behavior
+If the user says `進めて`, `続けて`, `やって`, or equivalent after reporting a concrete FINAL.39 field failure:
+- treat it as permission to continue all safe reversible work in that turn;
+- investigate first, then implement if evidence supports it;
+- continue through finite relevant verification, merge, deploy, live verification, and canonical bookkeeping;
+- stop only at COMPLETE / HUMAN_REQUIRED / TECHNICAL_BLOCKER / IRREVERSIBLE_APPROVAL_REQUIRED.
+
+### Short resume sentence
+A fresh chat can start with: **「VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.39本番完了後の実機確認から再開して。」**

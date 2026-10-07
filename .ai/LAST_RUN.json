@@ -72,5 +72,19 @@
     ".ai/LAST_RUN.json",
     "AI_ROADMAP.md",
     ".ai/DECISIONS.md"
-  ]
+  ],
+  "continuityCheckpoint": {
+    "createdFor": "fresh-chat handoff",
+    "status": "PASS",
+    "productCodeChanged": false,
+    "sourceMain": "d0d9f6668043793a50f0a1225dd5726e8da137af",
+    "resumeFrom": "FINAL.39 production-complete; real-device iPhone confirmation still pending",
+    "immediateEvidence": [
+      "same long-distance highway case",
+      "route acquisition timeout recurrence or absence",
+      "fullscreen route visible immediately",
+      "software-rotated fullscreen route remains visible"
+    ],
+    "warning": "Do not treat automated FINAL.39 PASS as real-device confirmation, and do not reopen AN15 automatically."
+  }
 }

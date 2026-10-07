@@ -61,8 +61,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.39本番完了後の実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.39 is production-verified and complete. PR #177 and its validation branch are historical only; latest synchronized main is authoritative. Resume from the intentionally paused AN15 evidence gate unless the user reports new field-route evidence."
+    "handoffBoundary": "FINAL.39 is production-verified. New-chat recovery must start from the 2026-10-08 NEW CHAT HANDOFF CHECKPOINT in .ai/HANDOFF.md. The immediate next evidence is real-iPhone retest of (1) long-distance highway selection, (2) route timeout, and (3) fullscreen/software-rotated route visibility. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "2026-10-08 NEW CHAT HANDOFF CHECKPOINT — resume from here"
   }
 }
