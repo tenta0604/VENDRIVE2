@@ -1,41 +1,57 @@
 {
-  "evidenceVersion": 39,
-  "runType": "an15_evidence_strategy_product_decision",
-  "phase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "status": "COMPLETE",
+  "evidenceVersion": 40,
+  "runType": "final33_arrival_visit_cards_map_rotation_validation",
+  "phase": "FINAL33_ARRIVAL_VISIT_CARDS_MAP_ROTATION",
+  "status": "PASS",
   "base": {
-    "productionMainBefore": "a9044307eb916c20889a8c1c677e30257c54ade7",
-    "safetyTag": "NOT_REQUIRED: product decision / canonical documentation only; no production code changed"
+    "productionMainBefore": "42e9d4565e64a90abec6933d5b8d958e2e461983",
+    "safetyTag": "backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007",
+    "safetyTagTarget": "42e9d4565e64a90abec6933d5b8d958e2e461983"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.32",
+    "app": "2026.10.07-FINAL.33",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Recorded the user's decision to pause AN15 learned numeric promotion for now because there is no currently authorized low-friction source of real sales outcomes. No evidence-capture UI was added, OCR/Analysis was not restored, and no production code changed.",
-    "productStatus": "COMPLETE",
-    "productionCodeChanged": false
+    "summary": "Implemented and validated FINAL.33: accurate 100m arrival ends in-app routing; arrival shows one nearby visit card at a time; left completes through existing task/order checks; right skips; Today cards also gain right-swipe skip; normal UI no longer blocks landscape; fullscreen MAP gains a software 90-degree rotate control for rotation-locked devices.",
+    "productStatus": "VALIDATED_PENDING_PRODUCTION",
+    "productionCodeChanged": true
   },
   "gates": {
-    "canonicalMain": "PASS: current synchronized main a9044307eb916c20889a8c1c677e30257c54ade7",
-    "final32Boundary": "PASS: unchanged; FINAL.32 remains complete and production-verified",
-    "productDecision": "PASS: option A selected — keep AN15 learned numeric promotion paused",
-    "productionCode": "PASS: no production code changes",
-    "safetyPolicy": "PASS: exact/no-lookahead/censoring safeguards remain unchanged"
+    "canonicalRecovery": "PASS: latest synchronized main and canonical recovery set verified before edits",
+    "immutableSafetyTag": "PASS: backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007 -> 42e9d4565e64a90abec6933d5b8d958e2e461983",
+    "syntaxAndNode": "PASS: workflow 37609873036 route syntax/logic checks",
+    "realEdge320390": "PASS: workflow 37609873036",
+    "arrivalAutoEnd": "PASS: accurate <=50m GPS within 100m clears route and emits arrival once",
+    "arrivalVisitDeck": "PASS: destination-first, nearby-today-unvisited, one card at a time",
+    "taskOrderSafety": "PASS: arrival left-swipe reuses task confirmation then order confirmation",
+    "arrivalRightSkip": "PASS: nearby arrival card right-swipe sets today's skip",
+    "todayRightSkip": "PASS: standard Today card right-swipe sets today's skip",
+    "fullscreenSoftwareRotation": "PASS: fullscreen-only rotate control toggles software 90-degree MAP rotation and continues to fill viewport",
+    "fullscreenPin": "PASS: machine PIN remains clickable while fullscreen/software-rotated",
+    "browserRegression": "PASS: workflow 37609873072",
+    "initialHarnessFailure": "RESOLVED: first Edge run 37609644215 timed out because test fixture mode remained 'held'; test-only reset was added, no product-code change was required"
   },
   "openItems": [
-    "AN15 promotion remains intentionally paused until the user explicitly reopens the scope or an authorized real sales-outcome source becomes available."
+    "Merge/deploy/live verification remains pending."
   ],
-  "nextAction": "Continue normal VENDRIVE use. Do not create AN15 evidence-capture UX or promote learned numeric corrections unless the scope is explicitly reopened.",
+  "nextAction": "Revalidate final PR head, merge PR #164, verify production/live FINAL.33, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
   "unresolved": [
-    "Normal shipped field use still does not accumulate the exact AN15 evidence required for promotion; this is now an accepted paused state rather than an active blocker."
+    "FINAL.33 is validated but not yet production-verified."
   ],
   "changedFiles": [
+    "index.html",
+    "truck-routing.js",
+    "manifest.webmanifest",
+    "version.json",
+    "tests/truck-route-client.test.mjs",
+    "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
-    "AI_ROADMAP.md"
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
   ]
 }

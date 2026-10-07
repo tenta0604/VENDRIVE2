@@ -148,3 +148,25 @@ This resolves the prior HUMAN_REQUIRED decision without changing production beha
 - Reopen AN15 evidence-capture design only when the user explicitly authorizes it or a genuinely usable authorized real outcome source becomes available.
 
 This is an intentional product pause, not a FINAL.32 defect and not an unfinished implementation task.
+
+## 2026-10-07 FINAL.33 arrival cards and MAP rotation
+
+FINAL.33 is validated on PR #164 and is pending production release.
+
+Locked scope:
+- Accurate GPS (<=50m accuracy) within 100m of the active destination ends the in-app route.
+- Arrival shows exactly one visit card at a time: the unvisited destination first, then other unvisited machines on today's plan within 100m.
+- Left swipe = visit complete through the existing task/order confirmations. Right swipe = today's visit skip.
+- The standard Today list uses the same bidirectional swipe behavior.
+- The blocking non-MAP landscape portrait guard is withdrawn. Portrait orientation is requested where supported and the manifest prefers portrait.
+- Fullscreen MAP alone exposes a 🔄 control that software-rotates the MAP 90 degrees. This is the iPhone/rotation-lock fallback and does not attempt to bypass the OS rotation lock.
+- Fullscreen PIN -> machine modal interaction remains required.
+
+Safety tag: `backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007` -> `42e9d4565e64a90abec6933d5b8d958e2e461983`.
+
+Validation evidence before final bookkeeping:
+- Truck route readiness / real Edge 320/390: run `37609873036`, PASS.
+- Browser regression: run `37609873072`, PASS.
+- The earlier run `37609644215` failed only because the test fixture stayed in held-response mode before the new arrival gate; resetting the fixture fixed the harness with no product-code change.
+
+Do not call FINAL.33 production-complete until PR #164 is merged and Vercel, main browser regression, GitHub Pages, and live version/asset checks are terminal PASS.

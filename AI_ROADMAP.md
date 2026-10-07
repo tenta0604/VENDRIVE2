@@ -4,7 +4,7 @@
 
 - Visible app baseline: **2026.10.07-FINAL.32** (distance-aware natural expressway preference, travelled-route line trimming, and sustained off-route automatic rerouting; prior highway toggle/classification/fullscreen behavior preserved; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate**. FINAL.32 navigation/highway maintenance is released and production-verified; no additional maintenance phase is active without new field evidence.
+- Active engineering phase: **FINAL.33 arrival visit cards + fullscreen MAP software rotation**. PR #164 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -134,3 +134,11 @@ FINAL.31 still treated any motorway-bearing candidate as equivalent, so a short 
 ## FINAL.32 natural highway + live navigation production release (2026-10-07)
 
 FINAL.32 is released and production-verified. Highway ON now measures real motorway/toll distance across ORS HGV alternatives and prefers the longest reasonable expressway usage while rejecting excessive detours. Real provider validation selected about 16.8 km of motorway for Nagoya IC → Komaki IC. Navigation display now removes already-travelled geometry as accurate GPS progress advances, and three sustained accurate off-route fixes automatically recalculate from the current position with a 30-second cooldown; failed automatic reroutes retain the previous route. 22/22 Node tests, real Edge 320/390, all existing regressions, Vercel production, main regression and GitHub Pages passed. Live version is `2026.10.07-FINAL.32`.
+
+## FINAL.33 arrival visit cards + fullscreen MAP software rotation validation (2026-10-07)
+
+A new bounded field-work maintenance scope adds automatic arrival closeout and faster visit handling without reopening the withdrawn OCR/Analysis workflow. Accurate GPS fixes (<=50m accuracy) within 100m of the active destination end the in-app route and open one nearby visit card at a time. The destination is first when unvisited, followed by other unvisited machines on today's plan within 100m. Left swipe completes through the existing task/order confirmation flow; right swipe skips today's visit. The standard Today list gains the same right-swipe skip.
+
+The prior landscape blocking guard is withdrawn. Normal app/MAP remain portrait-width and portrait orientation is requested where supported. Fullscreen MAP adds a software 90-degree 🔄 rotation mode so rotation-locked iPhone users can change MAP viewing direction without bypassing the OS orientation lock. Fullscreen PIN/modal behavior is preserved.
+
+Safety tag `backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007` points to `42e9d4565e64a90abec6933d5b8d958e2e461983`. PR #164 validation passed Truck route readiness / real Edge 320/390 run `37609873036` and Browser regression run `37609873072`. Production release evidence is still pending.
