@@ -100,14 +100,7 @@ test('highway ON rejects an excessive expressway detour',async()=>{
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
-test('warm-instance quota guard caps upstream calls',async()=>{
-  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
-  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
-  try{
-    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
-    assert.equal(response.status,429);assert.ok(calls<=30);
-  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
-});
+
 
 
 test('highway ON actively searches motorway junctions and adopts a bounded HGV via-IC candidate',async()=>{
@@ -145,5 +138,14 @@ test('active highway IC discovery fails open to the safe baseline HGV route',asy
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
     const data=await response.json();assert.equal(data.selection,'active-highway-unavailable');assert.equal(data.highwaySearch.attempted,true);assert.equal(data.highwaySearch.status,'junction-search-unavailable');assert.deepEqual(data.route.summary,{distance:32000,duration:2400});
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('warm-instance quota guard caps upstream calls',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
+  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
+  try{
+    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
+    assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
