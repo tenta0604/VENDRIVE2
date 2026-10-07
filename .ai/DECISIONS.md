@@ -462,3 +462,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - At most two extra ORS route calls are allowed per route request; baseline and extra route calls share the 30/minute warm-instance upstream route-call guard.
 - No car or straight-line fallback is permitted.
 - Safety tag: `backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007` -> `77b7b437469e8100f94661fb4f5707acd1320e13`.
+
+## 2026-10-07 — FINAL.37 production release complete
+- PR #172 merged to `main` at `04ce9033731bb52a49c9d0dc636b46e7826f3a82`.
+- Final PR Truck route / API / Edge run `37636733086` and Browser regression run `37636733333` passed.
+- Main Browser regression run `37636924246` and GitHub Pages run `37636923395` passed.
+- Vercel production deployment `dpl_58RHPeSbzBG3urLD54WrMYsCtCTo` is READY for the exact merge SHA.
+- Live public version and routing asset report `2026.10.07-FINAL.37`; public UI describes active nearby-IC HGV highway search.
+- FINAL.37 is closed. The next evidence is real-device retest of the previously failing highway case; do not weaken HGV safety globally without an exact failing route.
+- Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.

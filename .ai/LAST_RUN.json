@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 48,
-  "runType": "final37_active_highway_ic_search_validation",
+  "evidenceVersion": 49,
+  "runType": "final37_production_release_closeout",
   "phase": "FINAL37_ACTIVE_HIGHWAY_IC_SEARCH",
-  "status": "PASS",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "77b7b437469e8100f94661fb4f5707acd1320e13",
     "safetyTag": "backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007",
@@ -15,34 +15,44 @@
     "schema": 4
   },
   "work": {
-    "summary": "Implemented FINAL.37 active highway discovery: if normal highway-ON ORS candidates have too little motorway use, query nearby OSM motorway junctions and evaluate up to two additional driving-hgv routes through plausible entry/exit IC pairs, preserving HGV restrictions and FINAL.36 detour bounds.",
-    "productStatus": "VALIDATED_PENDING_PRODUCTION",
-    "productionCodeChanged": true
+    "summary": "FINAL.37 is production-complete: highway ON now actively discovers nearby OSM motorway junctions when normal ORS alternatives contain too little motorway use and evaluates up to two bounded driving-hgv routes through plausible entry/exit IC pairs while preserving exact HGV restrictions.",
+    "productStatus": "PRODUCTION_VERIFIED",
+    "productionCodeChanged": true,
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
     "immutableSafetyTag": "PASS: backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007 -> 77b7b437469e8100f94661fb4f5707acd1320e13",
-    "apiAndNode": "PASS: workflow 37636311481",
+    "finalPrTruckRoute": "PASS: workflow 37636733086",
+    "finalPrBrowserRegression": "PASS: workflow 37636733333",
     "activeMotorwayJunctionSearch": "PASS",
     "fourPointHgvWaypointRequest": "PASS",
     "exactHgvRestrictions": "PASS",
-    "boundedExtraRoutes": "PASS: maximum two extra ORS candidates",
-    "routeCallQuota": "PASS: baseline and extra ORS calls share the 30/minute warm-instance guard",
+    "boundedExtraRoutes": "PASS: maximum two extra ORS route candidates",
+    "providerQuotaGuard": "PASS: baseline and extra ORS route calls share the 30/minute warm-instance guard",
     "failOpenBaseline": "PASS",
     "final36DetourBoundsPreserved": "PASS",
     "noCarFallback": "PASS",
-    "realEdge320390": "PASS: workflow 37636311481",
-    "browserRegression": "PASS: workflow 37636311451",
-    "priorTestFailures": "RESOLVED: first failure was quota-test ordering; second was warm junction-cache contamination in the fail-open test. Both were test-isolation issues, not product failures."
+    "merge": "PASS: PR #172 -> 04ce9033731bb52a49c9d0dc636b46e7826f3a82",
+    "mainBrowserRegression": "PASS: workflow 37636924246",
+    "githubPages": "PASS: workflow 37636923395",
+    "vercelProduction": "PASS: dpl_58RHPeSbzBG3urLD54WrMYsCtCTo READY, target production, Git SHA 04ce9033731bb52a49c9d0dc636b46e7826f3a82",
+    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.37",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.37",
+    "liveUi": "PASS: public route help states highway ON searches nearby ICs and compares bounded HGV highway routes",
+    "priorTestFailures": "RESOLVED: quota-state ordering and warm junction-cache contamination were test-isolation issues; final required runs passed"
   },
   "openItems": [
-    "Merge/deploy/live verification remains pending."
+    "No unresolved FINAL.37 implementation/release issue.",
+    "The exact previously failing highway route still needs real-device confirmation because no origin/destination pair was available for direct provider reproduction.",
+    "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Revalidate final PR head, merge PR #172, verify production/live FINAL.37, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
+  "nextAction": "Continue normal FINAL.37 field use and retest the previously failing highway route. Treat any remaining exact case as new field evidence; resume AN15 only when explicitly reopened or an authorized real outcome source becomes available.",
   "unresolved": [
-    "FINAL.37 is validated but not yet production-verified."
+    "No unresolved FINAL.37 release issue.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
-  "changedFiles": [
+  "releaseChangedFiles": [
     "api/route.mjs",
     "truck-routing.js",
     "index.html",
@@ -50,6 +60,13 @@
     "tests/truck-route-api.test.mjs",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
+    ".ai/STATE.json",
+    ".ai/HANDOFF.md",
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
+  ],
+  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

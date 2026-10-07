@@ -7,15 +7,15 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.36`.
+- Current visible production app version: `2026.10.07-FINAL.37`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.36 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.36 implementation task.
+FINAL.37 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.37 implementation task.
 
-Historical PR #170 is closed and merged. Its validation branch `chatgpt/final36-route-sanity-visibility-20261007` is history only and must not be used as a resume source. PR #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
+Historical PR #172 is closed and merged. Its validation branch `chatgpt/final37-active-highway-ic-search-20261007` is history only and must not be used as a resume source. PR #170 / #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
 After recovery, the normal next project phase is:
 
@@ -361,3 +361,30 @@ PR #172 validation before canonical bookkeeping:
 - Earlier failures were test isolation only: quota state ordering, then warm IC-cache contamination.
 
 Do not call FINAL.37 production-complete until PR #172 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.37 evidence are terminal PASS.
+
+## 2026-10-07 FINAL.37 production release complete
+
+FINAL.37 is released and production-verified.
+
+- PR #172 merged to `main` at `04ce9033731bb52a49c9d0dc636b46e7826f3a82`.
+- Immutable safety tag: `backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007` -> `77b7b437469e8100f94661fb4f5707acd1320e13`.
+- Final PR Truck route readiness / API / real Edge run `37636733086`: PASS.
+- Final PR Browser regression run `37636733333`: PASS.
+- Main Browser regression run `37636924246`: PASS.
+- GitHub Pages deployment run `37636923395`: PASS.
+- Vercel production deployment `dpl_58RHPeSbzBG3urLD54WrMYsCtCTo`: READY for the exact merge commit.
+- Public `version.json` and routing asset report `2026.10.07-FINAL.37`.
+- Public route help states that highway ON now searches nearby ICs and compares bounded HGV highway routes.
+
+FINAL.37 behavior:
+- normal ORS HGV alternatives remain first-pass;
+- if their motorway usage is insufficient, nearby OSM motorway junctions are discovered through a bounded Overpass query;
+- up to two plausible entry/exit pairs are evaluated as origin -> entry IC -> exit IC -> destination driving-hgv routes;
+- exact vehicle restrictions are preserved for every extra route;
+- FINAL.36 detour bounds remain authoritative and extra routes are never forced;
+- IC discovery failure safely falls back to the normal HGV route;
+- no car/straight-line fallback exists.
+
+The next route-quality evidence should come from retesting the previously failing field route. If it still fails, capture that exact origin/destination rather than weakening HGV safety globally.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
