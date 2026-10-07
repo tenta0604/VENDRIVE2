@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 46,
-  "runType": "final36_route_sanity_visibility_validation",
+  "evidenceVersion": 47,
+  "runType": "final36_production_release_closeout",
   "phase": "FINAL36_ROUTE_SANITY_VISIBILITY",
-  "status": "PASS",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "beb9325938954a7fa8afec8a559d4b58ee5b44d6",
     "safetyTag": "backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007",
@@ -15,33 +15,42 @@
     "schema": 4
   },
   "work": {
-    "summary": "Implemented FINAL.36 route sanity improvements: fresher initial GPS, median off-route reroute origin, extreme auto-reroute replacement guard, ORS HGV recommended weighting, more diverse but more tightly bounded highway alternatives, and fluorescent cyan cased ordinary-route rendering.",
-    "productStatus": "VALIDATED_PENDING_PRODUCTION",
-    "productionCodeChanged": true
+    "summary": "FINAL.36 is production-complete: fresher route-origin GPS, median sustained off-route reroute origin, extreme replacement-detour guard, ORS recommended HGV weighting, more diverse/tighter highway alternatives, and fluorescent-cased ordinary route rendering.",
+    "productStatus": "PRODUCTION_VERIFIED",
+    "productionCodeChanged": true,
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
-    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before edits",
+    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before implementation",
     "immutableSafetyTag": "PASS: backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007 -> beb9325938954a7fa8afec8a559d4b58ee5b44d6",
-    "apiAndNode": "PASS: workflow 37629834281",
-    "freshGpsOrigin": "PASS: stale/coarse cached positions force a fresh high-accuracy request",
-    "medianRerouteOrigin": "PASS: three off-route fixes produce median reroute origin rather than last-fix origin",
-    "extremeRerouteGuard": "PASS: excessive auto-reroute replacement retains previous route",
-    "hgvRestrictions": "PASS: driving-hgv and exact dimensions/weight restrictions preserved; no car/straight fallback",
-    "naturalHgvWeighting": "PASS: API request uses ORS recommended weighting",
-    "highwayCandidateBounds": "PASS: alternatives 0.85/1.6 with tighter primary bounds and near-fast ranking",
-    "fluorescentRouteRendering": "PASS: Edge test follows #00e5ff route plus #0b132b casing and red priority route",
-    "realEdge320390": "PASS: workflow 37629834281",
-    "browserRegression": "PASS: workflow 37629618914 on identical app/runtime code; subsequent commit changed test selectors only",
-    "firstEdgeFailure": "RESOLVED: workflow 37629619016 referenced legacy #2563eb in its test selector after the intentional cyan color change; test-only selector update fixed it"
+    "finalPrTruckRoute": "PASS: workflow 37630470134",
+    "finalPrBrowserRegression": "PASS: workflow 37630470259",
+    "freshGpsOrigin": "PASS",
+    "medianRerouteOrigin": "PASS",
+    "extremeRerouteGuard": "PASS",
+    "hgvRestrictionsPreserved": "PASS",
+    "recommendedHgvWeighting": "PASS",
+    "diversifiedBoundedHighwayCandidates": "PASS",
+    "fluorescentCasedRoute": "PASS",
+    "merge": "PASS: PR #170 -> c68a6a283cac5074916bd40a9ae0fb814d1eb9cb",
+    "mainBrowserRegression": "PASS: workflow 37630690705",
+    "githubPages": "PASS: workflow 37630688603",
+    "vercelProduction": "PASS: dpl_9q64prYCtNWhUysBRtRs5hGy2gzr READY, target production, Git SHA c68a6a283cac5074916bd40a9ae0fb814d1eb9cb",
+    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.36",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.36",
+    "firstEdgeFailure": "RESOLVED: workflow 37629619016 used the legacy blue test selector after the intentional cyan change; product code was unchanged and the corrected final route gate passed"
   },
   "openItems": [
-    "Merge/deploy/live verification remains pending."
+    "No unresolved FINAL.36 implementation/release issue.",
+    "A future exact field origin/destination is required if provider/OSM-specific route quality still looks wrong.",
+    "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Run final-head finite checks, merge PR #170, verify production/live FINAL.36, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
+  "nextAction": "Continue normal FINAL.36 field use. Treat any remaining exact detour/highway case as new route evidence; resume AN15 only when explicitly reopened or an authorized real outcome source becomes available.",
   "unresolved": [
-    "FINAL.36 is validated but not yet production-verified."
+    "No unresolved FINAL.36 release issue.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
-  "changedFiles": [
+  "releaseChangedFiles": [
     "index.html",
     "truck-routing.js",
     "api/route.mjs",
@@ -49,6 +58,13 @@
     "tests/truck-route-client.test.mjs",
     "tests/truck-route-api.test.mjs",
     "tests/run-truck-route-gates.mjs",
+    ".ai/STATE.json",
+    ".ai/HANDOFF.md",
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
+  ],
+  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

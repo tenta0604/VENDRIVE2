@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.35** in production; **FINAL.36** is validated on PR #170 and pending release. FINAL.36 adds route-sanity protections, more natural HGV/highway candidate selection, and fluorescent-cased route rendering; Analytics engine **AN14B3B5**, DB/schema remain 4.
+- Visible app baseline: **2026.10.07-FINAL.36** (FINAL.35 UI/orientation behavior plus fresher route GPS, median reroute origin, extreme detour protection, more natural HGV/highway selection, and fluorescent-cased ordinary route rendering; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **FINAL.36 route sanity + route visibility**. PR #170 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.36 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -186,3 +186,11 @@ FINAL.35 closes this maintenance scope. Normal project state returns to the inte
 A bounded routing maintenance scope addresses non-highway detours, inconsistent reroute origins, highway candidate diversity, and weak ordinary-route visibility while preserving HGV safety constraints. Initial route GPS is now fresher/stricter, automatic reroute uses the median of three sustained accurate fixes, and extreme replacement detours are rejected. ORS remains driving-hgv with registered vehicle restrictions and uses recommended weighting. Highway alternatives are more diverse but tighter-bounded, with expressway distance preference limited to near-fast candidates. Ordinary route geometry is fluorescent cyan with a dark casing; priority sections remain red.
 
 Safety tag `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`. PR #170 validation passed Truck route readiness / real Edge run `37629834281`; browser regression on identical product code passed run `37629618914`. Production release evidence is pending.
+
+## FINAL.36 route sanity + visibility production release (2026-10-07)
+
+FINAL.36 is released and production-verified. It reduces non-highway detour risk with fresher route-origin GPS, median sustained-off-route recalculation origin, an extreme replacement-detour guard, and ORS recommended HGV weighting while retaining exact vehicle restrictions. Highway ON alternatives are more diverse but tighter-bounded and expressway distance is only maximized among near-fast candidates. Ordinary route geometry is fluorescent cyan over a dark casing; priority sections remain red.
+
+Safety tag `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`. PR #170 merged at `c68a6a283cac5074916bd40a9ae0fb814d1eb9cb`. Final PR runs `37630470134` and `37630470259`, main Browser regression `37630690705`, and Pages `37630688603` passed. Vercel production `dpl_9q64prYCtNWhUysBRtRs5hGy2gzr` is READY for the exact merge SHA. Public version and routing asset report `2026.10.07-FINAL.36`.
+
+FINAL.36 closes this maintenance scope. Any still-bad route should be investigated from an exact field origin/destination pair rather than globally weakening HGV routing. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.

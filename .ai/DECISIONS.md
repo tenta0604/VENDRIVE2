@@ -440,3 +440,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Highway ON candidate admissibility is tightened to +20% travel time capped at +8 minutes and +30% distance capped at +10km versus ORS primary. Expressway distance is maximized only inside a near-fast subset (within +10% / +2min and +15% / +3km of the fastest eligible highway candidate).
 - Ordinary route geometry is fluorescent cyan `#00e5ff` over a dark `#0b132b` casing; motorway/toll remains red over the same casing.
 - Safety tag: `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`.
+
+## 2026-10-07 — FINAL.36 production release complete
+- PR #170 merged to `main` at `c68a6a283cac5074916bd40a9ae0fb814d1eb9cb`.
+- Final PR Truck route / API / Edge run `37630470134` and Browser regression run `37630470259` passed.
+- Main Browser regression run `37630690705` and GitHub Pages run `37630688603` passed.
+- Vercel production deployment `dpl_9q64prYCtNWhUysBRtRs5hGy2gzr` is READY for the exact merge SHA.
+- Live public version and routing asset report `2026.10.07-FINAL.36`.
+- FINAL.36 is closed. Remaining route-quality anomalies require exact field-route evidence; do not weaken HGV safety globally.
+- Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.

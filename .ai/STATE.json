@@ -3,47 +3,54 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL36_ROUTE_SANITY_VISIBILITY",
-  "nextPhase": "FINAL36_ROUTE_SANITY_VISIBILITY",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.07-FINAL.36",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL36_VALIDATED_PENDING_PRODUCTION",
+  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
   "currentWork": {
-    "title": "FINAL.36 route sanity, natural HGV selection, and fluorescent route visibility",
-    "releaseStatus": "Implementation is validated on PR #170 and awaits merge/production verification. FINAL.35 remains the current production release until merge.",
-    "fieldEvidence": [
-      "Operator reports some routes take unnecessary detours that do not appear related to highway preference.",
-      "Operator also reports highway ON can still miss plausible expressway use.",
-      "Ordinary blue route line is difficult to distinguish from the base map."
+    "title": "FINAL.36 production verified; AN15 learned numeric promotion remains paused",
+    "releaseStatus": "FINAL.36 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
+    "releaseScope": [
+      "Initial HGV route origin now requires cached GPS <=5 seconds old and <=50m accuracy, otherwise a fresh maximumAge=0 fix <=50m.",
+      "Automatic reroute uses the median of three sustained accurate off-route fixes.",
+      "Extreme-distance automatic reroute replacements are rejected while the existing route remains visible.",
+      "ORS remains driving-hgv with exact vehicle restrictions, using recommended weighting rather than pure fastest.",
+      "Highway ON uses more diverse alternatives but tighter detour limits and only maximizes expressway distance among near-fast candidates.",
+      "Ordinary route line is fluorescent cyan over a dark casing; motorway/toll remains red over the same casing.",
+      "No car or straight-line fallback was introduced."
     ],
-    "scope": [
-      "Initial routing accepts cached GPS only when <=5 seconds old and <=50m accuracy; otherwise it requests a fresh high-accuracy fix with maximumAge=0 and rejects fixes worse than 50m.",
-      "Automatic reroute uses the median of the three sustained accurate off-route fixes rather than the final single fix.",
-      "Automatic reroute keeps the existing route when the replacement distance is an extreme detour versus remaining route plus reconnect distance.",
-      "ORS remains driving-hgv with all registered dimensions/weight restrictions, but base preference changes from fastest to recommended to reduce time-only distance detours.",
-      "Highway ON alternatives become more diverse (share_factor 0.85, weight_factor 1.6); admissible detour limits are tightened and expressway distance is maximized only among near-fast candidates.",
-      "Ordinary route rendering becomes fluorescent cyan (#00e5ff) over a dark casing; motorway/toll remains red over the same casing.",
-      "No car routing, straight-line fallback, or weakening of HGV restrictions is introduced."
-    ],
-    "verification": {
-      "preEditMain": "PASS: beb9325938954a7fa8afec8a559d4b58ee5b44d6",
-      "safetyTag": "PASS: backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007 dereferences to pre-edit main",
-      "syntaxApiNode": "PASS: Truck route readiness final product/test head run 37629834281",
-      "realEdge": "PASS: run 37629834281 after updating only stale route-color test selectors",
-      "browserRegressionProductHead": "PASS: run 37629618914 on the same app/runtime code; the later commit changed only tests/run-truck-route-gates.mjs selectors"
+    "productionEvidence": {
+      "safetyTag": "backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007 -> beb9325938954a7fa8afec8a559d4b58ee5b44d6",
+      "pr": "PR #170 merged",
+      "mergeCommit": "c68a6a283cac5074916bd40a9ae0fb814d1eb9cb",
+      "finalPrTruckRoute": "37630470134 PASS",
+      "finalPrBrowserRegression": "37630470259 PASS",
+      "mainBrowserRegression": "37630690705 PASS",
+      "githubPages": "37630688603 PASS",
+      "vercel": "dpl_9q64prYCtNWhUysBRtRs5hGy2gzr READY for exact merge commit",
+      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.36"
     },
+    "decision": [
+      "Keep AN15 learned numeric promotion paused for now.",
+      "Do not add a new manual sales-outcome capture flow at this time.",
+      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
+      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
+      "Keep the deterministic production forecast baseline unchanged."
+    ],
     "nextActions": [
-      "Run the required final-head checks after canonical bookkeeping.",
-      "Merge PR #170 only if the required finite gates remain PASS.",
-      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.36 assets.",
-      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
+      "Continue normal VENDRIVE field use on FINAL.36 and specifically watch previously problematic detour/highway cases.",
+      "If a specific route still detours, capture that exact origin/destination as new field evidence rather than broadening HGV fallbacks.",
+      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/deployment/live verification is still pending for FINAL.36."
+    "No unresolved FINAL.36 release issue. Exact field-route quality must still be judged from future real-device routes because no specific problematic origin/destination pair was supplied for provider-data reproduction.",
+    "AN15 learned numeric promotion remains intentionally paused.",
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -58,6 +65,6 @@
     ],
     "shortResumePrompt": "VENDRIVE続き",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.35 is production-verified and complete. PR #168 and its validation branch are historical only; latest synchronized main is authoritative. Resume from the intentionally paused AN15 evidence gate unless the user reports new field evidence."
+    "handoffBoundary": "FINAL.36 is production-verified and complete. PR #170 and its validation branch are historical only; latest synchronized main is authoritative. Resume from the intentionally paused AN15 evidence gate unless the user reports new field-route evidence."
   }
 }

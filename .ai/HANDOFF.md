@@ -7,15 +7,15 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.35`.
+- Current visible production app version: `2026.10.07-FINAL.36`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.35 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.35 implementation task.
+FINAL.36 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.36 implementation task.
 
-Historical PR #168 is closed and merged. Its validation branch `chatgpt/final35-rotated-machine-card-20261007` is history only and must not be used as a resume source. PR #166 remains earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
+Historical PR #170 is closed and merged. Its validation branch `chatgpt/final36-route-sanity-visibility-20261007` is history only and must not be used as a resume source. PR #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
 After recovery, the normal next project phase is:
 
@@ -310,3 +310,29 @@ Validation evidence before canonical bookkeeping:
 - Earlier route run `37629619016` failed only because the browser gate still searched for legacy `#2563eb` after the intentional fluorescent-cyan change; only the test selector was changed.
 
 Do not call FINAL.36 production-complete until PR #170 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.36 evidence are terminal PASS.
+
+## 2026-10-07 FINAL.36 production release complete
+
+FINAL.36 is released and production-verified.
+
+- PR #170 merged to `main` at `c68a6a283cac5074916bd40a9ae0fb814d1eb9cb`.
+- Immutable safety tag: `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`.
+- Final PR Truck route readiness / API / real Edge run `37630470134`: PASS.
+- Final PR Browser regression run `37630470259`: PASS.
+- Main Browser regression run `37630690705`: PASS.
+- GitHub Pages deployment run `37630688603`: PASS.
+- Vercel production deployment `dpl_9q64prYCtNWhUysBRtRs5hGy2gzr`: READY for the exact merge commit.
+- Public `version.json` and routing asset report `2026.10.07-FINAL.36`.
+
+FINAL.36 behavior:
+- cached route-origin GPS is accepted only at <=5 seconds and <=50m accuracy; otherwise a new high-accuracy fix is required;
+- automatic reroute origin is the median of three sustained accurate off-route fixes;
+- extreme-distance reroute replacements are rejected while the old route remains visible;
+- ORS remains driving-hgv with exact vehicle restrictions and uses recommended weighting;
+- highway ON requests more distinct alternatives with tighter detour bounds and near-fast expressway preference;
+- ordinary route geometry is fluorescent cyan over a dark casing, while motorway/toll stays red over the same casing;
+- no car/straight-line fallback exists.
+
+If future field use still shows an implausible route, collect that exact origin/destination and treat it as a new bounded routing evidence case rather than weakening HGV safety globally.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
