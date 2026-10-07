@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.33** (FINAL.32 HGV/highway/live-route behavior plus automatic 100m arrival closeout, one-card nearby visit handling, bidirectional visit swipe, and fullscreen MAP software rotation; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.07-FINAL.34** (FINAL.33 arrival/visit/fullscreen behavior plus corrected software-rotated MAP drag axes and rotated arrival-card orientation/swipe handling; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **FINAL.34 rotated fullscreen MAP gesture + arrival-card orientation fix**. PR #166 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.34 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -158,3 +158,11 @@ FINAL.33 closes this maintenance scope. Normal project state returns to the inte
 Real-device evidence showed that FINAL.33's software-rotated MAP transformed pixels but not the Leaflet drag coordinate system, and its arrival visit sheet did not rotate with the MAP. FINAL.34 remaps fullscreen software-rotated pointer deltas by 90 degrees before Leaflet pan, while leaving normal MAP dragging untouched. The arrival visit sheet rotates only in this fullscreen software-rotated mode and its visible left/right swipes are interpreted on the rotated axis.
 
 Safety tag `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`. PR #166 final product validation passed Truck route readiness / real Edge 320/390 run `37612564670` and Browser regression run `37612564593`. Production release evidence is pending.
+
+## FINAL.34 rotated fullscreen MAP gesture + arrival-card orientation production release (2026-10-07)
+
+FINAL.34 is released and production-verified. Software-rotated fullscreen MAP now remaps drag input into the rotated Leaflet axes, while normal MAP dragging remains native. Arrival visit UI rotates only in that software-rotated fullscreen mode, and its visible left/right gestures are interpreted on the rotated pointer axis so complete/skip semantics stay unchanged.
+
+Safety tag `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`. PR #166 merged at `4914b905a02b74969ce5d7a199fa68424fe5d6cb`. Final PR runs `37612820361` and `37612820358`, main Browser regression `37612956449`, and Pages `37612955809` passed. Vercel production `dpl_ETa4iD6suyBsosBnaXJRXb2BkxLp` is READY for the exact merge SHA. Public version and routing asset report `2026.10.07-FINAL.34`.
+
+FINAL.34 closes this maintenance scope. Normal project state returns to the intentionally paused AN15 real-evidence/promotion gate.

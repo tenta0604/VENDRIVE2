@@ -7,15 +7,15 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.33`.
+- Current visible production app version: `2026.10.07-FINAL.34`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.33 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.33 implementation task.
+FINAL.34 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.34 implementation task.
 
-Historical PR #164 is closed and merged. Its validation branch `chatgpt/final33-arrival-cards-map-rotation-20261007` is history only and must not be used as a resume source. FINAL.32 and PR #162 remain earlier completed history; latest synchronized `main` is authoritative.
+Historical PR #166 is closed and merged. Its validation branch `chatgpt/final34-rotated-map-gesture-arrival-card-20261007` is history only and must not be used as a resume source. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
 After recovery, the normal next project phase is:
 
@@ -220,3 +220,25 @@ PR #166 final product validation before canonical bookkeeping:
 - Earlier failures `37612339313` and `37612497681` were test-harness-only defects (closure-local map reference and regex escaping). Product behavior was not rolled back.
 
 Do not call FINAL.34 production-complete until PR #166 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.34 evidence are terminal PASS.
+
+## 2026-10-07 FINAL.34 production release complete
+
+FINAL.34 is released and production-verified.
+
+- PR #166 merged to `main` at `4914b905a02b74969ce5d7a199fa68424fe5d6cb`.
+- Immutable safety tag: `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`.
+- Final PR Truck route readiness / real Edge run `37612820361`: PASS.
+- Final PR Browser regression run `37612820358`: PASS.
+- Main Browser regression run `37612956449`: PASS.
+- GitHub Pages deployment run `37612955809`: PASS.
+- Vercel production deployment `dpl_ETa4iD6suyBsosBnaXJRXb2BkxLp`: READY for the exact merge commit.
+- Public `version.json` and public routing asset report `2026.10.07-FINAL.34`.
+
+FINAL.34 behavior:
+- software-rotated fullscreen MAP drag follows the visible rotated axes rather than the underlying portrait axes;
+- normal/unrotated MAP dragging remains native;
+- arrival visit sheet rotates only in software-rotated fullscreen MAP;
+- rotated arrival-card visible left/right swipes still mean complete/skip and use the correct rotated pointer axis;
+- task/order confirmations and fullscreen PIN interaction remain preserved.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.

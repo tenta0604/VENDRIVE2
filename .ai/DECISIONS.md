@@ -405,3 +405,11 @@ This file records confirmed project decisions that must survive chat migration. 
 - In rotated arrival mode, visible left/right swipe semantics remain unchanged: left = complete, right = skip. The pointer axis is remapped rather than changing product semantics.
 - Task and order confirmation logic remains the existing authority after an arrival-card complete gesture.
 - Safety tag: `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`.
+
+## 2026-10-07 — FINAL.34 production release complete
+- PR #166 merged to `main` at `4914b905a02b74969ce5d7a199fa68424fe5d6cb`.
+- Final PR Truck route / Edge run `37612820361` and Browser regression run `37612820358` passed.
+- Main Browser regression run `37612956449` and GitHub Pages run `37612955809` passed.
+- Vercel production deployment `dpl_ETa4iD6suyBsosBnaXJRXb2BkxLp` is READY for the exact merge SHA.
+- Live public version and routing asset report `2026.10.07-FINAL.34`.
+- FINAL.34 is closed. Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a new bounded maintenance scope.
