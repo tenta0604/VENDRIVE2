@@ -117,7 +117,7 @@ async function handle(request) {
     for(let i=1;i<features.length;i++){try{candidates.push(sanitizeFeature(features[i]));}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=Math.min(5000,primary.summary.distance*0.25),highwaySearch={attempted:false,junctions:0,evaluated:0,accepted:0,status:'not-needed'},activeHighwayRoutes=new Set();
+    const motorwayTarget=Math.min(18000,primary.summary.distance*0.55),highwaySearch={attempted:false,junctions:0,evaluated:0,accepted:0,status:'not-needed'},activeHighwayRoutes=new Set();
     if(!vehicle.avoidTolls&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
       const junctions=await findMotorwayJunctions(body.origin,body.destination,junctionRadius);highwaySearch.junctions=junctions.length;
@@ -128,8 +128,8 @@ async function handle(request) {
           if(!viaResponse.ok)return null;
           const viaData=await viaResponse.json(),feature=Array.isArray(viaData?.features)?viaData.features[0]:null;
           if(!feature)return null;
-          const viaRoute=sanitizeFeature(feature),viaUsage=routing.routeUsage(viaRoute);
-          if(viaUsage.motorwayMeters<500)return null;
+          const viaRoute=sanitizeFeature(feature),viaUsage=routing.routeUsage(viaRoute),meaningfulMotorway=Math.max(1500,primary.summary.distance*0.15);
+          if(viaUsage.motorwayMeters<meaningfulMotorway)return null;
           return {route:viaRoute,usage:viaUsage,via:{entry:{id:pair.entry.id,ref:pair.entry.ref,name:pair.entry.name},exit:{id:pair.exit.id,ref:pair.exit.ref,name:pair.exit.name}}};
         }catch{return null;}
       }));
@@ -141,8 +141,12 @@ async function handle(request) {
     if(!vehicle.avoidTolls){
       const eligible=candidates.map(candidate).filter(item=>item.usage.priorityMeters>100&&item.route.summary.duration<=maxDuration&&item.route.summary.distance<=maxDistance).sort((a,b)=>a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
       if(eligible.length){
-        const fastest=eligible[0],nearFast=eligible.filter(item=>item.route.summary.duration<=fastest.route.summary.duration+Math.min(120,fastest.route.summary.duration*0.10)&&item.route.summary.distance<=fastest.route.summary.distance+Math.min(3000,fastest.route.summary.distance*0.15)).sort((a,b)=>b.usage.priorityMeters-a.usage.priorityMeters||b.usage.motorwayMeters-a.usage.motorwayMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
-        route=nearFast[0].route;usage=nearFast[0].usage;selection=activeHighwayRoutes.has(route)?'active-ic-expressway-preferred':'expressway-natural-preferred';
+        const activeEligible=eligible.filter(item=>activeHighwayRoutes.has(item.route)).sort((a,b)=>b.usage.motorwayMeters-a.usage.motorwayMeters||b.usage.priorityMeters-a.usage.priorityMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
+        if(activeEligible.length){route=activeEligible[0].route;usage=activeEligible[0].usage;selection='active-ic-expressway-preferred';}
+        else{
+          const fastest=eligible[0],nearFast=eligible.filter(item=>item.route.summary.duration<=fastest.route.summary.duration+Math.min(120,fastest.route.summary.duration*0.10)&&item.route.summary.distance<=fastest.route.summary.distance+Math.min(3000,fastest.route.summary.distance*0.15)).sort((a,b)=>b.usage.priorityMeters-a.usage.priorityMeters||b.usage.motorwayMeters-a.usage.motorwayMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
+          route=nearFast[0].route;usage=nearFast[0].usage;selection='expressway-natural-preferred';
+        }
       } else selection=highwaySearch.attempted?'active-highway-unavailable':'highway-unavailable';
     }else selection='highway-avoided';
     return json(200,{ok:true,profile:'driving-hgv',route,selection,usage,highwaySearch,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
