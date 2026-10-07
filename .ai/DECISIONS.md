@@ -413,3 +413,10 @@ This file records confirmed project decisions that must survive chat migration. 
 - Vercel production deployment `dpl_ETa4iD6suyBsosBnaXJRXb2BkxLp` is READY for the exact merge SHA.
 - Live public version and routing asset report `2026.10.07-FINAL.34`.
 - FINAL.34 is closed. Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a new bounded maintenance scope.
+
+## 2026-10-07 — FINAL.35 rotated machine-detail decision
+- A machine detail opened from a MAP PIN follows the MAP software orientation only while `mapFullscreen + mapSoftRotated` is active.
+- Outside that exact mode, machine detail remains portrait.
+- Use the same centered 90-degree sheet presentation established for the rotated arrival sheet; do not rotate every modal globally.
+- Existing machine-detail actions, route controls, task/order flows, PIN interaction and FINAL.34 rotated drag/swipe behavior must remain unchanged.
+- Safety tag: `backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007` -> `f5294949edca2783f45e7abbe3232b8249d70ced`.

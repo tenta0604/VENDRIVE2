@@ -62,8 +62,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.34 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.07-FINAL.34');
+test('routing asset version matches FINAL.35 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.07-FINAL.35');
 });
 
 test('dedicated tollways extra highlights a route when waycategory reports no highway or toll bits',()=>{

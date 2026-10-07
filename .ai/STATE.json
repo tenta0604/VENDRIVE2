@@ -3,51 +3,41 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.34",
+  "activePhase": "FINAL35_ROTATED_MACHINE_CARD",
+  "nextPhase": "FINAL35_ROTATED_MACHINE_CARD",
+  "appVersion": "2026.10.07-FINAL.35",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL35_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.34 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.34 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
-    "releaseScope": [
-      "Software-rotated fullscreen MAP remaps pointer drag deltas by 90 degrees before Leaflet pan so visible gesture and visible map movement align.",
-      "Normal/unrotated MAP retains native Leaflet dragging.",
-      "Arrival visit sheet rotates only while fullscreen MAP software rotation is active.",
-      "Rotated arrival cards interpret visible left/right swipes on the rotated pointer axis, preserving left=complete and right=skip.",
-      "Existing task/order confirmation, fullscreen PIN interaction, Today swipe semantics, routing and data behavior remain preserved."
+    "title": "FINAL.35 rotated fullscreen MAP machine-detail card",
+    "releaseStatus": "Implementation is validated on PR #168 and awaits production merge/live verification. FINAL.34 remains the current production release until merge.",
+    "fieldEvidence": [
+      "In software-rotated fullscreen MAP, arrival cards were landscape but a machine detail opened from a vending-machine PIN still remained portrait-oriented."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007 -> aa23bca23109dfb549dd7d84fe14c912e26b6c51",
-      "pr": "PR #166 merged",
-      "mergeCommit": "4914b905a02b74969ce5d7a199fa68424fe5d6cb",
-      "finalPrTruckRoute": "37612820361 PASS",
-      "finalPrBrowserRegression": "37612820358 PASS",
-      "mainBrowserRegression": "37612956449 PASS",
-      "githubPages": "37612955809 PASS",
-      "vercel": "dpl_ETa4iD6suyBsosBnaXJRXb2BkxLp READY for merge commit",
-      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.34; public UI still exposes 🔄 and bidirectional Today swipe labels"
+    "scope": [
+      "Rotate the PIN-opened machine detail sheet only while fullscreen MAP software rotation is active.",
+      "Keep machine detail portrait in normal MAP and unrotated fullscreen MAP.",
+      "Preserve close, visit, skip, route, external navigation, details, task/order behavior, and FINAL.34 gesture behavior."
+    ],
+    "verification": {
+      "preEditMain": "PASS: f5294949edca2783f45e7abbe3232b8249d70ced",
+      "safetyTag": "PASS: backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007 dereferences to pre-edit main",
+      "syntaxAndNode": "PASS: Truck route readiness run 37614566359",
+      "realEdge": "PASS: Edge 320/390 validates rotated PIN-opened machine detail, unrotated portrait preservation, and existing routing/fullscreen regressions in run 37614566359",
+      "browserRegression": "PASS: run 37614566431"
     },
-    "decision": [
-      "Keep AN15 learned numeric promotion paused for now.",
-      "Do not add a new manual sales-outcome capture flow at this time.",
-      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
-      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
-      "Keep the deterministic production forecast baseline unchanged."
-    ],
     "nextActions": [
-      "Continue normal VENDRIVE use on FINAL.34.",
-      "If new real-device evidence reveals a defect or operator friction, open a new bounded maintenance scope with a new immutable pre-edit safety tag.",
-      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
+      "Revalidate the final PR head after canonical bookkeeping.",
+      "Merge PR #168 only if required checks remain PASS.",
+      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.35.",
+      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "AN15 learned numeric promotion is intentionally paused because normal shipped use does not provide the exact authorized real outcome evidence required for promotion.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "Production merge/deployment/live verification is still pending for FINAL.35."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

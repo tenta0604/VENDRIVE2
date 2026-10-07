@@ -1,64 +1,47 @@
 {
-  "evidenceVersion": 43,
-  "runType": "final34_production_release_closeout",
-  "phase": "FINAL34_ROTATED_MAP_GESTURE_ARRIVAL_CARD",
-  "status": "COMPLETE",
+  "evidenceVersion": 44,
+  "runType": "final35_rotated_machine_card_validation",
+  "phase": "FINAL35_ROTATED_MACHINE_CARD",
+  "status": "PASS",
   "base": {
-    "productionMainBefore": "aa23bca23109dfb549dd7d84fe14c912e26b6c51",
-    "safetyTag": "backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007",
-    "safetyTagTarget": "aa23bca23109dfb549dd7d84fe14c912e26b6c51"
+    "productionMainBefore": "f5294949edca2783f45e7abbe3232b8249d70ced",
+    "safetyTag": "backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007",
+    "safetyTagTarget": "f5294949edca2783f45e7abbe3232b8249d70ced"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.34",
+    "app": "2026.10.07-FINAL.35",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.34 is production-complete: software-rotated fullscreen MAP drag axes now match visible gestures; arrival visit UI rotates with that MAP mode and uses the rotated swipe axis while preserving complete/skip semantics and existing task/order confirmations.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "productionCodeChanged": true,
-    "closeoutCommitChangesDocumentationOnly": true
+    "summary": "Rotated the PIN-opened machine detail sheet only while fullscreen MAP software rotation is active, while preserving portrait machine detail outside that mode and preserving all existing controls and FINAL.34 interactions.",
+    "productStatus": "VALIDATED_PENDING_PRODUCTION",
+    "productionCodeChanged": true
   },
   "gates": {
-    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before implementation",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007 -> aa23bca23109dfb549dd7d84fe14c912e26b6c51",
-    "finalPrTruckRoute": "PASS: workflow 37612820361",
-    "finalPrBrowserRegression": "PASS: workflow 37612820358",
-    "rotatedMapGestureAxis": "PASS: final Edge 320/390 validation",
-    "rotatedArrivalOrientation": "PASS: final Edge 320/390 validation",
-    "rotatedArrivalSwipeAxis": "PASS: final Edge 320/390 validation",
-    "fullscreenPin": "PASS: final Edge 320/390 validation",
-    "merge": "PASS: PR #166 -> 4914b905a02b74969ce5d7a199fa68424fe5d6cb",
-    "mainBrowserRegression": "PASS: workflow 37612956449",
-    "githubPages": "PASS: workflow 37612955809",
-    "vercelProduction": "PASS: dpl_ETa4iD6suyBsosBnaXJRXb2BkxLp READY, target production, Git SHA 4914b905a02b74969ce5d7a199fa68424fe5d6cb",
-    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.34",
-    "liveUi": "PASS: public page exposes 🔄 and left-complete/right-skip Today hint",
-    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.34",
-    "harnessCorrections": "RESOLVED: earlier failures were test-only closure reference and regex escaping issues; product fix remained unchanged."
+    "canonicalRecovery": "PASS: latest synchronized main and canonical recovery set verified before edits",
+    "immutableSafetyTag": "PASS: backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007 -> f5294949edca2783f45e7abbe3232b8249d70ced",
+    "syntaxAndNode": "PASS: workflow 37614566359",
+    "realEdge320390": "PASS: workflow 37614566359",
+    "rotatedMachineCardOrientation": "PASS: PIN-opened machine detail sheet rotates in software-rotated fullscreen MAP and presents landscape",
+    "unrotatedMachineCardPreserved": "PASS: same machine detail returns to portrait when MAP software rotation is off",
+    "existingFullscreenInteraction": "PASS: fullscreen PIN -> machine modal and close interaction remain operational",
+    "browserRegression": "PASS: workflow 37614566431"
   },
   "openItems": [
-    "AN15 learned numeric promotion remains intentionally paused until explicitly reopened or an authorized real outcome source becomes available."
+    "Merge/deploy/live verification remains pending."
   ],
-  "nextAction": "Continue normal FINAL.34 field use. Resume the intentionally paused AN15 evidence gate only when explicitly reopened or a usable authorized real outcome source becomes available.",
+  "nextAction": "Revalidate final PR head, merge PR #168, verify production/live FINAL.35, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
   "unresolved": [
-    "No unresolved FINAL.34 release issue.",
-    "AN15 evidence/promotion remains an intentional paused state."
+    "FINAL.35 is validated but not yet production-verified."
   ],
-  "releaseChangedFiles": [
+  "changedFiles": [
     "index.html",
     "truck-routing.js",
     "version.json",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
-    ".ai/STATE.json",
-    ".ai/HANDOFF.md",
-    ".ai/LAST_RUN.json",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
-  ],
-  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
