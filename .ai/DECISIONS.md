@@ -510,3 +510,17 @@ This file records confirmed project decisions that must survive chat migration. 
 - Live public version and routing asset report `2026.10.08-FINAL.39`.
 - FINAL.39 is closed. Next evidence is the same real-device long-route/highway, timeout, and iPhone fullscreen cases.
 - Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.
+
+
+## 2026-10-08 — FINAL.40 fullscreen routing and highway-corridor decisions
+
+- Treat the new iPhone evidence as fullscreen-specific when the same long route succeeds in normal MAP but times out when started from fullscreen MAP. Do not explain it away as generic long-distance latency.
+- Starting a route while MAP is already active must not re-click the MAP tab or trigger an unnecessary full `renderMap()`.
+- While route acquisition is busy, fullscreen viewport-settle work may invalidate Leaflet size but must not redraw/refit the active route until the request has completed.
+- The 20-second client timeout is a route network/body-acquisition budget. Once the response body has been received, local parsing/drawing/fitting must not be able to trip that network timeout.
+- Highway ON may use JCT transitions chosen naturally by ORS between the selected entry and exit ICs. VENDRIVE should improve which bounded IC corridors are probed rather than attempting to hard-code JCT sequences.
+- Keep the maximum of two active via-IC ORS candidates. When possible, use one balanced access pair plus one geographically distinct corridor so both probes are not spent on the same nearby motorway cluster.
+- For long routes, the motorway-sufficiency discovery target may scale to 80km. This changes only whether active highway discovery continues; it does not loosen final route acceptance.
+- FINAL.36 final caps remain authoritative: duration primary + min(20%, 8 minutes), distance primary + min(30%, 10km).
+- Keep `driving-hgv`, exact registered vehicle height/width/length/weight/optional axleload, ferry avoidance, the warm 30 route-call/minute guard, and no car/straight-line fallback.
+- Safety tag: `backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007` -> `9541bd9d1d8242ec880f87315ae4fcf05052b006`.

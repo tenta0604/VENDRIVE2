@@ -639,3 +639,26 @@ If the user says `進めて`, `続けて`, `やって`, or equivalent after repo
 
 ### Short resume sentence
 A fresh chat can start with: **「VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.39本番完了後の実機確認から再開して。」**
+
+
+## 2026-10-08 FINAL.40 iPhone fullscreen + JCT corridor validation
+
+New real-device evidence after FINAL.39 opened a bounded maintenance scope:
+- long-distance route acquisition succeeds in normal MAP but can time out when started from fullscreen MAP on iPhone;
+- highway ON can still use materially less motorway than expected on longer trips where a farther/JCT-connected corridor is plausible.
+
+FINAL.40 validated changes on PR #180:
+- starting a route while MAP is already active/fullscreen no longer re-clicks the MAP tab and trigger a redundant full `renderMap()`;
+- fullscreen viewport settle keeps Leaflet size invalidation but skips active-route redraw/refit while a route request is busy;
+- the 20s client route timer is cleared as soon as the response body is received, before local route parsing/drawing/fitting;
+- the existing maximum-two via-IC budget now evaluates one balanced pair and, when available, one geographically distinct bounded corridor so ORS `driving-hgv` can traverse farther motorway/JCT networks;
+- long-route motorway discovery target may scale to 80km, while the FINAL.36 final time/distance detour caps remain unchanged;
+- exact vehicle restrictions, max-two extra routes, warm 30 route-call/min guard, and no car/straight-line fallback remain unchanged.
+
+Safety tag: `backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007` -> `9541bd9d1d8242ec880f87315ae4fcf05052b006`.
+
+Validation:
+- PR #180 Truck route readiness / API / real Edge: `37699925874`, PASS.
+- PR #180 Browser regression: `37699925873`, PASS.
+
+Do not call FINAL.40 production-complete until PR #180 is merged and main regression, GitHub Pages, Vercel production, and live FINAL.40 evidence are terminal PASS. After release, the next evidence is the exact iPhone fullscreen timeout case and the same long-distance highway/JCT case. AN15 remains intentionally paused.

@@ -170,6 +170,39 @@ test('long-distance highway ON still searches farther IC access and does not sto
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
+test('highway ON uses one of the two bounded via-IC probes for a geographically distinct motorway corridor',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const farInput={origin:{lat:35.00,lng:136.00},destination:{lat:35.00,lng:137.00},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.50,35.00],[137.00,35.00]]},properties:{summary:{distance:120000,duration:7200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const modestHighway={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.30,35.00],[136.50,35.00],[137.00,35.00]]},properties:{summary:{distance:121000,duration:7100},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
+  const shortVia={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.02,35.00],[136.35,35.00],[136.98,35.00],[137.00,35.00]]},properties:{summary:{distance:124000,duration:7450},extras:{waycategory:{values:[[0,1,0],[1,2,1],[2,4,0]]},tollways:{values:[[0,4,0]]}}}};
+  const longVia={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.00,35.08],[136.20,35.07],[136.80,34.93],[137.00,34.92],[137.00,35.00]]},properties:{summary:{distance:128000,duration:7550},extras:{waycategory:{values:[[0,1,0],[1,4,1],[4,5,0]]},tollways:{values:[[0,1,0],[1,4,1],[4,5,0]]}}}};
+  const junctions={elements:[
+    {type:'node',id:701,lat:35.00,lon:136.02,tags:{highway:'motorway_junction',ref:'NEAR-A'}},
+    {type:'node',id:702,lat:35.002,lon:136.022,tags:{highway:'motorway_junction',ref:'NEAR-A2'}},
+    {type:'node',id:703,lat:35.00,lon:136.98,tags:{highway:'motorway_junction',ref:'NEAR-B'}},
+    {type:'node',id:704,lat:35.002,lon:136.978,tags:{highway:'motorway_junction',ref:'NEAR-B2'}},
+    {type:'node',id:705,lat:35.08,lon:136.00,tags:{highway:'motorway_junction',ref:'ALT-A'}},
+    {type:'node',id:706,lat:34.92,lon:137.00,tags:{highway:'motorway_junction',ref:'ALT-B'}}
+  ]};
+  const routeBodies=[];
+  globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('overpass-api.de'))return Response.json(junctions);
+    const body=JSON.parse(options.body);routeBodies.push(body);
+    if(body.coordinates.length===2)return Response.json({features:[surface,modestHighway]});
+    const entryLat=body.coordinates[1][1],exitLat=body.coordinates[2][1];
+    return Response.json({features:[entryLat>35.05&&exitLat<34.95?longVia:shortVia]});
+  };
+  try{
+    const response=await POST(request(farInput));assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.highwaySearch.pairStrategy,'balanced+diverse-corridor');assert.ok(data.highwaySearch.motorwayTargetMeters>45000);assert.equal(data.highwaySearch.evaluated,2);assert.ok(data.highwaySearch.finalEligible>=1);
+    const viaBodies=routeBodies.filter(body=>body.coordinates.length===4);assert.equal(viaBodies.length,2);
+    assert.ok(viaBodies.some(body=>body.coordinates[1][1]>35.05&&body.coordinates[2][1]<34.95),'one probe must explore a geographically distinct IC corridor instead of spending both probes on the nearest cluster');
+    assert.equal(data.selection,'active-ic-expressway-preferred');assert.deepEqual(data.route.summary,{distance:128000,duration:7550});assert.ok(data.usage.motorwayMeters>60000);
+    viaBodies.forEach(body=>assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8}));
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
 test('warm-instance quota guard caps upstream calls',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
   globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
