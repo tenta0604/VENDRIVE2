@@ -501,3 +501,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Preserve exact registered HGV restrictions, maximum two active via-route candidates, 30 route-call/min warm guard, and no car/straight-line fallback.
 - Browser/Edge regression must assert active route overlap with the visible MAP rectangle before fullscreen, after fullscreen, and after software rotation.
 - Safety tag: `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`.
+
+## 2026-10-08 — FINAL.39 production release complete
+- PR #177 merged to `main` at `6b843d988fddba509cedcd590c6fe71ba1afd6db`.
+- Final PR Truck route/API/Edge run `37643816604` and Browser regression run `37643816472` passed.
+- Main Browser regression run `37644030491` and GitHub Pages run `37644029832` passed.
+- Vercel production deployment `dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4` is READY for the exact merge SHA.
+- Live public version and routing asset report `2026.10.08-FINAL.39`.
+- FINAL.39 is closed. Next evidence is the same real-device long-route/highway, timeout, and iPhone fullscreen cases.
+- Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.

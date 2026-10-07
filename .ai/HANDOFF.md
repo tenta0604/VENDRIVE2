@@ -7,13 +7,13 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.38`.
+- Current visible production app version: `2026.10.08-FINAL.39`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.38 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.38 implementation task.
+FINAL.39 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.39 implementation task.
 
 Historical PR #174 is closed and merged. Its validation branch for FINAL.38 is history only and must not be used as a resume source. PR #172 / #170 / #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
@@ -453,3 +453,28 @@ PR #177 validation before canonical bookkeeping:
 - API test proves a long route still performs active IC search when normal motorway usage already exceeds the old 18km cap and the useful IC pair exceeds the old combined 18km access prefilter.
 
 Do not call FINAL.39 production-complete until PR #177 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.39 evidence are terminal PASS.
+
+## 2026-10-08 FINAL.39 production release complete
+
+FINAL.39 is released and production-verified.
+
+- PR #177 merged to `main` at `6b843d988fddba509cedcd590c6fe71ba1afd6db`.
+- Immutable safety tag: `backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007` -> `170289c08866bf6120df46d5c9545ed22e3a9b35`.
+- Final PR Truck route/API/real Edge run `37643816604`: PASS.
+- Final PR Browser regression run `37643816472`: PASS.
+- Main Browser regression run `37644030491`: PASS.
+- GitHub Pages run `37644029832`: PASS.
+- Vercel production `dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4`: READY for the exact merge commit.
+- Public `version.json` and routing asset report `2026.10.08-FINAL.39`.
+
+FINAL.39 behavior:
+- fullscreen/software rotation refits the remaining active route into the visible MAP after viewport settle;
+- client route timeout is 20s and bounded junction discovery starts in parallel with baseline ORS;
+- Overpass is capped at 2.8s and via-IC ORS at 5.5s;
+- long-distance motorway target can scale to 45km, junction radius to 25km, per-end IC access to 25km, combined prefilter to 35km;
+- FINAL.36 final detour caps remain unchanged;
+- exact HGV restrictions and no-car/no-straight-line fallback remain preserved.
+
+Next evidence: retest the same long-route/highway, timeout, and iPhone fullscreen cases.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.

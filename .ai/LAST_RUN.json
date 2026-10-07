@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 52,
-  "runType": "final39_route_robustness_validation",
+  "evidenceVersion": 53,
+  "runType": "final39_production_release_closeout",
   "phase": "FINAL39_ROUTE_ROBUSTNESS",
-  "status": "PASS",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "170289c08866bf6120df46d5c9545ed22e3a9b35",
     "safetyTag": "backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007",
@@ -15,14 +15,16 @@
     "schema": 4
   },
   "work": {
-    "summary": "Implemented FINAL.39 to keep active route visually in-frame after fullscreen/rotation, align client/server timeout budgets, and remove long-distance 18km highway-discovery bottlenecks while preserving final HGV detour safety caps.",
-    "productStatus": "VALIDATED_PENDING_PRODUCTION",
-    "productionCodeChanged": true
+    "summary": "FINAL.39 is production-complete: active route is refit into the visible fullscreen MAP, route timeout budgets are aligned, and long-distance highway discovery no longer stops at the old 18km caps.",
+    "productStatus": "PRODUCTION_VERIFIED",
+    "productionCodeChanged": true,
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
     "immutableSafetyTag": "PASS: backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007 -> 170289c08866bf6120df46d5c9545ed22e3a9b35",
-    "apiAndNode": "PASS: workflow 37643412185",
+    "finalPrTruckRoute": "PASS: workflow 37643816604",
+    "finalPrBrowserRegression": "PASS: workflow 37643816472",
     "longDistanceHighwaySearch": "PASS",
     "expandedIcRadiusAndAccess": "PASS",
     "final36GlobalDetourCapsPreserved": "PASS",
@@ -32,18 +34,25 @@
     "fullscreenRouteVisibleViewport": "PASS",
     "exactHgvRestrictions": "PASS",
     "noCarFallback": "PASS",
-    "realEdge320390": "PASS: workflow 37643412185",
-    "browserRegression": "PASS: workflow 37643412287",
-    "priorFailure": "RESOLVED: first FINAL.39 run failed only because the client version test expected the old release date; functional tests passed."
+    "merge": "PASS: PR #177 -> 6b843d988fddba509cedcd590c6fe71ba1afd6db",
+    "mainBrowserRegression": "PASS: workflow 37644030491",
+    "githubPages": "PASS: workflow 37644029832",
+    "vercelProduction": "PASS: dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4 READY, target production, Git SHA 6b843d988fddba509cedcd590c6fe71ba1afd6db",
+    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.39",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.39",
+    "liveUi": "PASS: public truck settings state long-distance highway search is not cut off early"
   },
   "openItems": [
-    "Merge/deploy/live verification remains pending."
+    "No unresolved FINAL.39 implementation/release issue.",
+    "The exact previously failing field cases still require real-device confirmation.",
+    "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Revalidate final PR head, merge PR #177, verify production/live FINAL.39, finalize canonical release bookkeeping, then return to paused AN15 evidence phase.",
+  "nextAction": "Retest the same long-route highway, timeout, and fullscreen MAP cases on FINAL.39. Treat any remaining exact failure as new bounded field evidence; resume AN15 only when explicitly reopened or an authorized real outcome source becomes available.",
   "unresolved": [
-    "FINAL.39 is validated but not yet production-verified."
+    "No unresolved FINAL.39 release issue.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
-  "changedFiles": [
+  "releaseChangedFiles": [
     "api/route.mjs",
     "truck-routing.js",
     "index.html",
@@ -51,6 +60,13 @@
     "tests/truck-route-api.test.mjs",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
+    ".ai/STATE.json",
+    ".ai/HANDOFF.md",
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
+  ],
+  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

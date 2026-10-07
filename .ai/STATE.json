@@ -3,58 +3,52 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL39_ROUTE_ROBUSTNESS",
-  "nextPhase": "FINAL39_ROUTE_ROBUSTNESS",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.08-FINAL.39",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL39_VALIDATED_PENDING_PRODUCTION",
+  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
   "currentWork": {
-    "title": "FINAL.39 long-route highway + timeout + fullscreen visual fit",
-    "releaseStatus": "Implementation is validated on PR #177 and awaits production merge/live verification. FINAL.38 remains the current production release until merge.",
-    "fieldEvidence": [
-      "On iPhone, active route geometry still was not visibly present after entering fullscreen MAP despite DOM-path persistence tests passing.",
-      "Route acquisition sometimes timed out.",
-      "Longer destinations were less likely to use a practical highway than shorter destinations."
+    "title": "FINAL.39 production verified; AN15 learned numeric promotion remains paused",
+    "releaseStatus": "FINAL.39 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
+    "releaseScope": [
+      "Fullscreen/software-rotation now refits the remaining active route into the visible MAP after viewport settle, rather than only preserving SVG nodes.",
+      "Route client request budget is 20s; OSM junction discovery runs in parallel with baseline ORS; Overpass and via-IC calls are separately bounded.",
+      "Long-distance highway discovery no longer stops at an 18km motorway target or combined IC-access prefilter; radius/access thresholds scale farther for long routes.",
+      "FINAL.36 final detour caps remain unchanged, exact HGV restrictions remain authoritative, and no car/straight-line fallback was added."
     ],
-    "rootCause": [
-      "Fullscreen regression only counted SVG path elements; it did not prove the route was inside the visible MAP viewport. Viewport resize/rotation could leave route geometry out of frame.",
-      "Client aborted a route request after 15s while the bounded server path could spend up to about 9s on primary ORS, then Overpass discovery, then up to 6.5s on via-IC ORS. The client could therefore abort before the server completed.",
-      "Long-distance active highway discovery used an 18km motorway-sufficiency cap and an 18km combined entry/exit access prefilter, causing long routes to stop searching too early or reject useful farther IC pairs."
-    ],
-    "scope": [
-      "Expose fitActive() from the route client and fit the remaining active route, not travelled geometry.",
-      "After fullscreen/software-rotation viewport settling, invalidate Leaflet, redraw, then refit active remaining route unless follow-current-position mode is active.",
-      "Browser regression asserts route geometry overlaps the visible MAP rectangle before fullscreen, after fullscreen, and after software rotation.",
-      "Route client request budget increases from 15s to 20s.",
-      "OSM motorway-junction discovery starts in parallel with the baseline ORS request so it does not add its full latency after ORS.",
-      "Overpass wall timeout is reduced to 2.8s and via-IC ORS timeout to 5.5s.",
-      "Long-route junction radius can expand to 25km; per-end access can reach 25km and combined prefilter 35km.",
-      "Motorway sufficiency target can scale to 55% of the primary route up to 45km rather than stopping at 18km.",
-      "FINAL.36 final detour caps remain unchanged: +20% time capped +8min and +30% distance capped +10km.",
-      "Exact HGV restrictions, 30 route-call/min warm guard, max two active via routes, and no car/straight-line fallback remain unchanged."
-    ],
-    "verification": {
-      "preEditMain": "PASS: 170289c08866bf6120df46d5c9545ed22e3a9b35",
-      "safetyTag": "PASS: backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007 dereferences to pre-edit main",
-      "apiAndNode": "PASS: Truck route readiness run 37643412185",
-      "realEdge": "PASS: Edge 320/390 run 37643412185",
-      "browserRegression": "PASS: run 37643412287",
-      "longDistanceHighway": "PASS: API test proves search expands beyond old 18km radius/access and does not stop after only 18km motorway usage",
-      "fullscreenVisibleRoute": "PASS: real browser asserts active route overlaps visible MAP before fullscreen, after fullscreen, and after software rotation",
-      "timeoutBudget": "PASS: client 20s budget exceeds bounded server critical path; junction discovery runs in parallel and via timeout is 5.5s"
+    "productionEvidence": {
+      "safetyTag": "backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007 -> 170289c08866bf6120df46d5c9545ed22e3a9b35",
+      "pr": "PR #177 merged",
+      "mergeCommit": "6b843d988fddba509cedcd590c6fe71ba1afd6db",
+      "finalPrTruckRoute": "37643816604 PASS",
+      "finalPrBrowserRegression": "37643816472 PASS",
+      "mainBrowserRegression": "37644030491 PASS",
+      "githubPages": "37644029832 PASS",
+      "vercel": "dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4 READY for exact merge commit",
+      "live": "Public version.json and truck-routing.js report 2026.10.08-FINAL.39; public UI states long-distance highway search is not cut off early"
     },
+    "decision": [
+      "Keep AN15 learned numeric promotion paused for now.",
+      "Do not add a new manual sales-outcome capture flow at this time.",
+      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
+      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
+      "Keep the deterministic production forecast baseline unchanged."
+    ],
     "nextActions": [
-      "Revalidate the final PR head after canonical bookkeeping.",
-      "Merge PR #177 only if required checks remain PASS.",
-      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.39.",
-      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
+      "Retest the same long-distance highway case on FINAL.39.",
+      "Confirm active route is visible immediately after fullscreen and software rotation on iPhone.",
+      "Confirm route acquisition no longer times out under the same field case.",
+      "If any exact case still fails, treat it as new bounded field evidence and inspect that route/provider case rather than globally weakening HGV safety."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/deployment/live verification is still pending for FINAL.39."
+    "No unresolved FINAL.39 implementation/release issue. Real-device confirmation of the previously failing long-route/highway, timeout, and fullscreen cases is the next evidence step.",
+    "AN15 learned numeric promotion remains intentionally paused.",
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -69,6 +63,6 @@
     ],
     "shortResumePrompt": "VENDRIVE続き",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.38 is production-verified and complete. PR #174 and its validation branch are historical only; latest synchronized main is authoritative. Resume from the intentionally paused AN15 evidence gate unless the user reports new field-route evidence."
+    "handoffBoundary": "FINAL.39 is production-verified and complete. PR #177 and its validation branch are historical only; latest synchronized main is authoritative. Resume from the intentionally paused AN15 evidence gate unless the user reports new field-route evidence."
   }
 }
