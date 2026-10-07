@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.07-FINAL.32';
+  var ASSET_VERSION='2026.10.07-FINAL.33';
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
   function distanceMeters(a,b){if(!point(a)||!point(b))return Infinity;var rad=Math.PI/180,lat1=a.lat*rad,lat2=b.lat*rad,dlat=(b.lat-a.lat)*rad,dlng=(b.lng-a.lng)*rad,s=Math.sin(dlat/2)*Math.sin(dlat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)*Math.sin(dlng/2);return 6371000*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
@@ -185,6 +185,7 @@
       if(!active||!destination||busy||!point(position))return;
       var accuracy=typeof position.accuracy==='number'&&Number.isFinite(position.accuracy)?position.accuracy:Infinity;
       if(accuracy>50)return;
+      if(distanceMeters(position,destination)<=100){var arrived=destination;offRouteHits=0;end();app.toast('目的地付近に到着しました');if(typeof app.onArrival==='function')app.onArrival(arrived,position);return;}
       var match=routeProgress(active,position,progress?progress.edge:0);if(!match)return;
       var snapThreshold=Math.max(25,Math.min(50,accuracy*1.5+10)),offThreshold=Math.max(60,Math.min(100,accuracy*2+20));
       if(match.distance<=snapThreshold){
@@ -192,7 +193,6 @@
         if(!progress||match.edge>progress.edge||(match.edge===progress.edge&&match.t>progress.t+0.01)){progress=match;draw();}
         return;
       }
-      if(distanceMeters(position,destination)<=100){offRouteHits=0;return;}
       if(match.distance>offThreshold)offRouteHits++;else offRouteHits=0;
       if(offRouteHits>=3&&Date.now()-lastAutoRerouteAt>=30000){
         offRouteHits=0;lastAutoRerouteAt=Date.now();app.toast('ルートを再検索します');calculate({auto:true,origin:position});
