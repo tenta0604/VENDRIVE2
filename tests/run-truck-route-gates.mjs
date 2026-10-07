@@ -48,7 +48,7 @@ for(const width of [320,390]){
     async function waitText(text){await page.waitForFunction(t=>document.getElementById('truckRouteSummary').textContent.includes(t),text);}
     async function swipeRow(locator,direction){const box=await locator.boundingBox();assert.ok(box,'swipe row must have a box');const startX=box.x+box.width/2,startY=box.y+box.height/2,endX=startX+(direction==='right'?100:-100);await page.mouse.move(startX,startY);await page.mouse.down();await page.mouse.move(endX,startY,{steps:6});await page.mouse.up();await page.waitForTimeout(220);}
     async function swipeRowRotated(locator,direction){const box=await locator.boundingBox();assert.ok(box,'rotated swipe row must have a box');const startX=box.x+box.width/2,startY=box.y+box.height/2,endY=startY+(direction==='right'?100:-100);await page.mouse.move(startX,startY);await page.mouse.down();await page.mouse.move(startX,endY,{steps:6});await page.mouse.up();await page.waitForTimeout(220);}
-    const paths=()=>page.locator('#map path[stroke="#2563eb"], #map path[stroke="#dc2626"], #map path[fill="#2563eb"]').count();
+    const paths=()=>page.locator('#map path[stroke="#00e5ff"], #map path[stroke="#dc2626"], #map path[fill="#00e5ff"]').count();
     const roadPathCount=color=>page.locator(`#map path[stroke="${color}"]`).count();
     await page.goto(base+'/index.html',{waitUntil:'load'});
     await page.waitForFunction(()=>window.L&&document.querySelector('#machineSearch').oninput);
@@ -62,17 +62,18 @@ for(const width of [320,390]){
     await page.locator('#truckVehicleAvoidTolls').check();
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
     assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.ok(await paths()>=3);assert.match(await page.locator('#mapHighwayToggle').innerText(),/ON/);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');
-    assert.ok(await roadPathCount('#2563eb')>=1);assert.ok(await roadPathCount('#dc2626')>=1);
+    assert.ok(await roadPathCount('#0b132b')>=2,'route casing should be present under the fluorescent/red route strokes');
+    assert.ok(await roadPathCount('#00e5ff')>=1);assert.ok(await roadPathCount('#dc2626')>=1);
     await page.evaluate(()=>{var original=window.VENDRIVETruckRouting.routeSections;window.__routeSectionsCurrent=original;window.VENDRIVETruckRouting.routeSections=function(value){return original(value).map(function(section){return {motorway:section.motorway,tollway:section.tollway,coordinates:section.coordinates};});};});
     await page.locator('#allRoutes').click();assert.ok(await roadPathCount('#dc2626')>=1,'legacy section objects without highlight must still render priority spans red');
     await page.evaluate(()=>{window.VENDRIVETruckRouting.routeSections=window.__routeSectionsCurrent;delete window.__routeSectionsCurrent;});
     await page.locator('#allRoutes').click();
     assert.match(await page.locator('#truckRouteSummary').innerText(),/有料 約/);assert.match(await page.locator('#truckRouteSummary').innerText(),/高速優先ON/);
-    await page.locator('#mapHighwayToggle').click();await waitText('高速利用OFF');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);assert.equal((await stored()).routeVehicle.avoidTolls,true);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'false');assert.equal(await roadPathCount('#dc2626'),0);assert.ok(await roadPathCount('#2563eb')>=1);
+    await page.locator('#mapHighwayToggle').click();await waitText('高速利用OFF');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);assert.equal((await stored()).routeVehicle.avoidTolls,true);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'false');assert.equal(await roadPathCount('#dc2626'),0);assert.ok(await roadPathCount('#00e5ff')>=1);
     await page.locator('#mapHighwayToggle').click();await waitText('高速優先ON');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,3);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');assert.ok(await roadPathCount('#dc2626')>=1);
-    const routePathBefore=await page.locator('#map path[stroke="#2563eb"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
+    const routePathBefore=await page.locator('#map path[stroke="#00e5ff"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3,longitude:136.804,accuracy:8,heading:90}}));await page.waitForTimeout(120);
-    const routePathAfter=await page.locator('#map path[stroke="#2563eb"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
+    const routePathAfter=await page.locator('#map path[stroke="#00e5ff"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
     assert.notEqual(routePathAfter,routePathBefore,'travelled route geometry should disappear from the displayed line');
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
     const startDisplay=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
