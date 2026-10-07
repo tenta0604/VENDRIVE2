@@ -7,15 +7,15 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.34`.
+- Current visible production app version: `2026.10.07-FINAL.35`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.34 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.34 implementation task.
+FINAL.35 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.35 implementation task.
 
-Historical PR #166 is closed and merged. Its validation branch `chatgpt/final34-rotated-map-gesture-arrival-card-20261007` is history only and must not be used as a resume source. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
+Historical PR #168 is closed and merged. Its validation branch `chatgpt/final35-rotated-machine-card-20261007` is history only and must not be used as a resume source. PR #166 remains earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
 After recovery, the normal next project phase is:
 
@@ -263,3 +263,23 @@ PR #168 validation before canonical bookkeeping:
 - Browser regression: `37614566431`, PASS.
 
 Do not call FINAL.35 production-complete until PR #168 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.35 evidence are terminal PASS.
+
+## 2026-10-07 FINAL.35 production release complete
+
+FINAL.35 is released and production-verified.
+
+- PR #168 merged to `main` at `0be90de6a25b779819a14ccf09b03718a9c44490`.
+- Immutable safety tag: `backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007` -> `f5294949edca2783f45e7abbe3232b8249d70ced`.
+- Final PR Truck route readiness / real Edge run `37614817452`: PASS.
+- Final PR Browser regression run `37614817466`: PASS.
+- Main Browser regression run `37614981166`: PASS.
+- GitHub Pages deployment run `37614979975`: PASS.
+- Vercel production deployment `dpl_9Zp3oos5JnPKHxvabRnubrhThjcU`: READY for the exact merge commit.
+- Public `version.json` and routing asset report `2026.10.07-FINAL.35`.
+
+FINAL.35 behavior:
+- PIN-opened machine detail rotates with the software-rotated fullscreen MAP;
+- it remains portrait when MAP software rotation is off;
+- existing machine actions, rotated MAP dragging, rotated arrival-card handling, task/order checks and fullscreen PIN interaction remain preserved.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.

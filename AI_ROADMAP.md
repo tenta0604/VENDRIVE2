@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.34** in production; **FINAL.35** is validated on PR #168 and pending release. FINAL.35 adds landscape machine-detail presentation for PIN-opened cards during software-rotated fullscreen MAP; Analytics engine **AN14B3B5**, DB/schema remain 4.
+- Visible app baseline: **2026.10.07-FINAL.35** (FINAL.34 rotated MAP/arrival behavior plus landscape PIN-opened machine detail during software-rotated fullscreen MAP; Analytics engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **FINAL.35 rotated fullscreen MAP machine-detail card**. PR #168 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.35 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -172,3 +172,11 @@ FINAL.34 closes this maintenance scope. Normal project state returns to the inte
 A new bounded field-work maintenance scope aligns PIN-opened machine details with the existing software-rotated fullscreen MAP experience. The machine detail sheet rotates 90 degrees only while fullscreen MAP software rotation is active, and stays portrait in normal or unrotated MAP modes. Existing machine controls and FINAL.34 interactions remain preserved.
 
 Safety tag `backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007` -> `f5294949edca2783f45e7abbe3232b8249d70ced`. PR #168 validation passed Truck route readiness / real Edge 320/390 run `37614566359` and Browser regression run `37614566431`. Production release evidence is pending.
+
+## FINAL.35 rotated machine-detail card production release (2026-10-07)
+
+FINAL.35 is released and production-verified. A machine detail opened from a MAP PIN rotates 90 degrees only while fullscreen MAP software rotation is active and remains portrait otherwise. Existing machine controls and FINAL.34 rotated MAP/arrival behavior remain preserved.
+
+Safety tag `backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007` -> `f5294949edca2783f45e7abbe3232b8249d70ced`. PR #168 merged at `0be90de6a25b779819a14ccf09b03718a9c44490`. Final PR runs `37614817452` and `37614817466`, main Browser regression `37614981166`, and Pages `37614979975` passed. Vercel production `dpl_9Zp3oos5JnPKHxvabRnubrhThjcU` is READY for the exact merge SHA. Public version and routing asset report `2026.10.07-FINAL.35`.
+
+FINAL.35 closes this maintenance scope. Normal project state returns to the intentionally paused AN15 real-evidence/promotion gate.

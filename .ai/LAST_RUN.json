@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 44,
-  "runType": "final35_rotated_machine_card_validation",
+  "evidenceVersion": 45,
+  "runType": "final35_production_release_closeout",
   "phase": "FINAL35_ROTATED_MACHINE_CARD",
-  "status": "PASS",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "f5294949edca2783f45e7abbe3232b8249d70ced",
     "safetyTag": "backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007",
@@ -15,33 +15,47 @@
     "schema": 4
   },
   "work": {
-    "summary": "Rotated the PIN-opened machine detail sheet only while fullscreen MAP software rotation is active, while preserving portrait machine detail outside that mode and preserving all existing controls and FINAL.34 interactions.",
-    "productStatus": "VALIDATED_PENDING_PRODUCTION",
-    "productionCodeChanged": true
+    "summary": "FINAL.35 is production-complete: PIN-opened machine detail now follows software-rotated fullscreen MAP orientation only in that mode and remains portrait elsewhere, with existing controls and FINAL.34 behavior preserved.",
+    "productStatus": "PRODUCTION_VERIFIED",
+    "productionCodeChanged": true,
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
-    "canonicalRecovery": "PASS: latest synchronized main and canonical recovery set verified before edits",
+    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before implementation",
     "immutableSafetyTag": "PASS: backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007 -> f5294949edca2783f45e7abbe3232b8249d70ced",
-    "syntaxAndNode": "PASS: workflow 37614566359",
-    "realEdge320390": "PASS: workflow 37614566359",
-    "rotatedMachineCardOrientation": "PASS: PIN-opened machine detail sheet rotates in software-rotated fullscreen MAP and presents landscape",
-    "unrotatedMachineCardPreserved": "PASS: same machine detail returns to portrait when MAP software rotation is off",
-    "existingFullscreenInteraction": "PASS: fullscreen PIN -> machine modal and close interaction remain operational",
-    "browserRegression": "PASS: workflow 37614566431"
+    "finalPrTruckRoute": "PASS: workflow 37614817452",
+    "finalPrBrowserRegression": "PASS: workflow 37614817466",
+    "rotatedMachineCardOrientation": "PASS: final Edge 320/390 validation",
+    "unrotatedMachineCardPreserved": "PASS: final Edge 320/390 validation",
+    "fullscreenPinInteraction": "PASS: final Edge 320/390 validation",
+    "merge": "PASS: PR #168 -> 0be90de6a25b779819a14ccf09b03718a9c44490",
+    "mainBrowserRegression": "PASS: workflow 37614981166",
+    "githubPages": "PASS: workflow 37614979975",
+    "vercelProduction": "PASS: dpl_9Zp3oos5JnPKHxvabRnubrhThjcU READY, target production, Git SHA 0be90de6a25b779819a14ccf09b03718a9c44490",
+    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.35",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.35"
   },
   "openItems": [
-    "Merge/deploy/live verification remains pending."
+    "AN15 learned numeric promotion remains intentionally paused until explicitly reopened or an authorized real outcome source becomes available."
   ],
-  "nextAction": "Revalidate final PR head, merge PR #168, verify production/live FINAL.35, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
+  "nextAction": "Continue normal FINAL.35 field use. Resume the intentionally paused AN15 evidence gate only when explicitly reopened or a usable authorized real outcome source becomes available.",
   "unresolved": [
-    "FINAL.35 is validated but not yet production-verified."
+    "No unresolved FINAL.35 release issue.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
-  "changedFiles": [
+  "releaseChangedFiles": [
     "index.html",
     "truck-routing.js",
     "version.json",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
+    ".ai/STATE.json",
+    ".ai/HANDOFF.md",
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
+  ],
+  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
