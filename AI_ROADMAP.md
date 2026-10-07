@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.07-FINAL.36** (FINAL.35 UI/orientation behavior plus fresher route GPS, median reroute origin, extreme detour protection, more natural HGV/highway selection, and fluorescent-cased ordinary route rendering; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.07-FINAL.36** in production; **FINAL.37** is validated on PR #172 and pending release. FINAL.37 actively discovers nearby motorway ICs and generates bounded HGV via-IC highway candidates when normal ORS alternatives omit useful motorway paths; Analytics engine **AN14B3B5**, DB/schema remain 4.
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.36 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
+- Active engineering phase: **FINAL.37 active highway IC search**. PR #172 is validated and pending production release. After release, return to the intentionally paused AN15 evidence/promotion gate.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -194,3 +194,9 @@ FINAL.36 is released and production-verified. It reduces non-highway detour risk
 Safety tag `backup-pre-FINAL36-ROUTE-SANITY-VISIBILITY-20261007` -> `beb9325938954a7fa8afec8a559d4b58ee5b44d6`. PR #170 merged at `c68a6a283cac5074916bd40a9ae0fb814d1eb9cb`. Final PR runs `37630470134` and `37630470259`, main Browser regression `37630690705`, and Pages `37630688603` passed. Vercel production `dpl_9q64prYCtNWhUysBRtRs5hGy2gzr` is READY for the exact merge SHA. Public version and routing asset report `2026.10.07-FINAL.36`.
 
 FINAL.36 closes this maintenance scope. Any still-bad route should be investigated from an exact field origin/destination pair rather than globally weakening HGV routing. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.
+
+## FINAL.37 active highway IC search validation (2026-10-07)
+
+FINAL.37 changes highway ON from passive ranking to bounded active discovery when normal ORS alternatives contain insufficient motorway use. The server queries nearby OSM motorway junctions, creates at most two plausible entry/exit pairs, and evaluates driving-hgv routes through those ICs while preserving all vehicle restrictions. IC candidates remain subject to FINAL.36 detour limits and near-fast ranking; failures fall back to the normal HGV route. Extra route calls share the warm-instance quota guard and no car fallback is introduced.
+
+Safety tag `backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007` -> `77b7b437469e8100f94661fb4f5707acd1320e13`. PR #172 validation passed Truck route/API/Edge run `37636311481` and Browser regression run `37636311451`. Production release evidence is pending.
