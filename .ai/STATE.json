@@ -3,42 +3,52 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "FINAL33_ARRIVAL_VISIT_CARDS_MAP_ROTATION",
-  "nextPhase": "FINAL33_ARRIVAL_VISIT_CARDS_MAP_ROTATION",
+  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
+  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "appVersion": "2026.10.07-FINAL.33",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL33_VALIDATED_PENDING_PRODUCTION",
+  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
   "currentWork": {
-    "title": "FINAL.33 arrival visit cards, bidirectional visit swipe, and fullscreen MAP software rotation",
-    "releaseStatus": "Implementation is validated on PR #164 and awaits merge/production verification. FINAL.32 remains the previous production release until merge.",
-    "scope": [
-      "Accurate GPS fixes (accuracy <=50m) within 100m of the route destination automatically end the in-app route.",
-      "Arrival opens one vending-machine card at a time: destination first when unvisited, then other unvisited machines on today's plan within 100m.",
-      "Arrival cards and standard Today cards use left swipe for visit complete and right swipe for today's visit skip.",
-      "Visit completion reuses the existing task confirmation and order confirmation flow; arrival does not bypass either.",
-      "Normal app and normal MAP no longer show the blocking landscape portrait guard; portrait orientation is requested where supported and the web-app manifest prefers portrait.",
-      "Fullscreen MAP adds a fullscreen-only software rotate button (🔄) that rotates the MAP 90 degrees without requiring OS orientation unlock.",
-      "Fullscreen PIN interaction and modal stacking remain preserved."
+    "title": "FINAL.33 production verified; AN15 learned numeric promotion remains paused",
+    "releaseStatus": "FINAL.33 is merged, deployed, and live-verified. The normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
+    "releaseScope": [
+      "Accurate GPS fixes with accuracy <=50m within 100m of the active route destination automatically end the in-app route.",
+      "Arrival shows exactly one visit card at a time: unvisited destination first, then other unvisited machines on today's plan within 100m.",
+      "Left swipe completes through the existing task and order confirmation flow; right swipe skips today's visit.",
+      "The standard Today list also supports right-swipe visit skip.",
+      "The blocking landscape portrait guard is withdrawn; normal app/MAP remain portrait-width and portrait is requested where supported.",
+      "Fullscreen MAP alone exposes a 🔄 software-rotation control for rotation-locked devices; PIN/modal interaction remains preserved."
     ],
-    "verification": {
-      "preEditMain": "PASS: 42e9d4565e64a90abec6933d5b8d958e2e461983",
-      "safetyTag": "PASS: backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007 dereferences to pre-edit main",
-      "nodeAndSyntax": "PASS: Truck route readiness run 37609873036",
-      "realEdge": "PASS: Edge 320/390 arrival auto-end, one-card swipe flow, Today right-swipe skip, fullscreen software rotation, and fullscreen PIN modal in run 37609873036",
-      "browserRegression": "PASS: Browser regression run 37609873072"
+    "productionEvidence": {
+      "safetyTag": "backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007 -> 42e9d4565e64a90abec6933d5b8d958e2e461983",
+      "pr": "PR #164 merged",
+      "mergeCommit": "1e0c68b2829349a2d30ba93e0414b6194ceedc0b",
+      "finalPrTruckRoute": "37610172801 PASS",
+      "finalPrBrowserRegression": "37610172731 PASS",
+      "mainBrowserRegression": "37610334284 PASS",
+      "githubPages": "37610333585 PASS",
+      "vercel": "dpl_B7PYTGPGRCNHE56dG68uPtx8voPq READY for merge commit",
+      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.33; public UI contains 🔄 and bidirectional Today swipe labels"
     },
+    "decision": [
+      "Keep AN15 learned numeric promotion paused for now.",
+      "Do not add a new manual sales-outcome capture flow at this time.",
+      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
+      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
+      "Keep the deterministic production forecast baseline unchanged."
+    ],
     "nextActions": [
-      "Revalidate the final PR head after canonical bookkeeping.",
-      "Merge PR #164 only if required checks remain PASS.",
-      "Verify Vercel production, main browser regression, GitHub Pages, and live FINAL.33 assets.",
-      "After production verification, restore the paused AN15 evidence phase as the normal next phase."
+      "Continue normal VENDRIVE use on FINAL.33.",
+      "If new real-device evidence reveals a defect or operator friction, open a new bounded maintenance scope with a new immutable pre-edit safety tag.",
+      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Production merge/deployment/live verification is still pending for FINAL.33."
+    "AN15 learned numeric promotion is intentionally paused because normal shipped use does not provide the exact authorized real outcome evidence required for promotion.",
+    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -53,6 +63,6 @@
     ],
     "shortResumePrompt": "VENDRIVE続き",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.32 is production-verified and complete. Do not resume PR #162 or its historical branch; latest synchronized main is authoritative. Resume from STATE.nextPhase unless the user reports new field evidence."
+    "handoffBoundary": "FINAL.33 is production-verified and complete. PR #164 and its validation branch are historical only; latest synchronized main is authoritative. Resume from the intentionally paused AN15 evidence gate unless the user reports new field evidence."
   }
 }

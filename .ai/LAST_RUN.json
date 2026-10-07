@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 40,
-  "runType": "final33_arrival_visit_cards_map_rotation_validation",
+  "evidenceVersion": 41,
+  "runType": "final33_production_release_closeout",
   "phase": "FINAL33_ARRIVAL_VISIT_CARDS_MAP_ROTATION",
-  "status": "PASS",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "42e9d4565e64a90abec6933d5b8d958e2e461983",
     "safetyTag": "backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007",
@@ -15,39 +15,48 @@
     "schema": 4
   },
   "work": {
-    "summary": "Implemented and validated FINAL.33: accurate 100m arrival ends in-app routing; arrival shows one nearby visit card at a time; left completes through existing task/order checks; right skips; Today cards also gain right-swipe skip; normal UI no longer blocks landscape; fullscreen MAP gains a software 90-degree rotate control for rotation-locked devices.",
-    "productStatus": "VALIDATED_PENDING_PRODUCTION",
-    "productionCodeChanged": true
+    "summary": "FINAL.33 is production-complete: accurate 100m arrival ends navigation; one-card nearby visit handling reuses task/order confirmations; left swipe completes and right swipe skips; Today gains right-swipe skip; fullscreen MAP gains software 90-degree rotation for rotation-locked devices while PIN/modal behavior remains intact.",
+    "productStatus": "PRODUCTION_VERIFIED",
+    "productionCodeChanged": true,
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
-    "canonicalRecovery": "PASS: latest synchronized main and canonical recovery set verified before edits",
+    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before implementation",
     "immutableSafetyTag": "PASS: backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007 -> 42e9d4565e64a90abec6933d5b8d958e2e461983",
-    "syntaxAndNode": "PASS: workflow 37609873036 route syntax/logic checks",
-    "realEdge320390": "PASS: workflow 37609873036",
-    "arrivalAutoEnd": "PASS: accurate <=50m GPS within 100m clears route and emits arrival once",
-    "arrivalVisitDeck": "PASS: destination-first, nearby-today-unvisited, one card at a time",
-    "taskOrderSafety": "PASS: arrival left-swipe reuses task confirmation then order confirmation",
-    "arrivalRightSkip": "PASS: nearby arrival card right-swipe sets today's skip",
-    "todayRightSkip": "PASS: standard Today card right-swipe sets today's skip",
-    "fullscreenSoftwareRotation": "PASS: fullscreen-only rotate control toggles software 90-degree MAP rotation and continues to fill viewport",
-    "fullscreenPin": "PASS: machine PIN remains clickable while fullscreen/software-rotated",
-    "browserRegression": "PASS: workflow 37609873072",
-    "initialHarnessFailure": "RESOLVED: first Edge run 37609644215 timed out because test fixture mode remained 'held'; test-only reset was added, no product-code change was required"
+    "finalPrTruckRoute": "PASS: workflow 37610172801",
+    "finalPrBrowserRegression": "PASS: workflow 37610172731",
+    "realEdge320390": "PASS: final PR truck route workflow covers arrival auto-end, one-card flow, task/order confirmation, Today right-swipe skip, fullscreen software rotation, and fullscreen PIN modal",
+    "merge": "PASS: PR #164 -> 1e0c68b2829349a2d30ba93e0414b6194ceedc0b",
+    "mainBrowserRegression": "PASS: workflow 37610334284",
+    "githubPages": "PASS: workflow 37610333585",
+    "vercelProduction": "PASS: dpl_B7PYTGPGRCNHE56dG68uPtx8voPq READY, target production, Git SHA 1e0c68b2829349a2d30ba93e0414b6194ceedc0b",
+    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.33",
+    "liveUi": "PASS: public page exposes 🔄 and left-complete/right-skip Today hint",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.33 and contains accurate <=100m arrival end/callback behavior",
+    "initialHarnessFailure": "RESOLVED: workflow 37609644215 failure was test-fixture state only; test reset fixed it without product-code changes"
   },
   "openItems": [
-    "Merge/deploy/live verification remains pending."
+    "AN15 learned numeric promotion remains intentionally paused until explicitly reopened or an authorized real outcome source becomes available."
   ],
-  "nextAction": "Revalidate final PR head, merge PR #164, verify production/live FINAL.33, then finalize canonical release bookkeeping and return to paused AN15 evidence phase.",
+  "nextAction": "Continue normal FINAL.33 field use. Resume the intentionally paused AN15 evidence gate only when explicitly reopened or a usable authorized real outcome source becomes available.",
   "unresolved": [
-    "FINAL.33 is validated but not yet production-verified."
+    "No unresolved FINAL.33 release issue.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
-  "changedFiles": [
+  "releaseChangedFiles": [
     "index.html",
     "truck-routing.js",
     "manifest.webmanifest",
     "version.json",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
+    ".ai/STATE.json",
+    ".ai/HANDOFF.md",
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
+  ],
+  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

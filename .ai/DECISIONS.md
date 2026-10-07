@@ -388,3 +388,11 @@ This file records confirmed project decisions that must survive chat migration. 
 - Fullscreen MAP is the only surface with a manual orientation-view control. The fullscreen-only 🔄 button software-rotates the MAP 90 degrees; this is specifically the fallback for iPhone/other rotation-lock cases where Web APIs cannot override OS orientation lock.
 - Software rotation must keep the full MAP viewport filled and preserve machine PIN interaction plus modal visibility above the MAP.
 - Safety tag: `backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007` -> `42e9d4565e64a90abec6933d5b8d958e2e461983`.
+
+## 2026-10-07 — FINAL.33 production release complete
+- PR #164 merged to `main` at `1e0c68b2829349a2d30ba93e0414b6194ceedc0b`.
+- Final PR Truck route / Edge run `37610172801` and Browser regression run `37610172731` passed.
+- Main Browser regression run `37610334284` and GitHub Pages run `37610333585` passed.
+- Vercel production deployment `dpl_B7PYTGPGRCNHE56dG68uPtx8voPq` is READY for the exact merge SHA.
+- Live public version and routing asset report `2026.10.07-FINAL.33`; public UI exposes `🔄` plus left-complete/right-skip Today guidance.
+- FINAL.33 is closed. Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a new bounded maintenance scope.

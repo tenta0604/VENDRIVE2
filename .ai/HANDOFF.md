@@ -7,15 +7,15 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.32`.
+- Current visible production app version: `2026.10.07-FINAL.33`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.32 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.32 implementation task.
+FINAL.33 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.33 implementation task.
 
-Historical PR #162 is closed and merged. Its old branch `chatgpt/final32-nav-progress-reroute-20261007` may remain available for history/tests, but it is **not** a resume branch and must not be treated as newer authority than `main`.
+Historical PR #164 is closed and merged. Its validation branch `chatgpt/final33-arrival-cards-map-rotation-20261007` is history only and must not be used as a resume source. FINAL.32 and PR #162 remain earlier completed history; latest synchronized `main` is authoritative.
 
 After recovery, the normal next project phase is:
 
@@ -99,8 +99,8 @@ On a fresh chat:
 
 1. Fetch latest `main`.
 2. Read the canonical recovery set in STATE.recovery.readOrder.
-3. Confirm live/code versions and phase consistency only as needed; do not rerun already-passed FINAL.32 gates without a changed precondition or contradictory new evidence.
-4. Ignore old PR #162 branch state as an execution source.
+3. Confirm live/code versions and phase consistency only as needed; do not rerun already-passed FINAL.33 gates without a changed precondition or contradictory new evidence.
+4. Ignore old PR #164 / PR #162 branch state as an execution source.
 5. If the user says only `VENDRIVE続き`, resume from `STATE.nextPhase`.
 6. If the user instead reports a fresh field issue, open a new bounded maintenance scope with a new immutable pre-edit safety tag before production-code edits.
 7. Continue under the hard terminal-state rule from `AGENTS.md`.
@@ -170,3 +170,28 @@ Validation evidence before final bookkeeping:
 - The earlier run `37609644215` failed only because the test fixture stayed in held-response mode before the new arrival gate; resetting the fixture fixed the harness with no product-code change.
 
 Do not call FINAL.33 production-complete until PR #164 is merged and Vercel, main browser regression, GitHub Pages, and live version/asset checks are terminal PASS.
+
+## 2026-10-07 FINAL.33 production release complete
+
+FINAL.33 is released and production-verified.
+
+- PR #164 merged to `main` at `1e0c68b2829349a2d30ba93e0414b6194ceedc0b`.
+- Immutable safety tag: `backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007` -> `42e9d4565e64a90abec6933d5b8d958e2e461983`.
+- Final PR Truck route readiness / real Edge run `37610172801`: PASS.
+- Final PR Browser regression run `37610172731`: PASS.
+- Main Browser regression run `37610334284`: PASS.
+- GitHub Pages deployment run `37610333585`: PASS.
+- Vercel production deployment `dpl_B7PYTGPGRCNHE56dG68uPtx8voPq`: READY for the exact merge commit.
+- Public `version.json` and public routing asset report `2026.10.07-FINAL.33`.
+- Public UI contains the fullscreen `🔄` control and the Today hint `左：訪問完了 / 右：訪問スキップ`.
+- Public routing asset contains the accurate-GPS <=100m arrival end/callback behavior.
+
+FINAL.33 behavior:
+- Accurate GPS (<=50m accuracy) within 100m of the destination ends navigation.
+- Arrival shows one unvisited visit card at a time: destination first, then other today's-plan machines within 100m.
+- Left swipe completes through existing task/order confirmations; right swipe skips today's visit.
+- Today cards use the same left-complete/right-skip behavior.
+- Normal UI no longer blocks landscape with the old portrait guard; normal app/MAP stay portrait-width and portrait is requested where supported.
+- Fullscreen MAP alone exposes software `🔄` rotation for rotation-locked devices while preserving PIN/modal interaction.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`. Do not reopen AN15 evidence capture unless explicitly authorized or a genuinely usable authorized real outcome source becomes available.
