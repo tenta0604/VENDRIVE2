@@ -108,3 +108,42 @@ test('warm-instance quota guard caps upstream calls',async()=>{
     assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+
+
+test('highway ON actively searches motorway junctions and adopts a bounded HGV via-IC candidate',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const farInput={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const viaHighway={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.73,35.22],[136.86,35.33],[136.92,35.38],[136.95,35.40]]},properties:{summary:{distance:34000,duration:2250},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+  const junctions={elements:[
+    {type:'node',id:101,lat:35.22,lon:136.73,tags:{highway:'motorway_junction',ref:'A'}},
+    {type:'node',id:102,lat:35.38,lon:136.92,tags:{highway:'motorway_junction',ref:'B'}},
+    {type:'node',id:103,lat:35.225,lon:136.735,tags:{highway:'motorway_junction',ref:'A2'}},
+    {type:'node',id:104,lat:35.375,lon:136.915,tags:{highway:'motorway_junction',ref:'B2'}}
+  ]};
+  const routeBodies=[];
+  globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('overpass-api.de'))return Response.json(junctions);
+    routeBodies.push(JSON.parse(options.body));
+    return Response.json({features:[routeBodies.length===1?surface:viaHighway]});
+  };
+  try{
+    const response=await POST(request(farInput));assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.selection,'active-ic-expressway-preferred');assert.equal(data.highwaySearch.attempted,true);assert.ok(data.highwaySearch.junctions>=4);assert.ok(data.highwaySearch.evaluated>=1);assert.ok(data.highwaySearch.accepted>=1);
+    assert.deepEqual(data.route.summary,{distance:34000,duration:2250});assert.ok(data.usage.motorwayMeters>10000);
+    const viaRequest=routeBodies.find(body=>body.coordinates.length===4);assert.ok(viaRequest,'active highway search must issue a waypoint HGV request');assert.equal(viaRequest.options.vehicle_type,'hgv');assert.deepEqual(viaRequest.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});assert.equal(viaRequest.alternative_routes,undefined);
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+test('active highway IC discovery fails open to the safe baseline HGV route',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const farInput={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  globalThis.fetch=async(url)=>{
+    if(String(url).includes('overpass-api.de'))throw new Error('overpass unavailable');
+    return Response.json({features:[surface]});
+  };
+  try{
+    const response=await POST(request(farInput));assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.selection,'active-highway-unavailable');assert.equal(data.highwaySearch.attempted,true);assert.equal(data.highwaySearch.status,'junction-search-unavailable');assert.deepEqual(data.route.summary,{distance:32000,duration:2400});
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
