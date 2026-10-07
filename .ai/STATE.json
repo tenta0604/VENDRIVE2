@@ -5,48 +5,45 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.08-FINAL.39",
+  "appVersion": "2026.10.08-FINAL.40",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL40_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.39 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.39 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
+    "title": "FINAL.40 validated on PR #180; production release pending",
+    "releaseStatus": "FINAL.40 product changes passed the finite PR gates. Merge, production deployments, live verification, and final canonical closeout remain.",
     "releaseScope": [
-      "Fullscreen/software-rotation now refits the remaining active route into the visible MAP after viewport settle, rather than only preserving SVG nodes.",
-      "Route client request budget is 20s; OSM junction discovery runs in parallel with baseline ORS; Overpass and via-IC calls are separately bounded.",
-      "Long-distance highway discovery no longer stops at an 18km motorway target or combined IC-access prefilter; radius/access thresholds scale farther for long routes.",
-      "FINAL.36 final detour caps remain unchanged, exact HGV restrictions remain authoritative, and no car/straight-line fallback was added."
+      "Fullscreen route start no longer re-clicks the already-active MAP tab, avoiding a redundant full map render while the route request is in flight.",
+      "Fullscreen viewport settle invalidates Leaflet size but skips route redraw/refit while route acquisition is busy; the 20s client network timer is cleared once the response body is received before local render work.",
+      "The existing maximum-two via-IC budget now samples one balanced pair plus a geographically distinct motorway corridor when available, allowing ORS driving-hgv to traverse farther JCT-connected highway networks.",
+      "Long-route motorway discovery target can scale to 80km; FINAL.36 final detour caps and all exact HGV restrictions remain authoritative."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007 -> 170289c08866bf6120df46d5c9545ed22e3a9b35",
-      "pr": "PR #177 merged",
-      "mergeCommit": "6b843d988fddba509cedcd590c6fe71ba1afd6db",
-      "finalPrTruckRoute": "37643816604 PASS",
-      "finalPrBrowserRegression": "37643816472 PASS",
-      "mainBrowserRegression": "37644030491 PASS",
-      "githubPages": "37644029832 PASS",
-      "vercel": "dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4 READY for exact merge commit",
-      "live": "Public version.json and truck-routing.js report 2026.10.08-FINAL.39; public UI states long-distance highway search is not cut off early"
+    "validationEvidence": {
+      "safetyTag": "backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007 -> 9541bd9d1d8242ec880f87315ae4fcf05052b006",
+      "pr": "PR #180 open",
+      "truckRoute": "37699925874 PASS",
+      "browserRegression": "37699925873 PASS"
     },
     "decision": [
-      "Keep AN15 learned numeric promotion paused for now.",
-      "Do not add a new manual sales-outcome capture flow at this time.",
-      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
-      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
-      "Keep the deterministic production forecast baseline unchanged."
+      "Keep driving-hgv and exact registered vehicle restrictions unchanged.",
+      "Keep at most two active via-IC ORS candidates and the warm-instance 30 route-call/minute guard.",
+      "Keep FINAL.36 final detour envelope unchanged.",
+      "Do not add car or straight-line fallback.",
+      "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "Retest the same long-distance highway case on FINAL.39.",
-      "Confirm active route is visible immediately after fullscreen and software rotation on iPhone.",
-      "Confirm route acquisition no longer times out under the same field case.",
-      "If any exact case still fails, treat it as new bounded field evidence and inspect that route/provider case rather than globally weakening HGV safety."
+      "Merge PR #180 after the final validated head is unchanged.",
+      "Verify main browser regression and GitHub Pages.",
+      "Verify Vercel production is READY for the exact FINAL.40 merge commit.",
+      "Live-verify version.json and truck-routing.js as FINAL.40, then close canonical bookkeeping.",
+      "After production closeout, retest the previously failing iPhone fullscreen timeout and long-route highway/JCT case."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "No unresolved FINAL.39 implementation/release issue. Real-device confirmation of the previously failing long-route/highway, timeout, and fullscreen cases is the next evidence step.",
+    "FINAL.40 production release evidence is pending after PR validation.",
+    "Real-device confirmation of the fullscreen timeout and longer JCT-capable highway route remains required after production release.",
     "AN15 learned numeric promotion remains intentionally paused.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
   ],
@@ -63,7 +60,7 @@
     ],
     "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.39本番完了後の実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.39 is production-verified. New-chat recovery must start from the 2026-10-08 NEW CHAT HANDOFF CHECKPOINT in .ai/HANDOFF.md. The immediate next evidence is real-iPhone retest of (1) long-distance highway selection, (2) route timeout, and (3) fullscreen/software-rotated route visibility. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "2026-10-08 NEW CHAT HANDOFF CHECKPOINT — resume from here"
+    "handoffBoundary": "FINAL.40 is validated on PR #180 and pending production release. Complete merge/deploy/live verification/canonical closeout before asking for the iPhone retest. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.40 PR #180 validation complete — production release pending"
   }
 }
