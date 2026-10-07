@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 50,
-  "runType": "final38_highway_adoption_fullscreen_route_validation",
+  "evidenceVersion": 51,
+  "runType": "final38_production_release_closeout",
   "phase": "FINAL38_HIGHWAY_ADOPTION_FULLSCREEN_ROUTE",
-  "status": "PASS",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd",
     "safetyTag": "backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007",
@@ -15,32 +15,42 @@
     "schema": 4
   },
   "work": {
-    "summary": "Implemented FINAL.38 so safe bounded active-IC HGV candidates can actually win highway-ON selection and active route geometry is explicitly redrawn across fullscreen/software-rotation viewport changes.",
-    "productStatus": "VALIDATED_PENDING_PRODUCTION",
-    "productionCodeChanged": true
+    "summary": "FINAL.38 is production-complete: bounded active-IC HGV highway candidates can now actually win highway-ON selection, and active route geometry is explicitly redrawn across fullscreen/software-rotation viewport changes.",
+    "productStatus": "PRODUCTION_VERIFIED",
+    "productionCodeChanged": true,
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
     "immutableSafetyTag": "PASS: backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007 -> 84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd",
-    "apiAndNode": "PASS: workflow 37639777479",
+    "finalPrTruckRoute": "PASS: workflow 37640151684",
+    "finalPrBrowserRegression": "PASS: workflow 37640151587",
     "activeIcGlobalBoundAdoption": "PASS",
     "meaningfulMotorwayRequirement": "PASS",
     "exactHgvRestrictions": "PASS",
     "final36GlobalDetourCapsPreserved": "PASS",
     "nonActiveNearFastRankingPreserved": "PASS",
-    "fullscreenRoutePersistence": "PASS: route visible before fullscreen, after fullscreen, and after software rotation",
-    "realEdge320390": "PASS: workflow 37639777479",
-    "browserRegression": "PASS: workflow 37639777130",
-    "noCarFallback": "PASS"
+    "fullscreenRoutePersistence": "PASS: route visible before fullscreen, after fullscreen viewport settle, and after software rotation",
+    "noCarFallback": "PASS",
+    "merge": "PASS: PR #174 -> f1987f5f2c73c0c642d36ce72959836233c885e1",
+    "mainBrowserRegression": "PASS: workflow 37640387020",
+    "githubPages": "PASS: workflow 37640385887",
+    "vercelProduction": "PASS: dpl_6j227M7n3db77s3hfFACap9M7XyM READY, target production, Git SHA f1987f5f2c73c0c642d36ce72959836233c885e1",
+    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.38",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.38",
+    "liveUi": "PASS: public route help states highway ON prefers bounded HGV highway routes found through nearby IC search"
   },
   "openItems": [
-    "Merge/deploy/live verification remains pending."
+    "No unresolved FINAL.38 implementation/release issue.",
+    "The exact previously failing highway route still needs real-device confirmation.",
+    "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Revalidate final PR head, merge PR #174, verify production/live FINAL.38, finalize canonical release bookkeeping, then return to paused AN15 evidence phase.",
+  "nextAction": "Continue normal FINAL.38 field use and retest the exact highway/fullscreen cases. Treat any remaining exact route failure as new bounded field evidence; resume AN15 only when explicitly reopened or an authorized real outcome source becomes available.",
   "unresolved": [
-    "FINAL.38 is validated but not yet production-verified."
+    "No unresolved FINAL.38 release issue.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
-  "changedFiles": [
+  "releaseChangedFiles": [
     "api/route.mjs",
     "truck-routing.js",
     "index.html",
@@ -48,6 +58,13 @@
     "tests/truck-route-api.test.mjs",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
+    ".ai/STATE.json",
+    ".ai/HANDOFF.md",
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
+  ],
+  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

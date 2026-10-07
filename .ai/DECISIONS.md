@@ -482,3 +482,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Browser/Edge regression must directly assert route visibility before fullscreen, after fullscreen, and after software rotation.
 - HGV restrictions, provider caps, global detour caps, and the no-car/no-straight-line policy remain unchanged.
 - Safety tag: `backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007` -> `84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd`.
+
+## 2026-10-07 — FINAL.38 production release complete
+- PR #174 merged to `main` at `f1987f5f2c73c0c642d36ce72959836233c885e1`.
+- Final PR Truck route / API / Edge run `37640151684` and Browser regression run `37640151587` passed.
+- Main Browser regression run `37640387020` and GitHub Pages run `37640385887` passed.
+- Vercel production deployment `dpl_6j227M7n3db77s3hfFACap9M7XyM` is READY for the exact merge SHA.
+- Live public version and routing asset report `2026.10.07-FINAL.38`.
+- FINAL.38 is closed. The next evidence is real-device retest of the previously failing highway route and fullscreen route persistence.
+- Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a bounded maintenance scope.
