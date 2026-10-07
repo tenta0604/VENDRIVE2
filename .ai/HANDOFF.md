@@ -7,15 +7,15 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.07-FINAL.37`.
+- Current visible production app version: `2026.10.07-FINAL.38`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.37 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.37 implementation task.
+FINAL.38 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.38 implementation task.
 
-Historical PR #172 is closed and merged. Its validation branch `chatgpt/final37-active-highway-ic-search-20261007` is history only and must not be used as a resume source. PR #170 / #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
+Historical PR #174 is closed and merged. Its validation branch `chatgpt/final38-highway-adoption-fullscreen-route-20261007` is history only and must not be used as a resume source. PR #172 / #170 / #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
 After recovery, the normal next project phase is:
 
@@ -409,3 +409,27 @@ PR #174 validation before canonical bookkeeping:
 - Edge explicitly asserts the active route remains visible before fullscreen, after fullscreen viewport resize, and after software rotation.
 
 Do not call FINAL.38 production-complete until PR #174 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.38 evidence are terminal PASS.
+
+## 2026-10-07 FINAL.38 production release complete
+
+FINAL.38 is released and production-verified.
+
+- PR #174 merged to `main` at `f1987f5f2c73c0c642d36ce72959836233c885e1`.
+- Immutable safety tag: `backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007` -> `84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd`.
+- Final PR Truck route/API/real Edge run `37640151684`: PASS.
+- Final PR Browser regression run `37640151587`: PASS.
+- Main Browser regression run `37640387020`: PASS.
+- GitHub Pages run `37640385887`: PASS.
+- Vercel production `dpl_6j227M7n3db77s3hfFACap9M7XyM`: READY for the exact merge commit.
+- Public `version.json` and routing asset report `2026.10.07-FINAL.38`.
+
+FINAL.38 behavior:
+- active IC driving-hgv candidates inside the existing global detour envelope can win highway-ON selection without the old near-fast +2 minute filter;
+- generated via-IC candidates require meaningful motorway distance;
+- normal provider alternatives retain near-fast ranking;
+- fullscreen/software-rotation viewport changes explicitly redraw the active route after Leaflet size invalidation;
+- HGV restrictions, global detour caps, provider-call limits, and no-car fallback remain preserved.
+
+Next evidence: retest the exact previously failing highway route and iPhone fullscreen route display.
+
+After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
