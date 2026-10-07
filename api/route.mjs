@@ -45,9 +45,9 @@ function junctionCacheKey(origin,destination,radius){return [rounded(origin.lat)
 async function findMotorwayJunctions(origin,destination,radius){
   const cacheKey=junctionCacheKey(origin,destination,radius),cached=junctionCache.get(cacheKey),now=Date.now();
   if(cached&&now-cached.at<JUNCTION_CACHE_TTL_MS)return cached.items;
-  const query='[out:json][timeout:3];(node(around:'+radius+','+origin.lat+','+origin.lng+')["highway"="motorway_junction"];node(around:'+radius+','+destination.lat+','+destination.lng+')["highway"="motorway_junction"];);out body 60;';
+  const query='[out:json][timeout:2];(node(around:'+radius+','+origin.lat+','+origin.lng+')["highway"="motorway_junction"];node(around:'+radius+','+destination.lat+','+destination.lng+')["highway"="motorway_junction"];);out body 80;';
   try{
-    const response=await timedFetch(OVERPASS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},3200);
+    const response=await timedFetch(OVERPASS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},2800);
     if(!response.ok)return [];
     const data=await response.json(),seen=new Set(),items=[];
     for(const element of Array.isArray(data?.elements)?data.elements:[]){
@@ -62,14 +62,15 @@ async function findMotorwayJunctions(origin,destination,radius){
 function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   const direct=routing.distanceMeters(origin,destination);
   if(!Number.isFinite(direct)||direct<5000)return [];
-  const entries=junctions.map(j=>({...j,access:routing.distanceMeters(origin,j)})).filter(j=>Number.isFinite(j.access)&&j.access<=Math.min(18000,Math.max(7000,baselineDistance*0.65))).sort((a,b)=>a.access-b.access).slice(0,5);
-  const exits=junctions.map(j=>({...j,egress:routing.distanceMeters(j,destination)})).filter(j=>Number.isFinite(j.egress)&&j.egress<=Math.min(18000,Math.max(7000,baselineDistance*0.65))).sort((a,b)=>a.egress-b.egress).slice(0,5);
+  const perEndAccessLimit=Math.min(25000,Math.max(9000,baselineDistance*0.25)),combinedAccessLimit=Math.min(35000,Math.max(16000,baselineDistance*0.35));
+  const entries=junctions.map(j=>({...j,access:routing.distanceMeters(origin,j)})).filter(j=>Number.isFinite(j.access)&&j.access<=perEndAccessLimit).sort((a,b)=>a.access-b.access).slice(0,6);
+  const exits=junctions.map(j=>({...j,egress:routing.distanceMeters(j,destination)})).filter(j=>Number.isFinite(j.egress)&&j.egress<=perEndAccessLimit).sort((a,b)=>a.egress-b.egress).slice(0,6);
   const pairs=[];
   for(const entry of entries)for(const exit of exits){
     if(entry.id===exit.id)continue;
     const highwaySpan=routing.distanceMeters(entry,exit),accessTotal=entry.access+exit.egress;
     if(!Number.isFinite(highwaySpan)||highwaySpan<Math.max(2500,direct*0.22))continue;
-    if(accessTotal>Math.min(18000,baselineDistance*0.75+2500))continue;
+    if(accessTotal>combinedAccessLimit)continue;
     pairs.push({entry,exit,score:accessTotal+Math.abs(highwaySpan-direct)*0.08});
   }
   pairs.sort((a,b)=>a.score-b.score);
@@ -101,7 +102,8 @@ async function handle(request) {
   if (!key) return json(503,{ok:false,message:'経路サービスの準備がまだ完了していません。外部ナビを利用できます'},origin,allowed);
   const restrictions={height:vehicle.height,width:vehicle.width,length:vehicle.length,weight:vehicle.weight};
   if (vehicle.axleload!==undefined)restrictions.axleload=vehicle.axleload;
-  const directMeters=routing.distanceMeters(body.origin,body.destination),junctionRadius=Math.round(Math.max(7000,Math.min(18000,directMeters*0.55)));
+  const directMeters=routing.distanceMeters(body.origin,body.destination),junctionRadius=Math.round(Math.max(8000,Math.min(25000,directMeters*0.35+4000)));
+  const junctionPromise=!vehicle.avoidTolls&&directMeters>=6000?findMotorwayJunctions(body.origin,body.destination,junctionRadius):Promise.resolve([]);
   try {
     const response=await requestOrsRoute([[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:true,timeoutMs:9000});
     if (!response.ok) {
@@ -117,14 +119,14 @@ async function handle(request) {
     for(let i=1;i<features.length;i++){try{candidates.push(sanitizeFeature(features[i]));}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=Math.min(18000,primary.summary.distance*0.55),highwaySearch={attempted:false,junctions:0,evaluated:0,accepted:0,status:'not-needed'},activeHighwayRoutes=new Set();
+    const motorwayTarget=Math.min(45000,primary.summary.distance*0.55),highwaySearch={attempted:false,junctions:0,evaluated:0,accepted:0,status:'not-needed',radiusMeters:junctionRadius},activeHighwayRoutes=new Set();
     if(!vehicle.avoidTolls&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
-      const junctions=await findMotorwayJunctions(body.origin,body.destination,junctionRadius);highwaySearch.junctions=junctions.length;
+      const junctions=await junctionPromise;highwaySearch.junctions=junctions.length;
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
       const viaResults=await Promise.all(pairs.map(async pair=>{
         try{
-          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:6500});
+          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:5500});
           if(!viaResponse.ok)return null;
           const viaData=await viaResponse.json(),feature=Array.isArray(viaData?.features)?viaData.features[0]:null;
           if(!feature)return null;
