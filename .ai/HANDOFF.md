@@ -195,3 +195,28 @@ FINAL.33 behavior:
 - Fullscreen MAP alone exposes software `🔄` rotation for rotation-locked devices while preserving PIN/modal interaction.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`. Do not reopen AN15 evidence capture unless explicitly authorized or a genuinely usable authorized real outcome source becomes available.
+
+## 2026-10-07 FINAL.34 rotated MAP gesture and arrival-card fix
+
+New real-device evidence after FINAL.33 opened a bounded maintenance scope. FINAL.33 remains completed history; this is not a retroactive reopening.
+
+Field evidence:
+- software-rotated fullscreen MAP visually rotated 90 degrees, but drag input still followed the portrait coordinate axes;
+- arrival visit cards stayed portrait-oriented while the fullscreen MAP was software-rotated.
+
+FINAL.34 validated behavior:
+- native Leaflet dragging is disabled only while software-rotated fullscreen MAP is active;
+- pointer drag deltas are rotated before calling Leaflet pan, so visible gesture and visible MAP movement use the same axes;
+- normal/unrotated MAP dragging is unchanged;
+- the arrival visit sheet rotates 90 degrees only in software-rotated fullscreen MAP mode;
+- arrival-card swipe detection uses the rotated pointer axis in that mode, preserving visible left = visit complete and visible right = visit skip;
+- existing task/order confirmations and fullscreen PIN/modal behavior remain preserved.
+
+Safety tag: `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`.
+
+PR #166 final product validation before canonical bookkeeping:
+- Truck route readiness / real Edge 320/390: `37612564670`, PASS.
+- Browser regression: `37612564593`, PASS.
+- Earlier failures `37612339313` and `37612497681` were test-harness-only defects (closure-local map reference and regex escaping). Product behavior was not rolled back.
+
+Do not call FINAL.34 production-complete until PR #166 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.34 evidence are terminal PASS.

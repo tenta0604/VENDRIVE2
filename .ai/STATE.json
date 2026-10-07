@@ -3,52 +3,44 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.33",
+  "activePhase": "FINAL34_ROTATED_MAP_GESTURE_ARRIVAL_CARD",
+  "nextPhase": "FINAL34_ROTATED_MAP_GESTURE_ARRIVAL_CARD",
+  "appVersion": "2026.10.07-FINAL.34",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL34_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.33 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.33 is merged, deployed, and live-verified. The normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
-    "releaseScope": [
-      "Accurate GPS fixes with accuracy <=50m within 100m of the active route destination automatically end the in-app route.",
-      "Arrival shows exactly one visit card at a time: unvisited destination first, then other unvisited machines on today's plan within 100m.",
-      "Left swipe completes through the existing task and order confirmation flow; right swipe skips today's visit.",
-      "The standard Today list also supports right-swipe visit skip.",
-      "The blocking landscape portrait guard is withdrawn; normal app/MAP remain portrait-width and portrait is requested where supported.",
-      "Fullscreen MAP alone exposes a 🔄 software-rotation control for rotation-locked devices; PIN/modal interaction remains preserved."
+    "title": "FINAL.34 rotated fullscreen MAP gesture and arrival-card orientation fix",
+    "releaseStatus": "Implementation is validated on PR #166 and awaits production merge/live verification. FINAL.33 remains the current production release until merge.",
+    "fieldEvidence": [
+      "In software-rotated fullscreen MAP, drag input followed the unrotated portrait coordinate system, making the map move in a different direction from the visible gesture.",
+      "Arrival visit cards remained portrait-oriented while the fullscreen MAP was software-rotated."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007 -> 42e9d4565e64a90abec6933d5b8d958e2e461983",
-      "pr": "PR #164 merged",
-      "mergeCommit": "1e0c68b2829349a2d30ba93e0414b6194ceedc0b",
-      "finalPrTruckRoute": "37610172801 PASS",
-      "finalPrBrowserRegression": "37610172731 PASS",
-      "mainBrowserRegression": "37610334284 PASS",
-      "githubPages": "37610333585 PASS",
-      "vercel": "dpl_B7PYTGPGRCNHE56dG68uPtx8voPq READY for merge commit",
-      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.33; public UI contains 🔄 and bidirectional Today swipe labels"
+    "scope": [
+      "While fullscreen MAP software rotation is active, disable native Leaflet dragging and remap pointer deltas by 90 degrees before panning the map.",
+      "Do not alter normal portrait MAP dragging.",
+      "While fullscreen MAP software rotation is active, rotate only the arrival visit sheet to the same visual orientation.",
+      "While that rotated arrival sheet is active, interpret the sheet's visible left/right swipe along the rotated pointer axis.",
+      "Preserve existing task/order confirmation flow, visit skip semantics, fullscreen PIN interaction, and non-rotated arrival behavior."
+    ],
+    "verification": {
+      "preEditMain": "PASS: aa23bca23109dfb549dd7d84fe14c912e26b6c51",
+      "safetyTag": "PASS: backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007 dereferences to pre-edit main",
+      "syntaxAndNode": "PASS: final Truck route readiness run 37612564670",
+      "realEdge": "PASS: final run 37612564670 validates rotated MAP gesture axis, rotated arrival sheet orientation/swipe axis, fullscreen PIN and existing route/arrival regressions at Edge 320/390",
+      "browserRegression": "PASS: final run 37612564593",
+      "earlierHarnessFailures": "RESOLVED: run 37612339313 referenced closure-local leafletMap from the harness; run 37612497681 had an over-escaped harness regex. Both were test-only issues; product code was unchanged."
     },
-    "decision": [
-      "Keep AN15 learned numeric promotion paused for now.",
-      "Do not add a new manual sales-outcome capture flow at this time.",
-      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
-      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
-      "Keep the deterministic production forecast baseline unchanged."
-    ],
     "nextActions": [
-      "Continue normal VENDRIVE use on FINAL.33.",
-      "If new real-device evidence reveals a defect or operator friction, open a new bounded maintenance scope with a new immutable pre-edit safety tag.",
-      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
+      "Merge PR #166 if latest-head checks remain PASS.",
+      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.34 assets/UI.",
+      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "AN15 learned numeric promotion is intentionally paused because normal shipped use does not provide the exact authorized real outcome evidence required for promotion.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "Production merge/deployment/live verification is still pending for FINAL.34."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",

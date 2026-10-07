@@ -1,62 +1,49 @@
 {
-  "evidenceVersion": 41,
-  "runType": "final33_production_release_closeout",
-  "phase": "FINAL33_ARRIVAL_VISIT_CARDS_MAP_ROTATION",
-  "status": "COMPLETE",
+  "evidenceVersion": 42,
+  "runType": "final34_rotated_map_gesture_arrival_card_validation",
+  "phase": "FINAL34_ROTATED_MAP_GESTURE_ARRIVAL_CARD",
+  "status": "PASS",
   "base": {
-    "productionMainBefore": "42e9d4565e64a90abec6933d5b8d958e2e461983",
-    "safetyTag": "backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007",
-    "safetyTagTarget": "42e9d4565e64a90abec6933d5b8d958e2e461983"
+    "productionMainBefore": "aa23bca23109dfb549dd7d84fe14c912e26b6c51",
+    "safetyTag": "backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007",
+    "safetyTagTarget": "aa23bca23109dfb549dd7d84fe14c912e26b6c51"
   },
   "versions": {
-    "app": "2026.10.07-FINAL.33",
+    "app": "2026.10.07-FINAL.34",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.33 is production-complete: accurate 100m arrival ends navigation; one-card nearby visit handling reuses task/order confirmations; left swipe completes and right swipe skips; Today gains right-swipe skip; fullscreen MAP gains software 90-degree rotation for rotation-locked devices while PIN/modal behavior remains intact.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "productionCodeChanged": true,
-    "closeoutCommitChangesDocumentationOnly": true
+    "summary": "Corrected software-rotated fullscreen MAP drag direction by remapping pointer deltas into the rotated Leaflet coordinate system. Rotated the arrival visit sheet only in that mode and remapped its swipe axis so visible left/right gestures retain complete/skip meaning.",
+    "productStatus": "VALIDATED_PENDING_PRODUCTION",
+    "productionCodeChanged": true
   },
   "gates": {
-    "canonicalRecovery": "PASS: synchronized main and canonical recovery set verified before implementation",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL33-ARRIVAL-CARDS-MAP-ROTATION-20261007 -> 42e9d4565e64a90abec6933d5b8d958e2e461983",
-    "finalPrTruckRoute": "PASS: workflow 37610172801",
-    "finalPrBrowserRegression": "PASS: workflow 37610172731",
-    "realEdge320390": "PASS: final PR truck route workflow covers arrival auto-end, one-card flow, task/order confirmation, Today right-swipe skip, fullscreen software rotation, and fullscreen PIN modal",
-    "merge": "PASS: PR #164 -> 1e0c68b2829349a2d30ba93e0414b6194ceedc0b",
-    "mainBrowserRegression": "PASS: workflow 37610334284",
-    "githubPages": "PASS: workflow 37610333585",
-    "vercelProduction": "PASS: dpl_B7PYTGPGRCNHE56dG68uPtx8voPq READY, target production, Git SHA 1e0c68b2829349a2d30ba93e0414b6194ceedc0b",
-    "liveVersion": "PASS: public version.json reports 2026.10.07-FINAL.33",
-    "liveUi": "PASS: public page exposes 🔄 and left-complete/right-skip Today hint",
-    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.07-FINAL.33 and contains accurate <=100m arrival end/callback behavior",
-    "initialHarnessFailure": "RESOLVED: workflow 37609644215 failure was test-fixture state only; test reset fixed it without product-code changes"
+    "canonicalRecovery": "PASS: latest synchronized main and canonical recovery set verified before edits",
+    "immutableSafetyTag": "PASS: backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007 -> aa23bca23109dfb549dd7d84fe14c912e26b6c51",
+    "syntaxAndNode": "PASS: workflow 37612564670",
+    "realEdge320390": "PASS: workflow 37612564670",
+    "rotatedMapGestureAxis": "PASS: visible screen-right drag in 90-degree MAP primarily moves the corresponding rotated Leaflet pane axis",
+    "rotatedArrivalOrientation": "PASS: arrival sheet is software-rotated only while fullscreen MAP software rotation is active",
+    "rotatedArrivalSwipeAxis": "PASS: rotated visible left/right gestures drive visit complete/skip through the existing workflow",
+    "fullscreenPin": "PASS: existing fullscreen PIN -> machine modal remains operational",
+    "browserRegression": "PASS: workflow 37612564593",
+    "initialHarnessFailures": "RESOLVED: 37612339313 closure-local map reference; 37612497681 test regex escaping. No product-code rollback or logic change was needed."
   },
   "openItems": [
-    "AN15 learned numeric promotion remains intentionally paused until explicitly reopened or an authorized real outcome source becomes available."
+    "Merge/deploy/live verification remains pending."
   ],
-  "nextAction": "Continue normal FINAL.33 field use. Resume the intentionally paused AN15 evidence gate only when explicitly reopened or a usable authorized real outcome source becomes available.",
+  "nextAction": "Merge PR #166 after final-head checks, then verify production/live FINAL.34 and finalize canonical release bookkeeping.",
   "unresolved": [
-    "No unresolved FINAL.33 release issue.",
-    "AN15 evidence/promotion remains an intentional paused state."
+    "FINAL.34 is validated but not yet production-verified."
   ],
-  "releaseChangedFiles": [
+  "changedFiles": [
     "index.html",
     "truck-routing.js",
-    "manifest.webmanifest",
     "version.json",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
-    ".ai/STATE.json",
-    ".ai/HANDOFF.md",
-    ".ai/LAST_RUN.json",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
-  ],
-  "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",

@@ -396,3 +396,12 @@ This file records confirmed project decisions that must survive chat migration. 
 - Vercel production deployment `dpl_B7PYTGPGRCNHE56dG68uPtx8voPq` is READY for the exact merge SHA.
 - Live public version and routing asset report `2026.10.07-FINAL.33`; public UI exposes `🔄` plus left-complete/right-skip Today guidance.
 - FINAL.33 is closed. Return to the intentionally paused AN15 evidence/promotion gate unless new field evidence opens a new bounded maintenance scope.
+
+## 2026-10-07 — FINAL.34 rotated gesture decisions
+- CSS software rotation alone is not sufficient for interactive MAP dragging. While `mapFullscreen + mapSoftRotated` is active, native Leaflet dragging must be disabled and pointer deltas remapped by 90 degrees before pan.
+- Normal/unrotated MAP keeps native Leaflet dragging.
+- Interactive MAP controls, machine PINs and form controls must remain outside the custom rotated-drag capture path.
+- Arrival visit UI follows the MAP software orientation only while `mapFullscreen + mapSoftRotated` is active. It remains normal portrait orientation otherwise.
+- In rotated arrival mode, visible left/right swipe semantics remain unchanged: left = complete, right = skip. The pointer axis is remapped rather than changing product semantics.
+- Task and order confirmation logic remains the existing authority after an arrival-card complete gesture.
+- Safety tag: `backup-pre-FINAL34-ROTATED-MAP-GESTURE-ARRIVAL-CARD-20261007` -> `aa23bca23109dfb549dd7d84fe14c912e26b6c51`.
