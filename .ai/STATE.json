@@ -3,55 +3,52 @@
   "repository": "tenta0604/VENDRIVE2",
   "productionBranch": "main",
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
-  "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.07-FINAL.37",
+  "activePhase": "FINAL38_HIGHWAY_ADOPTION_FULLSCREEN_ROUTE",
+  "nextPhase": "FINAL38_HIGHWAY_ADOPTION_FULLSCREEN_ROUTE",
+  "appVersion": "2026.10.07-FINAL.38",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "AN15_PROMOTION_PAUSED_BY_PRODUCT_DECISION",
+  "status": "FINAL38_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.37 production verified; AN15 learned numeric promotion remains paused",
-    "releaseStatus": "FINAL.37 is merged, deployed, and live-verified. Normal project state returns to the intentionally paused AN15 evidence/promotion gate.",
-    "releaseScope": [
-      "Highway ON first evaluates normal ORS driving-hgv alternatives.",
-      "When normal candidates still contain insufficient motorway use, VENDRIVE actively queries nearby OSM motorway junctions through Overpass.",
-      "At most two plausible entry/exit IC pairs are evaluated as four-point ORS driving-hgv routes.",
-      "Every extra route preserves the exact registered HGV height/width/length/weight/axleload restrictions and ferry avoidance.",
-      "FINAL.36 time/distance detour limits and near-fast ranking remain authoritative; IC routes are candidates, never forced.",
-      "IC discovery failure safely falls back to the normal HGV route.",
-      "Overpass discovery is deferred until needed, briefly cached per warm instance, and extra ORS calls share the 30/minute warm-instance route-call guard.",
-      "No car or straight-line fallback was introduced."
+    "title": "FINAL.38 bounded highway adoption + fullscreen route persistence",
+    "releaseStatus": "Implementation is validated on PR #174 and awaits production merge/live verification. FINAL.37 remains the current production release until merge.",
+    "fieldEvidence": [
+      "Real-device retest after FINAL.37 showed no practical change in highway selection.",
+      "Real-device retest also showed active route geometry disappearing in fullscreen MAP."
     ],
-    "productionEvidence": {
-      "safetyTag": "backup-pre-FINAL37-ACTIVE-HIGHWAY-IC-SEARCH-20261007 -> 77b7b437469e8100f94661fb4f5707acd1320e13",
-      "pr": "PR #172 merged",
-      "mergeCommit": "04ce9033731bb52a49c9d0dc636b46e7826f3a82",
-      "finalPrTruckRoute": "37636733086 PASS",
-      "finalPrBrowserRegression": "37636733333 PASS",
-      "mainBrowserRegression": "37636924246 PASS",
-      "githubPages": "37636923395 PASS",
-      "vercel": "dpl_58RHPeSbzBG3urLD54WrMYsCtCTo READY for exact merge commit",
-      "live": "GitHub Pages version.json and public routing asset report 2026.10.07-FINAL.37; public UI states highway ON actively searches nearby ICs"
+    "rootCause": [
+      "FINAL.37 could generate via-IC HGV candidates, but final selection still forced them through the older near-fast +2 minute band, so a valid bounded highway candidate could be discarded and the surface route retained.",
+      "Fullscreen/soft-rotation viewport changes invalidated Leaflet size but did not explicitly redraw the active route layer after the iOS viewport settled; existing regression tests did not assert route persistence across fullscreen transitions."
+    ],
+    "scope": [
+      "Active IC search remains driving-hgv with exact registered vehicle restrictions.",
+      "Active IC search is triggered until normal motorway use is materially sufficient (target up to 55% of primary route distance, capped at 18km), rather than stopping after a small fixed amount.",
+      "A via-IC candidate must contain meaningful motorway use (at least 1.5km and at least 15% of primary route distance).",
+      "If an active IC candidate is inside FINAL.36 global detour bounds (+20% time capped +8min; +30% distance capped +10km), the best active IC candidate is preferred without reapplying the old near-fast +2min filter.",
+      "Non-active ORS alternatives retain the near-fast ranking behavior.",
+      "Fullscreen and software-rotation viewport refresh explicitly redraws the active route after Leaflet size invalidation at two settle points.",
+      "No car/straight-line fallback and no weakening of HGV safety restrictions."
+    ],
+    "verification": {
+      "preEditMain": "PASS: 84effdd4fc616f8c4c8e9b508cd5c673d5e92dfd",
+      "safetyTag": "PASS: backup-pre-FINAL38-HIGHWAY-ADOPTION-FULLSCREEN-ROUTE-20261007 dereferences to pre-edit main",
+      "apiAndNode": "PASS: Truck route readiness run 37639777479",
+      "realEdge": "PASS: Edge 320/390 run 37639777479",
+      "browserRegression": "PASS: run 37639777130",
+      "activeIcAdoption": "PASS: bounded active IC route outside the old +2min near-fast window is selected while inside global detour caps",
+      "fullscreenRoutePersistence": "PASS: active route is asserted visible before fullscreen, after fullscreen resize, and after software rotation"
     },
-    "decision": [
-      "Keep AN15 learned numeric promotion paused for now.",
-      "Do not add a new manual sales-outcome capture flow at this time.",
-      "Do not restore the withdrawn OCR/Analysis UI by assumption.",
-      "Do not weaken exact interval or no-lookahead safeguards merely to accumulate evidence.",
-      "Keep the deterministic production forecast baseline unchanged."
-    ],
     "nextActions": [
-      "Continue normal VENDRIVE field use on FINAL.37 and retest the highway case that previously failed to use a practical expressway.",
-      "If that exact route still avoids the highway, capture the specific origin/destination as new field evidence so the selected IC pair/provider data can be investigated rather than weakening HGV safety globally.",
-      "Revisit AN15 promotion only when an authorized real sales-outcome source becomes available or the user explicitly reopens the scope."
+      "Revalidate the final PR head after canonical bookkeeping.",
+      "Merge PR #174 only if required checks remain PASS.",
+      "Verify main browser regression, GitHub Pages, Vercel production, and live FINAL.38.",
+      "After production verification, return normal project state to the intentionally paused AN15 evidence/promotion gate."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "No unresolved FINAL.37 release issue. Real-device confirmation on the previously problematic highway case remains the next evidence step because no exact origin/destination pair was supplied for provider-data reproduction.",
-    "AN15 learned numeric promotion remains intentionally paused.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "Production merge/deployment/live verification is still pending for FINAL.38."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
