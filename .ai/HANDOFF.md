@@ -242,3 +242,24 @@ FINAL.34 behavior:
 - task/order confirmations and fullscreen PIN interaction remain preserved.
 
 After this release, return to the intentionally paused `AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE`.
+
+## 2026-10-07 FINAL.35 rotated machine-detail card
+
+New real-device evidence after FINAL.34 opened a bounded maintenance scope. FINAL.34 remains completed history.
+
+Field evidence:
+- in software-rotated fullscreen MAP, the arrival visit sheet was correctly landscape but a machine detail opened from a vending-machine PIN still appeared portrait-oriented.
+
+FINAL.35 validated behavior:
+- the PIN-opened machine detail sheet rotates 90 degrees only while `mapFullscreen + mapSoftRotated` is active;
+- machine detail stays portrait in normal MAP and unrotated fullscreen MAP;
+- close and the existing machine-detail controls remain operational;
+- FINAL.34 rotated MAP dragging, arrival-card orientation/swipe behavior, task/order confirmations and PIN interaction remain preserved.
+
+Safety tag: `backup-pre-FINAL35-ROTATED-MACHINE-CARD-20261007` -> `f5294949edca2783f45e7abbe3232b8249d70ced`.
+
+PR #168 validation before canonical bookkeeping:
+- Truck route readiness / real Edge 320/390: `37614566359`, PASS.
+- Browser regression: `37614566431`, PASS.
+
+Do not call FINAL.35 production-complete until PR #168 is merged and main regression, Vercel production, GitHub Pages, and live FINAL.35 evidence are terminal PASS.
