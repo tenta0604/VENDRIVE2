@@ -1,55 +1,53 @@
 {
-  "evidenceVersion": 53,
-  "runType": "final39_production_release_closeout",
-  "phase": "FINAL39_ROUTE_ROBUSTNESS",
+  "evidenceVersion": 54,
+  "runType": "final40_production_release_closeout",
+  "phase": "FINAL40_IOS_FULLSCREEN_HIGHWAY_JCT",
   "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "170289c08866bf6120df46d5c9545ed22e3a9b35",
-    "safetyTag": "backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007",
-    "safetyTagTarget": "170289c08866bf6120df46d5c9545ed22e3a9b35"
+    "productionMainBefore": "9541bd9d1d8242ec880f87315ae4fcf05052b006",
+    "safetyTag": "backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007",
+    "safetyTagTarget": "9541bd9d1d8242ec880f87315ae4fcf05052b006"
   },
   "versions": {
-    "app": "2026.10.08-FINAL.39",
+    "app": "2026.10.08-FINAL.40",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.39 is production-complete: active route is refit into the visible fullscreen MAP, route timeout budgets are aligned, and long-distance highway discovery no longer stops at the old 18km caps.",
+    "summary": "FINAL.40 is production-complete: fullscreen route start avoids redundant MAP rerender work, in-flight route acquisition is isolated from fullscreen refit/redraw work, and bounded highway discovery now probes a geographically distinct corridor so ORS driving-hgv can use farther JCT-connected motorway paths.",
     "productStatus": "PRODUCTION_VERIFIED",
     "productionCodeChanged": true,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL39-ROUTE-ROBUSTNESS-20261007 -> 170289c08866bf6120df46d5c9545ed22e3a9b35",
-    "finalPrTruckRoute": "PASS: workflow 37643816604",
-    "finalPrBrowserRegression": "PASS: workflow 37643816472",
-    "longDistanceHighwaySearch": "PASS",
-    "expandedIcRadiusAndAccess": "PASS",
-    "final36GlobalDetourCapsPreserved": "PASS",
-    "timeoutBudgetAlignment": "PASS",
-    "parallelJunctionDiscovery": "PASS",
-    "fitActiveRemainingRoute": "PASS",
-    "fullscreenRouteVisibleViewport": "PASS",
+    "immutableSafetyTag": "PASS: backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007 -> 9541bd9d1d8242ec880f87315ae4fcf05052b006",
+    "productPrTruckRoute": "PASS: PR #180 workflow 37699925874",
+    "productPrBrowserRegression": "PASS: PR #180 workflow 37699925873",
+    "followupTruckRoute": "PASS: PR #179 workflow 37709837666",
     "exactHgvRestrictions": "PASS",
-    "noCarFallback": "PASS",
-    "merge": "PASS: PR #177 -> 6b843d988fddba509cedcd590c6fe71ba1afd6db",
-    "mainBrowserRegression": "PASS: workflow 37644030491",
-    "githubPages": "PASS: workflow 37644029832",
-    "vercelProduction": "PASS: dpl_7Brq9TY4PciGB65jAQoLWi1rNwm4 READY, target production, Git SHA 6b843d988fddba509cedcd590c6fe71ba1afd6db",
-    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.39",
-    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.39",
-    "liveUi": "PASS: public truck settings state long-distance highway search is not cut off early"
+    "maxTwoViaIcCandidates": "PASS",
+    "final36GlobalDetourCapsPreserved": "PASS",
+    "noCarOrStraightLineFallback": "PASS",
+    "productMerge": "PASS: PR #180 -> 7f58726df3ed7a69820013f94f78e80d914f32f6",
+    "testOnlyFollowupMerge": "PASS: PR #179 -> 1aefd847ffc38945d305e80c560fe1e9f8b2a714; relative to product merge only tests/run-truck-route-gates.mjs changed",
+    "mainBrowserRegression": "PASS: workflow 37700422796 on the identical FINAL.40 product tree",
+    "githubPages": "PASS: workflow 37709999513 on current main",
+    "vercelProduction": "PASS: dpl_H6MTgzUTv4z72HQSERcJcgBdRY8H READY, target production, Git SHA 1aefd847ffc38945d305e80c560fe1e9f8b2a714",
+    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.40",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.40"
   },
   "openItems": [
-    "No unresolved FINAL.39 implementation/release issue.",
-    "The exact previously failing field cases still require real-device confirmation.",
+    "No unresolved FINAL.40 implementation or release issue.",
+    "The exact iPhone fullscreen-start timeout case still requires real-device confirmation.",
+    "The same long-distance highway/JCT case still requires real-device confirmation.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Retest the same long-route highway, timeout, and fullscreen MAP cases on FINAL.39. Treat any remaining exact failure as new bounded field evidence; resume AN15 only when explicitly reopened or an authorized real outcome source becomes available.",
+  "nextAction": "Retest FINAL.40 on the same iPhone: start the same long route from fullscreen MAP, confirm no timeout, confirm the route remains visible fullscreen/rotated, and confirm highway ON uses the expected longer JCT-capable motorway path. Treat any remaining failure as new bounded field evidence before changing more thresholds.",
   "unresolved": [
-    "No unresolved FINAL.39 release issue.",
+    "No unresolved FINAL.40 release issue.",
+    "Real-device FINAL.40 confirmation remains pending.",
     "AN15 evidence/promotion remains an intentional paused state."
   ],
   "releaseChangedFiles": [
@@ -77,14 +75,15 @@
     "createdFor": "fresh-chat handoff",
     "status": "PASS",
     "productCodeChanged": false,
-    "sourceMain": "d0d9f6668043793a50f0a1225dd5726e8da137af",
-    "resumeFrom": "FINAL.39 production-complete; real-device iPhone confirmation still pending",
+    "sourceMain": "1aefd847ffc38945d305e80c560fe1e9f8b2a714",
+    "resumeFrom": "FINAL.40 production-complete; exact iPhone field confirmation pending",
     "immediateEvidence": [
-      "same long-distance highway case",
+      "same fullscreen long-route start",
       "route acquisition timeout recurrence or absence",
-      "fullscreen route visible immediately",
+      "same long-distance highway/JCT route",
+      "fullscreen route remains visible",
       "software-rotated fullscreen route remains visible"
     ],
-    "warning": "Do not treat automated FINAL.39 PASS as real-device confirmation, and do not reopen AN15 automatically."
+    "warning": "Do not treat automated FINAL.40 PASS as real-device confirmation, and do not reopen AN15 automatically."
   }
 }

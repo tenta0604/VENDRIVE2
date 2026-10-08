@@ -524,3 +524,19 @@ This file records confirmed project decisions that must survive chat migration. 
 - FINAL.36 final caps remain authoritative: duration primary + min(20%, 8 minutes), distance primary + min(30%, 10km).
 - Keep `driving-hgv`, exact registered vehicle height/width/length/weight/optional axleload, ferry avoidance, the warm 30 route-call/minute guard, and no car/straight-line fallback.
 - Safety tag: `backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007` -> `9541bd9d1d8242ec880f87315ae4fcf05052b006`.
+
+
+## 2026-10-08 — FINAL.40 production release complete
+
+- FINAL.40 product PR #180 merged to `main` at `7f58726df3ed7a69820013f94f78e80d914f32f6`.
+- PR #180 Truck route readiness / API / real Edge run `37699925874` and Browser regression run `37699925873` passed.
+- Follow-up PR #179 merged at `1aefd847ffc38945d305e80c560fe1e9f8b2a714`; compared with the product merge, the effective delta is test-only (`tests/run-truck-route-gates.mjs`).
+- The final follow-up Truck route readiness run `37709837666` passed.
+- Main Browser regression `37700422796` passed on the identical FINAL.40 product tree.
+- Current-main GitHub Pages run `37709999513` passed.
+- Vercel production deployment `dpl_H6MTgzUTv4z72HQSERcJcgBdRY8H` is READY for Git SHA `1aefd847ffc38945d305e80c560fe1e9f8b2a714`.
+- Public `version.json` and public routing asset report `2026.10.08-FINAL.40`.
+- FINAL.40 implementation/release is closed. The remaining evidence is the exact iPhone field retest of fullscreen route acquisition and the long-distance highway/JCT route.
+- Automated PASS must not be treated as real-device confirmation.
+- If the field issue persists, instrument the exact failing case before changing route thresholds or iOS viewport behavior again.
+- AN15 learned numeric promotion remains intentionally paused; OCR/Analysis remains withdrawn.
