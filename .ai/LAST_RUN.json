@@ -1,61 +1,58 @@
 {
-  "evidenceVersion": 56,
-  "runType": "final41_production_release_closeout",
-  "phase": "FINAL41_DIRECTIONAL_REROUTE_TURN_ZOOM",
+  "evidenceVersion": 57,
+  "runType": "final42_production_release_closeout",
+  "phase": "FINAL42_ARRIVAL_WORK_DETAILS",
   "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "695eaa74716446f3e1f147be226d46521b7747a8",
-    "safetyTag": "backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008",
-    "safetyTagTarget": "695eaa74716446f3e1f147be226d46521b7747a8"
+    "productionMainBefore": "1a84a1c5830d39b715990753fc327a059eaa7f1f",
+    "safetyTag": "backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008",
+    "safetyTagTarget": "1a84a1c5830d39b715990753fc327a059eaa7f1f"
   },
   "versions": {
-    "app": "2026.10.08-FINAL.41",
+    "app": "2026.10.08-FINAL.42",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.41 is production-complete: automatic off-route rerouting can honor reliable travel direction, while MAP follow gradually zooms for upcoming significant bends. Initial/manual search and all HGV safety contracts remain unchanged.",
+    "summary": "FINAL.42 is production-complete: arrival visit cards now surface the full pending order information and every active incomplete task for the arriving machine using arrival-specific rendering rather than Today-list task decoration.",
     "productStatus": "PRODUCTION_VERIFIED",
     "productionCodeChanged": true,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008 -> 695eaa74716446f3e1f147be226d46521b7747a8",
-    "finalPrTruckRoute": "PASS: workflow 37720662646",
-    "finalPrBrowserRegression": "PASS: workflow 37720662617",
-    "directionAwareAutoReroute": "PASS",
-    "initialAndManualDirectionAgnostic": "PASS",
-    "turnAwareFollowZoom": "PASS",
-    "exactHgvRestrictions": "PASS",
-    "highwayAndDetourPoliciesPreserved": "PASS",
-    "noCarOrStraightLineFallback": "PASS",
-    "merge": "PASS: PR #183 -> b8427d859afe0c9cc05d26f55859022c41c11037",
-    "mainBrowserRegression": "PASS: workflow 37720926478",
-    "githubPages": "PASS: workflow 37720925836",
-    "vercelProduction": "PASS: dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa READY, target production, Git SHA b8427d859afe0c9cc05d26f55859022c41c11037",
-    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.41",
-    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.41"
+    "immutableSafetyTag": "PASS: backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008 -> 1a84a1c5830d39b715990753fc327a059eaa7f1f",
+    "prTruckRoute": "PASS: workflow 37723986337",
+    "prBrowserRegression": "PASS: workflow 37723986287",
+    "arrivalFullOrderDetails": "PASS",
+    "arrivalAllActiveTasks": "PASS",
+    "arrivalIndependentFromTodayTaskDecoration": "PASS",
+    "uncheckedTaskRemainsIncomplete": "PASS",
+    "routingSafetyUnchanged": "PASS",
+    "merge": "PASS: PR #186 -> 55f304892fcb626a73a755c4a8e0129272da91c7",
+    "mainBrowserRegression": "PASS: workflow 37724083359",
+    "githubPages": "PASS: workflow 37724082816",
+    "vercelProduction": "PASS: dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR READY, target production, Git SHA 55f304892fcb626a73a755c4a8e0129272da91c7",
+    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.42",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.42"
   },
   "openItems": [
-    "No unresolved FINAL.41 implementation or release issue.",
-    "Real-device direction-aware reroute confirmation remains required.",
-    "Real-device turn-aware MAP follow zoom confirmation remains required.",
+    "No unresolved FINAL.42 implementation or release issue.",
+    "Real-device FINAL.42 arrival-card display confirmation remains required.",
+    "FINAL.41 and FINAL.40 field confirmations remain pending.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Retest FINAL.41 on the real iPhone: leave the route while moving to verify direction-aware automatic reroute, and approach a clear turn with MAP follow ON to verify gradual zoom-in/zoom-out. Treat any remaining failure as new bounded field evidence.",
+  "nextAction": "Retest FINAL.42 on the iPhone with an arriving machine that has an order and multiple active tasks. Confirm full order detail and all active tasks appear on the arrival card before swipe, and unchecked tasks remain incomplete.",
   "unresolved": [
-    "No unresolved FINAL.41 release issue.",
-    "Real-device FINAL.41 confirmation remains pending.",
+    "No unresolved FINAL.42 release issue.",
+    "Real-device FINAL.42 confirmation remains pending.",
     "AN15 evidence/promotion remains an intentional paused state."
   ],
   "releaseChangedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
     "index.html",
+    "truck-routing.js",
     "version.json",
-    "tests/truck-route-api.test.mjs",
     "tests/truck-route-client.test.mjs",
     "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
@@ -75,14 +72,15 @@
     "createdFor": "fresh-chat handoff",
     "status": "PASS",
     "productCodeChanged": false,
-    "sourceMain": "b8427d859afe0c9cc05d26f55859022c41c11037",
-    "resumeFrom": "FINAL.41 production-complete; real-device navigation confirmation pending",
+    "sourceMain": "55f304892fcb626a73a755c4a8e0129272da91c7",
+    "resumeFrom": "FINAL.42 production-complete; arrival-card field confirmation pending",
     "immediateEvidence": [
-      "automatic off-route reroute follows travel direction",
-      "initial/manual search still ordinary",
-      "turn-aware zoom approaches clear bend gradually",
-      "zoom relaxes after the turn"
+      "arrival card shows full order details",
+      "arrival card shows all active incomplete tasks",
+      "unchecked tasks remain incomplete",
+      "FINAL.41 directional reroute and turn zoom when convenient",
+      "FINAL.40 fullscreen/highway behavior when convenient"
     ],
-    "warning": "Do not treat automated FINAL.41 PASS as real-device confirmation, and do not reopen AN15 automatically."
+    "warning": "Do not treat automated FINAL.42 PASS as real-device confirmation, and do not reopen AN15 automatically."
   }
 }
