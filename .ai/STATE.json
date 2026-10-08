@@ -5,51 +5,50 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.08-FINAL.43",
+  "appVersion": "2026.10.08-FINAL.44",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL43_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+  "status": "FINAL44_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
   "currentWork": {
-    "title": "FINAL.43 production complete; office internal-route field confirmation pending",
-    "releaseStatus": "FINAL.43 is merged, deployed, and live-verified. Office list taps/buttons and office MAP pins now start the same internal VENDRIVE driving-hgv route flow as vending-machine navigation.",
+    "title": "FINAL.44 production complete; task-threshold gauge field confirmation pending",
+    "releaseStatus": "FINAL.44 is merged, deployed, and live-verified. Task-tab progress gauges now scale against each task's configured auto-completion threshold while actual progress text and completion logic remain unchanged.",
     "releaseScope": [
-      "Office list rows/buttons now start the internal VENDRIVE HGV route instead of immediately opening external Google Maps.",
-      "Office MAP pins now start the same internal HGV route.",
-      "Office destinations are tracked distinctly from vending machines so destination validity checks use state.offices.",
-      "Arriving within the office destination threshold ends routing but does not open vending-machine visit/task/order arrival actions.",
-      "The explicit external-navigation action in the active route panel remains available.",
-      "All HGV restrictions, highway/JCT logic, direction-aware reroute, turn-aware zoom, provider-call guards, and FINAL.36 detour caps remain unchanged."
+      "A task configured to auto-complete at N% now treats N% actual completion as a full gauge.",
+      "Example: a 70% threshold displays 35% actual progress as half the gauge and 50% actual progress as about 71.4% of the gauge.",
+      "The task detail progress gauge uses the same threshold-relative scale.",
+      "Displayed actual percentage, target counts, task completion threshold, and auto-completion logic are unchanged.",
+      "No routing, HGV, task-target, persistence, order, or arrival behavior changed."
     ],
     "validationEvidence": {
-      "safetyTag": "backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008 -> af8f34f363b25ea1885df22adc35dc6b01ac3ec0",
-      "productMerge": "PR #189 -> e648323947019745e507015f61ddb0b464163f43",
-      "prTruckRoute": "37730660379 PASS",
-      "prBrowserRegression": "37730661344 PASS",
-      "mainBrowserRegression": "37730783341 PASS",
-      "githubPages": "37730782368 PASS",
-      "vercelProduction": "dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM READY, target production, Git SHA e648323947019745e507015f61ddb0b464163f43",
-      "liveVersion": "public version.json = 2026.10.08-FINAL.43; Vercel version.json = 2026.10.08-FINAL.43",
-      "priorFieldEvidence": "User confirmed FINAL.42 arrival-card task display is OK. Other previously pending field checks remain unconfirmed."
+      "safetyTag": "backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008 -> 712f89119ce14ed62cb028cbaafdb46e2c730f64",
+      "productMerge": "PR #192 -> afcbf0b639959fa6c3d80bf202021f060d487593",
+      "prTruckRoute": "37733253158 PASS",
+      "prBrowserRegression": "37733253132 PASS",
+      "mainBrowserRegression": "37733379642 PASS",
+      "githubPages": "37733378870 PASS",
+      "vercelProduction": "dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw READY, target production, Git SHA afcbf0b639959fa6c3d80bf202021f060d487593",
+      "liveVersion": "Pages and Vercel version.json = 2026.10.08-FINAL.44",
+      "priorFieldEvidence": "FINAL.42 arrival-card task display was user-confirmed OK. FINAL.40/41/43 checks remain pending; FINAL.42 order-detail display was not explicitly confirmed."
     },
     "decision": [
-      "Treat office navigation as an internal HGV destination, not a vending-machine visit target.",
-      "Do not open visit/task/order arrival workflows for office arrivals.",
-      "Keep the optional external navigation button in the active route panel.",
-      "Do not change routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior beyond generic office destination support.",
+      "Gauge fill is threshold-relative: gaugePercent = clamp(actualPercent / configuredThreshold * 100, 0, 100).",
+      "Actual progress text remains the real 0-100% completion rate and must not be relabeled as threshold-relative.",
+      "Task auto-completion semantics remain unchanged.",
+      "Keep all previously released routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior unchanged.",
       "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "On the iPhone, tap an office in the office list and confirm the internal VENDRIVE route opens.",
-      "Tap the office MAP pin and confirm it also starts the internal route.",
-      "Drive/position near the office and confirm routing ends without opening a vending-machine arrival card.",
-      "Continue the still-pending FINAL.40 fullscreen/highway and FINAL.41 directional-reroute/turn-zoom checks when convenient."
+      "On the iPhone, open a task whose completion threshold is below 100% and confirm the task-card gauge visually fills relative to that threshold.",
+      "Open the same task detail and confirm its gauge uses the same scale.",
+      "Continue the still-pending FINAL.43 office-route, FINAL.41 directional-reroute/turn-zoom, and FINAL.40 fullscreen/highway checks when convenient."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Real-device confirmation of FINAL.43 office internal routing remains required.",
-    "FINAL.42 arrival-card task display is user-confirmed; order-detail field confirmation is still not explicitly confirmed.",
+    "Real-device confirmation of FINAL.44 threshold-relative task gauges remains required.",
+    "FINAL.43 office internal-routing real-device confirmation remains pending.",
+    "FINAL.42 arrival-card task display is user-confirmed; order-detail display is not explicitly confirmed.",
     "FINAL.41 direction-aware reroute and turn-aware zoom real-device confirmation remains pending.",
     "FINAL.40 fullscreen/highway real-device confirmation remains pending.",
     "AN15 learned numeric promotion remains intentionally paused."
@@ -65,9 +64,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.43本番完了後の実機確認から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.44本番完了後の実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.43 is production-complete and live-verified. Resume from iPhone confirmation that office list/MAP taps use the internal HGV route and office arrival does not open machine visit actions. Keep the still-pending FINAL.40/41 field checks separate. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.43 production complete — office internal-route field retest pending"
+    "handoffBoundary": "FINAL.44 is production-complete and live-verified. Resume from iPhone confirmation that task-card and task-detail gauges scale against each configured completion threshold. Keep the still-pending FINAL.40/41/43 field checks separate. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.44 production complete — task-threshold gauge field retest pending"
   }
 }
