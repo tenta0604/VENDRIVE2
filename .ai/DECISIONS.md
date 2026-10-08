@@ -640,3 +640,18 @@ This file records confirmed project decisions that must survive chat migration. 
 - PR #196 product merge: `da376f589387144774c7d7e8dc6eb6f024a919b9`; Truck route/real Edge `37751032915` PASS; PR Browser `37751032983` PASS; main Browser `37751257933` PASS; Pages `37751256803` PASS; Vercel `dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M` READY for merge SHA.
 - Public Pages and Vercel versions: `2026.10.08-FINAL.45`.
 - Release is complete; exact next evidence is one copied real-device highway diagnosis. Do not mark the expressway-selection mismatch resolved.
+
+
+## 2026-10-08 — FINAL.46 timeout and deployment-blocker decisions
+
+User corrected the highway issue: route request times out before anything renders. Prioritize getting a safe HGV base route rendered before evaluating motorway preference or requesting FINAL.45 route diagnostics.
+
+Limit upstream timeout to fetch headers AND full JSON body. Cap optional IC searches to remaining server budget; return valid base route if optional IC exploration is too slow.
+
+Preserve driving-hgv, registered vehicle dimensions, max two via-IC ORS requests, 30/minute warm-call guard, FINAL.36 detour caps and no car/straight-line fallback.
+
+Safety tag backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114dc8926425bff81555d305. Product PR #199 merged c2307edf38c1e1256c3eaa125e86d8e9fd461edc; PR route 37754575289 PASS, PR Browser 37754575245 PASS, main Browser 37754745261 PASS, Pages 37754744610 PASS.
+
+Vercel production API cannot deploy right now: HTTP 402 api-deployments-free-per-day (>100/day), retryAfter 86400. Current Pages FINAL.46 / Vercel API FINAL.45. Treat as TECHNICAL_BLOCKER and do NOT claim the timeout fix is live. No billing/plan changes without user approval.
+
+After quota resets, make one exact-main Vercel production deploy and verify live backend FINAL.46; only then request iPhone retest. AN15 paused.
