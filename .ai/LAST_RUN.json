@@ -1,29 +1,44 @@
 {
-  "evidenceVersion": 60,
-  "runType": "field_evidence_highway_selection_mismatch",
-  "phase": "FIELD_EVIDENCE_HIGHWAY_SELECTION_MISMATCH",
+  "evidenceVersion": 61,
+  "runType": "final45_highway_diagnostics_production_release_closeout",
+  "phase": "FINAL45_HIGHWAY_DIAGNOSTICS",
   "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "712f89119ce14ed62cb028cbaafdb46e2c730f64",
-    "safetyTag": "backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008",
-    "safetyTagTarget": "712f89119ce14ed62cb028cbaafdb46e2c730f64"
+    "productionMainBefore": "f6c5052d0def10a5f64ab842395bcbab04f5a7ec",
+    "safetyTag": "backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008",
+    "safetyTagTarget": "f6c5052d0def10a5f64ab842395bcbab04f5a7ec"
   },
   "versions": {
-    "app": "2026.10.08-FINAL.44",
+    "app": "2026.10.08-FINAL.45",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "User reports recent features are basically OK, but VENDRIVE still avoids expressway use on at least one route where Google Maps uses the expressway. No production-code change was made because the failure class must be diagnosed before changing highway thresholds.",
-    "productStatus": "FIELD_EVIDENCE_RECORDED",
-    "productionCodeChanged": false,
+    "summary": "FINAL.45 adds a privacy-safe collapsible and copyable highway-search diagnostic to the live route panel, augments preexisting IC/provider failure counters without additional provider calls, and keeps all routing safety limits unchanged.",
+    "productStatus": "PRODUCTION_VERIFIED_PENDING_FIELD_REPRO",
+    "productionCodeChanged": true,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "fieldEvidenceRecorded": "PASS",
-    "productionCodeChanged": "NOT_REQUIRED: diagnostic classification must precede another routing edit"
+    "immutableSafetyTag": "PASS: pre-FINAL45 tag dereferenced to exact f6c5052d0def10a5f64ab842395bcbab04f5a7ec",
+    "preliminaryTruckRoute": "FAIL: 37750884018 test harness used innerText on collapsed <details>; no product defect; harness corrected",
+    "finalPrTruckRoute": "PASS: 37751032915 logic/API and real Edge",
+    "finalPrBrowserRegression": "PASS: 37751032983",
+    "locationFreeDiagnostic": "PASS",
+    "icLookupAndViaOutcomeCounters": "PASS",
+    "staleResultsClearedOnErrorOrNewRoute": "PASS",
+    "copyDiagnostic": "PASS",
+    "routeProviderCallCountPreserved": "PASS",
+    "hgvAndFinalDetourSafetyPreserved": "PASS",
+    "merge": "PASS: PR #196 -> da376f589387144774c7d7e8dc6eb6f024a919b9",
+    "mainBrowserRegression": "PASS: 37751257933",
+    "githubPages": "PASS: 37751256803",
+    "vercelProduction": "PASS: dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M READY for exact merge SHA",
+    "liveVersion": "PASS: Pages and Vercel = 2026.10.08-FINAL.45",
+    "liveRoutingAsset": "PASS: public truck-routing.js has FINAL.45 asset version and highwayDiagnosticReport",
+    "realDeviceHighwayDiagnosis": "PENDING: requires one user reproduction"
   },
   "fieldEvidence": {
     "final44TaskThresholdGauge": "USER_CONFIRMED_BASICALLY_OK",
@@ -32,25 +47,28 @@
     "final42OrderDetails": "USER_CONFIRMED_BASICALLY_OK",
     "final41DirectionalRerouteAndTurnZoom": "USER_CONFIRMED_BASICALLY_OK",
     "final40FullscreenBehavior": "USER_CONFIRMED_BASICALLY_OK",
-    "final40HighwaySelection": "FAIL: highway ON still misses at least one expressway route that Google Maps uses"
+    "final40HighwaySelection": "FAIL: user reports missing expressway option when Google Maps uses motorway",
+    "final45HighwayDiagnosis": "PENDING_SINGLE_FIELD_REPORT"
   },
   "openItems": [
-    "Expose or otherwise capture existing highwaySearch diagnostics for one failing real-device route.",
-    "Classify whether the miss is provider candidate, IC discovery, via timeout, or final eligibility rejection.",
-    "Only then implement a bounded fix without weakening HGV safety."
-  ],
-  "nextAction": "Make the existing highwaySearch/selection diagnostics accessible for a failing route, reproduce once, and classify the cause before changing route-selection thresholds.",
-  "unresolved": [
-    "Highway selection mismatch remains unresolved.",
-    "No production fix should be attempted until the failing route is classified.",
+    "Need one copied or screenshot FINAL.45 report from a route where highway ON still misses the motorway.",
+    "Classify source before any routing preference/detour change.",
     "AN15 remains intentionally paused."
   ],
+  "nextAction": "Ask user to repeat one affected route with highway ON, open MAP route panel -> 高速診断（原因調査用） -> 診断内容をコピー, and paste location-free report. Use diagnosis to choose next bounded fix.",
+  "unresolved": [
+    "No FINAL.45 code/release issues remaining.",
+    "Highway selection discrepancy remains unresolved and needs concrete field diagnosis.",
+    "AN15 evidence/promotion remains intentionally paused."
+  ],
   "releaseChangedFiles": [
-    "index.html",
+    "api/route.mjs",
     "truck-routing.js",
+    "index.html",
     "version.json",
+    "tests/truck-route-api.test.mjs",
     "tests/truck-route-client.test.mjs",
-    "tests/task-target-threshold-ui-gate.html",
+    "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
@@ -60,19 +78,21 @@
   "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
-    ".ai/LAST_RUN.json"
+    ".ai/LAST_RUN.json",
+    "AI_ROADMAP.md",
+    ".ai/DECISIONS.md"
   ],
   "continuityCheckpoint": {
-    "createdFor": "field evidence handoff",
+    "createdFor": "fresh-chat handoff",
     "status": "PASS",
     "productCodeChanged": false,
-    "sourceMain": "fd228e54fea90fbbf49cc4aa81330cb70bf98957",
-    "resumeFrom": "highway-selection mismatch diagnosis",
+    "sourceMain": "da376f589387144774c7d7e8dc6eb6f024a919b9",
+    "resumeFrom": "FINAL.45 highway-search diagnostics live; one real-device affected-route report pending",
     "immediateEvidence": [
-      "all recent checks basically OK except highway selection",
-      "API already returns detailed highwaySearch metadata",
-      "UI does not expose that metadata"
+      "highway ON route UI exposes candidate/IC/ORS rejection metrics",
+      "one location-free copied report required",
+      "HGV safety bounds unchanged"
     ],
-    "warning": "Do not widen detour caps or weaken HGV restrictions without diagnosing the exact failure class."
+    "warning": "Do not claim highway-selection bug fixed or classify its cause until real-route report is received."
   }
 }
