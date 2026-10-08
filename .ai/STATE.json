@@ -5,49 +5,51 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.08-FINAL.42",
+  "appVersion": "2026.10.08-FINAL.43",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL42_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+  "status": "FINAL43_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
   "currentWork": {
-    "title": "FINAL.42 production complete; arrival-card field confirmation pending",
-    "releaseStatus": "FINAL.42 is merged, deployed, and live-verified. Arrival cards now show full pending order details and all active incomplete tasks assigned to the machine, independently from Today-list task rendering.",
+    "title": "FINAL.43 production complete; office internal-route field confirmation pending",
+    "releaseStatus": "FINAL.43 is merged, deployed, and live-verified. Office list taps/buttons and office MAP pins now start the same internal VENDRIVE driving-hgv route flow as vending-machine navigation.",
     "releaseScope": [
-      "Arrival visit cards show pending order type, subtype, full detail text, and remaining/deadline state.",
-      "Arrival visit cards show every active incomplete task assigned to that machine, regardless of Today-list decoration.",
-      "Arrival task rendering is implemented separately from the Today-list task block.",
-      "Unchecked tasks in the visit-completion confirmation remain incomplete exactly as before.",
-      "Routing, HGV restrictions, highway/JCT logic, directional reroute, turn zoom, and FINAL.36 detour safety behavior are unchanged."
+      "Office list rows/buttons now start the internal VENDRIVE HGV route instead of immediately opening external Google Maps.",
+      "Office MAP pins now start the same internal HGV route.",
+      "Office destinations are tracked distinctly from vending machines so destination validity checks use state.offices.",
+      "Arriving within the office destination threshold ends routing but does not open vending-machine visit/task/order arrival actions.",
+      "The explicit external-navigation action in the active route panel remains available.",
+      "All HGV restrictions, highway/JCT logic, direction-aware reroute, turn-aware zoom, provider-call guards, and FINAL.36 detour caps remain unchanged."
     ],
     "validationEvidence": {
-      "safetyTag": "backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008 -> 1a84a1c5830d39b715990753fc327a059eaa7f1f",
-      "productMerge": "PR #186 -> 55f304892fcb626a73a755c4a8e0129272da91c7",
-      "prTruckRoute": "37723986337 PASS",
-      "prBrowserRegression": "37723986287 PASS",
-      "mainBrowserRegression": "37724083359 PASS",
-      "githubPages": "37724082816 PASS",
-      "vercelProduction": "dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR READY, target production, Git SHA 55f304892fcb626a73a755c4a8e0129272da91c7",
-      "liveVersion": "public version.json = 2026.10.08-FINAL.42",
-      "liveRoutingAsset": "public truck-routing.js assetVersion = 2026.10.08-FINAL.42"
+      "safetyTag": "backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008 -> af8f34f363b25ea1885df22adc35dc6b01ac3ec0",
+      "productMerge": "PR #189 -> e648323947019745e507015f61ddb0b464163f43",
+      "prTruckRoute": "37730660379 PASS",
+      "prBrowserRegression": "37730661344 PASS",
+      "mainBrowserRegression": "37730783341 PASS",
+      "githubPages": "37730782368 PASS",
+      "vercelProduction": "dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM READY, target production, Git SHA e648323947019745e507015f61ddb0b464163f43",
+      "liveVersion": "public version.json = 2026.10.08-FINAL.43; Vercel version.json = 2026.10.08-FINAL.43",
+      "priorFieldEvidence": "User confirmed FINAL.42 arrival-card task display is OK. Other previously pending field checks remain unconfirmed."
     },
     "decision": [
-      "Arrival card task display means all active incomplete tasks assigned to the arriving machine; completed task history is not mixed into the live visit card.",
-      "Arrival task rendering must not depend on Today-list task decoration.",
-      "Keep the existing visit-completion rule: only tasks explicitly checked in the confirmation modal are marked complete.",
-      "Do not change routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior in FINAL.42.",
+      "Treat office navigation as an internal HGV destination, not a vending-machine visit target.",
+      "Do not open visit/task/order arrival workflows for office arrivals.",
+      "Keep the optional external navigation button in the active route panel.",
+      "Do not change routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior beyond generic office destination support.",
       "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "On the iPhone, reach an arrival card for a machine that has an order and multiple active tasks and confirm the full order detail plus every active task is visible before swiping.",
-      "Confirm unchecked tasks still remain incomplete after completing the visit.",
-      "Continue the already-pending FINAL.41 direction-aware reroute/turn-zoom and FINAL.40 fullscreen/highway field checks when convenient.",
-      "Treat any exact field failure as new bounded evidence before changing behavior."
+      "On the iPhone, tap an office in the office list and confirm the internal VENDRIVE route opens.",
+      "Tap the office MAP pin and confirm it also starts the internal route.",
+      "Drive/position near the office and confirm routing ends without opening a vending-machine arrival card.",
+      "Continue the still-pending FINAL.40 fullscreen/highway and FINAL.41 directional-reroute/turn-zoom checks when convenient."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Real-device confirmation of FINAL.42 arrival-card order/task display remains required.",
+    "Real-device confirmation of FINAL.43 office internal routing remains required.",
+    "FINAL.42 arrival-card task display is user-confirmed; order-detail field confirmation is still not explicitly confirmed.",
     "FINAL.41 direction-aware reroute and turn-aware zoom real-device confirmation remains pending.",
     "FINAL.40 fullscreen/highway real-device confirmation remains pending.",
     "AN15 learned numeric promotion remains intentionally paused."
@@ -63,9 +65,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.42本番完了後の実機確認から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.43本番完了後の実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.42 is production-complete and live-verified. Resume from iPhone field confirmation of arrival-card full order details and all active tasks, alongside the still-pending FINAL.41/FINAL.40 field checks. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.42 production complete — arrival card field retest pending"
+    "handoffBoundary": "FINAL.43 is production-complete and live-verified. Resume from iPhone confirmation that office list/MAP taps use the internal HGV route and office arrival does not open machine visit actions. Keep the still-pending FINAL.40/41 field checks separate. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.43 production complete — office internal-route field retest pending"
   }
 }
