@@ -607,3 +607,23 @@ This file records confirmed project decisions that must survive chat migration. 
 - FINAL.42 arrival-card task display is now user-confirmed OK; FINAL.42 order-detail display plus FINAL.40/41 field checks remain pending.
 - FINAL.43 implementation/release is closed. Remaining evidence is real-device confirmation of office internal routing and office-arrival behavior.
 - AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.
+
+
+## 2026-10-08 — FINAL.44 task-gauge decisions
+
+- Task progress gauges scale against each task's configured auto-completion threshold instead of always using 100% actual completion as the visual full-scale target.
+- The displayed numeric completion percentage remains the actual completion percentage.
+- Task auto-completion threshold semantics and persistence remain unchanged.
+- The same threshold-relative gauge scale is used on the task card and task detail.
+- FINAL.44 does not change routing, HGV, highway/JCT, direction-aware reroute, or turn-aware zoom behavior.
+- Safety tag: `backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008` -> `712f89119ce14ed62cb028cbaafdb46e2c730f64`.
+
+## 2026-10-08 — FINAL.44 production release complete
+
+- PR #192 merged to `main` at `afcbf0b639959fa6c3d80bf202021f060d487593`.
+- PR Truck route readiness `37733253158` and Browser regression `37733253132` passed.
+- Main Browser regression `37733379642` and GitHub Pages `37733378870` passed.
+- Vercel production deployment `dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw` is READY for the exact merge SHA.
+- Public Pages and Vercel version endpoints report `2026.10.08-FINAL.44`.
+- FINAL.44 implementation/release is closed. Remaining evidence is real-device visual confirmation of threshold-relative task gauges.
+- AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.

@@ -1,57 +1,58 @@
 {
-  "evidenceVersion": 58,
-  "runType": "final43_production_release_closeout",
-  "phase": "FINAL43_OFFICE_INTERNAL_HGV_ROUTE",
+  "evidenceVersion": 59,
+  "runType": "final44_production_release_closeout",
+  "phase": "FINAL44_TASK_THRESHOLD_GAUGE",
   "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "af8f34f363b25ea1885df22adc35dc6b01ac3ec0",
-    "safetyTag": "backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008",
-    "safetyTagTarget": "af8f34f363b25ea1885df22adc35dc6b01ac3ec0"
+    "productionMainBefore": "712f89119ce14ed62cb028cbaafdb46e2c730f64",
+    "safetyTag": "backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008",
+    "safetyTagTarget": "712f89119ce14ed62cb028cbaafdb46e2c730f64"
   },
   "versions": {
-    "app": "2026.10.08-FINAL.43",
+    "app": "2026.10.08-FINAL.44",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.43 is production-complete: office list and MAP taps now use the internal VENDRIVE driving-hgv route flow, office targets remain distinct from machine visit targets, and office arrival ends routing without machine arrival actions.",
+    "summary": "FINAL.44 is production-complete: task-card and task-detail gauges now fill relative to each task's configured auto-completion threshold, while actual progress text and task completion behavior remain unchanged.",
     "productStatus": "PRODUCTION_VERIFIED",
     "productionCodeChanged": true,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008 -> af8f34f363b25ea1885df22adc35dc6b01ac3ec0",
-    "prTruckRoute": "PASS: workflow 37730660379",
-    "prBrowserRegression": "PASS: workflow 37730661344",
-    "officeListInternalRoute": "PASS",
-    "officePinInternalRoute": "PASS",
-    "officeArrivalNoMachineActions": "PASS",
-    "exactHgvSafetyUnchanged": "PASS",
-    "merge": "PASS: PR #189 -> e648323947019745e507015f61ddb0b464163f43",
-    "mainBrowserRegression": "PASS: workflow 37730783341",
-    "githubPages": "PASS: workflow 37730782368",
-    "vercelProduction": "PASS: dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM READY, target production, Git SHA e648323947019745e507015f61ddb0b464163f43",
-    "liveVersion": "PASS: Pages and Vercel version.json report 2026.10.08-FINAL.43"
+    "immutableSafetyTag": "PASS: backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008 -> 712f89119ce14ed62cb028cbaafdb46e2c730f64",
+    "prTruckRoute": "PASS: workflow 37733253158",
+    "prBrowserRegression": "PASS: workflow 37733253132",
+    "thresholdScaledTaskCardGauge": "PASS",
+    "thresholdScaledTaskDetailGauge": "PASS",
+    "actualProgressTextUnchanged": "PASS",
+    "autoCompletionLogicUnchanged": "PASS",
+    "merge": "PASS: PR #192 -> afcbf0b639959fa6c3d80bf202021f060d487593",
+    "mainBrowserRegression": "PASS: workflow 37733379642",
+    "githubPages": "PASS: workflow 37733378870",
+    "vercelProduction": "PASS: dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw READY, target production, Git SHA afcbf0b639959fa6c3d80bf202021f060d487593",
+    "liveVersion": "PASS: Pages and Vercel version.json report 2026.10.08-FINAL.44"
   },
   "fieldEvidence": {
+    "final44TaskThresholdGauge": "PENDING",
+    "final43OfficeInternalRoute": "PENDING",
     "final42ArrivalTasks": "USER_CONFIRMED_OK",
     "final42OrderDetails": "PENDING",
     "final41DirectionalRerouteAndTurnZoom": "PENDING",
-    "final40FullscreenAndHighway": "PENDING",
-    "final43OfficeInternalRoute": "PENDING"
+    "final40FullscreenAndHighway": "PENDING"
   },
   "openItems": [
-    "No unresolved FINAL.43 implementation or release issue.",
-    "Real-device FINAL.43 office internal-route confirmation remains required.",
-    "Other previously pending field checks remain pending except FINAL.42 arrival-card task display, which the user confirmed OK.",
+    "No unresolved FINAL.44 implementation or release issue.",
+    "Real-device FINAL.44 task-threshold gauge confirmation remains required.",
+    "Previously pending field checks remain pending except FINAL.42 arrival-card task display, which the user confirmed OK.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Retest FINAL.43 on the iPhone by tapping an office from the list and MAP pin, confirming the internal route appears, and confirming arrival near the office ends routing without machine visit actions.",
+  "nextAction": "Retest FINAL.44 on the iPhone with a task whose completion threshold is below 100%. Confirm the task-card and task-detail gauges fill relative to the configured threshold while the displayed actual percentage remains unchanged.",
   "unresolved": [
-    "No unresolved FINAL.43 release issue.",
-    "Real-device FINAL.43 confirmation remains pending.",
+    "No unresolved FINAL.44 release issue.",
+    "Real-device FINAL.44 confirmation remains pending.",
     "AN15 evidence/promotion remains intentionally paused."
   ],
   "releaseChangedFiles": [
@@ -59,7 +60,7 @@
     "truck-routing.js",
     "version.json",
     "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
+    "tests/task-target-threshold-ui-gate.html",
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
@@ -77,14 +78,14 @@
     "createdFor": "fresh-chat handoff",
     "status": "PASS",
     "productCodeChanged": false,
-    "sourceMain": "e648323947019745e507015f61ddb0b464163f43",
-    "resumeFrom": "FINAL.43 production-complete; office internal-route field confirmation pending",
+    "sourceMain": "afcbf0b639959fa6c3d80bf202021f060d487593",
+    "resumeFrom": "FINAL.44 production-complete; task-threshold gauge field confirmation pending",
     "immediateEvidence": [
-      "office list tap opens internal HGV route",
-      "office MAP pin tap opens internal HGV route",
-      "office arrival does not open machine visit actions",
-      "FINAL.41 and FINAL.40 checks when convenient"
+      "task-card gauge scales to configured completion threshold",
+      "task-detail gauge uses the same scale",
+      "displayed actual percent remains the true actual percent",
+      "FINAL.43/41/40 checks when convenient"
     ],
-    "warning": "Do not treat automated FINAL.43 PASS as real-device confirmation, and do not reopen AN15 automatically."
+    "warning": "Do not treat automated FINAL.44 PASS as real-device confirmation, and do not reopen AN15 automatically."
   }
 }

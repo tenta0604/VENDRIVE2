@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.43`.
+- Current visible production app version: `2026.10.08-FINAL.44`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -835,5 +835,43 @@ On the iPhone:
 2. tap the office MAP pin and confirm the same internal route opens;
 3. arrive near the office and confirm routing ends without a vending-machine arrival card;
 4. continue the still-pending FINAL.40/41 checks when convenient.
+
+AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
+
+
+## 2026-10-08 FINAL.44 production release complete
+
+FINAL.44 is released and production-verified.
+
+Release evidence:
+- immutable safety tag: `backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008` -> `712f89119ce14ed62cb028cbaafdb46e2c730f64`;
+- PR #192 merged at `afcbf0b639959fa6c3d80bf202021f060d487593`;
+- PR Truck route readiness run `37733253158`: PASS;
+- PR Browser regression run `37733253132`: PASS;
+- main Browser regression run `37733379642`: PASS;
+- GitHub Pages run `37733378870`: PASS;
+- Vercel production deployment `dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw`: READY for exact merge SHA `afcbf0b639959fa6c3d80bf202021f060d487593`;
+- public Pages and Vercel `version.json`: `2026.10.08-FINAL.44`.
+
+FINAL.44 behavior:
+- task-card gauge fill is relative to the configured auto-completion threshold;
+- a 70% threshold means 35% actual progress fills 50% of the gauge and 50% actual progress fills about 71.4%;
+- task detail uses the same threshold-relative gauge;
+- the text still shows the true actual completion percentage;
+- task auto-completion logic is unchanged.
+
+Field evidence carried forward:
+- FINAL.42 arrival-card task display: user confirmed OK;
+- FINAL.42 order-detail display: pending;
+- FINAL.43 office internal route: pending;
+- FINAL.41 direction-aware reroute + turn-aware zoom: pending;
+- FINAL.40 fullscreen/highway: pending.
+
+### Exact next evidence
+
+On the iPhone, use a task with a completion threshold below 100% and confirm:
+1. the task-tab card gauge fills relative to that threshold;
+2. the task-detail gauge uses the same scale;
+3. the displayed numeric completion percentage remains the actual percentage.
 
 AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
