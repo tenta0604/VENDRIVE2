@@ -5,51 +5,51 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.08-FINAL.41",
+  "appVersion": "2026.10.08-FINAL.42",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL41_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+  "status": "FINAL42_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
   "currentWork": {
-    "title": "FINAL.41 production complete; real-device navigation confirmation pending",
-    "releaseStatus": "FINAL.41 is merged, deployed, and live-verified. The next evidence is the operator's real iPhone confirmation of direction-aware off-route rerouting and turn-aware MAP follow zoom.",
+    "title": "FINAL.42 production complete; arrival-card field confirmation pending",
+    "releaseStatus": "FINAL.42 is merged, deployed, and live-verified. Arrival cards now show full pending order details and all active incomplete tasks assigned to the machine, independently from Today-list task rendering.",
     "releaseScope": [
-      "Initial route search and manual recalculation remain direction-agnostic.",
-      "Only sustained off-route automatic rerouting may add a reliable travel heading; unreliable direction evidence falls back to ordinary HGV rerouting without a bearing constraint.",
-      "The relay converts that optional heading into an ORS start-bearing sector with optimized=false while preserving driving-hgv and exact registered vehicle restrictions.",
-      "MAP current-position follow detects significant upcoming route bends from existing route geometry and changes at most one zoom level per GPS update toward 16/17/18/19 as the turn approaches, then relaxes afterward.",
-      "FINAL.40 highway/JCT behavior and FINAL.36 detour safety caps remain unchanged."
+      "Arrival visit cards show pending order type, subtype, full detail text, and remaining/deadline state.",
+      "Arrival visit cards show every active incomplete task assigned to that machine, regardless of Today-list decoration.",
+      "Arrival task rendering is implemented separately from the Today-list task block.",
+      "Unchecked tasks in the visit-completion confirmation remain incomplete exactly as before.",
+      "Routing, HGV restrictions, highway/JCT logic, directional reroute, turn zoom, and FINAL.36 detour safety behavior are unchanged."
     ],
     "validationEvidence": {
-      "safetyTag": "backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008 -> 695eaa74716446f3e1f147be226d46521b7747a8",
-      "productMerge": "PR #183 -> b8427d859afe0c9cc05d26f55859022c41c11037",
-      "prTruckRoute": "37720662646 PASS",
-      "prBrowserRegression": "37720662617 PASS",
-      "mainBrowserRegression": "37720926478 PASS",
-      "githubPages": "37720925836 PASS",
-      "vercelProduction": "dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa READY, target production, Git SHA b8427d859afe0c9cc05d26f55859022c41c11037",
-      "liveVersion": "public version.json = 2026.10.08-FINAL.41",
-      "liveRoutingAsset": "public truck-routing.js assetVersion = 2026.10.08-FINAL.41"
+      "safetyTag": "backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008 -> 1a84a1c5830d39b715990753fc327a059eaa7f1f",
+      "productMerge": "PR #186 -> 55f304892fcb626a73a755c4a8e0129272da91c7",
+      "prTruckRoute": "37723986337 PASS",
+      "prBrowserRegression": "37723986287 PASS",
+      "mainBrowserRegression": "37724083359 PASS",
+      "githubPages": "37724082816 PASS",
+      "vercelProduction": "dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR READY, target production, Git SHA 55f304892fcb626a73a755c4a8e0129272da91c7",
+      "liveVersion": "public version.json = 2026.10.08-FINAL.42",
+      "liveRoutingAsset": "public truck-routing.js assetVersion = 2026.10.08-FINAL.42"
     },
     "decision": [
-      "Direction applies only to automatic off-route reroutes; initial and manual searches remain direction-agnostic.",
-      "Do not force a bearing when travel direction is not reliable enough.",
-      "Turn-aware zoom runs only while MAP current-position follow is ON and moves one level per GPS update.",
-      "Keep driving-hgv, exact vehicle restrictions, highway/JCT safety logic, upstream-call guards, and no-car/no-straight-line fallback unchanged.",
+      "Arrival card task display means all active incomplete tasks assigned to the arriving machine; completed task history is not mixed into the live visit card.",
+      "Arrival task rendering must not depend on Today-list task decoration.",
+      "Keep the existing visit-completion rule: only tasks explicitly checked in the confirmation modal are marked complete.",
+      "Do not change routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior in FINAL.42.",
       "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "On the real iPhone, intentionally leave the route while moving and confirm automatic reroute prefers the current travel direction instead of a backward/opposite start.",
-      "With MAP current-position follow ON, approach a clear turn and confirm the map zooms in gradually and relaxes after the turn.",
-      "Report any exact failure as new field evidence before changing thresholds or bearing/zoom behavior again.",
-      "FINAL.40 fullscreen/highway retest can still be reported independently."
+      "On the iPhone, reach an arrival card for a machine that has an order and multiple active tasks and confirm the full order detail plus every active task is visible before swiping.",
+      "Confirm unchecked tasks still remain incomplete after completing the visit.",
+      "Continue the already-pending FINAL.41 direction-aware reroute/turn-zoom and FINAL.40 fullscreen/highway field checks when convenient.",
+      "Treat any exact field failure as new bounded evidence before changing behavior."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Real-device confirmation of FINAL.41 direction-aware automatic reroute remains required.",
-    "Real-device confirmation of FINAL.41 turn-aware follow zoom remains required.",
-    "FINAL.40 real-device fullscreen/highway confirmation can still be reported independently.",
+    "Real-device confirmation of FINAL.42 arrival-card order/task display remains required.",
+    "FINAL.41 direction-aware reroute and turn-aware zoom real-device confirmation remains pending.",
+    "FINAL.40 fullscreen/highway real-device confirmation remains pending.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
   "recovery": {
@@ -63,9 +63,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.41本番完了後のiPhone実機確認から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.42本番完了後の実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.41 is production-complete and live-verified. Resume from real-device confirmation of direction-aware off-route rerouting and turn-aware MAP follow zoom. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.41 production complete — iPhone navigation retest pending"
+    "handoffBoundary": "FINAL.42 is production-complete and live-verified. Resume from iPhone field confirmation of arrival-card full order details and all active tasks, alongside the still-pending FINAL.41/FINAL.40 field checks. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.42 production complete — arrival card field retest pending"
   }
 }
