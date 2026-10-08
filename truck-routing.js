@@ -15,7 +15,7 @@
   function stableTravelHeading(samples){
     var valid=(Array.isArray(samples)?samples:[]).filter(function(sample){return point(sample)&&typeof sample.accuracy==='number'&&Number.isFinite(sample.accuracy)&&sample.accuracy<=25;});
     if(valid.length<2)return null;
-    var latest=valid[valid.length-1],direct=normalizeHeading(latest.heading);
+    var latest=valid[valid.length-1],direct=normalizeHeading(latest.reportedHeading);
     if(direct!==null&&typeof latest.speed==='number'&&Number.isFinite(latest.speed)&&latest.speed>=2)return direct;
     var first=valid[0];if(distanceMeters(first,latest)<10)return null;
     return bearing(first,latest);
