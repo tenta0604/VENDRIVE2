@@ -9,48 +9,54 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL44_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+  "status": "FIELD_EVIDENCE_HIGHWAY_SELECTION_MISMATCH",
   "currentWork": {
-    "title": "FINAL.44 production complete; task-threshold gauge field confirmation pending",
-    "releaseStatus": "FINAL.44 is merged, deployed, and live-verified. Task-tab progress gauges now scale against each task's configured auto-completion threshold while actual progress text and completion logic remain unchanged.",
+    "title": "Real-device highway-selection mismatch remains after FINAL.44",
+    "releaseStatus": "User field confirmation says the recent UI/navigation changes are basically OK. The remaining concrete defect is that, with highway ON, VENDRIVE still sometimes stays off the expressway on a route where Google Maps uses the expressway.",
     "releaseScope": [
-      "A task configured to auto-complete at N% now treats N% actual completion as a full gauge.",
-      "Example: a 70% threshold displays 35% actual progress as half the gauge and 50% actual progress as about 71.4% of the gauge.",
-      "The task detail progress gauge uses the same threshold-relative scale.",
-      "Displayed actual percentage, target counts, task completion threshold, and auto-completion logic are unchanged.",
-      "No routing, HGV, task-target, persistence, order, or arrival behavior changed."
+      "FINAL.42 arrival-card task display: user-confirmed OK.",
+      "FINAL.41 direction-aware reroute and turn-aware zoom: user reports basic behavior OK.",
+      "FINAL.43 office internal routing: user reports basic behavior OK.",
+      "FINAL.44 threshold-relative task gauges: user reports basic behavior OK.",
+      "Remaining issue: highway route selection quality on at least one real-device route still differs from Google Maps in a way the user considers undesirable."
     ],
     "validationEvidence": {
-      "safetyTag": "backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008 -> 712f89119ce14ed62cb028cbaafdb46e2c730f64",
-      "productMerge": "PR #192 -> afcbf0b639959fa6c3d80bf202021f060d487593",
-      "prTruckRoute": "37733253158 PASS",
-      "prBrowserRegression": "37733253132 PASS",
-      "mainBrowserRegression": "37733379642 PASS",
-      "githubPages": "37733378870 PASS",
-      "vercelProduction": "dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw READY, target production, Git SHA afcbf0b639959fa6c3d80bf202021f060d487593",
-      "liveVersion": "Pages and Vercel version.json = 2026.10.08-FINAL.44",
-      "priorFieldEvidence": "FINAL.42 arrival-card task display was user-confirmed OK. FINAL.40/41/43 checks remain pending; FINAL.42 order-detail display was not explicitly confirmed."
+      "latestMain": "fd228e54fea90fbbf49cc4aa81330cb70bf98957",
+      "userFieldEvidence": "2026-10-08: 基本全部OK。ただしGoogleマップなら高速案内するところをVENDRIVEでは高速案内しない。",
+      "currentHighwayDiagnosticsReturnedByApi": [
+        "selection",
+        "highwaySearch.attempted",
+        "highwaySearch.junctions",
+        "highwaySearch.evaluated",
+        "highwaySearch.accepted",
+        "highwaySearch.finalEligible",
+        "highwaySearch.viaTimeouts",
+        "highwaySearch.motorwayTargetMeters",
+        "highwaySearch.bestExistingMotorwayMeters",
+        "usage.motorwayMeters"
+      ],
+      "currentUiExposure": "These diagnostics are returned by /api/route but are not currently exposed in the UI."
     },
     "decision": [
-      "Gauge fill is threshold-relative: gaugePercent = clamp(actualPercent / configuredThreshold * 100, 0, 100).",
-      "Actual progress text remains the real 0-100% completion rate and must not be relabeled as threshold-relative.",
-      "Task auto-completion semantics remain unchanged.",
-      "Keep all previously released routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior unchanged.",
-      "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
+      "Treat the highway mismatch as new real-device field evidence, not as proof that FINAL.40 solved route selection.",
+      "Do not blindly widen FINAL.36 final detour caps or weaken HGV restrictions.",
+      "Before changing route thresholds, identify whether the failing case is caused by ORS not returning a motorway option, IC search not producing a usable candidate, or final bounded acceptance rejecting the candidate.",
+      "Preserve driving-hgv, exact vehicle restrictions, max two active via-IC probes, warm 30 route calls/min guard, and no passenger-car/straight-line fallback.",
+      "AN15 remains intentionally paused."
     ],
     "nextActions": [
-      "On the iPhone, open a task whose completion threshold is below 100% and confirm the task-card gauge visually fills relative to that threshold.",
-      "Open the same task detail and confirm its gauge uses the same scale.",
-      "Continue the still-pending FINAL.43 office-route, FINAL.41 directional-reroute/turn-zoom, and FINAL.40 fullscreen/highway checks when convenient."
+      "Capture the highway-search diagnostics for the exact failing real-device route without exposing unnecessary location details.",
+      "Use those diagnostics to classify the failure as provider-candidate, IC-discovery, via-timeout, or final-eligibility rejection.",
+      "Only then open a bounded production-code fix with a new immutable safety tag."
     ]
   },
-  "requiredUserInput": [],
+  "requiredUserInput": [
+    "One reproduction of the highway mismatch after diagnostics are made accessible, or the exact failing origin/destination only if diagnostics alone are insufficient."
+  ],
   "unresolved": [
-    "Real-device confirmation of FINAL.44 threshold-relative task gauges remains required.",
-    "FINAL.43 office internal-routing real-device confirmation remains pending.",
-    "FINAL.42 arrival-card task display is user-confirmed; order-detail display is not explicitly confirmed.",
-    "FINAL.41 direction-aware reroute and turn-aware zoom real-device confirmation remains pending.",
-    "FINAL.40 fullscreen/highway real-device confirmation remains pending.",
+    "Highway ON still fails to select an expressway on at least one real-device route where Google Maps does.",
+    "The exact failure class is not yet identified because API highwaySearch metadata is not exposed in the UI.",
+    "Do not loosen FINAL.36 detour caps or HGV safety constraints by assumption.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
   "recovery": {
@@ -64,9 +70,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.44本番完了後の実機確認から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、高速ONの実機ルート選択不一致の診断から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.44 is production-complete and live-verified. Resume from iPhone confirmation that task-card and task-detail gauges scale against each configured completion threshold. Keep the still-pending FINAL.40/41/43 field checks separate. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.44 production complete — task-threshold gauge field retest pending"
+    "handoffBoundary": "Recent FINAL.41/42/43/44 field checks are basically OK except highway selection. Resume by exposing/capturing the existing highwaySearch diagnostics for the failing route, then classify the cause before changing thresholds or HGV behavior.",
+    "latestContinuityCheckpoint": "Real-device highway-selection mismatch confirmed — diagnosis required before another routing change"
   }
 }
