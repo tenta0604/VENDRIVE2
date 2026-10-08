@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.08-FINAL.45';
+  var ASSET_VERSION='2026.10.08-FINAL.46';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -150,6 +150,7 @@
     else if(h.junctionQueryStatus==='timeout'||h.junctionQueryStatus==='provider-error')reason='IC取得元が応答できず：IC探索サービス要確認';
     else if(h.junctions===0)reason='IC取得0件：探索範囲かICデータの不足の可能性';
     else if(h.evaluated===0)reason='IC組合せ0件：入口・出口の探索条件で候補なし';
+    else if(h.timeBudgetLimited&&h.accepted===0)reason='追加IC探索が処理時間の上限に達したため、安全な基本HGV経路を表示';
     else if(h.accepted===0)reason='IC経由の成立候補なし：提供元の応答・通行条件・高速区間を確認';
     else if(h.finalEligible===0)reason='IC経由候補あり／最終採用0件：迂回上限などの採用条件を確認';
     else reason='IC経由候補は採用条件に適合。最終選択と高速距離を確認';
@@ -160,6 +161,7 @@
       '選択経路の高速区間：'+kilometers(usage.motorwayMeters),
       '既存ORS候補の最大高速区間：'+kilometers(h.bestExistingMotorwayMeters),
       '追加IC探索：'+(h.attempted?'実施':'未実施'),
+      '時間制限で追加探索を短縮：'+(h.timeBudgetLimited?'あり（基本のHGV経路を優先）':'なし'),
       'IC取得状態：'+String(h.junctionQueryStatus||'不明'),
       'IC取得件数：'+count(h.junctions),
       'IC組合せ評価数：'+count(h.evaluated),
