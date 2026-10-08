@@ -19,6 +19,8 @@
   function fire(el,type){el.dispatchEvent(new Event(type,{bubbles:true}))}
   function stored(){return JSON.parse(localStorage.getItem('vendrive2_v7_data'))}
   function taskByText(text){return stored().tasks.find(t=>t.text===text)}
+  function taskCardByText(text){return [...d.querySelectorAll('#taskList .taskCard')].find(x=>x.textContent.includes(text))}
+  function taskGaugeValue(text){const card=taskCardByText(text),gauge=card&&card.querySelector('.taskProgress');assert(gauge,'task gauge missing for '+text);return {actual:Number(gauge.dataset.actualPercent),threshold:Number(gauge.dataset.thresholdPercent),gauge:Number(gauge.dataset.gaugePercent),width:parseFloat(gauge.querySelector('i').style.width)}}
   function openTab(page){click(d.querySelector('.tabs button[data-page="'+page+'"]'))}
   async function waitFor(fn,label){for(let i=0;i<80;i++){if(fn())return;await sleep(50)}throw new Error(label||'wait timeout')}
 
@@ -62,9 +64,9 @@
     await sleep(60);click(d.getElementById('closeMachine'));
   }
   await completeNamedTaskOnMachine('M1','Maker task');
-  assert(taskByText('Maker task').completed===false,'70% task completed at 25%');
+  assert(taskByText('Maker task').completed===false,'70% task completed at 25%');openTab('tasksPage');let gauge=taskGaugeValue('Maker task');assert(gauge.actual===25&&gauge.threshold===70,'task card gauge metadata must keep actual 25% and threshold 70%');assert(Math.abs(gauge.gauge-35.7)<0.2&&Math.abs(gauge.width-35.7)<0.2,'25% actual progress should fill about 35.7% of a 70% completion gauge');
   await completeNamedTaskOnMachine('M2','Maker task');
-  assert(taskByText('Maker task').completed===false,'70% task completed at 50%');
+  assert(taskByText('Maker task').completed===false,'70% task completed at 50%');openTab('tasksPage');gauge=taskGaugeValue('Maker task');assert(gauge.actual===50&&gauge.threshold===70,'task card gauge must preserve actual 50% and threshold 70%');assert(Math.abs(gauge.gauge-71.4)<0.2&&Math.abs(gauge.width-71.4)<0.2,'50% actual progress should fill about 71.4% of a 70% completion gauge');let makerCard=taskCardByText('Maker task');click(makerCard);assert(Math.abs(parseFloat(d.getElementById('taskDetailProgressBar').style.width)-71.4)<0.2,'task detail gauge should use the same configured-threshold scale');click(d.getElementById('closeTaskDetail'));
   await completeNamedTaskOnMachine('M3','Maker task');
   await waitFor(()=>taskByText('Maker task').completed===true,'70% task did not auto-complete at 75%');
 
@@ -75,6 +77,6 @@
   await waitFor(()=>taskByText('Selected machines task').targetMachineIds.length===1,'selected task detail edit did not persist');
   selected=taskByText('Selected machines task');assert(selected.targetType==='selected','selection task lost target type after edit');
 
-  out.textContent='PASS\nfull-width five-tab navigation: PASS\nselection-type multi-machine task creation: PASS\nmanufacturer targeting retained: PASS\nlegacy threshold editing: PASS\n70% auto-completion: PASS\nselection detail editing: PASS';
+  out.textContent='PASS\nfull-width five-tab navigation: PASS\nselection-type multi-machine task creation: PASS\nmanufacturer targeting retained: PASS\nlegacy threshold editing: PASS\n70% threshold-scaled task-card gauge: PASS\n70% threshold-scaled task-detail gauge: PASS\n70% auto-completion: PASS\nselection detail editing: PASS';
 })().catch(e=>{document.getElementById('out').textContent='FAIL: '+(e&&e.stack||e);console.error(e)});
 </script></body></html>
