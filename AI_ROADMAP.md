@@ -259,3 +259,12 @@ FINAL.40 closes this maintenance scope. The next step is the same real-device iP
 FINAL.41 improves live navigation without changing initial route semantics. Initial and manual searches remain direction-agnostic, while a sustained off-route automatic reroute may constrain only the starting road direction when accurate movement evidence is available. MAP current-position follow now gradually zooms toward significant upcoming route bends one level per GPS update and relaxes again afterward. HGV restrictions, highway/JCT logic, FINAL.36 detour limits, and fallback prohibitions remain unchanged.
 
 Safety tag `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`. PR #183 validation passed Truck route readiness / API / real Edge run `37720662646` and Browser regression run `37720662617`. Production release evidence is pending.
+
+
+## FINAL.41 direction-aware reroute + turn-aware follow zoom production release (2026-10-08)
+
+FINAL.41 is released and production-verified. Initial and manual routing remain direction-agnostic. Sustained off-route automatic rerouting may constrain only the starting road direction when reliable movement evidence is available; otherwise it reroutes normally without a bearing. MAP current-position follow detects significant upcoming bends from existing route geometry and adjusts zoom gradually one level per GPS update toward zoom 16/17/18/19 as the turn approaches, then relaxes afterward. No new turn-instruction dependency was added.
+
+Safety tag `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`. PR #183 merged at `b8427d859afe0c9cc05d26f55859022c41c11037`. PR runs `37720662646` and `37720662617`, main Browser regression `37720926478`, and Pages `37720925836` passed. Vercel production `dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa` is READY for the exact merge SHA. Public version and routing asset report `2026.10.08-FINAL.41`.
+
+FINAL.41 closes this implementation/release scope. The next evidence is real-device iPhone confirmation of direction-aware off-route rerouting and turn-aware follow zoom. AN15 remains intentionally paused.
