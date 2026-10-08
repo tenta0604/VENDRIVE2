@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.08-FINAL.40';
+  var ASSET_VERSION='2026.10.08-FINAL.41';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -11,6 +11,47 @@
   function normalizeHeading(value){if(typeof value!=='number'||!Number.isFinite(value))return null;return ((value%360)+360)%360;}
   function bearing(from,to){if(!point(from)||!point(to)||distanceMeters(from,to)<0.5)return null;var rad=Math.PI/180,lat1=from.lat*rad,lat2=to.lat*rad,dlng=(to.lng-from.lng)*rad,y=Math.sin(dlng)*Math.cos(lat2),x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dlng);return normalizeHeading(Math.atan2(y,x)/rad);}
   function resolveHeading(previous,next,reported,last){var direct=normalizeHeading(reported);if(direct!==null)return direct;if(point(previous)&&point(next)&&distanceMeters(previous,next)>=4){var movement=bearing(previous,next);if(movement!==null)return movement;}return normalizeHeading(last);}
+  function headingDifference(a,b){var first=normalizeHeading(a),second=normalizeHeading(b);if(first===null||second===null)return 0;var diff=Math.abs(first-second)%360;return diff>180?360-diff:diff;}
+  function stableTravelHeading(samples){
+    var valid=(Array.isArray(samples)?samples:[]).filter(function(sample){return point(sample)&&typeof sample.accuracy==='number'&&Number.isFinite(sample.accuracy)&&sample.accuracy<=25;});
+    if(valid.length<2)return null;
+    var latest=valid[valid.length-1],direct=normalizeHeading(latest.heading);
+    if(direct!==null&&typeof latest.speed==='number'&&Number.isFinite(latest.speed)&&latest.speed>=2)return direct;
+    var first=valid[0];if(distanceMeters(first,latest)<10)return null;
+    return bearing(first,latest);
+  }
+  function coordinatePoint(coordinate){return {lng:coordinate[0],lat:coordinate[1]};}
+  function turnReferencePoint(coordinates,index,direction,minMeters){
+    var current=coordinatePoint(coordinates[index]),distance=0,i=index;
+    while(true){
+      var nextIndex=i+direction;if(nextIndex<0||nextIndex>=coordinates.length)return null;
+      var next=coordinatePoint(coordinates[nextIndex]);distance+=distanceMeters(current,next);current=next;i=nextIndex;
+      if(distance>=minMeters)return current;
+    }
+  }
+  function nextTurnMeters(value,currentProgress){
+    var coordinates=value&&value.geometry&&Array.isArray(value.geometry.coordinates)?value.geometry.coordinates:null;
+    if(!coordinates||coordinates.length<3)return null;
+    var edge=currentProgress&&Number.isInteger(currentProgress.edge)?Math.max(0,Math.min(coordinates.length-2,currentProgress.edge)):0;
+    var cursor=currentProgress&&point(currentProgress.point)?currentProgress.point:coordinatePoint(coordinates[edge]),distanceAhead=0;
+    for(var vertex=edge+1;vertex<coordinates.length-1;vertex++){
+      var vertexPoint=coordinatePoint(coordinates[vertex]);distanceAhead+=distanceMeters(cursor,vertexPoint);cursor=vertexPoint;
+      if(distanceAhead>500)return null;
+      var before=turnReferencePoint(coordinates,vertex,-1,30),after=turnReferencePoint(coordinates,vertex,1,30);
+      if(!before||!after)continue;
+      var incoming=bearing(before,vertexPoint),outgoing=bearing(vertexPoint,after);
+      if(headingDifference(incoming,outgoing)>=40)return distanceAhead;
+    }
+    return null;
+  }
+  function navigationZoomTarget(value,currentProgress){
+    var meters=nextTurnMeters(value,currentProgress);
+    if(meters===null)return 16;
+    if(meters<=50)return 19;
+    if(meters<=120)return 18;
+    if(meters<=260)return 17;
+    return 16;
+  }
   function vehicle(value){
     if(!value||typeof value!=='object')throw new Error('車検証などで確認した車両の寸法・総重量を登録してください');
     var result={};
@@ -103,8 +144,9 @@
     var doc=app.document,el=function(id){return doc.getElementById(id);};
     function draw(){if(destination&&app.isDestinationCurrent&&!app.isDestinationCurrent(destination)){end();return;}app.draw(active,destination,progress);}
     function fitActive(){if(active&&destination&&typeof app.fit==='function')app.fit(active,destination,progress);}
+    function navigationView(){if(typeof app.navigationView==='function')app.navigationView(active,destination,progress);}
     function cancel(){sequence++;if(controller)controller.abort();controller=null;busy=false;}
-    function end(){cancel();destination=null;active=null;progress=null;offRouteHits=0;offRouteSamples=[];lastAutoRerouteAt=0;draw();el('truckRoutePanel').classList.add('hidden');}
+    function end(){cancel();destination=null;active=null;progress=null;offRouteHits=0;offRouteSamples=[];lastAutoRerouteAt=0;draw();navigationView();el('truckRoutePanel').classList.add('hidden');}
     function panel(message){
       el('truckRoutePanel').classList.remove('hidden');
       el('truckRouteTitle').textContent=destination?destination.name||'自販機への経路':'トラック経路';
@@ -175,19 +217,20 @@
         var origin=point(options.origin)?options.origin:await getPosition(signal);if(token!==sequence)return;
         if(!auto)panel('車両条件に合う経路を取得中…');
         timer=setTimeout(function(){if(token===sequence)controller.abort();},ROUTE_REQUEST_TIMEOUT_MS);
-        var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v}),signal:signal});
+        var requestBody={origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v},rerouteHeading=auto?normalizeHeading(options.heading):null;if(rerouteHeading!==null)requestBody.heading=rerouteHeading;
+        var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(requestBody),signal:signal});
         var data=await response.json();clearTimeout(timer);timer=null;if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
         var nextRoute=route(data.route);
         if(auto&&previousActive){
           var baseline=remainingMeters(previousActive,previousProgress)+(previousProgress&&point(previousProgress.point)?distanceMeters(origin,previousProgress.point):0),detourLimit=baseline+Math.max(3000,baseline*0.5);
-          if(baseline>500&&nextRoute.summary.distance>detourLimit){active=previousActive;progress=previousProgress;offRouteHits=0;offRouteSamples=[];draw();panel('再検索した経路が大きく迂回するため、現在の経路を保持しています');app.toast('大きく迂回する再検索結果を採用しませんでした');return;}
+          if(baseline>500&&nextRoute.summary.distance>detourLimit){active=previousActive;progress=previousProgress;offRouteHits=0;offRouteSamples=[];draw();navigationView();panel('再検索した経路が大きく迂回するため、現在の経路を保持しています');app.toast('大きく迂回する再検索結果を採用しませんでした');return;}
         }
-        active=nextRoute;progress=null;offRouteHits=0;offRouteSamples=[];draw();if(!auto)fitActive();else app.toast('新しい経路に更新しました');
+        active=nextRoute;progress=null;offRouteHits=0;offRouteSamples=[];draw();if(!auto)fitActive();navigationView();if(auto)app.toast('新しい経路に更新しました');
         panel(routeSummary(v));
       }catch(e){
         if(token!==sequence)return;
-        if(auto){active=previousActive;progress=previousProgress;draw();panel('ルート再検索に失敗しました。現在の経路を表示しています');}
+        if(auto){active=previousActive;progress=previousProgress;draw();navigationView();panel('ルート再検索に失敗しました。現在の経路を表示しています');}
         else{active=null;progress=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
       }finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
     }
@@ -201,11 +244,11 @@
       if(match.distance<=snapThreshold){
         offRouteHits=0;offRouteSamples=[];
         if(!progress||match.edge>progress.edge||(match.edge===progress.edge&&match.t>progress.t+0.01)){progress=match;draw();}
-        return;
+        navigationView();return;
       }
       if(match.distance>offThreshold){offRouteHits++;offRouteSamples.push(position);if(offRouteSamples.length>3)offRouteSamples.shift();}else{offRouteHits=0;offRouteSamples=[];}
       if(offRouteHits>=3&&offRouteSamples.length>=3&&Date.now()-lastAutoRerouteAt>=30000){
-        var stableOrigin=stableOffRouteOrigin(offRouteSamples);offRouteHits=0;offRouteSamples=[];lastAutoRerouteAt=Date.now();app.toast('ルートを再検索します');if(stableOrigin)calculate({auto:true,origin:stableOrigin});
+        var stableOrigin=stableOffRouteOrigin(offRouteSamples),rerouteHeading=stableTravelHeading(offRouteSamples);offRouteHits=0;offRouteSamples=[];lastAutoRerouteAt=Date.now();app.toast('ルートを再検索します');if(stableOrigin)calculate({auto:true,origin:stableOrigin,heading:rerouteHeading});
       }
     }
     function start(target){
@@ -226,8 +269,8 @@
       el('truckRouteExternal').onclick=function(){if(destination)app.external(destination);};
       summary();syncHighwayToggle();
     }
-    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,fitActive:fitActive,isBusy:function(){return busy;},refreshVehicle:function(){summary();syncHighwayToggle();}};
+    return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,fitActive:fitActive,refreshNavigationView:navigationView,isBusy:function(){return busy;},refreshVehicle:function(){summary();syncHighwayToggle();}};
   }
-  return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,createClient:createClient};
+  return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,stableTravelHeading:stableTravelHeading,nextTurnMeters:nextTurnMeters,navigationZoomTarget:navigationZoomTarget,createClient:createClient};
 });
 
