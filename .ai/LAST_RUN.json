@@ -1,53 +1,58 @@
 {
-  "evidenceVersion": 57,
-  "runType": "final42_production_release_closeout",
-  "phase": "FINAL42_ARRIVAL_WORK_DETAILS",
+  "evidenceVersion": 58,
+  "runType": "final43_production_release_closeout",
+  "phase": "FINAL43_OFFICE_INTERNAL_HGV_ROUTE",
   "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "1a84a1c5830d39b715990753fc327a059eaa7f1f",
-    "safetyTag": "backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008",
-    "safetyTagTarget": "1a84a1c5830d39b715990753fc327a059eaa7f1f"
+    "productionMainBefore": "af8f34f363b25ea1885df22adc35dc6b01ac3ec0",
+    "safetyTag": "backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008",
+    "safetyTagTarget": "af8f34f363b25ea1885df22adc35dc6b01ac3ec0"
   },
   "versions": {
-    "app": "2026.10.08-FINAL.42",
+    "app": "2026.10.08-FINAL.43",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.42 is production-complete: arrival visit cards now surface the full pending order information and every active incomplete task for the arriving machine using arrival-specific rendering rather than Today-list task decoration.",
+    "summary": "FINAL.43 is production-complete: office list and MAP taps now use the internal VENDRIVE driving-hgv route flow, office targets remain distinct from machine visit targets, and office arrival ends routing without machine arrival actions.",
     "productStatus": "PRODUCTION_VERIFIED",
     "productionCodeChanged": true,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008 -> 1a84a1c5830d39b715990753fc327a059eaa7f1f",
-    "prTruckRoute": "PASS: workflow 37723986337",
-    "prBrowserRegression": "PASS: workflow 37723986287",
-    "arrivalFullOrderDetails": "PASS",
-    "arrivalAllActiveTasks": "PASS",
-    "arrivalIndependentFromTodayTaskDecoration": "PASS",
-    "uncheckedTaskRemainsIncomplete": "PASS",
-    "routingSafetyUnchanged": "PASS",
-    "merge": "PASS: PR #186 -> 55f304892fcb626a73a755c4a8e0129272da91c7",
-    "mainBrowserRegression": "PASS: workflow 37724083359",
-    "githubPages": "PASS: workflow 37724082816",
-    "vercelProduction": "PASS: dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR READY, target production, Git SHA 55f304892fcb626a73a755c4a8e0129272da91c7",
-    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.42",
-    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.42"
+    "immutableSafetyTag": "PASS: backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008 -> af8f34f363b25ea1885df22adc35dc6b01ac3ec0",
+    "prTruckRoute": "PASS: workflow 37730660379",
+    "prBrowserRegression": "PASS: workflow 37730661344",
+    "officeListInternalRoute": "PASS",
+    "officePinInternalRoute": "PASS",
+    "officeArrivalNoMachineActions": "PASS",
+    "exactHgvSafetyUnchanged": "PASS",
+    "merge": "PASS: PR #189 -> e648323947019745e507015f61ddb0b464163f43",
+    "mainBrowserRegression": "PASS: workflow 37730783341",
+    "githubPages": "PASS: workflow 37730782368",
+    "vercelProduction": "PASS: dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM READY, target production, Git SHA e648323947019745e507015f61ddb0b464163f43",
+    "liveVersion": "PASS: Pages and Vercel version.json report 2026.10.08-FINAL.43"
+  },
+  "fieldEvidence": {
+    "final42ArrivalTasks": "USER_CONFIRMED_OK",
+    "final42OrderDetails": "PENDING",
+    "final41DirectionalRerouteAndTurnZoom": "PENDING",
+    "final40FullscreenAndHighway": "PENDING",
+    "final43OfficeInternalRoute": "PENDING"
   },
   "openItems": [
-    "No unresolved FINAL.42 implementation or release issue.",
-    "Real-device FINAL.42 arrival-card display confirmation remains required.",
-    "FINAL.41 and FINAL.40 field confirmations remain pending.",
+    "No unresolved FINAL.43 implementation or release issue.",
+    "Real-device FINAL.43 office internal-route confirmation remains required.",
+    "Other previously pending field checks remain pending except FINAL.42 arrival-card task display, which the user confirmed OK.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Retest FINAL.42 on the iPhone with an arriving machine that has an order and multiple active tasks. Confirm full order detail and all active tasks appear on the arrival card before swipe, and unchecked tasks remain incomplete.",
+  "nextAction": "Retest FINAL.43 on the iPhone by tapping an office from the list and MAP pin, confirming the internal route appears, and confirming arrival near the office ends routing without machine visit actions.",
   "unresolved": [
-    "No unresolved FINAL.42 release issue.",
-    "Real-device FINAL.42 confirmation remains pending.",
-    "AN15 evidence/promotion remains an intentional paused state."
+    "No unresolved FINAL.43 release issue.",
+    "Real-device FINAL.43 confirmation remains pending.",
+    "AN15 evidence/promotion remains intentionally paused."
   ],
   "releaseChangedFiles": [
     "index.html",
@@ -72,15 +77,14 @@
     "createdFor": "fresh-chat handoff",
     "status": "PASS",
     "productCodeChanged": false,
-    "sourceMain": "55f304892fcb626a73a755c4a8e0129272da91c7",
-    "resumeFrom": "FINAL.42 production-complete; arrival-card field confirmation pending",
+    "sourceMain": "e648323947019745e507015f61ddb0b464163f43",
+    "resumeFrom": "FINAL.43 production-complete; office internal-route field confirmation pending",
     "immediateEvidence": [
-      "arrival card shows full order details",
-      "arrival card shows all active incomplete tasks",
-      "unchecked tasks remain incomplete",
-      "FINAL.41 directional reroute and turn zoom when convenient",
-      "FINAL.40 fullscreen/highway behavior when convenient"
+      "office list tap opens internal HGV route",
+      "office MAP pin tap opens internal HGV route",
+      "office arrival does not open machine visit actions",
+      "FINAL.41 and FINAL.40 checks when convenient"
     ],
-    "warning": "Do not treat automated FINAL.42 PASS as real-device confirmation, and do not reopen AN15 automatically."
+    "warning": "Do not treat automated FINAL.43 PASS as real-device confirmation, and do not reopen AN15 automatically."
   }
 }
