@@ -150,7 +150,7 @@ test('active highway IC discovery fails open to the safe baseline HGV route',asy
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
-    const data=await response.json();assert.equal(data.selection,'active-highway-unavailable');assert.equal(data.highwaySearch.attempted,true);assert.equal(data.highwaySearch.status,'junction-search-unavailable');assert.deepEqual(data.route.summary,{distance:34000,duration:2500});
+    const data=await response.json();assert.equal(data.selection,'active-highway-unavailable');assert.equal(data.highwaySearch.attempted,true);assert.equal(data.highwaySearch.status,'junction-search-unavailable');assert.equal(data.highwaySearch.junctionQueryStatus,'provider-error');assert.equal(data.highwaySearch.junctions,0);assert.equal(data.highwaySearch.evaluated,0);assert.deepEqual(data.route.summary,{distance:34000,duration:2500});
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
@@ -207,11 +207,33 @@ test('highway ON uses one of the two bounded via-IC probes for a geographically 
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
-    const data=await response.json();assert.equal(data.highwaySearch.pairStrategy,'balanced+diverse-corridor');assert.ok(data.highwaySearch.motorwayTargetMeters>45000);assert.equal(data.highwaySearch.evaluated,2);assert.ok(data.highwaySearch.finalEligible>=1);
+    const data=await response.json();assert.equal(data.highwaySearch.pairStrategy,'balanced+diverse-corridor');assert.equal(data.highwaySearch.junctionQueryStatus,'ok');assert.ok(data.highwaySearch.motorwayTargetMeters>45000);assert.equal(data.highwaySearch.evaluated,2);assert.ok(data.highwaySearch.finalEligible>=1);assert.equal(data.highwaySearch.viaProviderRejected,0);assert.equal(data.highwaySearch.viaErrors,0);
     const viaBodies=routeBodies.filter(body=>body.coordinates.length===4);assert.equal(viaBodies.length,2);
     assert.ok(viaBodies.some(body=>body.coordinates[1][1]>35.05&&body.coordinates[2][1]<34.95),'one probe must explore a geographically distinct IC corridor instead of spending both probes on the nearest cluster');
     assert.equal(data.selection,'active-ic-expressway-preferred');assert.deepEqual(data.route.summary,{distance:128000,duration:7550});assert.ok(data.usage.motorwayMeters>60000);
     viaBodies.forEach(body=>assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8}));
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('highway diagnostics separate rejected ORS via-IC probes without increasing calls',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+  const requestBody={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const junctions={elements:[{type:'node',id:19801,lat:35.22,lon:136.73,tags:{ref:'A'}},{type:'node',id:19802,lat:35.38,lon:136.92,tags:{ref:'B'}},{type:'node',id:19803,lat:35.225,lon:136.735,tags:{ref:'C'}},{type:'node',id:19804,lat:35.375,lon:136.915,tags:{ref:'D'}}]};
+  let routeRequests=0;
+  globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('overpass-api.de'))return Response.json(junctions);
+    const sent=JSON.parse(options.body);routeRequests++;
+    assert.equal(sent.options.vehicle_type,'hgv');assert.deepEqual(sent.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});
+    if(sent.coordinates.length===2)return Response.json({features:[surface]});
+    return Response.json({error:'vehicle restriction'}, {status:400});
+  };
+  try{
+    const response=await POST(request(requestBody));assert.equal(response.status,200);
+    const result=await response.json();assert.equal(result.highwaySearch.attempted,true);assert.equal(result.highwaySearch.junctionQueryStatus,'ok');
+    assert.equal(result.highwaySearch.accepted,0);assert.equal(result.highwaySearch.viaProviderRejected,result.highwaySearch.evaluated);assert.equal(result.highwaySearch.viaNoFeature,0);
+    assert.ok(routeRequests<=3,'baseline plus at most two via-IC requests');
+    assert.equal(result.selection,'active-highway-unavailable');assert.deepEqual(result.route.summary,{distance:32000,duration:2400});
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
