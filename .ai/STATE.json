@@ -9,21 +9,27 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL40_VALIDATED_PENDING_PRODUCTION",
+  "status": "FINAL40_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
   "currentWork": {
-    "title": "FINAL.40 validated on PR #180; production release pending",
-    "releaseStatus": "FINAL.40 product changes passed the finite PR gates. Merge, production deployments, live verification, and final canonical closeout remain.",
+    "title": "FINAL.40 production complete; exact iPhone field retest pending",
+    "releaseStatus": "FINAL.40 product code is merged, deployed, and live-verified. The only remaining FINAL.40 evidence is the operator's real iPhone retest of the fullscreen-start timeout and long-route highway/JCT behavior.",
     "releaseScope": [
       "Fullscreen route start no longer re-clicks the already-active MAP tab, avoiding a redundant full map render while the route request is in flight.",
-      "Fullscreen viewport settle invalidates Leaflet size but skips route redraw/refit while route acquisition is busy; the 20s client network timer is cleared once the response body is received before local render work.",
-      "The existing maximum-two via-IC budget now samples one balanced pair plus a geographically distinct motorway corridor when available, allowing ORS driving-hgv to traverse farther JCT-connected highway networks.",
-      "Long-route motorway discovery target can scale to 80km; FINAL.36 final detour caps and all exact HGV restrictions remain authoritative."
+      "Fullscreen viewport settle may invalidate Leaflet size but skips route redraw/refit while route acquisition is busy; the 20s client timer is cleared after the response body is received before local route processing.",
+      "The existing maximum-two via-IC budget samples one balanced pair plus one geographically distinct bounded corridor when available, allowing ORS driving-hgv to traverse farther JCT-connected motorway networks.",
+      "Long-route motorway discovery target may scale to 80km; FINAL.36 final detour caps and all exact HGV restrictions remain authoritative."
     ],
     "validationEvidence": {
       "safetyTag": "backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007 -> 9541bd9d1d8242ec880f87315ae4fcf05052b006",
-      "pr": "PR #180 open",
-      "truckRoute": "37699925874 PASS",
-      "browserRegression": "37699925873 PASS"
+      "productMerge": "PR #180 -> 7f58726df3ed7a69820013f94f78e80d914f32f6",
+      "finalTestOnlyMerge": "PR #179 -> 1aefd847ffc38945d305e80c560fe1e9f8b2a714 (relative to the product merge, only tests/run-truck-route-gates.mjs changed)",
+      "prValidation": "PR #180 Truck route 37699925874 PASS; Browser regression 37699925873 PASS",
+      "finalTruckRouteValidation": "PR #179 Truck route readiness 37709837666 PASS",
+      "mainBrowserRegression": "37700422796 PASS on the identical FINAL.40 product tree",
+      "githubPages": "37709999513 PASS on current main",
+      "vercelProduction": "dpl_H6MTgzUTv4z72HQSERcJcgBdRY8H READY, target production, Git SHA 1aefd847ffc38945d305e80c560fe1e9f8b2a714",
+      "liveVersion": "public version.json = 2026.10.08-FINAL.40",
+      "liveRoutingAsset": "public truck-routing.js assetVersion = 2026.10.08-FINAL.40"
     },
     "decision": [
       "Keep driving-hgv and exact registered vehicle restrictions unchanged.",
@@ -33,17 +39,16 @@
       "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "Merge PR #180 after the final validated head is unchanged.",
-      "Verify main browser regression and GitHub Pages.",
-      "Verify Vercel production is READY for the exact FINAL.40 merge commit.",
-      "Live-verify version.json and truck-routing.js as FINAL.40, then close canonical bookkeeping.",
-      "After production closeout, retest the previously failing iPhone fullscreen timeout and long-route highway/JCT case."
+      "On the same iPhone, start the same long route from fullscreen MAP and confirm whether route acquisition still times out.",
+      "Retest the same long-distance destination with highway ON and confirm whether the route uses materially more appropriate motorway/JCT-connected travel.",
+      "Also confirm the route remains visible in fullscreen and after software rotation.",
+      "If any item still fails, treat the exact field failure as new evidence; instrument the exact origin/destination and iOS/Safari state before changing more thresholds."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.40 production release evidence is pending after PR validation.",
-    "Real-device confirmation of the fullscreen timeout and longer JCT-capable highway route remains required after production release.",
+    "Real-device confirmation of the FINAL.40 fullscreen route-start timeout fix remains required.",
+    "Real-device confirmation of the longer JCT-capable highway route remains required.",
     "AN15 learned numeric promotion remains intentionally paused.",
     "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
   ],
@@ -58,9 +63,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.39本番完了後の実機確認から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.40本番完了後のiPhone実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.40 is validated on PR #180 and pending production release. Complete merge/deploy/live verification/canonical closeout before asking for the iPhone retest. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.40 PR #180 validation complete — production release pending"
+    "handoffBoundary": "FINAL.40 is production-complete and live-verified. Resume from the exact iPhone field retest of fullscreen route acquisition and long-route highway/JCT behavior. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.40 production complete — iPhone field retest pending"
   }
 }
