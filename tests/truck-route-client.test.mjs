@@ -55,6 +55,19 @@ test('heading prefers reported GPS direction and falls back to meaningful moveme
   assert.ok(Math.abs(routing.resolveHeading(a,east,null,null)-90)<1);
   assert.equal(routing.resolveHeading(a,{lat:35.300001,lng:136.800001},null,123),123);
 });
+test('automatic reroute heading is used only when travel direction is reliable',()=>{
+  const moving=[{lat:35.3,lng:136.8,accuracy:8,heading:92,speed:8},{lat:35.3,lng:136.8002,accuracy:8,heading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:8,heading:88,speed:8}];
+  assert.equal(routing.stableTravelHeading(moving),88);
+  const noSpeed=moving.map(({speed,...sample})=>sample);assert.ok(Math.abs(routing.stableTravelHeading(noSpeed)-90)<2);
+  assert.equal(routing.stableTravelHeading([{lat:35.3,lng:136.8,accuracy:40,heading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:40,heading:90,speed:8}]),null);
+});
+test('turn-aware zoom tightens as a significant route bend approaches',()=>{
+  const turnRoute={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.801,35.301],[136.002,35.301]]},summary:{distance:400,duration:60}};
+  const atStart={edge:0,t:0,point:{lng:136.8,lat:35.3},distance:0},nearTurn={edge:0,t:0.7,point:{lng:136.8007,lat:35.3},distance:0};
+  const far=routing.nextTurnMeters(turnRoute,atStart),near=routing.nextTurnMeters(turnRoute,nearTurn);
+  assert.ok(far>70&&far<120);assert.ok(near>10&&near<50);assert.equal(routing.navigationZoomTarget(turnRoute,atStart),18);assert.equal(routing.navigationZoomTarget(turnRoute,nearTurn),19);
+  const straight={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.802,35.3]]},summary:{distance:200,duration:30}};assert.equal(routing.nextTurnMeters(straight,null),null);assert.equal(routing.navigationZoomTarget(straight,null),16);
+});
 
 test('route sections highlight both motorway and toll-only spans',()=>{
   const mixed={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.301],[136.802,35.302],[136.803,35.303]]},summary:{distance:900,duration:120},waycategory:[[0,1,0],[1,2,2],[2,3,1]]};
@@ -63,8 +76,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.40 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.08-FINAL.40');
+test('routing asset version matches FINAL.41 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.08-FINAL.41');
 });
 
 test('dedicated tollways extra highlights a route when waycategory reports no highway or toll bits',()=>{
@@ -90,15 +103,16 @@ test('route usage measures expressway distance and remaining sections drop trave
   const remaining=routing.remainingRouteSections(navRoute,progress);assert.equal(remaining[0].startEdge,1);assert.ok(Math.abs(remaining[0].coordinates[0][0]-136.8015)<0.00001);
   assert.ok(routing.routeUsage(navRoute).priorityMeters>routing.routeUsage({ ...navRoute, geometry:{type:'LineString',coordinates:[[136.802,35.3],[136.803,35.3]]}, waycategory:[[0,1,1]], tollways:[[0,1,1]] }).priorityMeters);
 });
-test('navigation progress redraws remaining line and sustained off-route fixes trigger one automatic reroute',async()=>{
-  let now=Date.now(),drawProgress=null,fetchOrigin=null;
-  const h=harness();h.setFetch(async(url,options)=>{fetchOrigin=JSON.parse(options.body).origin;return Response.json({ok:true,route});});
-  h.client.start(target);await tick();assert.equal(h.calls,1);
-  h.client.onPosition({lat:35.307,lng:136.807,accuracy:8,updatedAt:now});assert.ok(h.drawn);assert.ok(h.drawProgress&&h.drawProgress.edge>=1); 
-  h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,updatedAt:now+1000});
-  h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,updatedAt:now+2000});
-  h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,updatedAt:now+3000});await tick();
-  assert.equal(h.calls,2);assert.ok(fetchOrigin&&Math.abs(fetchOrigin.lat-35.3501)<0.00001&&Math.abs(fetchOrigin.lng-136.8501)<0.00001);
+test('navigation progress redraws remaining line and sustained off-route fixes trigger one direction-aware automatic reroute',async()=>{
+  let now=Date.now(),bodies=[];
+  const h=harness();h.setFetch(async(url,options)=>{bodies.push(JSON.parse(options.body));return Response.json({ok:true,route});});
+  h.client.start(target);await tick();assert.equal(h.calls,1);assert.equal(bodies[0].heading,undefined);
+  h.client.onPosition({lat:35.307,lng:136.807,accuracy:8,updatedAt:now});assert.ok(h.drawn);assert.ok(h.drawProgress&&h.drawProgress.edge>=1);
+  h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,heading:45,speed:10,updatedAt:now+1000});
+  h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,heading:45,speed:10,updatedAt:now+2000});
+  h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,heading:45,speed:10,updatedAt:now+3000});await tick();
+  assert.equal(h.calls,2);assert.ok(Math.abs(bodies[1].origin.lat-35.3501)<0.00001&&Math.abs(bodies[1].origin.lng-136.8501)<0.00001);assert.equal(bodies[1].heading,45);
+  h.node('truckRouteRecalculate').onclick();await tick();assert.equal(bodies.at(-1).heading,undefined,'manual recalculation must stay direction-agnostic');
 });
 test('stale or coarse cached GPS is refreshed before an initial route request',async()=>{
   const h=harness();h.setPosition({lat:35.3,lng:136.8,accuracy:70,updatedAt:Date.now()-10000});
