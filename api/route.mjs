@@ -6,6 +6,8 @@ const OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
 const MAX_BODY_BYTES = 4096;
 const MAX_ACTIVE_HIGHWAY_ROUTES = 2;
 const JUNCTION_CACHE_TTL_MS = 15*60*1000;
+const ROUTE_SERVER_BUDGET_MS = 14500;
+const ROUTE_RESPONSE_RESERVE_MS = 700;
 // Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
 const recent = [];
 const junctionCache = new Map();
@@ -22,9 +24,16 @@ function headers(origin,allowed) {
 }
 function json(status,body,origin,allowed) { return new Response(JSON.stringify(body),{status,headers:headers(origin,allowed)}); }
 function rounded(value,digits=2){return Number(value).toFixed(digits);}
-async function timedFetch(url,options,timeoutMs){
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
-  try{return await fetch(url,{...options,signal:controller.signal});}
+async function timedJsonFetch(url,options,timeoutMs){
+  const controller=new AbortController();let timer;
+  const work=(async()=>{
+    const response=await fetch(url,{...options,signal:controller.signal});
+    return {ok:response.ok,status:response.status,data:response.ok?await response.json():null};
+  })();
+  const deadline=new Promise((_,reject)=>{timer=setTimeout(()=>{
+    controller.abort();const error=new Error('upstream timed out');error.name='AbortError';reject(error);
+  },timeoutMs);});
+  try{return await Promise.race([work,deadline]);}
   finally{clearTimeout(timer);}
 }
 function routeRequestBody(coordinates,vehicle,restrictions,withAlternatives,startHeading=null){
@@ -42,8 +51,8 @@ function reserveUpstreamRouteCall(){
   recent.push(now);return true;
 }
 async function requestOrsRoute(coordinates,vehicle,restrictions,key,{alternatives=false,timeoutMs=9000,startHeading=null}={}){
-  if(!reserveUpstreamRouteCall())return new Response(null,{status:429});
-  return timedFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives,startHeading))},timeoutMs);
+  if(!reserveUpstreamRouteCall())return {ok:false,status:429,data:null};
+  return timedJsonFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives,startHeading))},timeoutMs);
 }
 function junctionCacheKey(origin,destination,radius){return [rounded(origin.lat),rounded(origin.lng),rounded(destination.lat),rounded(destination.lng),radius].join(':');}
 async function findMotorwayJunctions(origin,destination,radius){
@@ -51,9 +60,9 @@ async function findMotorwayJunctions(origin,destination,radius){
   if(cached&&now-cached.at<JUNCTION_CACHE_TTL_MS)return cached.value;
   const query='[out:json][timeout:2];(node(around:'+radius+','+origin.lat+','+origin.lng+')["highway"="motorway_junction"];node(around:'+radius+','+destination.lat+','+destination.lng+')["highway"="motorway_junction"];);out body 80;';
   try{
-    const response=await timedFetch(OVERPASS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},2800);
+    const response=await timedJsonFetch(OVERPASS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},2800);
     if(!response.ok)return {items:[],status:'provider-error'};
-    const data=await response.json(),seen=new Set(),items=[];
+    const data=response.data,seen=new Set(),items=[];
     for(const element of Array.isArray(data?.elements)?data.elements:[]){
       if(element?.type!=='node'||!Number.isFinite(element.lat)||!Number.isFinite(element.lon)||seen.has(element.id))continue;
       seen.add(element.id);items.push({id:element.id,lat:element.lat,lng:element.lon,ref:typeof element.tags?.ref==='string'?element.tags.ref:'',name:typeof element.tags?.name==='string'?element.tags.name:''});
@@ -90,6 +99,7 @@ function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   return result;
 }
 async function handle(request) {
+  const routeDeadline=Date.now()+ROUTE_SERVER_BUDGET_MS;
   const origin = request.headers.get('origin') || '',allowed=originAllowed(request,origin);
   if (!allowed) return json(403,{ok:false,message:'許可されていない接続元です'},origin,false);
   if (request.method==='OPTIONS') return new Response(null,{status:204,headers:headers(origin,allowed)});
@@ -121,23 +131,26 @@ async function handle(request) {
       if(response.status===400||response.status===404)return json(422,{ok:false,message:'車両条件に合う経路が見つかりません。位置と車両設定を確認してください'},origin,allowed);
       return json(502,{ok:false,message:'経路サービスに接続できません。時間をおいて再計算してください'},origin,allowed);
     }
-    const data=await response.json(),features=Array.isArray(data?.features)?data.features:[];
+    const data=response.data,features=Array.isArray(data?.features)?data.features:[];
     if(!features.length)throw new Error('missing route');
     function sanitizeFeature(feature){return routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary,waycategory:feature?.properties?.extras?.waycategory?.values,tollways:feature?.properties?.extras?.tollways?.values});}
     const primary=sanitizeFeature(features[0]),candidates=[primary];
     for(let i=1;i<features.length;i++){try{candidates.push(sanitizeFeature(features[i]));}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=Math.min(80000,primary.summary.distance*0.55),highwaySearch={attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,status:'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
+    const motorwayTarget=Math.min(80000,primary.summary.distance*0.55),highwaySearch={attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
     if(!vehicle.avoidTolls&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
       const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
-      const viaResults=await Promise.all(pairs.map(async pair=>{
+      const remainingTime=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
+      const viaBudget=Math.min(6500,Math.max(0,remainingTime));
+      if(viaBudget<1000){highwaySearch.timeBudgetLimited=true;highwaySearch.status='time-budget-skip';}
+      const viaResults=viaBudget<1000?[]:await Promise.all(pairs.map(async pair=>{
         try{
-          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:6500,startHeading});
+          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:viaBudget,startHeading});
           if(!viaResponse.ok){highwaySearch.viaProviderRejected++;return null;}
-          const viaData=await viaResponse.json(),feature=Array.isArray(viaData?.features)?viaData.features[0]:null;
+          const viaData=viaResponse.data,feature=Array.isArray(viaData?.features)?viaData.features[0]:null;
           if(!feature){highwaySearch.viaNoFeature++;return null;}
           const viaRoute=sanitizeFeature(feature),viaUsage=routing.routeUsage(viaRoute),meaningfulMotorway=Math.max(1500,primary.summary.distance*0.15);
           if(viaUsage.motorwayMeters<meaningfulMotorway){highwaySearch.viaLowMotorway++;return null;}
@@ -145,7 +158,8 @@ async function handle(request) {
         }catch(error){if(error?.name==='AbortError')highwaySearch.viaTimeouts++;else highwaySearch.viaErrors++;return null;}
       }));
       for(const result of viaResults)if(result){candidates.push(result.route);activeHighwayRoutes.add(result.route);highwaySearch.accepted++;}
-      highwaySearch.status=highwaySearch.accepted?'via-ic-candidates-added':junctions.length?'no-valid-via-route':'junction-search-unavailable';
+      if(viaBudget<6500&&pairs.length)highwaySearch.timeBudgetLimited=true;
+      if(highwaySearch.status!=='time-budget-skip')highwaySearch.status=highwaySearch.accepted?'via-ic-candidates-added':highwaySearch.timeBudgetLimited&&pairs.length?'time-budget-exhausted':junctions.length?'no-valid-via-route':'junction-search-unavailable';
     }
     const maxDuration=primary.summary.duration+Math.min(480,primary.summary.duration*0.20),maxDistance=primary.summary.distance+Math.min(10000,primary.summary.distance*0.30);
     let route=primary,selection='optimal',usage=primaryItem.usage;
@@ -162,9 +176,11 @@ async function handle(request) {
     }else selection='highway-avoided';
     return json(200,{ok:true,profile:'driving-hgv',route,selection,usage,highwaySearch,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
   } catch(error) {
-    return json(502,{ok:false,message:error?.name==='AbortError'?'経路サービスがタイムアウトしました':'経路を取得できませんでした'},origin,allowed);
+    return json(502,{ok:false,message:error?.name==='AbortError'?'基本のHGV経路取得がタイムアウトしました。時間をおいて再検索してください':'経路を取得できませんでした'},origin,allowed);
   }
 }
 export async function POST(request) { return handle(request); }
 export async function OPTIONS(request) { return handle(request); }
 
+
+export { timedJsonFetch };
