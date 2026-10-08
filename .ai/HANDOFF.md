@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.41`.
+- Current visible production app version: `2026.10.08-FINAL.42`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -763,5 +763,38 @@ Automated PASS is not real-device confirmation. On the iPhone:
 2. with MAP current-position follow ON, approach a clear turn and verify gradual zoom-in;
 3. after the turn, verify zoom relaxes naturally;
 4. report any exact failure as new field evidence before changing thresholds again.
+
+AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
+
+
+## 2026-10-08 FINAL.42 production release complete
+
+FINAL.42 is released and production-verified.
+
+Release evidence:
+- immutable safety tag: `backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008` -> `1a84a1c5830d39b715990753fc327a059eaa7f1f`;
+- PR #186 merged at `55f304892fcb626a73a755c4a8e0129272da91c7`;
+- PR Truck route readiness run `37723986337`: PASS;
+- PR Browser regression run `37723986287`: PASS;
+- main Browser regression run `37724083359`: PASS;
+- GitHub Pages run `37724082816`: PASS;
+- Vercel production deployment `dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR`: READY for exact merge SHA `55f304892fcb626a73a755c4a8e0129272da91c7`;
+- public `version.json`: `2026.10.08-FINAL.42`;
+- public `truck-routing.js`: `assetVersion = 2026.10.08-FINAL.42`.
+
+FINAL.42 behavior:
+- arrival cards show pending order type / subtype / full detail / remaining deadline state;
+- arrival cards show every active incomplete task assigned to that machine;
+- arrival task rendering is separate from Today-list task decoration;
+- unchecked tasks remain incomplete when the visit is completed;
+- routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior is unchanged.
+
+### Exact next evidence
+
+Automated PASS is not real-device confirmation. On the iPhone, when an arriving machine has an order and multiple tasks:
+1. confirm the full order details are visible on the arrival card;
+2. confirm every active incomplete task is visible before swiping;
+3. leave one task unchecked during completion and confirm it remains incomplete;
+4. continue the already-pending FINAL.41 and FINAL.40 field checks when convenient.
 
 AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
