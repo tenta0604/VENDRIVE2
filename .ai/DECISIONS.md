@@ -553,3 +553,15 @@ This file records confirmed project decisions that must survive chat migration. 
 - Zoom target is cruise 16, then 17/18/19 as the next significant bend enters 260m/120m/50m, moving by at most one zoom level per GPS update.
 - Keep FINAL.40 highway/JCT discovery, FINAL.36 detour limits, upstream-call guards, and no-car/no-straight-line fallback unchanged.
 - Safety tag: `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`.
+
+
+## 2026-10-08 — FINAL.41 production release complete
+
+- PR #183 merged to `main` at `b8427d859afe0c9cc05d26f55859022c41c11037`.
+- Final PR Truck route readiness / API / real Edge run `37720662646` and Browser regression run `37720662617` passed.
+- Main Browser regression `37720926478` and GitHub Pages `37720925836` passed.
+- Vercel production deployment `dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa` is READY for the exact merge SHA.
+- Public `version.json` and routing asset report `2026.10.08-FINAL.41`.
+- FINAL.41 implementation/release is closed. The remaining evidence is real-device confirmation of direction-aware automatic reroute and turn-aware MAP follow zoom.
+- Automated PASS must not be treated as real-device confirmation.
+- AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.
