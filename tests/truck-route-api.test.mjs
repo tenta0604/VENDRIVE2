@@ -51,6 +51,18 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));{const onBody=JSON.parse(sent.options.body);assert.deepEqual(onBody.options.avoid_features,['ferries']);assert.deepEqual(onBody.alternative_routes,{target_count:3,share_factor:0.85,weight_factor:1.6});}
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+test('optional reroute heading becomes an ORS start bearing without changing HGV restrictions',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const bodies=[];
+  globalThis.fetch=async(url,options)=>{bodies.push(JSON.parse(options.body));return Response.json({features:[feature]});};
+  try{
+    const invalid=await POST(request({...input,heading:361}));assert.equal(invalid.status,400);
+    const response=await POST(request({...input,heading:92,vehicle:{...vehicle,axleload:2.5}}));assert.equal(response.status,200);
+    const body=bodies.at(-1);assert.deepEqual(body.bearings,[[92,60],[]]);assert.equal(body.optimized,false);assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
+    assert.equal(body.options.vehicle_type,'hgv');assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
+    bodies.length=0;await POST(request({...input,vehicle:{...vehicle,axleload:2.5}}));assert.equal(bodies.at(-1).bearings,undefined);assert.equal(bodies.at(-1).optimized,undefined);
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
 test('provider failures and malformed geometry fail closed without car/straight-line fallback',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
   try{
