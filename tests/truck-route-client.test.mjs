@@ -56,10 +56,10 @@ test('heading prefers reported GPS direction and falls back to meaningful moveme
   assert.equal(routing.resolveHeading(a,{lat:35.300001,lng:136.800001},null,123),123);
 });
 test('automatic reroute heading is used only when travel direction is reliable',()=>{
-  const moving=[{lat:35.3,lng:136.8,accuracy:8,heading:92,speed:8},{lat:35.3,lng:136.8002,accuracy:8,heading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:8,heading:88,speed:8}];
+  const moving=[{lat:35.3,lng:136.8,accuracy:8,reportedHeading:92,speed:8},{lat:35.3,lng:136.8002,accuracy:8,reportedHeading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:8,reportedHeading:88,speed:8}];
   assert.equal(routing.stableTravelHeading(moving),88);
   const noSpeed=moving.map(({speed,...sample})=>sample);assert.ok(Math.abs(routing.stableTravelHeading(noSpeed)-90)<2);
-  assert.equal(routing.stableTravelHeading([{lat:35.3,lng:136.8,accuracy:40,heading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:40,heading:90,speed:8}]),null);
+  assert.equal(routing.stableTravelHeading([{lat:35.3,lng:136.8,accuracy:40,reportedHeading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:40,reportedHeading:90,speed:8}]),null);
 });
 test('turn-aware zoom tightens as a significant route bend approaches',()=>{
   const turnRoute={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.801,35.301],[136.802,35.301]]},summary:{distance:400,duration:60}};
@@ -108,9 +108,9 @@ test('navigation progress redraws remaining line and sustained off-route fixes t
   const h=harness();h.setFetch(async(url,options)=>{bodies.push(JSON.parse(options.body));return Response.json({ok:true,route});});
   h.client.start(target);await tick();assert.equal(h.calls,1);assert.equal(bodies[0].heading,undefined);
   h.client.onPosition({lat:35.307,lng:136.807,accuracy:8,updatedAt:now});assert.ok(h.drawn);assert.ok(h.drawProgress&&h.drawProgress.edge>=1);
-  h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,heading:45,speed:10,updatedAt:now+1000});
-  h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,heading:45,speed:10,updatedAt:now+2000});
-  h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,heading:45,speed:10,updatedAt:now+3000});await tick();
+  h.client.onPosition({lat:35.35,lng:136.85,accuracy:8,reportedHeading:45,heading:45,speed:10,updatedAt:now+1000});
+  h.client.onPosition({lat:35.3501,lng:136.8501,accuracy:8,reportedHeading:45,heading:45,speed:10,updatedAt:now+2000});
+  h.client.onPosition({lat:35.3502,lng:136.8502,accuracy:8,reportedHeading:45,heading:45,speed:10,updatedAt:now+3000});await tick();
   assert.equal(h.calls,2);assert.ok(Math.abs(bodies[1].origin.lat-35.3501)<0.00001&&Math.abs(bodies[1].origin.lng-136.8501)<0.00001);assert.equal(bodies[1].heading,45);
   h.node('truckRouteRecalculate').onclick();await tick();assert.equal(bodies.at(-1).heading,undefined,'manual recalculation must stay direction-agnostic');
 });
