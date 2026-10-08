@@ -1,7 +1,7 @@
 {
-  "evidenceVersion": 59,
-  "runType": "final44_production_release_closeout",
-  "phase": "FINAL44_TASK_THRESHOLD_GAUGE",
+  "evidenceVersion": 60,
+  "runType": "field_evidence_highway_selection_mismatch",
+  "phase": "FIELD_EVIDENCE_HIGHWAY_SELECTION_MISMATCH",
   "status": "COMPLETE",
   "base": {
     "productionMainBefore": "712f89119ce14ed62cb028cbaafdb46e2c730f64",
@@ -15,45 +15,35 @@
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.44 is production-complete: task-card and task-detail gauges now fill relative to each task's configured auto-completion threshold, while actual progress text and task completion behavior remain unchanged.",
-    "productStatus": "PRODUCTION_VERIFIED",
-    "productionCodeChanged": true,
+    "summary": "User reports recent features are basically OK, but VENDRIVE still avoids expressway use on at least one route where Google Maps uses the expressway. No production-code change was made because the failure class must be diagnosed before changing highway thresholds.",
+    "productStatus": "FIELD_EVIDENCE_RECORDED",
+    "productionCodeChanged": false,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS: backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008 -> 712f89119ce14ed62cb028cbaafdb46e2c730f64",
-    "prTruckRoute": "PASS: workflow 37733253158",
-    "prBrowserRegression": "PASS: workflow 37733253132",
-    "thresholdScaledTaskCardGauge": "PASS",
-    "thresholdScaledTaskDetailGauge": "PASS",
-    "actualProgressTextUnchanged": "PASS",
-    "autoCompletionLogicUnchanged": "PASS",
-    "merge": "PASS: PR #192 -> afcbf0b639959fa6c3d80bf202021f060d487593",
-    "mainBrowserRegression": "PASS: workflow 37733379642",
-    "githubPages": "PASS: workflow 37733378870",
-    "vercelProduction": "PASS: dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw READY, target production, Git SHA afcbf0b639959fa6c3d80bf202021f060d487593",
-    "liveVersion": "PASS: Pages and Vercel version.json report 2026.10.08-FINAL.44"
+    "fieldEvidenceRecorded": "PASS",
+    "productionCodeChanged": "NOT_REQUIRED: diagnostic classification must precede another routing edit"
   },
   "fieldEvidence": {
-    "final44TaskThresholdGauge": "PENDING",
-    "final43OfficeInternalRoute": "PENDING",
+    "final44TaskThresholdGauge": "USER_CONFIRMED_BASICALLY_OK",
+    "final43OfficeInternalRoute": "USER_CONFIRMED_BASICALLY_OK",
     "final42ArrivalTasks": "USER_CONFIRMED_OK",
-    "final42OrderDetails": "PENDING",
-    "final41DirectionalRerouteAndTurnZoom": "PENDING",
-    "final40FullscreenAndHighway": "PENDING"
+    "final42OrderDetails": "USER_CONFIRMED_BASICALLY_OK",
+    "final41DirectionalRerouteAndTurnZoom": "USER_CONFIRMED_BASICALLY_OK",
+    "final40FullscreenBehavior": "USER_CONFIRMED_BASICALLY_OK",
+    "final40HighwaySelection": "FAIL: highway ON still misses at least one expressway route that Google Maps uses"
   },
   "openItems": [
-    "No unresolved FINAL.44 implementation or release issue.",
-    "Real-device FINAL.44 task-threshold gauge confirmation remains required.",
-    "Previously pending field checks remain pending except FINAL.42 arrival-card task display, which the user confirmed OK.",
-    "AN15 learned numeric promotion remains intentionally paused."
+    "Expose or otherwise capture existing highwaySearch diagnostics for one failing real-device route.",
+    "Classify whether the miss is provider candidate, IC discovery, via timeout, or final eligibility rejection.",
+    "Only then implement a bounded fix without weakening HGV safety."
   ],
-  "nextAction": "Retest FINAL.44 on the iPhone with a task whose completion threshold is below 100%. Confirm the task-card and task-detail gauges fill relative to the configured threshold while the displayed actual percentage remains unchanged.",
+  "nextAction": "Make the existing highwaySearch/selection diagnostics accessible for a failing route, reproduce once, and classify the cause before changing route-selection thresholds.",
   "unresolved": [
-    "No unresolved FINAL.44 release issue.",
-    "Real-device FINAL.44 confirmation remains pending.",
-    "AN15 evidence/promotion remains intentionally paused."
+    "Highway selection mismatch remains unresolved.",
+    "No production fix should be attempted until the failing route is classified.",
+    "AN15 remains intentionally paused."
   ],
   "releaseChangedFiles": [
     "index.html",
@@ -70,22 +60,19 @@
   "changedFiles": [
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
-    ".ai/LAST_RUN.json",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
+    ".ai/LAST_RUN.json"
   ],
   "continuityCheckpoint": {
-    "createdFor": "fresh-chat handoff",
+    "createdFor": "field evidence handoff",
     "status": "PASS",
     "productCodeChanged": false,
-    "sourceMain": "afcbf0b639959fa6c3d80bf202021f060d487593",
-    "resumeFrom": "FINAL.44 production-complete; task-threshold gauge field confirmation pending",
+    "sourceMain": "fd228e54fea90fbbf49cc4aa81330cb70bf98957",
+    "resumeFrom": "highway-selection mismatch diagnosis",
     "immediateEvidence": [
-      "task-card gauge scales to configured completion threshold",
-      "task-detail gauge uses the same scale",
-      "displayed actual percent remains the true actual percent",
-      "FINAL.43/41/40 checks when convenient"
+      "all recent checks basically OK except highway selection",
+      "API already returns detailed highwaySearch metadata",
+      "UI does not expose that metadata"
     ],
-    "warning": "Do not treat automated FINAL.44 PASS as real-device confirmation, and do not reopen AN15 automatically."
+    "warning": "Do not widen detour caps or weaken HGV restrictions without diagnosing the exact failure class."
   }
 }

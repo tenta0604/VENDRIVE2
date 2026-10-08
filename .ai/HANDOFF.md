@@ -875,3 +875,27 @@ On the iPhone, use a task with a completion threshold below 100% and confirm:
 3. the displayed numeric completion percentage remains the actual percentage.
 
 AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
+
+
+## 2026-10-08 real-device highway-selection mismatch after FINAL.44
+
+User field result:
+- recent FINAL.41/42/43/44 changes are basically OK in real use;
+- remaining concrete issue: with highway ON, VENDRIVE still sometimes stays off the expressway on a route where Google Maps uses the expressway.
+
+Current routing evidence:
+- `/api/route` already returns `selection`, `usage.motorwayMeters`, and `highwaySearch` diagnostics including attempted/junctions/evaluated/accepted/finalEligible/viaTimeouts/motorwayTargetMeters/bestExistingMotorwayMeters;
+- those diagnostics are not currently surfaced in the VENDRIVE UI.
+
+Do not fix this by blindly widening FINAL.36 detour caps or weakening HGV constraints. The next bounded step is to capture the existing diagnostics for one failing real-device route, classify whether the cause is provider candidate generation, IC discovery, via timeout, or final eligibility rejection, and only then change routing behavior if needed.
+
+Preserve:
+- `driving-hgv`;
+- exact registered height/width/length/weight/optional axle load;
+- maximum two active via-IC probes;
+- warm 30 route calls/min guard;
+- no passenger-car fallback;
+- no straight-line navigation fallback;
+- FINAL.36 final safety envelope unless a deliberate product decision supersedes it.
+
+Exact resume point: expose/capture highway-search diagnostics for the failing route, reproduce once, classify the cause, then open a new safety-tagged routing maintenance scope only if code changes are justified.
