@@ -62,7 +62,7 @@ test('automatic reroute heading is used only when travel direction is reliable',
   assert.equal(routing.stableTravelHeading([{lat:35.3,lng:136.8,accuracy:40,heading:90,speed:8},{lat:35.3,lng:136.8004,accuracy:40,heading:90,speed:8}]),null);
 });
 test('turn-aware zoom tightens as a significant route bend approaches',()=>{
-  const turnRoute={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.801,35.301],[136.002,35.301]]},summary:{distance:400,duration:60}};
+  const turnRoute={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.801,35.301],[136.802,35.301]]},summary:{distance:400,duration:60}};
   const atStart={edge:0,t:0,point:{lng:136.8,lat:35.3},distance:0},nearTurn={edge:0,t:0.7,point:{lng:136.8007,lat:35.3},distance:0};
   const far=routing.nextTurnMeters(turnRoute,atStart),near=routing.nextTurnMeters(turnRoute,nearTurn);
   assert.ok(far>70&&far<120);assert.ok(near>10&&near<50);assert.equal(routing.navigationZoomTarget(turnRoute,atStart),18);assert.equal(routing.navigationZoomTarget(turnRoute,nearTurn),19);
