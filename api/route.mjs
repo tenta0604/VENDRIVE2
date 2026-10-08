@@ -27,9 +27,13 @@ async function timedFetch(url,options,timeoutMs){
   try{return await fetch(url,{...options,signal:controller.signal});}
   finally{clearTimeout(timer);}
 }
-function routeRequestBody(coordinates,vehicle,restrictions,withAlternatives){
+function routeRequestBody(coordinates,vehicle,restrictions,withAlternatives,startHeading=null){
   const body={coordinates,instructions:false,preference:'recommended',extra_info:['waycategory','tollways'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'],profile_params:{restrictions}}};
   if(withAlternatives&&!vehicle.avoidTolls)body.alternative_routes={target_count:3,share_factor:0.85,weight_factor:1.6};
+  if(Number.isFinite(startHeading)){
+    body.bearings=coordinates.map((_,index)=>index===0?[startHeading,60]:[]);
+    body.optimized=false;
+  }
   return body;
 }
 function reserveUpstreamRouteCall(){
@@ -37,9 +41,9 @@ function reserveUpstreamRouteCall(){
   if(recent.length>=30)return false;
   recent.push(now);return true;
 }
-async function requestOrsRoute(coordinates,vehicle,restrictions,key,{alternatives=false,timeoutMs=9000}={}){
+async function requestOrsRoute(coordinates,vehicle,restrictions,key,{alternatives=false,timeoutMs=9000,startHeading=null}={}){
   if(!reserveUpstreamRouteCall())return new Response(null,{status:429});
-  return timedFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives))},timeoutMs);
+  return timedFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives,startHeading))},timeoutMs);
 }
 function junctionCacheKey(origin,destination,radius){return [rounded(origin.lat),rounded(origin.lng),rounded(destination.lat),rounded(destination.lng),radius].join(':');}
 async function findMotorwayJunctions(origin,destination,radius){
@@ -98,6 +102,8 @@ async function handle(request) {
     body=JSON.parse(Buffer.concat(chunks).toString('utf8'));
   } catch { return json(400,{ok:false,message:'入力を確認してください'},origin,allowed); }
   if (!routing.point(body?.origin)||!routing.point(body?.destination)) return json(400,{ok:false,message:'現在地・自販機の位置を確認してください'},origin,allowed);
+  const startHeading=body?.heading===undefined?null:(typeof body.heading==='number'&&Number.isFinite(body.heading)&&body.heading>=0&&body.heading<360?body.heading:null);
+  if(body?.heading!==undefined&&startHeading===null)return json(400,{ok:false,message:'進行方向を確認できませんでした'},origin,allowed);
   let vehicle;
   try { vehicle=routing.vehicle(body.vehicle); } catch(error) { return json(400,{ok:false,message:error.message},origin,allowed); }
   const key=process.env.ORS_API_KEY?.trim();
@@ -107,7 +113,7 @@ async function handle(request) {
   const directMeters=routing.distanceMeters(body.origin,body.destination),junctionRadius=Math.round(Math.max(8000,Math.min(25000,directMeters*0.35+4000)));
   const junctionPromise=!vehicle.avoidTolls&&directMeters>=6000?findMotorwayJunctions(body.origin,body.destination,junctionRadius):Promise.resolve([]);
   try {
-    const response=await requestOrsRoute([[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:true,timeoutMs:9000});
+    const response=await requestOrsRoute([[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:true,timeoutMs:9000,startHeading});
     if (!response.ok) {
       if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin,allowed);
       if(response.status===401||response.status===403)return json(503,{ok:false,message:'経路サービスの認証を確認する必要があります'},origin,allowed);
@@ -128,7 +134,7 @@ async function handle(request) {
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
       const viaResults=await Promise.all(pairs.map(async pair=>{
         try{
-          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:6500});
+          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:6500,startHeading});
           if(!viaResponse.ok)return null;
           const viaData=await viaResponse.json(),feature=Array.isArray(viaData?.features)?viaData.features[0]:null;
           if(!feature)return null;
