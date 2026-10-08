@@ -9,42 +9,46 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL41_VALIDATED_PENDING_PRODUCTION",
+  "status": "FINAL41_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
   "currentWork": {
-    "title": "FINAL.41 direction-aware reroute + turn zoom validated; production release pending",
-    "releaseStatus": "FINAL.41 product changes passed the finite PR gates. Merge, production deployments, live verification, and final canonical closeout remain.",
+    "title": "FINAL.41 production complete; real-device navigation confirmation pending",
+    "releaseStatus": "FINAL.41 is merged, deployed, and live-verified. The next evidence is the operator's real iPhone confirmation of direction-aware off-route rerouting and turn-aware MAP follow zoom.",
     "releaseScope": [
       "Initial route search and manual recalculation remain direction-agnostic.",
-      "Only sustained off-route automatic rerouting may add a reliable travel heading. Raw GPS heading is used only with accurate fixes and moving speed; otherwise a sufficiently long accurate movement vector is used, otherwise no heading constraint is applied.",
-      "The relay converts that optional auto-reroute heading into an ORS start bearing sector while preserving driving-hgv and the exact registered vehicle restrictions.",
-      "MAP current-position follow mode uses route geometry to detect a significant upcoming bend and changes at most one Leaflet zoom level per GPS update toward zoom 16/17/18/19 as the turn approaches, then relaxes again after the turn.",
-      "FINAL.40 highway/JCT discovery and FINAL.36 detour safety caps remain unchanged."
+      "Only sustained off-route automatic rerouting may add a reliable travel heading; unreliable direction evidence falls back to ordinary HGV rerouting without a bearing constraint.",
+      "The relay converts that optional heading into an ORS start-bearing sector with optimized=false while preserving driving-hgv and exact registered vehicle restrictions.",
+      "MAP current-position follow detects significant upcoming route bends from existing route geometry and changes at most one zoom level per GPS update toward 16/17/18/19 as the turn approaches, then relaxes afterward.",
+      "FINAL.40 highway/JCT behavior and FINAL.36 detour safety caps remain unchanged."
     ],
     "validationEvidence": {
       "safetyTag": "backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008 -> 695eaa74716446f3e1f147be226d46521b7747a8",
-      "pr": "PR #183 open",
-      "truckRoute": "37720662646 PASS",
-      "browserRegression": "37720662617 PASS",
-      "officialProviderContract": "ORS Directions supports waypoint bearings; optimized=false is required when bearings are used."
+      "productMerge": "PR #183 -> b8427d859afe0c9cc05d26f55859022c41c11037",
+      "prTruckRoute": "37720662646 PASS",
+      "prBrowserRegression": "37720662617 PASS",
+      "mainBrowserRegression": "37720926478 PASS",
+      "githubPages": "37720925836 PASS",
+      "vercelProduction": "dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa READY, target production, Git SHA b8427d859afe0c9cc05d26f55859022c41c11037",
+      "liveVersion": "public version.json = 2026.10.08-FINAL.41",
+      "liveRoutingAsset": "public truck-routing.js assetVersion = 2026.10.08-FINAL.41"
     },
     "decision": [
-      "Apply direction only to automatic off-route rerouting; initial and manual route searches stay direction-agnostic.",
-      "Never force a direction when the GPS evidence is not reliable enough; fall back to ordinary HGV rerouting without a bearing.",
-      "Turn-aware zoom runs only while MAP current-position follow is ON and moves one zoom level per GPS update.",
-      "Keep driving-hgv, exact vehicle restrictions, highway safety logic, provider call guards, and no-car/no-straight-line fallback unchanged.",
+      "Direction applies only to automatic off-route reroutes; initial and manual searches remain direction-agnostic.",
+      "Do not force a bearing when travel direction is not reliable enough.",
+      "Turn-aware zoom runs only while MAP current-position follow is ON and moves one level per GPS update.",
+      "Keep driving-hgv, exact vehicle restrictions, highway/JCT safety logic, upstream-call guards, and no-car/no-straight-line fallback unchanged.",
       "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "Merge PR #183 if the validated head is unchanged.",
-      "Verify GitHub Pages and Vercel production for the exact FINAL.41 merge commit.",
-      "Live-verify version.json and truck-routing.js as FINAL.41.",
-      "Close canonical bookkeeping and then ask for real iPhone confirmation of directional reroute and turn-aware zoom."
+      "On the real iPhone, intentionally leave the route while moving and confirm automatic reroute prefers the current travel direction instead of a backward/opposite start.",
+      "With MAP current-position follow ON, approach a clear turn and confirm the map zooms in gradually and relaxes after the turn.",
+      "Report any exact failure as new field evidence before changing thresholds or bearing/zoom behavior again.",
+      "FINAL.40 fullscreen/highway retest can still be reported independently."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.41 production release evidence is pending after PR validation.",
-    "Real-device confirmation of directional reroute behavior and turn-aware follow zoom remains required after production release.",
+    "Real-device confirmation of FINAL.41 direction-aware automatic reroute remains required.",
+    "Real-device confirmation of FINAL.41 turn-aware follow zoom remains required.",
     "FINAL.40 real-device fullscreen/highway confirmation can still be reported independently.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
@@ -59,9 +63,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.41のリリース状態から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.41本番完了後のiPhone実機確認から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.41 is validated on PR #183 and pending production release. Complete merge/deploy/live verification/canonical closeout before asking for real-device confirmation. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.41 PR #183 validation complete — production release pending"
+    "handoffBoundary": "FINAL.41 is production-complete and live-verified. Resume from real-device confirmation of direction-aware off-route rerouting and turn-aware MAP follow zoom. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.41 production complete — iPhone navigation retest pending"
   }
 }
