@@ -540,3 +540,16 @@ This file records confirmed project decisions that must survive chat migration. 
 - Automated PASS must not be treated as real-device confirmation.
 - If the field issue persists, instrument the exact failing case before changing route thresholds or iOS viewport behavior again.
 - AN15 learned numeric promotion remains intentionally paused; OCR/Analysis remains withdrawn.
+
+
+## 2026-10-08 — FINAL.41 directional reroute and turn zoom decisions
+
+- Direction must affect only sustained off-route automatic rerouting. Initial search and manual recalculation remain direction-agnostic.
+- Use a start-bearing constraint only when travel direction evidence is reliable. Accurate raw GPS heading while moving is preferred; otherwise use an accurate movement vector; otherwise omit the bearing and reroute normally.
+- ORS bearing requests must set `optimized=false`; routing remains `driving-hgv` with exact registered vehicle restrictions.
+- Use a 60-degree start-bearing deviation so the reroute favors the current travel direction without over-constraining road snapping.
+- Turn-aware zoom is active only while MAP current-position follow is ON.
+- Detect significant upcoming bends from existing route geometry; do not increase ORS response size or add a turn-instruction dependency just for zoom.
+- Zoom target is cruise 16, then 17/18/19 as the next significant bend enters 260m/120m/50m, moving by at most one zoom level per GPS update.
+- Keep FINAL.40 highway/JCT discovery, FINAL.36 detour limits, upstream-call guards, and no-car/no-straight-line fallback unchanged.
+- Safety tag: `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`.
