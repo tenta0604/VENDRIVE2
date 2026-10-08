@@ -709,3 +709,25 @@ If any item still fails:
 - do not weaken HGV restrictions or restore any unsafe fallback.
 
 AN15 remains intentionally paused. Do not restore OCR/Analysis or reopen learned numeric promotion unless explicitly authorized.
+
+
+## 2026-10-08 FINAL.41 directional reroute + turn-aware zoom validation
+
+User field feedback opened a new bounded navigation-improvement scope after FINAL.40.
+
+FINAL.41 validated behavior:
+- initial route search remains direction-agnostic;
+- manual recalculation remains direction-agnostic;
+- only sustained off-route automatic rerouting may include a reliable travel heading;
+- reliable heading uses accurate raw GPS heading while moving, otherwise an accurate movement vector, otherwise no bearing constraint;
+- the relay maps that heading to an ORS start-bearing sector with `optimized=false` while keeping `driving-hgv` and exact registered vehicle restrictions;
+- MAP current-position follow detects a significant upcoming route bend from route geometry and moves at most one zoom level per GPS update toward zoom 16/17/18/19 as the turn approaches, then relaxes afterward;
+- highway/JCT selection, FINAL.36 detour caps, upstream-call guards, and no-car/no-straight-line policies are unchanged.
+
+Safety tag: `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`.
+
+Validation:
+- PR #183 Truck route readiness / API / real Edge 320/390: `37720662646`, PASS.
+- PR #183 Browser regression: `37720662617`, PASS.
+
+Do not call FINAL.41 production-complete until PR #183 is merged and Pages/Vercel/live FINAL.41 evidence is terminal PASS. AN15 remains intentionally paused.
