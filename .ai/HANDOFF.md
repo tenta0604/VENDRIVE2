@@ -7,13 +7,13 @@ Updated for the current migration boundary on 2026-10-07.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.39`.
+- Current visible production app version: `2026.10.08-FINAL.40`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
 ## Exact durable resume boundary
 
-FINAL.39 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.39 implementation task.
+FINAL.40 is **complete, merged, deployed, and live-verified**. There is no unfinished FINAL.40 implementation task. Automated verification does not count as the user's iPhone field confirmation.
 
 Historical PR #174 is closed and merged. Its validation branch for FINAL.38 is history only and must not be used as a resume source. PR #172 / #170 / #168 / #166 remain earlier completed history. FINAL.33/PR #164 and earlier releases remain completed history; latest synchronized `main` is authoritative.
 
@@ -638,7 +638,7 @@ If the user says `進めて`, `続けて`, `やって`, or equivalent after repo
 - stop only at COMPLETE / HUMAN_REQUIRED / TECHNICAL_BLOCKER / IRREVERSIBLE_APPROVAL_REQUIRED.
 
 ### Short resume sentence
-A fresh chat can start with: **「VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.39本番完了後の実機確認から再開して。」**
+A fresh chat can start with: **「VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.40本番完了後のiPhone実機確認から再開して。」**
 
 
 ## 2026-10-08 FINAL.40 iPhone fullscreen + JCT corridor validation
@@ -662,3 +662,50 @@ Validation:
 - PR #180 Browser regression: `37699925873`, PASS.
 
 Do not call FINAL.40 production-complete until PR #180 is merged and main regression, GitHub Pages, Vercel production, and live FINAL.40 evidence are terminal PASS. After release, the next evidence is the exact iPhone fullscreen timeout case and the same long-distance highway/JCT case. AN15 remains intentionally paused.
+
+
+## 2026-10-08 FINAL.40 production release complete
+
+FINAL.40 is released and production-verified.
+
+Release evidence:
+- immutable safety tag: `backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007` -> `9541bd9d1d8242ec880f87315ae4fcf05052b006`;
+- product PR #180 merged at `7f58726df3ed7a69820013f94f78e80d914f32f6`;
+- PR #180 Truck route readiness / API / real Edge run `37699925874`: PASS;
+- PR #180 Browser regression run `37699925873`: PASS;
+- follow-up PR #179 merged at `1aefd847ffc38945d305e80c560fe1e9f8b2a714`; relative to the product merge, its effective delta is test-only (`tests/run-truck-route-gates.mjs`);
+- final Truck route readiness run on that follow-up: `37709837666`, PASS;
+- main Browser regression on the identical FINAL.40 product tree: `37700422796`, PASS;
+- current-main GitHub Pages deployment: `37709999513`, PASS;
+- Vercel production deployment `dpl_H6MTgzUTv4z72HQSERcJcgBdRY8H`: READY for Git SHA `1aefd847ffc38945d305e80c560fe1e9f8b2a714`;
+- public `version.json`: `2026.10.08-FINAL.40`;
+- public `truck-routing.js`: `assetVersion = 2026.10.08-FINAL.40`.
+
+The safety contract remains unchanged:
+- routing profile is `driving-hgv`;
+- registered height / width / length / gross weight / optional axle load remain authoritative;
+- no passenger-car fallback;
+- no straight-line fallback;
+- highway OFF avoids highways/tollways/ferries;
+- highway ON still uses at most two extra via-IC ORS candidates;
+- the warm-instance route-call guard remains;
+- FINAL.36 final detour envelope remains authoritative: duration primary + min(20%, 8 minutes), distance primary + min(30%, 10km).
+
+### Exact resume point after FINAL.40
+
+The implementation/release task is complete. The next step is **real iPhone confirmation**, not more speculative threshold changes.
+
+Retest the same field cases:
+1. Start the same long route while already in fullscreen MAP. Confirm whether route acquisition still times out.
+2. On the same long-distance destination with highway ON, confirm whether the selected route uses the expected longer motorway/JCT-connected path.
+3. Confirm the route line is visible in fullscreen.
+4. Confirm the route remains visible after the software `🔄` rotation.
+
+If any item still fails:
+- treat the exact result as new real-device evidence;
+- inspect the exact origin/destination and the returned routing metadata before changing thresholds;
+- for highway failure inspect `highwaySearch.attempted`, junction/evaluated/accepted/finalEligible counts, `selection`, motorway meters, via timeout count, and whether the final detour envelope rejected a candidate;
+- for fullscreen failure prioritize iPhone/Safari viewport/render timing, Leaflet pane/SVG state, and orientation/visual-viewport behavior;
+- do not weaken HGV restrictions or restore any unsafe fallback.
+
+AN15 remains intentionally paused. Do not restore OCR/Analysis or reopen learned numeric promotion unless explicitly authorized.
