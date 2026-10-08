@@ -5,58 +5,54 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.08-FINAL.44",
+  "appVersion": "2026.10.08-FINAL.45",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FIELD_EVIDENCE_HIGHWAY_SELECTION_MISMATCH",
+  "status": "FINAL45_DIAGNOSTICS_PRODUCTION_VERIFIED_PENDING_FIELD_REPRO",
   "currentWork": {
-    "title": "Real-device highway-selection mismatch remains after FINAL.44",
-    "releaseStatus": "User field confirmation says the recent UI/navigation changes are basically OK. The remaining concrete defect is that, with highway ON, VENDRIVE still sometimes stays off the expressway on a route where Google Maps uses the expressway.",
+    "title": "FINAL.45 highway diagnostics live; one affected-route reproduction needed",
+    "releaseStatus": "FINAL.45 diagnostics are merged, deployed, and live-verified. No route-selection behavior or HGV safety constraints were changed. The remaining defect is Google's expressway route being absent in VENDRIVE on a field route; diagnose with one copied report.",
     "releaseScope": [
-      "FINAL.42 arrival-card task display: user-confirmed OK.",
-      "FINAL.41 direction-aware reroute and turn-aware zoom: user reports basic behavior OK.",
-      "FINAL.43 office internal routing: user reports basic behavior OK.",
-      "FINAL.44 threshold-relative task gauges: user reports basic behavior OK.",
-      "Remaining issue: highway route selection quality on at least one real-device route still differs from Google Maps in a way the user considers undesirable."
+      "MAP active-route panel contains collapsible '高速診断（原因調査用）' with a copy button.",
+      "Report includes selection, highway distance, existing candidate motorway distance, IC lookup status/count, pair count, accepted/final-eligible counts, rejected/no-feature/low-motorway/timeout/error counters.",
+      "Report intentionally excludes raw coordinates, destination addresses, names, vehicle dimensions, identifiers, and API keys; users can copy text or screenshot.",
+      "New calculations clear old reports; failed and ended routes do not retain stale report.",
+      "No additional ORS/Overpass calls and no route-safety changes."
     ],
     "validationEvidence": {
-      "latestMain": "fd228e54fea90fbbf49cc4aa81330cb70bf98957",
-      "userFieldEvidence": "2026-10-08: 基本全部OK。ただしGoogleマップなら高速案内するところをVENDRIVEでは高速案内しない。",
-      "currentHighwayDiagnosticsReturnedByApi": [
-        "selection",
-        "highwaySearch.attempted",
-        "highwaySearch.junctions",
-        "highwaySearch.evaluated",
-        "highwaySearch.accepted",
-        "highwaySearch.finalEligible",
-        "highwaySearch.viaTimeouts",
-        "highwaySearch.motorwayTargetMeters",
-        "highwaySearch.bestExistingMotorwayMeters",
-        "usage.motorwayMeters"
-      ],
-      "currentUiExposure": "These diagnostics are returned by /api/route but are not currently exposed in the UI."
+      "safetyTag": "backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008 -> f6c5052d0def10a5f64ab842395bcbab04f5a7ec",
+      "productMerge": "PR #196 -> da376f589387144774c7d7e8dc6eb6f024a919b9",
+      "prTruckRoute": "37751032915 PASS (API, logic, real Edge 320/390; test harness adjusted after first failed gate)",
+      "prBrowserRegression": "37751032983 PASS",
+      "mainBrowserRegression": "37751257933 PASS",
+      "githubPages": "37751256803 PASS",
+      "vercelProduction": "dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M READY, production git SHA da376f589387144774c7d7e8dc6eb6f024a919b9",
+      "liveVersion": "Pages and Vercel version.json = 2026.10.08-FINAL.45",
+      "liveRoutingAsset": "Public truck-routing.js includes assetVersion 2026.10.08-FINAL.45 and highwayDiagnosticReport",
+      "previousFieldEvidence": "User says recent features are basically OK; expressway routing still misses routes that Google Maps uses."
     },
     "decision": [
-      "Treat the highway mismatch as new real-device field evidence, not as proof that FINAL.40 solved route selection.",
-      "Do not blindly widen FINAL.36 final detour caps or weaken HGV restrictions.",
-      "Before changing route thresholds, identify whether the failing case is caused by ORS not returning a motorway option, IC search not producing a usable candidate, or final bounded acceptance rejecting the candidate.",
-      "Preserve driving-hgv, exact vehicle restrictions, max two active via-IC probes, warm 30 route calls/min guard, and no passenger-car/straight-line fallback.",
-      "AN15 remains intentionally paused."
+      "No speculation-driven increase to IC probes, search access limits, provider calls, or detour acceptance until the affected route is diagnosed.",
+      "Existing additional highway candidate probes stay <=2; 30 route calls per minute warm guard unchanged.",
+      "driving-hgv, exact HGV vehicle restrictions, highway OFF avoidance, and FINAL.36 duration/distance detour caps stay unchanged.",
+      "No passenger-car or straight-line fallback.",
+      "User can report location-free diagnostics; if necessary later, obtain exact route endpoints with consent to reproduce source data."
     ],
     "nextActions": [
-      "Capture the highway-search diagnostics for the exact failing real-device route without exposing unnecessary location details.",
-      "Use those diagnostics to classify the failure as provider-candidate, IC-discovery, via-timeout, or final-eligibility rejection.",
-      "Only then open a bounded production-code fix with a new immutable safety tag."
+      "On iPhone with highway ON, repeat once a route where Google Maps would use the motorway but VENDRIVE does not.",
+      "Tap '高速診断（原因調査用）' in the VENDRIVE route panel and use '診断内容をコピー'. Paste it into chat or send a screenshot.",
+      "Classify the IC lookup, pair-selection, HGV provider rejection or detour-eligibility failure from the sanitized report.",
+      "Only then decide on a bounded new highway-routing fix with a new immutable safety tag. AN15 remains paused."
     ]
   },
   "requiredUserInput": [
-    "One reproduction of the highway mismatch after diagnostics are made accessible, or the exact failing origin/destination only if diagnostics alone are insufficient."
+    "Paste one location-free FINAL.45 highway diagnostic report for the exact highway-ON route that still differs from Google Maps (or screenshot if clipboard fails)."
   ],
   "unresolved": [
-    "Highway ON still fails to select an expressway on at least one real-device route where Google Maps does.",
-    "The exact failure class is not yet identified because API highwaySearch metadata is not exposed in the UI.",
-    "Do not loosen FINAL.36 detour caps or HGV safety constraints by assumption.",
+    "FINAL.45 diagnosis is production-complete; exact field-route report is not yet supplied.",
+    "Highway ON still underuses expressways on at least one real user trip compared with Google Maps; the cause is not established.",
+    "Do not weaken HGV constraints or FINAL.36 safety envelope without grounded diagnosis.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
   "recovery": {
@@ -70,9 +66,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、高速ONの実機ルート選択不一致の診断から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHub最新mainからFINAL.45の高速診断結果の解析を再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "Recent FINAL.41/42/43/44 field checks are basically OK except highway selection. Resume by exposing/capturing the existing highwaySearch diagnostics for the failing route, then classify the cause before changing thresholds or HGV behavior.",
-    "latestContinuityCheckpoint": "Real-device highway-selection mismatch confirmed — diagnosis required before another routing change"
+    "handoffBoundary": "FINAL.45 highway diagnostics deployed and live-verified. Await one copied/screenshot location-free diagnosis from an affected highway-ON route; then classify candidate generation vs IC lookup/pairing vs provider rejection vs final route acceptance before any safety-tagged routing fix. No change to HGV/final detour rules.",
+    "latestContinuityCheckpoint": "FINAL.45 live highway diagnostics — affected-route field report pending"
   }
 }

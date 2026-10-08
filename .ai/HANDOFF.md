@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.44`.
+- Current visible production app version: `2026.10.08-FINAL.45`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -899,3 +899,23 @@ Preserve:
 - FINAL.36 final safety envelope unless a deliberate product decision supersedes it.
 
 Exact resume point: expose/capture highway-search diagnostics for the failing route, reproduce once, classify the cause, then open a new safety-tagged routing maintenance scope only if code changes are justified.
+
+
+## 2026-10-08 FINAL.45 highway diagnosis deployed — affected-route evidence pending
+
+FINAL.45 is released and production-verified. It does **not** claim the expressway-selection problem is fixed.
+
+- Safety tag: `backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008` -> `f6c5052d0def10a5f64ab842395bcbab04f5a7ec`.
+- Product PR #196 merged at `da376f589387144774c7d7e8dc6eb6f024a919b9`.
+- Final PR Truck route API / real Edge run `37751032915` PASS; Browser regression `37751032983` PASS. An initial Edge gate had a harness issue reading collapsed `details` text via `innerText`; it was corrected and retested.
+- Main Browser regression `37751257933` PASS; GitHub Pages `37751256803` PASS.
+- Vercel production `dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M` READY for the exact product merge SHA.
+- Public Pages and Vercel `version.json` = `2026.10.08-FINAL.45`; public routing asset contains the matching version and diagnostic formatter.
+
+The current route panel has a collapsible `高速診断（原因調査用）` and `診断内容をコピー`. It reports sanitized `selection`, selected/available highway distances, Overpass IC status/count, candidate pair attempts and outcomes (provider rejection, missing feature, insufficient motorway, timeout, other errors), and final adoption counts. Copied text intentionally contains no raw coordinates, destination identity, truck dimensions, or API keys. Results reset on new or failed routing. No additional ORS calls.
+
+**Exact next action (HUMAN_REQUIRED):** user repeats just one real route with highway ON where Google Maps uses expressway but VENDRIVE does not; opens the route panel's `高速診断（原因調査用）`; taps `診断内容をコピー`; pastes the diagnostic text into chat. A screenshot of expanded diagnostics is an alternative. Do not ask for full location until needed after reading the sanitized report.
+
+**Next engineering step after user evidence:** classify IC data absence, no viable IC pairs, ORS HGV rejection/timeouts, or rejected final candidates before a separately safety-tagged, bounded code fix. Do not blindly widen FINAL.36 detour caps, relax exact driving-hgv restrictions, exceed two active via probes, remove warm 30-call/min guard, or add car/straight-line fallback.
+
+User says recent other changes are basically OK; only highway selection remains unresolved. AN15 is still intentionally paused and OCR/Analysis remains withdrawn.

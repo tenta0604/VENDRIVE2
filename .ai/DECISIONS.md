@@ -627,3 +627,16 @@ This file records confirmed project decisions that must survive chat migration. 
 - Public Pages and Vercel version endpoints report `2026.10.08-FINAL.44`.
 - FINAL.44 implementation/release is closed. Remaining evidence is real-device visual confirmation of threshold-relative task gauges.
 - AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.
+
+
+## 2026-10-08 — FINAL.45 highway diagnosis decisions and release
+
+- The user's confirmed remaining navigation defect is highway ON selecting surface roads on a route where Google Maps selects expressway; recent other features are basically OK.
+- Do not presume the cause is ORS, Overpass IC discovery, pair selection, or FINAL.36 final rejection before a field diagnostic.
+- Expose copyable, privacy-safe diagnostics only; no raw coordinates, destinations, truck parameters or provider secrets.
+- Expand existing IC search diagnostic counters without increasing any provider request counts or changing how routes are selected.
+- Preserve `driving-hgv`, registered restrictions, the maximum of two via-IC active candidates, warm 30/min guard, FINAL.36 time and distance detour limits, highway OFF avoidance, and no car/straight-line fallback.
+- Safety tag: `backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008` -> `f6c5052d0def10a5f64ab842395bcbab04f5a7ec`.
+- PR #196 product merge: `da376f589387144774c7d7e8dc6eb6f024a919b9`; Truck route/real Edge `37751032915` PASS; PR Browser `37751032983` PASS; main Browser `37751257933` PASS; Pages `37751256803` PASS; Vercel `dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M` READY for merge SHA.
+- Public Pages and Vercel versions: `2026.10.08-FINAL.45`.
+- Release is complete; exact next evidence is one copied real-device highway diagnosis. Do not mark the expressway-selection mismatch resolved.
