@@ -304,3 +304,12 @@ FINAL.45 is production-complete, **not** an expressway-selection fix. The MAP ro
 Tag `backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008` points to `f6c5052d0def10a5f64ab842395bcbab04f5a7ec`. Product PR #196 merged at `da376f589387144774c7d7e8dc6eb6f024a919b9`. Final Truck route readiness `37751032915`, PR Browser `37751032983`, main Browser `37751257933`, and Pages `37751256803` passed. Vercel `dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M` READY for the exact SHA. Public versions are `2026.10.08-FINAL.45`.
 
 Next step: the user shares one copied/screenshot diagnosis from the affected route; determine whether the problem is missing provider/IC candidates or final acceptance and only then choose the next limited route-quality fix. No HGV/FINAL.36 safety-policy changes; AN15 remains paused.
+
+
+## FINAL.46 HGV timeout bounds — backend quota blocked (2026-10-08)
+
+User reported that a route cannot appear because search itself times out. FINAL.46 addresses upstream response-body hangs (instead of only header fetch deadlines) and prevents optional via-IC motorway probes from delaying an already validated HGV baseline beyond a 14.5-second server budget. No HGV safety or final detour policy changed.
+
+Safety tag backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 targets be83e6c8aee36caa114dc8926425bff81555d305. PR #199 merged at c2307edf38c1e1256c3eaa125e86d8e9fd461edc. PR Truck route 37754575289 and PR Browser 37754575245 PASS; main Browser 37754745261 and Pages 37754744610 PASS.
+
+NOT COMPLETE: Pages serves FINAL.46, Vercel route backend FINAL.45. Explicit production deploy was refused 402 payment_required api-deployments-free-per-day, retryAfter 86400. After quota reset, deploy exact latest main once, live verify correct backend, then request affected-route iPhone retest. AN15 paused.
