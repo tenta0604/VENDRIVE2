@@ -76,9 +76,28 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.44 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.08-FINAL.44');
+test('routing asset version matches FINAL.45 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.08-FINAL.45');
 });
+
+test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
+  const sample={selection:'active-highway-unavailable',usage:{motorwayMeters:0},
+    highwaySearch:{attempted:true,junctionQueryStatus:'ok',junctions:7,evaluated:2,accepted:0,finalEligible:0,
+      viaTimeouts:1,viaProviderRejected:1,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,motorwayTargetMeters:6000,bestExistingMotorwayMeters:0}};
+  const report=routing.highwayDiagnosticReport({...sample,origin:{lat:35.3,lng:136.8},destination:{lat:35.4,lng:136.9},apiKey:'SECRET'},{avoidTolls:false,height:2.85,weight:4.8});
+  assert.match(report,/高速設定：ON/);assert.match(report,/IC取得件数：7/);assert.match(report,/IC組合せ評価数：2/);
+  assert.match(report,/応答拒否 1/);assert.match(report,/タイムアウト 1/);
+  for(const secret of ['35.3','35.4','136.8','136.9','SECRET','2.85','4.8'])assert.ok(!report.includes(secret),'report must exclude '+secret);
+  const rejected=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,accepted:1,finalEligible:0}},{avoidTolls:false});
+  assert.match(rejected,/最終採用0件/);
+  const noPairs=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,evaluated:0}},{avoidTolls:false});
+  assert.match(noPairs,/IC組合せ0件/);
+  const overpassError=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctions:0}},{avoidTolls:false});
+  assert.match(overpassError,/IC取得元が応答できず/);
+  assert.match(routing.highwayDiagnosticReport(sample,{avoidTolls:true}),/高速OFF/);
+  assert.equal(routing.highwayDiagnosticReport({ok:true},{avoidTolls:false}),null);
+});
+
 
 test('dedicated tollways extra highlights a route when waycategory reports no highway or toll bits',()=>{
   const providerMismatch={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.301],[136.802,35.302],[136.803,35.303]]},summary:{distance:900,duration:120},waycategory:[[0,3,0]],tollways:[[0,1,0],[1,3,1]]};
