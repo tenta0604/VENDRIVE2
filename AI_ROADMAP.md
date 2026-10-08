@@ -277,3 +277,12 @@ FINAL.42 is released and production-verified. The arrival visit card now has its
 Safety tag `backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008` -> `1a84a1c5830d39b715990753fc327a059eaa7f1f`. PR #186 merged at `55f304892fcb626a73a755c4a8e0129272da91c7`. PR runs `37723986337` and `37723986287`, main Browser regression `37724083359`, and Pages `37724082816` passed. Vercel production `dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR` is READY for the exact merge SHA. Public version and routing asset report `2026.10.08-FINAL.42`.
 
 FINAL.42 closes this implementation/release scope. The next evidence is real-device iPhone confirmation of the arrival-card display. FINAL.41 and FINAL.40 field checks remain pending. AN15 remains intentionally paused.
+
+
+## FINAL.43 office internal HGV route production release (2026-10-08)
+
+FINAL.43 is released and production-verified. Office navigation now uses the same internal VENDRIVE `driving-hgv` route flow from both the office list and office MAP pin. Office destinations are typed separately from vending-machine visit destinations, so arriving at an office ends routing without opening machine visit/task/order actions. The explicit external-navigation action remains available from the active route panel.
+
+Safety tag `backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008` -> `af8f34f363b25ea1885df22adc35dc6b01ac3ec0`. PR #189 merged at `e648323947019745e507015f61ddb0b464163f43`. PR runs `37730660379` and `37730661344`, main Browser regression `37730783341`, and Pages `37730782368` passed. Vercel production `dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM` is READY for the exact merge SHA. Pages and Vercel version endpoints report `2026.10.08-FINAL.43`.
+
+No routing safety policy changed. FINAL.42 arrival-card task display has now been user-confirmed OK; the other previously pending field checks remain pending. AN15 remains intentionally paused.
