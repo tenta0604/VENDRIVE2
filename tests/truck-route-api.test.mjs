@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { POST, OPTIONS } from '../api/route.mjs';
+import { POST, OPTIONS, timedJsonFetch } from '../api/route.mjs';
 import routing from '../truck-routing.js';
 
 const origin='https://tenta0604.github.io';
@@ -8,6 +8,56 @@ const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
 const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehicle};
 const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
 const request=(body=input,options={})=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json',...options.headers},body:JSON.stringify(body)});
+
+test('upstream timeout also covers a stalled response JSON body, not just response headers',async()=>{
+  const previous=globalThis.fetch;
+  let aborted=false;
+  globalThis.fetch=async(_url,options)=>{
+    options.signal.addEventListener('abort',()=>{aborted=true;});
+    return {ok:true,status:200,json:()=>new Promise(()=>{})};
+  };
+  try{
+    const started=Date.now();
+    await assert.rejects(timedJsonFetch('https://example.test/route',{method:'POST'},35),e=>e?.name==='AbortError');
+    assert.equal(aborted,true,'the stalled JSON stream should be aborted');
+    assert.ok(Date.now()-started<1000,'full-response deadline must be bounded');
+  }finally{globalThis.fetch=previous;}
+});
+
+test('time budget skips optional via-IC probes and still delivers an already fetched safe HGV route',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch,realNow=Date.now;
+  process.env.ORS_API_KEY='test-secret';
+  let afterBaseline=false,viaCalls=0;
+  const far={origin:{lat:35.51,lng:136.11},destination:{lat:35.75,lng:136.49},vehicle:{...vehicle,avoidTolls:false}};
+  const base={geometry:{type:'LineString',coordinates:[[136.11,35.51],[136.29,35.62],[136.49,35.75]]},properties:{summary:{distance:48000,duration:3200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  globalThis.fetch=async(url,opts)=>{
+    if(String(url).includes('overpass-api.de'))return Response.json({elements:[
+      {type:'node',id:99101,lat:35.54,lon:136.14,tags:{ref:'ENTRY'}},
+      {type:'node',id:99102,lat:35.72,lon:136.46,tags:{ref:'EXIT'}}
+    ]});
+    const submitted=JSON.parse(opts.body);
+    assert.equal(submitted.options.vehicle_type,'hgv');
+    assert.deepEqual(submitted.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});
+    if(submitted.coordinates.length!==2){viaCalls++;return Response.json({error:'slow'});}
+    afterBaseline=true;
+    return Response.json({features:[base]});
+  };
+  Date.now=()=>realNow()+(afterBaseline?14500:0);
+  try{
+    const result=await POST(request(far));assert.equal(result.status,200);
+    const data=await result.json();
+    assert.deepEqual(data.route.summary,{distance:48000,duration:3200});
+    assert.equal(data.profile,'driving-hgv');
+    assert.equal(data.highwaySearch.attempted,true);
+    assert.equal(data.highwaySearch.timeBudgetLimited,true);
+    assert.equal(data.highwaySearch.status,'time-budget-skip');
+    assert.equal(viaCalls,0,'do not start an optional ORS request after the budget is exhausted');
+  }finally{
+    Date.now=realNow;globalThis.fetch=oldFetch;
+    if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;
+  }
+});
+
 test('vehicle validation rejects missing, zero, nonnumeric and impossible axle values',()=>{
   for(const field of ['height','width','length','weight'])for(const value of [undefined,null,'',0,'2',NaN,Infinity])assert.throws(()=>routing.vehicle({...vehicle,[field]:value}));
   assert.throws(()=>routing.vehicle({...vehicle,axleload:4.9}));
