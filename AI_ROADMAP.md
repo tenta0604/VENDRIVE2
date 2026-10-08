@@ -252,3 +252,10 @@ FINAL.40 is released and production-verified. Fullscreen route start no longer r
 Safety tag `backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007` -> `9541bd9d1d8242ec880f87315ae4fcf05052b006`. Product PR #180 merged at `7f58726df3ed7a69820013f94f78e80d914f32f6`; validation runs `37699925874` and `37699925873` passed. Follow-up PR #179 merged at `1aefd847ffc38945d305e80c560fe1e9f8b2a714` with a test-only effective delta relative to the product merge, and final Truck route readiness run `37709837666` passed. Main Browser regression `37700422796` passed on the identical product tree, GitHub Pages `37709999513` passed, Vercel production `dpl_H6MTgzUTv4z72HQSERcJcgBdRY8H` is READY for current main, and the public app/routing asset report `2026.10.08-FINAL.40`.
 
 FINAL.40 closes this maintenance scope. The next step is the same real-device iPhone retest: fullscreen route start timeout, long-distance highway/JCT usage, fullscreen route visibility, and software-rotated fullscreen visibility. Any remaining failure becomes new bounded field evidence; do not globally weaken HGV safety. AN15 remains intentionally paused.
+
+
+## FINAL.41 direction-aware reroute + turn-aware follow zoom validation (2026-10-08)
+
+FINAL.41 improves live navigation without changing initial route semantics. Initial and manual searches remain direction-agnostic, while a sustained off-route automatic reroute may constrain only the starting road direction when accurate movement evidence is available. MAP current-position follow now gradually zooms toward significant upcoming route bends one level per GPS update and relaxes again afterward. HGV restrictions, highway/JCT logic, FINAL.36 detour limits, and fallback prohibitions remain unchanged.
+
+Safety tag `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`. PR #183 validation passed Truck route readiness / API / real Edge run `37720662646` and Browser regression run `37720662617`. Production release evidence is pending.
