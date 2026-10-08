@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.42`.
+- Current visible production app version: `2026.10.08-FINAL.43`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -796,5 +796,44 @@ Automated PASS is not real-device confirmation. On the iPhone, when an arriving 
 2. confirm every active incomplete task is visible before swiping;
 3. leave one task unchecked during completion and confirm it remains incomplete;
 4. continue the already-pending FINAL.41 and FINAL.40 field checks when convenient.
+
+AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
+
+
+## 2026-10-08 FINAL.43 production release complete
+
+FINAL.43 is released and production-verified.
+
+Release evidence:
+- immutable safety tag: `backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008` -> `af8f34f363b25ea1885df22adc35dc6b01ac3ec0`;
+- PR #189 merged at `e648323947019745e507015f61ddb0b464163f43`;
+- PR Truck route readiness run `37730660379`: PASS;
+- PR Browser regression run `37730661344`: PASS;
+- main Browser regression run `37730783341`: PASS;
+- GitHub Pages run `37730782368`: PASS;
+- Vercel production deployment `dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM`: READY for exact merge SHA `e648323947019745e507015f61ddb0b464163f43`;
+- public Pages and Vercel `version.json`: `2026.10.08-FINAL.43`.
+
+FINAL.43 behavior:
+- office list rows/buttons start the internal VENDRIVE `driving-hgv` route;
+- office MAP pins start the same internal route instead of immediately opening Google Maps;
+- office destinations are tracked separately from vending-machine visit destinations;
+- office arrival ends routing without opening machine visit/task/order arrival actions;
+- the active-route external-navigation button remains available;
+- existing HGV restrictions, highway/JCT logic, direction-aware reroute, turn-aware zoom, provider-call guards, and FINAL.36 detour caps are unchanged.
+
+Field evidence carried forward:
+- FINAL.42 arrival-card task display: user confirmed OK;
+- FINAL.42 order-detail display: not explicitly confirmed yet;
+- FINAL.41 direction-aware reroute and turn-aware zoom: pending;
+- FINAL.40 fullscreen/highway behavior: pending.
+
+### Exact next evidence
+
+On the iPhone:
+1. tap an office from the office list and confirm the internal route opens;
+2. tap the office MAP pin and confirm the same internal route opens;
+3. arrive near the office and confirm routing ends without a vending-machine arrival card;
+4. continue the still-pending FINAL.40/41 checks when convenient.
 
 AN15 remains intentionally paused. OCR/Analysis stays withdrawn.

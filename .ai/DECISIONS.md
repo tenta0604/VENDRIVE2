@@ -585,3 +585,25 @@ This file records confirmed project decisions that must survive chat migration. 
 - Public `version.json` and routing asset report `2026.10.08-FINAL.42`.
 - FINAL.42 implementation/release is closed. Remaining evidence is real-device confirmation of arrival-card order/task display.
 - AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.
+
+
+## 2026-10-08 — FINAL.43 office internal-route decisions
+
+- Office navigation is an internal VENDRIVE HGV destination, not a vending-machine visit target.
+- Office list row/button and office MAP pin both start the internal `driving-hgv` route.
+- Office destination validity must resolve against `state.offices`; vending-machine destinations continue resolving against `state.machines`.
+- Office arrival ends the route but must not open machine visit/task/order arrival workflows.
+- Keep the explicit external-navigation action in the active route panel as an optional secondary path.
+- Do not alter registered HGV restrictions, highway/JCT selection, direction-aware reroute, turn-aware zoom, provider-call guards, or FINAL.36 final detour caps.
+- Safety tag: `backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008` -> `af8f34f363b25ea1885df22adc35dc6b01ac3ec0`.
+
+## 2026-10-08 — FINAL.43 production release complete
+
+- PR #189 merged to `main` at `e648323947019745e507015f61ddb0b464163f43`.
+- PR Truck route readiness `37730660379` and Browser regression `37730661344` passed.
+- Main Browser regression `37730783341` and GitHub Pages `37730782368` passed.
+- Vercel production deployment `dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM` is READY for the exact merge SHA.
+- Public Pages and Vercel version endpoints report `2026.10.08-FINAL.43`.
+- FINAL.42 arrival-card task display is now user-confirmed OK; FINAL.42 order-detail display plus FINAL.40/41 field checks remain pending.
+- FINAL.43 implementation/release is closed. Remaining evidence is real-device confirmation of office internal routing and office-arrival behavior.
+- AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.
