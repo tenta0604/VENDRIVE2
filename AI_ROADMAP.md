@@ -286,3 +286,12 @@ FINAL.43 is released and production-verified. Office navigation now uses the sam
 Safety tag `backup-pre-FINAL43-OFFICE-INTERNAL-HGV-ROUTE-20261008` -> `af8f34f363b25ea1885df22adc35dc6b01ac3ec0`. PR #189 merged at `e648323947019745e507015f61ddb0b464163f43`. PR runs `37730660379` and `37730661344`, main Browser regression `37730783341`, and Pages `37730782368` passed. Vercel production `dpl_9HEPeoR4Cd8QLSb5GuA1FuHn7HWM` is READY for the exact merge SHA. Pages and Vercel version endpoints report `2026.10.08-FINAL.43`.
 
 No routing safety policy changed. FINAL.42 arrival-card task display has now been user-confirmed OK; the other previously pending field checks remain pending. AN15 remains intentionally paused.
+
+
+## FINAL.44 task threshold-relative gauge production release (2026-10-08)
+
+FINAL.44 is released and production-verified. Task-tab progress gauges now use each task's configured auto-completion percentage as the full-scale target. For example, with a 70% completion threshold, 35% actual completion fills half the gauge and 50% actual completion fills about 71.4%. The task detail progress bar uses the same scale. The displayed numeric percentage remains the true actual completion rate, and task auto-completion logic is unchanged.
+
+Safety tag `backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008` -> `712f89119ce14ed62cb028cbaafdb46e2c730f64`. PR #192 merged at `afcbf0b639959fa6c3d80bf202021f060d487593`. PR runs `37733253158` and `37733253132`, main Browser regression `37733379642`, and Pages `37733378870` passed. Vercel production `dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw` is READY for the exact merge SHA. Pages and Vercel version endpoints report `2026.10.08-FINAL.44`.
+
+No routing, HGV, task-target, persistence, arrival, or order semantics changed. FINAL.44 closes this implementation/release scope; only real-device visual confirmation remains.
