@@ -1,8 +1,8 @@
 {
-  "evidenceVersion": 55,
-  "runType": "final41_pr_validation",
+  "evidenceVersion": 56,
+  "runType": "final41_production_release_closeout",
   "phase": "FINAL41_DIRECTIONAL_REROUTE_TURN_ZOOM",
-  "status": "VALIDATED_PENDING_PRODUCTION",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "695eaa74716446f3e1f147be226d46521b7747a8",
     "safetyTag": "backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008",
@@ -15,40 +15,40 @@
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.41 adds reliable direction-aware automatic off-route rerouting and gradual turn-aware MAP follow zoom without changing initial/manual route semantics or HGV safety constraints.",
-    "productStatus": "PR_VALIDATED",
+    "summary": "FINAL.41 is production-complete: automatic off-route rerouting can honor reliable travel direction, while MAP follow gradually zooms for upcoming significant bends. Initial/manual search and all HGV safety contracts remain unchanged.",
+    "productStatus": "PRODUCTION_VERIFIED",
     "productionCodeChanged": true,
-    "closeoutCommitChangesDocumentationOnly": false
+    "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
     "immutableSafetyTag": "PASS: backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008 -> 695eaa74716446f3e1f147be226d46521b7747a8",
-    "syntaxAndNodeLogic": "PASS as part of Truck route readiness workflow 37720662646",
-    "routeApiBearingGate": "PASS",
+    "finalPrTruckRoute": "PASS: workflow 37720662646",
+    "finalPrBrowserRegression": "PASS: workflow 37720662617",
+    "directionAwareAutoReroute": "PASS",
     "initialAndManualDirectionAgnostic": "PASS",
-    "autoRerouteDirectionGate": "PASS",
-    "turnAwareZoomHelper": "PASS",
-    "realEdge320390": "PASS: workflow 37720662646",
-    "browserRegression": "PASS: workflow 37720662617",
+    "turnAwareFollowZoom": "PASS",
     "exactHgvRestrictions": "PASS",
     "highwayAndDetourPoliciesPreserved": "PASS",
     "noCarOrStraightLineFallback": "PASS",
-    "merge": "PENDING",
-    "githubPages": "PENDING",
-    "vercelProduction": "PENDING",
-    "liveVersion": "PENDING",
-    "liveRoutingAsset": "PENDING"
+    "merge": "PASS: PR #183 -> b8427d859afe0c9cc05d26f55859022c41c11037",
+    "mainBrowserRegression": "PASS: workflow 37720926478",
+    "githubPages": "PASS: workflow 37720925836",
+    "vercelProduction": "PASS: dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa READY, target production, Git SHA b8427d859afe0c9cc05d26f55859022c41c11037",
+    "liveVersion": "PASS: public version.json reports 2026.10.08-FINAL.41",
+    "liveRoutingAsset": "PASS: public truck-routing.js reports assetVersion 2026.10.08-FINAL.41"
   },
   "openItems": [
-    "Merge PR #183 and verify production deployment/live assets.",
-    "Real-device directional reroute and turn zoom confirmation remains pending after release.",
+    "No unresolved FINAL.41 implementation or release issue.",
+    "Real-device direction-aware reroute confirmation remains required.",
+    "Real-device turn-aware MAP follow zoom confirmation remains required.",
     "AN15 learned numeric promotion remains intentionally paused."
   ],
-  "nextAction": "Merge the unchanged validated PR #183, verify Pages/Vercel/live FINAL.41, update canonical closeout, then request iPhone field confirmation.",
+  "nextAction": "Retest FINAL.41 on the real iPhone: leave the route while moving to verify direction-aware automatic reroute, and approach a clear turn with MAP follow ON to verify gradual zoom-in/zoom-out. Treat any remaining failure as new bounded field evidence.",
   "unresolved": [
-    "No unresolved implementation/test issue before merge.",
-    "Production release evidence pending.",
-    "AN15 evidence/promotion remains intentionally paused."
+    "No unresolved FINAL.41 release issue.",
+    "Real-device FINAL.41 confirmation remains pending.",
+    "AN15 evidence/promotion remains an intentional paused state."
   ],
   "releaseChangedFiles": [
     "api/route.mjs",
@@ -65,17 +65,24 @@
     ".ai/DECISIONS.md"
   ],
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "index.html",
-    "version.json",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
     ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
     "AI_ROADMAP.md",
     ".ai/DECISIONS.md"
-  ]
+  ],
+  "continuityCheckpoint": {
+    "createdFor": "fresh-chat handoff",
+    "status": "PASS",
+    "productCodeChanged": false,
+    "sourceMain": "b8427d859afe0c9cc05d26f55859022c41c11037",
+    "resumeFrom": "FINAL.41 production-complete; real-device navigation confirmation pending",
+    "immediateEvidence": [
+      "automatic off-route reroute follows travel direction",
+      "initial/manual search still ordinary",
+      "turn-aware zoom approaches clear bend gradually",
+      "zoom relaxes after the turn"
+    ],
+    "warning": "Do not treat automated FINAL.41 PASS as real-device confirmation, and do not reopen AN15 automatically."
+  }
 }

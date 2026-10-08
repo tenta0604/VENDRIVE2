@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.40`.
+- Current visible production app version: `2026.10.08-FINAL.41`.
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -731,3 +731,37 @@ Validation:
 - PR #183 Browser regression: `37720662617`, PASS.
 
 Do not call FINAL.41 production-complete until PR #183 is merged and Pages/Vercel/live FINAL.41 evidence is terminal PASS. AN15 remains intentionally paused.
+
+
+## 2026-10-08 FINAL.41 production release complete
+
+FINAL.41 is released and production-verified.
+
+Release evidence:
+- immutable safety tag: `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`;
+- PR #183 merged at `b8427d859afe0c9cc05d26f55859022c41c11037`;
+- PR Truck route readiness / API / real Edge run `37720662646`: PASS;
+- PR Browser regression run `37720662617`: PASS;
+- main Browser regression run `37720926478`: PASS;
+- GitHub Pages run `37720925836`: PASS;
+- Vercel production deployment `dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa`: READY for exact merge SHA `b8427d859afe0c9cc05d26f55859022c41c11037`;
+- public `version.json`: `2026.10.08-FINAL.41`;
+- public `truck-routing.js`: `assetVersion = 2026.10.08-FINAL.41`.
+
+FINAL.41 behavior:
+- initial search and manual recalculation ignore travel direction, as requested;
+- only sustained off-route automatic rerouting may add a reliable start bearing;
+- unreliable direction evidence falls back to normal HGV rerouting without a bearing constraint;
+- ORS remains `driving-hgv` with exact registered vehicle restrictions;
+- MAP current-position follow gradually zooms toward significant upcoming route bends one level per GPS update and relaxes afterward;
+- FINAL.40 highway/JCT logic and FINAL.36 final detour envelope remain unchanged.
+
+### Exact next evidence
+
+Automated PASS is not real-device confirmation. On the iPhone:
+1. intentionally leave the active route while moving and verify the automatic reroute starts naturally in the current travel direction instead of sending the vehicle backward;
+2. with MAP current-position follow ON, approach a clear turn and verify gradual zoom-in;
+3. after the turn, verify zoom relaxes naturally;
+4. report any exact failure as new field evidence before changing thresholds again.
+
+AN15 remains intentionally paused. OCR/Analysis stays withdrawn.
