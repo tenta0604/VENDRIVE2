@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.45`.
+- Current visible production app version: `2026.10.08-FINAL.46` (Pages only; Vercel route API remains FINAL.45 while quota-blocked).
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -919,3 +919,20 @@ The current route panel has a collapsible `高速診断（原因調査用）` an
 **Next engineering step after user evidence:** classify IC data absence, no viable IC pairs, ORS HGV rejection/timeouts, or rejected final candidates before a separately safety-tagged, bounded code fix. Do not blindly widen FINAL.36 detour caps, relax exact driving-hgv restrictions, exceed two active via probes, remove warm 30-call/min guard, or add car/straight-line fallback.
 
 User says recent other changes are basically OK; only highway selection remains unresolved. AN15 is still intentionally paused and OCR/Analysis remains withdrawn.
+
+
+## 2026-10-08 FINAL.46 timeout fix merged; Vercel quota blocker
+
+User clarified that the route times out before any route is displayed. FINAL.45 highway diagnostics cannot be copied without a successful route. This is the authoritative latest checkpoint.
+
+FINAL.46 changes upstream fetch+JSON body deadline handling and caps optional motorway via-IC probes to the remaining 14.5-second server budget. A validated base HGV route is preserved when optional probes overrun. The HGV dimensions, max two IC probes, warm 30 calls/min, no car fallback and FINAL.36 detour bounds were NOT changed.
+
+Safety tag: backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114dc8926425bff81555d305.
+
+Product PR #199 merged at c2307edf38c1e1256c3eaa125e86d8e9fd461edc. PR route test 37754575289 PASS; PR browser 37754575245 PASS; main browser 37754745261 PASS; Pages 37754744610 PASS.
+
+Critical blocker: Vercel rejected an explicit production deployment with HTTP 402, api-deployments-free-per-day (>100 deployments/day), retryAfter=86400. Public GitHub Pages is FINAL.46, but Vercel route API remains FINAL.45. Do not claim FINAL.46 production complete or real-device verified.
+
+Next after quota reset: recover exact latest main and make ONE deployment to the existing Vercel project; require READY, matching git SHA, Vercel public version.json FINAL.46. If a payment/plan change is proposed, require explicit user approval. Avoid repeat deploy calls while blocked.
+
+Only after backend matches ask the user to re-test the exact route; if it still fails, request exact displayed error and approximate distance (or endpoints with consent). AN15 remains paused and OCR/Analysis withdrawn.

@@ -1,79 +1,52 @@
 {
-  "evidenceVersion": 61,
-  "runType": "final45_highway_diagnostics_production_release_closeout",
-  "phase": "FINAL45_HIGHWAY_DIAGNOSTICS",
-  "status": "COMPLETE",
+  "evidenceVersion": 62,
+  "runType": "final46_hgv_timeout_prod_blocked",
+  "phase": "FINAL46_HGV_TIMEOUT_BOUNDS",
+  "status": "TECHNICAL_BLOCKER",
   "base": {
-    "productionMainBefore": "f6c5052d0def10a5f64ab842395bcbab04f5a7ec",
-    "safetyTag": "backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008",
-    "safetyTagTarget": "f6c5052d0def10a5f64ab842395bcbab04f5a7ec"
+    "productionMainBefore": "be83e6c8aee36caa114dc8926425bff81555d305",
+    "safetyTag": "backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008",
+    "safetyTagTarget": "be83e6c8aee36caa114dc8926425bff81555d305"
   },
   "versions": {
-    "app": "2026.10.08-FINAL.45",
+    "frontend": "2026.10.08-FINAL.46",
+    "apiLive": "2026.10.08-FINAL.45",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.45 adds a privacy-safe collapsible and copyable highway-search diagnostic to the live route panel, augments preexisting IC/provider failure counters without additional provider calls, and keeps all routing safety limits unchanged.",
-    "productStatus": "PRODUCTION_VERIFIED_PENDING_FIELD_REPRO",
+    "summary": "Safe HGV timeout bounding source implemented, tests passed, PR #199 merged. Pages deployed FINAL.46; Vercel blocked new production API deploy with daily 100 deployment cap, so real route fix is NOT live.",
     "productionCodeChanged": true,
+    "productStatus": "PARTIAL_FRONTEND_ONLY_VERCEL_BLOCKED",
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
     "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS: pre-FINAL45 tag dereferenced to exact f6c5052d0def10a5f64ab842395bcbab04f5a7ec",
-    "preliminaryTruckRoute": "FAIL: 37750884018 test harness used innerText on collapsed <details>; no product defect; harness corrected",
-    "finalPrTruckRoute": "PASS: 37751032915 logic/API and real Edge",
-    "finalPrBrowserRegression": "PASS: 37751032983",
-    "locationFreeDiagnostic": "PASS",
-    "icLookupAndViaOutcomeCounters": "PASS",
-    "staleResultsClearedOnErrorOrNewRoute": "PASS",
-    "copyDiagnostic": "PASS",
-    "routeProviderCallCountPreserved": "PASS",
-    "hgvAndFinalDetourSafetyPreserved": "PASS",
-    "merge": "PASS: PR #196 -> da376f589387144774c7d7e8dc6eb6f024a919b9",
-    "mainBrowserRegression": "PASS: 37751257933",
-    "githubPages": "PASS: 37751256803",
-    "vercelProduction": "PASS: dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M READY for exact merge SHA",
-    "liveVersion": "PASS: Pages and Vercel = 2026.10.08-FINAL.45",
-    "liveRoutingAsset": "PASS: public truck-routing.js has FINAL.45 asset version and highwayDiagnosticReport",
-    "realDeviceHighwayDiagnosis": "PENDING: requires one user reproduction"
-  },
-  "fieldEvidence": {
-    "final44TaskThresholdGauge": "USER_CONFIRMED_BASICALLY_OK",
-    "final43OfficeInternalRoute": "USER_CONFIRMED_BASICALLY_OK",
-    "final42ArrivalTasks": "USER_CONFIRMED_OK",
-    "final42OrderDetails": "USER_CONFIRMED_BASICALLY_OK",
-    "final41DirectionalRerouteAndTurnZoom": "USER_CONFIRMED_BASICALLY_OK",
-    "final40FullscreenBehavior": "USER_CONFIRMED_BASICALLY_OK",
-    "final40HighwaySelection": "FAIL: user reports missing expressway option when Google Maps uses motorway",
-    "final45HighwayDiagnosis": "PENDING_SINGLE_FIELD_REPORT"
+    "immutableSafetyTag": "PASS",
+    "requestBodyDeadline": "PASS: stalled upstream JSON bodies stop after timeout",
+    "optionalViaBudgetFallback": "PASS: validated HGV baseline preserved when optional probes exceed server budget",
+    "prTruckRoute": "PASS: 37754575289",
+    "prBrowser": "PASS: 37754575245",
+    "merged": "PASS: PR #199",
+    "mainBrowser": "PASS: 37754745261",
+    "githubPages": "PASS: 37754744610",
+    "vercelApiRelease": "BLOCKED: 402 payment_required api-deployments-free-per-day, retryAfter 86400",
+    "liveVersion": "MISMATCH: frontend FINAL.46 and route API FINAL.45",
+    "exactDeviceRetest": "NOT_DONE: do not request while live API still FINAL.45"
   },
   "openItems": [
-    "Need one copied or screenshot FINAL.45 report from a route where highway ON still misses the motorway.",
-    "Classify source before any routing preference/detour change.",
-    "AN15 remains intentionally paused."
+    "Provider daily deployment quota reset required.",
+    "Deploy exact latest main SHA to Vercel production once quota available.",
+    "Live API version must match FINAL.46 before user retest.",
+    "Original field timeout and highway discrepancy unresolved.",
+    "AN15 stays paused."
   ],
-  "nextAction": "Ask user to repeat one affected route with highway ON, open MAP route panel -> 高速診断（原因調査用） -> 診断内容をコピー, and paste location-free report. Use diagnosis to choose next bounded fix.",
+  "nextAction": "After Vercel deployment quota resets (HTTP 402 retryAfter 86400), make one deployment from verified latest main to existing Vercel project, verify READY, exact SHA and public version FINAL.46, then request same-route iPhone retest.",
   "unresolved": [
-    "No FINAL.45 code/release issues remaining.",
-    "Highway selection discrepancy remains unresolved and needs concrete field diagnosis.",
-    "AN15 evidence/promotion remains intentionally paused."
-  ],
-  "releaseChangedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "index.html",
-    "version.json",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
-    ".ai/STATE.json",
-    ".ai/HANDOFF.md",
-    ".ai/LAST_RUN.json",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
+    "Vercel production API remains FINAL.45 until retry.",
+    "Root cause and field fix effectiveness not confirmed.",
+    "AN15 paused."
   ],
   "changedFiles": [
     ".ai/STATE.json",
@@ -83,16 +56,16 @@
     ".ai/DECISIONS.md"
   ],
   "continuityCheckpoint": {
-    "createdFor": "fresh-chat handoff",
-    "status": "PASS",
-    "productCodeChanged": false,
-    "sourceMain": "da376f589387144774c7d7e8dc6eb6f024a919b9",
-    "resumeFrom": "FINAL.45 highway-search diagnostics live; one real-device affected-route report pending",
+    "createdFor": "new chat handoff",
+    "status": "TECHNICAL_BLOCKER",
+    "sourceMain": "c2307edf38c1e1256c3eaa125e86d8e9fd461edc",
+    "resumeFrom": "Vercel daily deployment quota reset -> release FINAL.46 route API",
     "immediateEvidence": [
-      "highway ON route UI exposes candidate/IC/ORS rejection metrics",
-      "one location-free copied report required",
-      "HGV safety bounds unchanged"
+      "GitHub Pages FINAL.46",
+      "Vercel live FINAL.45",
+      "provider 402 api-deployments-free-per-day retryAfter 86400",
+      "PR #199 + gates PASS"
     ],
-    "warning": "Do not claim highway-selection bug fixed or classify its cause until real-route report is received."
+    "warning": "Never call this production complete or retest until API version catches up."
   }
 }
