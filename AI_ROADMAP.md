@@ -295,3 +295,12 @@ FINAL.44 is released and production-verified. Task-tab progress gauges now use e
 Safety tag `backup-pre-FINAL44-TASK-THRESHOLD-GAUGE-20261008` -> `712f89119ce14ed62cb028cbaafdb46e2c730f64`. PR #192 merged at `afcbf0b639959fa6c3d80bf202021f060d487593`. PR runs `37733253158` and `37733253132`, main Browser regression `37733379642`, and Pages `37733378870` passed. Vercel production `dpl_6aoh9uco7ahAzzr53MtxV6Y9Egqw` is READY for the exact merge SHA. Pages and Vercel version endpoints report `2026.10.08-FINAL.44`.
 
 No routing, HGV, task-target, persistence, arrival, or order semantics changed. FINAL.44 closes this implementation/release scope; only real-device visual confirmation remains.
+
+
+## FINAL.45 privacy-safe highway diagnostics release (2026-10-08)
+
+FINAL.45 is production-complete, **not** an expressway-selection fix. The MAP route panel can reveal and copy location-free highway-search diagnostics for one real-world route that still differs from Google Maps. The existing ORS/Overpass pipeline now distinguishes IC lookup failure/empty sets, evaluated pairs, provider rejection, no geometry, too little motorway, timeout and other candidate errors, plus final adoption status, without extra provider calls.
+
+Tag `backup-pre-FINAL45-HIGHWAY-DIAGNOSTICS-20261008` points to `f6c5052d0def10a5f64ab842395bcbab04f5a7ec`. Product PR #196 merged at `da376f589387144774c7d7e8dc6eb6f024a919b9`. Final Truck route readiness `37751032915`, PR Browser `37751032983`, main Browser `37751257933`, and Pages `37751256803` passed. Vercel `dpl_Dhk2ZmXDw748B9UfdcxvREmKuf8M` READY for the exact SHA. Public versions are `2026.10.08-FINAL.45`.
+
+Next step: the user shares one copied/screenshot diagnosis from the affected route; determine whether the problem is missing provider/IC candidates or final acceptance and only then choose the next limited route-quality fix. No HGV/FINAL.36 safety-policy changes; AN15 remains paused.
