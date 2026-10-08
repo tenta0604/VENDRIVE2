@@ -5,52 +5,48 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.08-FINAL.40",
+  "appVersion": "2026.10.08-FINAL.41",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL40_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+  "status": "FINAL41_VALIDATED_PENDING_PRODUCTION",
   "currentWork": {
-    "title": "FINAL.40 production complete; exact iPhone field retest pending",
-    "releaseStatus": "FINAL.40 product code is merged, deployed, and live-verified. The only remaining FINAL.40 evidence is the operator's real iPhone retest of the fullscreen-start timeout and long-route highway/JCT behavior.",
+    "title": "FINAL.41 direction-aware reroute + turn zoom validated; production release pending",
+    "releaseStatus": "FINAL.41 product changes passed the finite PR gates. Merge, production deployments, live verification, and final canonical closeout remain.",
     "releaseScope": [
-      "Fullscreen route start no longer re-clicks the already-active MAP tab, avoiding a redundant full map render while the route request is in flight.",
-      "Fullscreen viewport settle may invalidate Leaflet size but skips route redraw/refit while route acquisition is busy; the 20s client timer is cleared after the response body is received before local route processing.",
-      "The existing maximum-two via-IC budget samples one balanced pair plus one geographically distinct bounded corridor when available, allowing ORS driving-hgv to traverse farther JCT-connected motorway networks.",
-      "Long-route motorway discovery target may scale to 80km; FINAL.36 final detour caps and all exact HGV restrictions remain authoritative."
+      "Initial route search and manual recalculation remain direction-agnostic.",
+      "Only sustained off-route automatic rerouting may add a reliable travel heading. Raw GPS heading is used only with accurate fixes and moving speed; otherwise a sufficiently long accurate movement vector is used, otherwise no heading constraint is applied.",
+      "The relay converts that optional auto-reroute heading into an ORS start bearing sector while preserving driving-hgv and the exact registered vehicle restrictions.",
+      "MAP current-position follow mode uses route geometry to detect a significant upcoming bend and changes at most one Leaflet zoom level per GPS update toward zoom 16/17/18/19 as the turn approaches, then relaxes again after the turn.",
+      "FINAL.40 highway/JCT discovery and FINAL.36 detour safety caps remain unchanged."
     ],
     "validationEvidence": {
-      "safetyTag": "backup-pre-FINAL40-IOS-FULLSCREEN-HIGHWAY-JCT-20261007 -> 9541bd9d1d8242ec880f87315ae4fcf05052b006",
-      "productMerge": "PR #180 -> 7f58726df3ed7a69820013f94f78e80d914f32f6",
-      "finalTestOnlyMerge": "PR #179 -> 1aefd847ffc38945d305e80c560fe1e9f8b2a714 (relative to the product merge, only tests/run-truck-route-gates.mjs changed)",
-      "prValidation": "PR #180 Truck route 37699925874 PASS; Browser regression 37699925873 PASS",
-      "finalTruckRouteValidation": "PR #179 Truck route readiness 37709837666 PASS",
-      "mainBrowserRegression": "37700422796 PASS on the identical FINAL.40 product tree",
-      "githubPages": "37709999513 PASS on current main",
-      "vercelProduction": "dpl_H6MTgzUTv4z72HQSERcJcgBdRY8H READY, target production, Git SHA 1aefd847ffc38945d305e80c560fe1e9f8b2a714",
-      "liveVersion": "public version.json = 2026.10.08-FINAL.40",
-      "liveRoutingAsset": "public truck-routing.js assetVersion = 2026.10.08-FINAL.40"
+      "safetyTag": "backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008 -> 695eaa74716446f3e1f147be226d46521b7747a8",
+      "pr": "PR #183 open",
+      "truckRoute": "37720662646 PASS",
+      "browserRegression": "37720662617 PASS",
+      "officialProviderContract": "ORS Directions supports waypoint bearings; optimized=false is required when bearings are used."
     },
     "decision": [
-      "Keep driving-hgv and exact registered vehicle restrictions unchanged.",
-      "Keep at most two active via-IC ORS candidates and the warm-instance 30 route-call/minute guard.",
-      "Keep FINAL.36 final detour envelope unchanged.",
-      "Do not add car or straight-line fallback.",
+      "Apply direction only to automatic off-route rerouting; initial and manual route searches stay direction-agnostic.",
+      "Never force a direction when the GPS evidence is not reliable enough; fall back to ordinary HGV rerouting without a bearing.",
+      "Turn-aware zoom runs only while MAP current-position follow is ON and moves one zoom level per GPS update.",
+      "Keep driving-hgv, exact vehicle restrictions, highway safety logic, provider call guards, and no-car/no-straight-line fallback unchanged.",
       "Keep AN15 learned numeric promotion intentionally paused and do not restore OCR/Analysis."
     ],
     "nextActions": [
-      "On the same iPhone, start the same long route from fullscreen MAP and confirm whether route acquisition still times out.",
-      "Retest the same long-distance destination with highway ON and confirm whether the route uses materially more appropriate motorway/JCT-connected travel.",
-      "Also confirm the route remains visible in fullscreen and after software rotation.",
-      "If any item still fails, treat the exact field failure as new evidence; instrument the exact origin/destination and iOS/Safari state before changing more thresholds."
+      "Merge PR #183 if the validated head is unchanged.",
+      "Verify GitHub Pages and Vercel production for the exact FINAL.41 merge commit.",
+      "Live-verify version.json and truck-routing.js as FINAL.41.",
+      "Close canonical bookkeeping and then ask for real iPhone confirmation of directional reroute and turn-aware zoom."
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Real-device confirmation of the FINAL.40 fullscreen route-start timeout fix remains required.",
-    "Real-device confirmation of the longer JCT-capable highway route remains required.",
-    "AN15 learned numeric promotion remains intentionally paused.",
-    "Historical Analytics remains preserved and user-facing Analysis/OCR remains withdrawn."
+    "FINAL.41 production release evidence is pending after PR validation.",
+    "Real-device confirmation of directional reroute behavior and turn-aware follow zoom remains required after production release.",
+    "FINAL.40 real-device fullscreen/highway confirmation can still be reported independently.",
+    "AN15 learned numeric promotion remains intentionally paused."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -63,9 +59,9 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.40本番完了後のiPhone実機確認から再開して。",
+    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.41のリリース状態から再開して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.40 is production-complete and live-verified. Resume from the exact iPhone field retest of fullscreen route acquisition and long-route highway/JCT behavior. Do not reopen AN15 by default.",
-    "latestContinuityCheckpoint": "FINAL.40 production complete — iPhone field retest pending"
+    "handoffBoundary": "FINAL.41 is validated on PR #183 and pending production release. Complete merge/deploy/live verification/canonical closeout before asking for real-device confirmation. Do not reopen AN15 by default.",
+    "latestContinuityCheckpoint": "FINAL.41 PR #183 validation complete — production release pending"
   }
 }

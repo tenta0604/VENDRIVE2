@@ -23,12 +23,12 @@ for(const width of [320,390]){
       const position={coords:{latitude:35.3,longitude:136.8,accuracy:8,heading:90}};
       Object.defineProperty(navigator,'geolocation',{value:{watchPosition(fn){window.__gpsSuccess=fn;setTimeout(()=>fn(position),0);return 1;},clearWatch(){},getCurrentPosition(fn){setTimeout(()=>fn(position),0);}}});
     });
-    let count=0,mode='success',heldResolve,heldStarted,heldDone;
+    let count=0,mode='success',heldResolve,heldStarted,heldDone,routePayloads=[];
     await page.route('**/*',async request=>{
       const url=request.request().url();
       if(url.includes('/api/route')){
         count++;
-        const payload=request.request().postDataJSON();assert.equal(payload.vehicle.weight,4.8);assert.equal(payload.vehicle.height,2.85);
+        const payload=request.request().postDataJSON();routePayloads.push(payload);assert.equal(payload.vehicle.weight,4.8);assert.equal(payload.vehicle.height,2.85);
         if(mode==='held'){
           heldStarted();await new Promise(resolve=>heldResolve=resolve);
           try{await request.fulfill({json:{ok:true,route}});}catch{}heldDone();return;
@@ -61,7 +61,7 @@ for(const width of [320,390]){
     for(const [field,value] of Object.entries({height:'285',width:'189',length:'520',weight:'4800'}))await page.locator('#truckVehicle_'+field).fill(value);
     await page.locator('#truckVehicleAvoidTolls').check();
     await page.locator('#truckVehicleSave').click();await waitText('1.8km');
-    assert.equal(count,1);assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.ok(await paths()>=3);assert.match(await page.locator('#mapHighwayToggle').innerText(),/ON/);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');
+    assert.equal(count,1);assert.equal(routePayloads[0].heading,undefined,'initial route must stay direction-agnostic');assert.equal((await stored()).routeVehicle.weight,4.8);assert.equal((await stored()).routeVehicle.axleload,undefined);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.ok(await paths()>=3);assert.match(await page.locator('#mapHighwayToggle').innerText(),/ON/);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');
     assert.ok(await roadPathCount('#0b132b')>=2,'route casing should be present under the fluorescent/red route strokes');
     assert.ok(await roadPathCount('#00e5ff')>=1);assert.ok(await roadPathCount('#dc2626')>=1);
     await page.evaluate(()=>{var original=window.VENDRIVETruckRouting.routeSections;window.__routeSectionsCurrent=original;window.VENDRIVETruckRouting.routeSections=function(value){return original(value).map(function(section){return {motorway:section.motorway,tollway:section.tollway,coordinates:section.coordinates};});};});
@@ -72,7 +72,10 @@ for(const width of [320,390]){
     await page.locator('#mapHighwayToggle').click();await waitText('高速利用OFF');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,2);assert.equal((await stored()).routeVehicle.avoidTolls,true);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'false');assert.equal(await roadPathCount('#dc2626'),0);assert.ok(await roadPathCount('#00e5ff')>=1);
     await page.locator('#mapHighwayToggle').click();await waitText('高速優先ON');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,3);assert.equal((await stored()).routeVehicle.avoidTolls,false);assert.equal(await page.locator('#mapHighwayToggle').getAttribute('aria-pressed'),'true');assert.ok(await roadPathCount('#dc2626')>=1);
     const routePathBefore=await page.locator('#map path[stroke="#00e5ff"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
-    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3,longitude:136.804,accuracy:8,heading:90}}));await page.waitForTimeout(120);
+    await page.evaluate(()=>{window.__turnZoomCalls=[];window.__turnZoomOriginal=window.L.Map.prototype.setZoom;window.L.Map.prototype.setZoom=function(zoom,options){window.__turnZoomCalls.push({from:this.getZoom(),to:zoom});return window.__turnZoomOriginal.call(this,zoom,options)};});
+    await page.locator('#mapFollowLocation').click();
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3,longitude:136.804,accuracy:8,heading:90,speed:10}}));await page.waitForTimeout(360);
+    const turnZoomCall=await page.evaluate(()=>{var calls=window.__turnZoomCalls.slice();window.L.Map.prototype.setZoom=window.__turnZoomOriginal;delete window.__turnZoomOriginal;delete window.__turnZoomCalls;return calls.at(-1)});assert.ok(turnZoomCall&&turnZoomCall.to===turnZoomCall.from+1,'follow mode should zoom in one level per GPS update as a significant turn approaches');await page.locator('#mapFollowLocation').click();
     const routePathAfter=await page.locator('#map path[stroke="#00e5ff"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
     assert.notEqual(routePathAfter,routePathBefore,'travelled route geometry should disappear from the displayed line');
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
@@ -95,11 +98,11 @@ for(const width of [320,390]){
     mode='success';await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');
     await page.locator('#truckRouteVehicleSettings').click();await page.locator('#truckVehicleModal.open').waitFor();assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'4800');
     await page.locator('#truckVehicleCancel').click();assert.ok(await paths()>=2);
-    const beforeAutoReroute=count;
-    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.36,longitude:136.86,accuracy:8,heading:45}}));
-    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3601,longitude:136.8601,accuracy:8,heading:45}}));
-    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3602,longitude:136.8602,accuracy:8,heading:45}}));
-    await page.waitForTimeout(250);assert.equal(count,beforeAutoReroute+1,'three sustained off-route fixes should trigger one automatic reroute');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);
+    const beforeAutoReroute=count;assert.equal(routePayloads.slice(0,beforeAutoReroute).every(payload=>payload.heading===undefined),true,'initial and manual route searches must remain direction-agnostic');
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.36,longitude:136.86,accuracy:8,heading:45,speed:10}}));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3601,longitude:136.8601,accuracy:8,heading:45,speed:10}}));
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3602,longitude:136.8602,accuracy:8,heading:45,speed:10}}));
+    await page.waitForTimeout(250);assert.equal(count,beforeAutoReroute+1,'three sustained off-route fixes should trigger one automatic reroute');assert.equal(routePayloads.at(-1).heading,45,'automatic off-route reroute should carry the stable travel direction');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);
     // A cancelled in-flight response must never restore a cleared route.
     mode='held';const began=new Promise(resolve=>heldStarted=resolve),done=new Promise(resolve=>heldDone=resolve);
     await page.locator('#truckRouteRecalculate').click();await began;await page.locator('#truckRouteEnd').click();heldResolve();await done;
@@ -150,7 +153,7 @@ for(const width of [320,390]){
     let externalUrl='';await page.route('https://www.google.com/maps/**',async request=>{externalUrl=request.request().url();await request.fulfill({body:'External navigation test',contentType:'text/html'});});
     await openMachine('T1');await page.locator('#machineExternalNav').click();await page.waitForURL('https://www.google.com/maps/**');
     assert.ok(externalUrl.includes('destination=35.31,136.81'));assert.equal(errors.length,0,errors.join('\n'));
-    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','dedicated-tollways-extra-red-segmentation','map-highway-toggle','highway-off-avoidance','highway-on-diverse-bounded-preference','active-highway-ic-search-server-gate','active-ic-global-bound-adoption','fullscreen-route-persistence','fullscreen-route-in-visible-viewport','fullscreen-route-inflight-settle','distinct-ic-corridor-probe','long-distance-highway-search','aligned-route-timeout-budget','fresh-gps-origin','median-off-route-origin','extreme-reroute-guard','fluorescent-cased-route-line','route-highway-status','nonblocking-portrait-layout','fullscreen-map-soft-rotation','rotated-map-gesture-axis','fullscreen-pin-machine-modal','rotated-machine-card-orientation','unrotated-machine-card-preserved','arrival-auto-end','rotated-arrival-card-orientation','rotated-arrival-swipe-axis','arrival-one-card-swipe-flow','today-right-swipe-skip','heading-arrow','smooth-GPS-animation','travelled-line-disappears','off-route-auto-reroute','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
+    evidence.push({width,browser:context.browser()?.version(),gates:['blank-profile-blocking','exact-unit-conversion','routing-asset-version-match','stale-section-compatibility','dedicated-tollways-extra-red-segmentation','map-highway-toggle','highway-off-avoidance','highway-on-diverse-bounded-preference','active-highway-ic-search-server-gate','active-ic-global-bound-adoption','fullscreen-route-persistence','fullscreen-route-in-visible-viewport','fullscreen-route-inflight-settle','distinct-ic-corridor-probe','long-distance-highway-search','aligned-route-timeout-budget','fresh-gps-origin','median-off-route-origin','extreme-reroute-guard','fluorescent-cased-route-line','route-highway-status','nonblocking-portrait-layout','fullscreen-map-soft-rotation','rotated-map-gesture-axis','fullscreen-pin-machine-modal','rotated-machine-card-orientation','unrotated-machine-card-preserved','arrival-auto-end','rotated-arrival-card-orientation','rotated-arrival-swipe-axis','arrival-one-card-swipe-flow','today-right-swipe-skip','heading-arrow','smooth-GPS-animation','turn-aware-follow-zoom','travelled-line-disappears','direction-aware-off-route-reroute','poor-accuracy-display-suppression','road-geometry','marker-only-GPS','route-survives-map-rerender','recalculate','quota-and-malformed-errors','late-response-cancellation','missing-destination','persistence','external-navigation','no-horizontal-overflow','no-page-errors'],status:'PASS'});
     console.log(`PASS truck route browser ${width}px`);
   }finally{await context.close();await rm(profile,{recursive:true,force:true});}
 }
