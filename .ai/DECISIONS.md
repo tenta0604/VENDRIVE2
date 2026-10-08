@@ -565,3 +565,23 @@ This file records confirmed project decisions that must survive chat migration. 
 - FINAL.41 implementation/release is closed. The remaining evidence is real-device confirmation of direction-aware automatic reroute and turn-aware MAP follow zoom.
 - Automated PASS must not be treated as real-device confirmation.
 - AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.
+
+
+## 2026-10-08 — FINAL.42 arrival-card work-detail decisions
+
+- Arrival cards must render work details independently from Today-list card decoration.
+- “All tasks” on the live arrival card means every active incomplete task currently assigned to that arriving machine; completed task history is not mixed into the visit-action card.
+- Pending order display on the arrival card includes type, subtype, full detail text, and current remaining/deadline state.
+- Visit completion semantics are unchanged: only tasks explicitly checked in the confirmation modal are marked complete.
+- FINAL.42 makes no routing/HGV/highway/JCT/directional-reroute/turn-zoom behavior changes.
+- Safety tag: `backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008` -> `1a84a1c5830d39b715990753fc327a059eaa7f1f`.
+
+## 2026-10-08 — FINAL.42 production release complete
+
+- PR #186 merged to `main` at `55f304892fcb626a73a755c4a8e0129272da91c7`.
+- PR Truck route readiness `37723986337` and Browser regression `37723986287` passed.
+- Main Browser regression `37724083359` and GitHub Pages `37724082816` passed.
+- Vercel production deployment `dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR` is READY for the exact merge SHA.
+- Public `version.json` and routing asset report `2026.10.08-FINAL.42`.
+- FINAL.42 implementation/release is closed. Remaining evidence is real-device confirmation of arrival-card order/task display.
+- AN15 learned numeric promotion remains intentionally paused and OCR/Analysis remains withdrawn.

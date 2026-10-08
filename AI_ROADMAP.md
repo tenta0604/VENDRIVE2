@@ -268,3 +268,12 @@ FINAL.41 is released and production-verified. Initial and manual routing remain 
 Safety tag `backup-pre-FINAL41-DIRECTIONAL-REROUTE-TURN-ZOOM-20261008` -> `695eaa74716446f3e1f147be226d46521b7747a8`. PR #183 merged at `b8427d859afe0c9cc05d26f55859022c41c11037`. PR runs `37720662646` and `37720662617`, main Browser regression `37720926478`, and Pages `37720925836` passed. Vercel production `dpl_7sUicoU7Pbk1TtejLZWBKGwefmNa` is READY for the exact merge SHA. Public version and routing asset report `2026.10.08-FINAL.41`.
 
 FINAL.41 closes this implementation/release scope. The next evidence is real-device iPhone confirmation of direction-aware off-route rerouting and turn-aware follow zoom. AN15 remains intentionally paused.
+
+
+## FINAL.42 arrival-card order + task detail production release (2026-10-08)
+
+FINAL.42 is released and production-verified. The arrival visit card now has its own work-detail rendering: it shows pending order type/subtype/full detail/deadline state and every active incomplete task assigned to the arriving machine. This is independent from the Today-list task decoration, so arrival information does not depend on how the Today list is rendered. Unchecked tasks remain incomplete during visit completion.
+
+Safety tag `backup-pre-FINAL42-ARRIVAL-WORK-DETAILS-20261008` -> `1a84a1c5830d39b715990753fc327a059eaa7f1f`. PR #186 merged at `55f304892fcb626a73a755c4a8e0129272da91c7`. PR runs `37723986337` and `37723986287`, main Browser regression `37724083359`, and Pages `37724082816` passed. Vercel production `dpl_8RTReXLPWn2fLGWLCAQhNNM25xCR` is READY for the exact merge SHA. Public version and routing asset report `2026.10.08-FINAL.42`.
+
+FINAL.42 closes this implementation/release scope. The next evidence is real-device iPhone confirmation of the arrival-card display. FINAL.41 and FINAL.40 field checks remain pending. AN15 remains intentionally paused.
