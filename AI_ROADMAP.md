@@ -320,3 +320,16 @@ NOT COMPLETE: Pages serves FINAL.46, Vercel route backend FINAL.45. Explicit pro
 The former Vercel free daily deployment quota block was cleared without billing changes. Production deployment dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum is READY for git SHA 8155695040e877614081a927aa39d7cfe534da35, containing the already tested FINAL.46 timeout bounds. Both GitHub Pages and Vercel public version endpoints report 2026.10.08-FINAL.46.
 
 FINAL.46 release is verified, but the original iPhone route timeout and highway selection remain pending real-world retest. Next ask for the same route to be retried. If successful, collect location-free highway diagnostics to classify remaining expressway routing quality before further modifications. No HGV/FINAL.36 safety changes; AN15 remains paused.
+
+
+## 2026-10-09 FINAL.46 owner-requested pause and complete handoff
+
+No new feature phase was started. The owner explicitly requested a deliberate work pause plus a complete recoverable snapshot of progress and the current stopping point.
+
+FINAL.46 production release has been verified: GitHub Pages version.json and Vercel route API version.json both return 2026.10.08-FINAL.46; Vercel latest known main-aligned deployment dpl_EKLbpJ4rgm7mDenWcxZ4KidAqcqU is READY for source SHA cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20. Prior Vercel free daily quota blocker is cleared without billing changes.
+
+Primary outstanding user-evidence checkpoint, not an assigned execution task: user previously experienced timeout before any route geometry could appear on the same highway-ON iPhone route, and has not yet confirmed whether FINAL.46 resolves it. Secondary motorway preference question (why Google Maps chooses highway where VENDRIVE may not) can be investigated only after a route is returned; FINAL.45 privacy-safe diagnostics are available for a successful route.
+
+Earlier FINAL.40–44 improvements received broad "基本全部OK" feedback; FINAL.42 arrival-card task display received explicit OK. Do not falsely mark all individual device scenarios validated.
+
+Full reproduction and safety policy are documented in the newest section of .ai/HANDOFF.md; .ai/STATE.json and .ai/LAST_RUN.json align. AN15 remains intentionally paused, no autonomous next phase or code work. The next action depends entirely on a new explicit owner instruction.
