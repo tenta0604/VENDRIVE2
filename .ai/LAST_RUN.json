@@ -1,40 +1,46 @@
 {
-  "evidenceVersion": 68,
-  "runType": "final48_live_release_documentation_closeout_20261009",
-  "phase": "DOCUMENTATION_ONLY_FINAL48_RELEASE_CLOSEOUT",
-  "status": "COMPLETE",
+  "evidenceVersion": 69,
+  "runType": "final49_compact_navigation_cue_pr_validation_20261009",
+  "phase": "FINAL49_COMPACT_NAV_CUE_MAINTENANCE",
+  "status": "PR_VALIDATED_RELEASE_PENDING",
   "base": {
-    "productionMainBefore": "6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
-    "productionCodeChanged": false,
-    "safetyTag": "NOT_REQUIRED: canonical documentation only; prior FINAL.48 product annotated tag backup-pre-FINAL48-NAV-CUE-20261009-20261009 -> 23f59b5a2c4e28934eaef9c0a2519d492d675a13"
+    "productionMainBefore": "5c2b3b26f625bc5b0912cf8b3704176a8182bd75",
+    "productionCodeChanged": true,
+    "safetyTag": "backup-pre-FINAL49-COMPACT-CUE-20261009 -> 5c2b3b26f625bc5b0912cf8b3704176a8182bd75; workflow 37917016663 PASS"
   },
   "versions": {
-    "app": "2026.10.09-FINAL.48",
-    "frontend": "2026.10.09-FINAL.48",
-    "apiTarget": "2026.10.09-FINAL.48",
+    "app": "2026.10.09-FINAL.49",
+    "frontend": "2026.10.09-FINAL.49",
+    "apiTarget": "2026.10.09-FINAL.49",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.48 product PR #207 merged; final PR and main browser/Edge CI PASS; Pages and Vercel production READY with both public versions FINAL.48; docs-only closeout maintains owner STOP.",
-    "productStatus": "PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
-    "productCodeChanged": false
+    "summary": "Shrink native and soft-rotated fullscreen-landscape turn cue to max 224px anchored at safe 8px top-left; hide MAP・本日 tag in fullscreen landscape; keep portrait and large arrow; HGV/navigation unmodified.",
+    "ownerIntent": "Real iPhone screenshot showed FINAL.48 panel stretched too far toward map center.",
+    "productStatus": "PR_VERIFIED_PENDING_PRODUCTION",
+    "productCodeChanged": true
   },
   "gates": {
-    "productSafetyTag": "PASS annotated immutable pre-edit tag via 37913311257",
-    "finalPRTruckNodeEdge": "PASS 37914210715",
-    "finalPRBrowser": "PASS 37914210633",
-    "productMerge": "PASS PR #207 at 6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
-    "mainBrowser": "PASS 37914366529",
-    "githubPages": "PASS 37914365913",
-    "vercelProduction": "READY dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1 exact 6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
-    "publicLiveVersions": "PASS GitHub Pages and Vercel 2026.10.09-FINAL.48",
-    "realIphone": "NOT_PERFORMED: real-world signoff requires user device/drive",
-    "newSafetyTag": "NOT_REQUIRED: documentation-only",
-    "appSourceVersion": "PASS APP_VERSION/ASSET_VERSION/cache key/version.json all FINAL.48"
+    "annotatedSafetyTag": "PASS 37917016663",
+    "prTruckRoute": "PASS 37917405398, Node/API/real Edge 320/390",
+    "prBrowser": "PASS 37917405381",
+    "landscapeCompactHud": "PASS 37917405398, width/safe corner/arrow/landscape MAP label",
+    "portraitUnchanged": "PASS 37917405398",
+    "mainBrowser": "PENDING merge",
+    "githubPages": "PENDING merge",
+    "vercelProduction": "PENDING merge",
+    "liveVersion": "PENDING public FINAL.49",
+    "realIphone": "NOT_PERFORMED, owner later",
+    "dbMigration": "NOT_REQUIRED: db/schema 4 unchanged"
   },
   "changedFiles": [
+    "index.html",
+    "truck-routing.js",
+    "version.json",
+    "tests/run-truck-route-gates.mjs",
+    "tests/truck-route-client.test.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -42,14 +48,16 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Optional owner-device view/drive confirmation for new FINAL.48 UI",
-    "Highway-ON route quality separate unresolved item",
-    "AN15 intentional pause"
+    "PR #210 merge/public release evidence pending",
+    "Owner physical iPhone viewing pending",
+    "Separate highway-ON routing quality issue",
+    "AN15 intentionally paused"
   ],
-  "nextAction": "STOP: wait for explicit owner instruction, then refresh main/canonical state. No automatic AN15 phase.",
+  "nextAction": "Merge verified PR #210, confirm main CI/Pages/Vercel/live versions, record docs-only closeout, stop.",
   "unresolved": [
-    "Owner FINAL.48 iPhone visual confirmation not yet performed",
-    "HGV motorway selection quality remains separate field concern",
+    "PR #210 merge/public release evidence pending",
+    "Owner physical iPhone viewing pending",
+    "Separate highway-ON routing quality issue",
     "AN15 intentionally paused"
   ],
   "continuityCheckpoint": {

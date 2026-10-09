@@ -353,3 +353,8 @@ Scoped owner maintenance: portrait HUD top-center stays; native/software-rotated
 ## FINAL.48 verified production closeout and owner stop — 2026-10-09
 
 PR #207 merged at `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`, after final PR route/Node/Edge `37914210715` PASS and final PR browser `37914210633` PASS. Main browser `37914366529` PASS and GitHub Pages `37914365913` PASS. Vercel production `dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1` READY at product SHA; both public version.json endpoints FINAL.48. Existing turn zoom-in and zoom-out was preserved and verified. Historical FINAL.48 PR-pending documentation is superseded by this checkpoint. Owner field visual validation is future evidence; no automatic AN15 restart or new development without a new owner instruction.
+
+
+## FINAL.49 compact landscape HUD maintenance — 2026-10-09 (PR verified, production pending)
+
+Owner screenshot shows FINAL.48 software-rotated navigation overlay extends too far into central map. Bound the landscape-only cue width to 224 CSS px and safe upper-left 8px, hide MAP・本日 in fullscreen landscape, preserve portrait and big maneuver arrow. Pre-edit annotated safety tag `backup-pre-FINAL49-COMPACT-CUE-20261009` at `5c2b3b26f625bc5b0912cf8b3704176a8182bd75`. PR #210 product/test `ba2a317fc31c838db138e8b2105397ddadb8daa0`: Truck/real Edge `37917405398` PASS and Browser `37917405381` PASS. **Production release pending**; AN15 intentionally paused.

@@ -701,3 +701,8 @@ Owner explicitly chose to preserve portrait HUD location, move the HUD to upper-
 ## 2026-10-09 — FINAL.48 product release complete, no automatic continuation
 
 FINAL.48 PR #207 merged `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`; final PR real Edge/Node `37914210715`, PR Browser `37914210633`, main Browser `37914366529`, and Pages `37914365913` all PASS. Vercel READY deployment `dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1` matches the merge SHA. Both public version endpoints serve `2026.10.09-FINAL.48`. The earlier PR-pending note is historical. Stop this scope; user iPhone visual confirmation remains pending; AN15 remains intentionally paused, and highway route-choice accuracy remains independent future evidence.
+
+
+## 2026-10-09 — FINAL.49 owner iPhone screenshot: compact nav cue
+
+Owner rejected the FINAL.48 landscape guidance panel width because it intruded far into central map. Lock the replacement: native and software-rotated landscape fullscreen cue should hug the safe upper-left and be much shorter (cap 224 CSS px, safe-edge 8px); landscape MAP・本日 tag may be hidden; large navigation arrow/text/distance stay. Portrait HUD location is unchanged and the portrait MAP tag remains. No additional navigation provider calls, route/zoom algorithm, HGV/DB/schema/AN15 scope. Pre-edit safety tag `backup-pre-FINAL49-COMPACT-CUE-20261009` -> `5c2b3b26f625bc5b0912cf8b3704176a8182bd75`, PR #210 first corrected Edge + browser runs `37917405398` and `37917405381` PASS; production pending at PR checkpoint.
