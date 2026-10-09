@@ -333,3 +333,8 @@ Primary outstanding user-evidence checkpoint, not an assigned execution task: us
 Earlier FINAL.40–44 improvements received broad "基本全部OK" feedback; FINAL.42 arrival-card task display received explicit OK. Do not falsely mark all individual device scenarios validated.
 
 Full reproduction and safety policy are documented in the newest section of .ai/HANDOFF.md; .ai/STATE.json and .ai/LAST_RUN.json align. AN15 remains intentionally paused, no autonomous next phase or code work. The next action depends entirely on a new explicit owner instruction.
+
+
+## FINAL.47 field UX PR validation — 2026-10-09
+
+The owner confirmed FINAL.46's previously reported timeout resolved in real use and authorized focused operational improvements. Draft PR #204 implements destination-anchored unvisited nearby planned arrival cards, compact landscape sheets for all software-rotated fullscreen MAP dialogs, task-history per-machine completion drilldown, fullscreen-only numeric-ORS-step/verified motorway-transition cues, and fractional eased turn zoom. Existing HGV restrictions/FINAL.36 detour caps/max two IC attempts/warm 30 calls-min guard remain. No new navigation service calls; DB/schema and AN15 unchanged. Pre-edit immutable annotated safety tag backup-pre-FINAL47-FIELD-UX-20261009 -> e1ce4b4091a799629d563669c659d4d6eb6757a5. PR #204 tests: Truck/API/real Edge run 37909127571 PASS; Browser regression 37909127498 PASS. **Production merge, deployment and live checks pending; do not label FINAL.47 shipped until terminal.** After completion, remain stopped at AN15 intentional pause awaiting explicit owner instruction.
