@@ -56,16 +56,16 @@
     var coordinates=value&&value.geometry&&value.geometry.coordinates;
     if(!Array.isArray(coordinates)||coordinates.length<2)return null;
     var edge=currentProgress&&Number.isInteger(currentProgress.edge)?Math.max(0,Math.min(coordinates.length-2,currentProgress.edge)):0;
-    var events=[],labels={0:'左折',1:'右折',2:'大きく左折',3:'大きく右折',4:'斜め左方向',5:'斜め右方向',7:'ロータリーに入ります',8:'ロータリーを出ます',9:'Uターン',12:'左方向を維持',13:'右方向を維持'};
-    (value.maneuvers||[]).forEach(function(step){if(step&&Object.prototype.hasOwnProperty.call(labels,step.type)&&Number.isInteger(step.at)&&step.at>edge&&step.at<coordinates.length)events.push({at:step.at,label:labels[step.type]})});
+    var events=[],labels={0:'左折',1:'右折',2:'大きく左折',3:'大きく右折',4:'斜め左方向',5:'斜め右方向',7:'ロータリーに入ります',8:'ロータリーを出ます',9:'Uターン',12:'左方向を維持',13:'右方向を維持'},arrows={0:'↰',1:'↱',2:'←',3:'→',4:'↖',5:'↗',7:'⟳',8:'⟳',9:'↶',12:'↖',13:'↗'};
+    (value.maneuvers||[]).forEach(function(step){if(step&&Object.prototype.hasOwnProperty.call(labels,step.type)&&Number.isInteger(step.at)&&step.at>edge&&step.at<coordinates.length)events.push({at:step.at,label:labels[step.type],arrow:arrows[step.type]})});
     var spans=value.waycategory||[],last=null;
-    spans.forEach(function(span){if(!Array.isArray(span)||span.length<3)return;var motorway=(span[2]&1)!==0;if(last!==null&&motorway!==last&&span[0]>edge&&span[0]<coordinates.length)events.push({at:span[0],label:motorway?'高速区間に入ります':'高速区間を出ます',priority:1});last=motorway});
+    spans.forEach(function(span){if(!Array.isArray(span)||span.length<3)return;var motorway=(span[2]&1)!==0;if(last!==null&&motorway!==last&&span[0]>edge&&span[0]<coordinates.length)events.push({at:span[0],label:motorway?'高速区間に入ります':'高速区間を出ます',arrow:motorway?'↗':'↘',priority:1});last=motorway});
     events.sort(function(a,b){return a.at-b.at||(b.priority||0)-(a.priority||0)});
     if(!events.length)return null;
     var next=events[0],pointAt=function(i){return coordinatePoint(coordinates[i])},cursor=currentProgress&&point(currentProgress.point)?currentProgress.point:pointAt(edge),meters=0;
     for(var index=edge+1;index<=next.at;index++){var following=pointAt(index);meters+=distanceMeters(cursor,following);cursor=following}
     if(!Number.isFinite(meters))return null;
-    return {label:next.label,meters:Math.max(0,Math.round(meters)),kind:next.priority?'highway':'turn'};
+    return {label:next.label,arrow:next.arrow,meters:Math.max(0,Math.round(meters)),kind:next.priority?'highway':'turn'};
   }
   function vehicle(value){
     if(!value||typeof value!=='object')throw new Error('車検証などで確認した車両の寸法・総重量を登録してください');
