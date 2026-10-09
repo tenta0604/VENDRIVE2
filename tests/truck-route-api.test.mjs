@@ -7,6 +7,7 @@ const origin='https://tenta0604.github.io';
 const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
 const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehicle};
 const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}],extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
+function withWaytype(feature,code=1){return {...feature,properties:{...feature.properties,extras:{...feature.properties.extras,waytype:{values:[[0,feature.geometry.coordinates.length-1,code]]}}}};}
 const request=(body=input,options={})=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json',...options.headers},body:JSON.stringify(body)});
 
 test('upstream timeout also covers a stalled response JSON body, not just response headers',async()=>{
@@ -91,7 +92,7 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
     assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
     assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,true);assert.equal(body.preference,'recommended');
-    assert.deepEqual(body.extra_info,['waycategory','tollways']);
+    assert.deepEqual(body.extra_info,['waycategory','tollways','waytype']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
     assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);assert.equal(body.alternative_routes,undefined);
     assert.deepEqual(data.route.summary,{distance:1800,duration:280});
@@ -136,8 +137,8 @@ test('highway ON prefers more expressway use only among near-fast bounded candid
   globalThis.fetch=async()=>Response.json({features:[surface,shortHighway,longHighway]});
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
-    const data=await response.json();assert.equal(data.selection,'expressway-natural-preferred');assert.deepEqual(data.route.summary,{distance:2000,duration:190});
-    assert.ok(data.usage.priorityMeters>100);
+    const data=await response.json();assert.equal(data.selection,'expressway-natural-preferred');assert.deepEqual(data.route.summary,{distance:2300,duration:225});
+    assert.ok(data.usage.priorityMeters>100);assert.equal(data.highwaySearch.baselineAlternatives,true);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 test('highway ON falls back cleanly when provider returns no highway candidate',async()=>{
@@ -182,7 +183,7 @@ test('highway ON actively searches motorway junctions and adopts a bounded HGV v
   globalThis.fetch=async(url,options)=>{
     if(String(url).includes('overpass-api.de'))return Response.json(junctions);
     routeBodies.push(JSON.parse(options.body));
-    return Response.json({features:routeBodies.length===1?[surface,modestHighway]:[viaHighway]});
+    return Response.json({features:(routeBodies.length===1?[surface,modestHighway]:[viaHighway]).map(x=>withWaytype(x))});
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
@@ -229,6 +230,7 @@ test('long-distance highway ON still searches farther IC access and does not sto
     const data=await response.json();assert.equal(data.highwaySearch.attempted,true);assert.ok(data.highwaySearch.radiusMeters>18000);assert.ok(data.highwaySearch.accepted>=1);assert.equal(data.selection,'active-ic-expressway-preferred');
     assert.deepEqual(data.route.summary,{distance:125000,duration:7600});assert.ok(data.usage.motorwayMeters>45000);
     assert.ok(decodeURIComponent(overpassBody).includes('around:25000'),'long-distance search should expand beyond the old 18km radius');
+    assert.equal(routeBodies[0].alternative_routes,undefined,'long distance must never request ORS alternatives');assert.equal(routeBodies[0].options.avoid_features,undefined,'long highway ON avoids dynamic-weight distance cap; ferry safety verified via waytype');assert.equal(data.highwaySearch.longRouteFerryVerified,true);
     assert.ok(routeBodies.some(body=>body.coordinates.length===4),'a long-distance via-IC HGV route must be evaluated even when endpoint IC access exceeds the old combined 18km cap');
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
@@ -252,9 +254,9 @@ test('highway ON uses one of the two bounded via-IC probes for a geographically 
   globalThis.fetch=async(url,options)=>{
     if(String(url).includes('overpass-api.de'))return Response.json(junctions);
     const body=JSON.parse(options.body);routeBodies.push(body);
-    if(body.coordinates.length===2)return Response.json({features:[surface,modestHighway]});
+    if(body.coordinates.length===2)return Response.json({features:[withWaytype(surface),withWaytype(modestHighway)]});
     const entryLat=body.coordinates[1][1],exitLat=body.coordinates[2][1];
-    return Response.json({features:[entryLat>35.05&&exitLat<34.95?longVia:shortVia]});
+    return Response.json({features:[withWaytype(entryLat>35.05&&exitLat<34.95?longVia:shortVia)]});
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
@@ -295,4 +297,39 @@ test('warm-instance quota guard caps upstream calls',async()=>{
     let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
     assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('if ORS rejects optional alternatives, retry one plain HGV baseline within budget',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const calls=[];
+ globalThis.fetch=async(url,opts)=>{const body=JSON.parse(opts.body);calls.push(body);if(body.alternative_routes)return Response.json({error:{code:2004,message:'alternative distance cap'}},{status:400});return Response.json({features:[feature]});};
+ try{
+  const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
+  const data=await response.json();assert.equal(data.highwaySearch.baselineRetried,true);assert.equal(data.highwaySearch.baselineRetryCause,'alternative-rejected');
+  assert.equal(calls.length,2);assert.ok(calls[0].alternative_routes);assert.equal(calls[1].alternative_routes,undefined);
+  assert.ok(calls.every(c=>c.options.vehicle_type==='hgv'&&c.options.avoid_features.includes('ferries')));
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('long HGV highway ON takes simple fast route, enforces exact truck profile and verified ferry-free waytype',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const bodies=[];
+ const body={origin:{lat:35.0,lng:136.0},destination:{lat:36.0,lng:137.1},vehicle:{...vehicle,avoidTolls:false}};
+ const longRoute={geometry:{type:'LineString',coordinates:[[136,35],[136.5,35.5],[137.1,36]]},properties:{summary:{distance:180000,duration:9000},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
+ let waytype=1;
+ globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});bodies.push(JSON.parse(opts.body));return Response.json({features:[waytype===null?longRoute:withWaytype(longRoute,waytype)]});};
+ try{
+   let response=await POST(request(body));assert.equal(response.status,200);let result=await response.json();
+   assert.equal(result.highwaySearch.baselineAlternatives,false);assert.equal(result.highwaySearch.longRouteFerryVerified,true);assert.ok(result.usage.motorwayMeters>50000);
+   assert.equal(bodies.length,1,'long route baseline does not multiply ORS calls');assert.equal(bodies[0].alternative_routes,undefined);assert.equal(bodies[0].options.vehicle_type,'hgv');
+   assert.deepEqual(bodies[0].options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});
+   assert.equal(bodies[0].options.avoid_features,undefined);assert.ok(bodies[0].extra_info.includes('waytype'));
+   waytype=9;response=await POST(request(body));assert.equal(response.status,502);assert.match((await response.json()).message,/フェリー/);
+   waytype=null;response=await POST(request(body));assert.equal(response.status,502);assert.match((await response.json()).message,/フェリー/);
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('highway OFF always preserves explicit ferry and highway avoidance',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let sent;
+ globalThis.fetch=async(url,opts)=>{sent=JSON.parse(opts.body);return Response.json({features:[feature]});};
+ try{await POST(request({...input,vehicle:{...vehicle,avoidTolls:true}}));assert.deepEqual(sent.options.avoid_features,['ferries','highways','tollways']);}
+ finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
