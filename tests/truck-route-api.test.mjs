@@ -9,6 +9,22 @@ const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehi
 const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
 const request=(body=input,options={})=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json',...options.headers},body:JSON.stringify(body)});
 
+test('provider turn instructions are reduced to safe maneuver types and geometry indices',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;
+ process.env.ORS_API_KEY='test-secret';
+ globalThis.fetch=async(url,opts)=>{
+   if(String(url).includes('overpass-api'))return Response.json({elements:[]});
+   return Response.json({features:[{...feature,properties:{...feature.properties,segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}]}}]});
+ };
+ try{
+   const response=await POST(request());
+   assert.equal(response.status,200);
+   const data=await response.json();
+   assert.deepEqual(data.route.maneuvers,[{type:11,at:0},{type:1,at:1}]);
+   assert.equal(JSON.stringify(data.route).includes('Turn right'),false,'upstream instruction text must not be persisted');
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
 test('upstream timeout also covers a stalled response JSON body, not just response headers',async()=>{
   const previous=globalThis.fetch;
   let aborted=false;
@@ -294,21 +310,4 @@ test('warm-instance quota guard caps upstream calls',async()=>{
     let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
     assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
-});
-
-
-test('provider turn instructions are reduced to safe maneuver types and geometry indices',async()=>{
- const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;
- process.env.ORS_API_KEY='test-secret';
- globalThis.fetch=async(url,opts)=>{
-   if(String(url).includes('overpass-api'))return Response.json({elements:[]});
-   return Response.json({features:[{...feature,properties:{...feature.properties,segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}]}}]});
- };
- try{
-   const response=await POST(request());
-   assert.equal(response.status,200);
-   const data=await response.json();
-   assert.deepEqual(data.route.maneuvers,[{type:11,at:0},{type:1,at:1}]);
-   assert.equal(JSON.stringify(data.route).includes('Turn right'),false,'upstream instruction text must not be persisted');
- }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
