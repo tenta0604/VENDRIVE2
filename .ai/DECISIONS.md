@@ -655,3 +655,12 @@ Safety tag backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114
 Vercel production API cannot deploy right now: HTTP 402 api-deployments-free-per-day (>100/day), retryAfter 86400. Current Pages FINAL.46 / Vercel API FINAL.45. Treat as TECHNICAL_BLOCKER and do NOT claim the timeout fix is live. No billing/plan changes without user approval.
 
 After quota resets, make one exact-main Vercel production deploy and verify live backend FINAL.46; only then request iPhone retest. AN15 paused.
+
+
+## 2026-10-09 — FINAL.46 API deployment complete, field retest outstanding
+
+The prior Vercel HTTP 402 api-deployments-free-per-day blocker has been resolved: exact-main deployment dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum became READY for main SHA 8155695040e877614081a927aa39d7cfe534da35. No upgrade/billing change occurred.
+
+Public GitHub Pages and Vercel version.json both show FINAL.46. Mark only deployment/release as complete; do NOT claim the user’s route no longer times out until the exact iPhone route has been retested.
+
+Maintain exact driving-hgv restrictions, registered dimensions, 2 extra via-IC probes maximum, warm 30/min guard, FINAL.36 detour limits, and AN15 pause. If the route now renders but avoids motorways, use the sanitized FINAL.45 highway diagnostic before any further code changes.

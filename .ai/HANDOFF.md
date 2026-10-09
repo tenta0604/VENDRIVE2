@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-08.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.46` (Pages only; Vercel route API remains FINAL.45 while quota-blocked).
+- Current visible production app version: `2026.10.08-FINAL.46` (GitHub Pages and Vercel production; pending iPhone field retest).
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -936,3 +936,18 @@ Critical blocker: Vercel rejected an explicit production deployment with HTTP 40
 Next after quota reset: recover exact latest main and make ONE deployment to the existing Vercel project; require READY, matching git SHA, Vercel public version.json FINAL.46. If a payment/plan change is proposed, require explicit user approval. Avoid repeat deploy calls while blocked.
 
 Only after backend matches ask the user to re-test the exact route; if it still fails, request exact displayed error and approximate distance (or endpoints with consent). AN15 remains paused and OCR/Analysis withdrawn.
+
+
+## 2026-10-09 FINAL.46 backend deployed — iPhone retest pending
+
+This is the newest authoritative checkpoint and supersedes the earlier FINAL.46 quota-blocker section.
+
+Vercel accepted deployment dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum from exact main SHA 8155695040e877614081a927aa39d7cfe534da35, target production; deployment finished READY. No payment or plan change.
+
+Live Pages and Vercel /version.json both report 2026.10.08-FINAL.46, so the upstream fetch/JSON-body timeout bound and the optional highway via-IC time budget are now deployed, not just merged.
+
+Prior tests remained green: FINAL.46 route readiness workflow 37754575289, PR browser 37754575245, main browser 37754745261, Pages 37754744610 and documentation closeout Pages 37755343380.
+
+**Next HUMAN_REQUIRED step:** User retries once the same previously timed-out highway-ON route safely while parked. If route appears, use the existing privacy-safe 高速診断 for any motorway selection mismatch; if still timed out, record displayed error and trip distance (endpoints only with consent). Do not assert field issue fixed merely because deployment is READY.
+
+HGV vehicle constraints, max-two IC attempts, warm 30 route calls/min, FINAL.36 safety detour caps and AN15 pause are preserved.

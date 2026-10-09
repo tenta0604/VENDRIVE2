@@ -1,71 +1,75 @@
 {
-  "evidenceVersion": 62,
-  "runType": "final46_hgv_timeout_prod_blocked",
-  "phase": "FINAL46_HGV_TIMEOUT_BOUNDS",
-  "status": "TECHNICAL_BLOCKER",
+  "evidenceVersion": 63,
+  "runType": "final46_production_backend_quota_recovery",
+  "phase": "FINAL46_HGV_TIMEOUT_BOUNDS_PRODUCTION",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "be83e6c8aee36caa114dc8926425bff81555d305",
     "safetyTag": "backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008",
     "safetyTagTarget": "be83e6c8aee36caa114dc8926425bff81555d305"
   },
   "versions": {
+    "app": "2026.10.08-FINAL.46",
     "frontend": "2026.10.08-FINAL.46",
-    "apiLive": "2026.10.08-FINAL.45",
+    "apiLive": "2026.10.08-FINAL.46",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Safe HGV timeout bounding source implemented, tests passed, PR #199 merged. Pages deployed FINAL.46; Vercel blocked new production API deploy with daily 100 deployment cap, so real route fix is NOT live.",
-    "productionCodeChanged": true,
-    "productStatus": "PARTIAL_FRONTEND_ONLY_VERCEL_BLOCKED",
+    "summary": "Vercel free deployment quota reset. Deployment for FINAL.46 exact main source is READY; production GitHub Pages and Vercel both serve FINAL.46. Original iPhone route timeout field case still needs retest.",
+    "productStatus": "PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+    "productionCodeChanged": false,
     "closeoutCommitChangesDocumentationOnly": true
   },
   "gates": {
-    "canonicalRecovery": "PASS",
-    "immutableSafetyTag": "PASS",
-    "requestBodyDeadline": "PASS: stalled upstream JSON bodies stop after timeout",
-    "optionalViaBudgetFallback": "PASS: validated HGV baseline preserved when optional probes exceed server budget",
-    "prTruckRoute": "PASS: 37754575289",
-    "prBrowser": "PASS: 37754575245",
-    "merged": "PASS: PR #199",
-    "mainBrowser": "PASS: 37754745261",
-    "githubPages": "PASS: 37754744610",
-    "vercelApiRelease": "BLOCKED: 402 payment_required api-deployments-free-per-day, retryAfter 86400",
-    "liveVersion": "MISMATCH: frontend FINAL.46 and route API FINAL.45",
-    "exactDeviceRetest": "NOT_DONE: do not request while live API still FINAL.45"
+    "canonicalRecovery": "PASS: latest main SHA 8155695040e877614081a927aa39d7cfe534da35, seven canonical files read",
+    "immutablePreEditTag": "PASS: backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 resolved to be83e6c8aee36caa114dc8926425bff81555d305 (prior product work)",
+    "priorProductPR": "PASS: PR #199 merged c2307edf38c1e1256c3eaa125e86d8e9fd461edc",
+    "priorTruckRoute": "PASS: workflow 37754575289",
+    "priorBrowser": "PASS: workflow 37754575245",
+    "priorMainBrowser": "PASS: workflow 37754745261",
+    "priorPages": "PASS: 37754744610 and 37755343380",
+    "vercelApiProduction": "PASS: dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum READY for main 8155695040e877614081a927aa39d7cfe534da35",
+    "liveVersion": "PASS: Pages and Vercel report 2026.10.08-FINAL.46",
+    "userBillingChange": "NOT_REQUIRED: Vercel free quota reset allowed deploy without plan change",
+    "realDevice": "PENDING: same route retest"
   },
   "openItems": [
-    "Provider daily deployment quota reset required.",
-    "Deploy exact latest main SHA to Vercel production once quota available.",
-    "Live API version must match FINAL.46 before user retest.",
-    "Original field timeout and highway discrepancy unresolved.",
-    "AN15 stays paused."
+    "Same previously failing iPhone route must be retested.",
+    "If route appears, use privacy-safe highway diagnostics to classify motorway selection issue.",
+    "If still times out, capture exact error and route length.",
+    "AN15 remains paused."
   ],
-  "nextAction": "After Vercel deployment quota resets (HTTP 402 retryAfter 86400), make one deployment from verified latest main to existing Vercel project, verify READY, exact SHA and public version FINAL.46, then request same-route iPhone retest.",
+  "nextAction": "Ask user to safely retry the exact highway-ON route previously timing out. Determine whether route appears; if yes request sanitized 高速診断 for missing expressway, if not the exact error and trip distance.",
   "unresolved": [
-    "Vercel production API remains FINAL.45 until retry.",
-    "Root cause and field fix effectiveness not confirmed.",
+    "No outstanding FINAL.46 production deployment blocker.",
+    "Device-level route timeout outcome unknown.",
+    "Highway preference diagnostic remains pending.",
     "AN15 paused."
   ],
   "changedFiles": [
     ".ai/STATE.json",
-    ".ai/HANDOFF.md",
     ".ai/LAST_RUN.json",
+    ".ai/HANDOFF.md",
     "AI_ROADMAP.md",
     ".ai/DECISIONS.md"
   ],
   "continuityCheckpoint": {
-    "createdFor": "new chat handoff",
-    "status": "TECHNICAL_BLOCKER",
-    "sourceMain": "c2307edf38c1e1256c3eaa125e86d8e9fd461edc",
-    "resumeFrom": "Vercel daily deployment quota reset -> release FINAL.46 route API",
+    "createdFor": "fresh chat handoff",
+    "status": "PASS",
+    "productCodeChanged": false,
+    "sourceMain": "8155695040e877614081a927aa39d7cfe534da35",
+    "resumeFrom": "FINAL.46 frontend/backend production verified, awaiting same-route iPhone retest",
     "immediateEvidence": [
-      "GitHub Pages FINAL.46",
-      "Vercel live FINAL.45",
-      "provider 402 api-deployments-free-per-day retryAfter 86400",
-      "PR #199 + gates PASS"
+      "Vercel dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum READY",
+      "GitHub Pages and Vercel both FINAL.46",
+      "User should retry exact same route"
     ],
-    "warning": "Never call this production complete or retest until API version catches up."
+    "warning": "Production verified does not establish route issue fixed on user's iPhone."
+  },
+  "fieldEvidence": {
+    "final46SameRouteRetest": "PENDING",
+    "final45HighwaySelection": "PENDING_AFTER_SUCCESSFUL_ROUTE"
   }
 }
