@@ -84,14 +84,7 @@ for(const width of [320,390]){
     await page.locator('#mapFollowLocation').click();
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.3,longitude:136.804,accuracy:8,heading:90,speed:10}}));await page.waitForTimeout(360);
     const turnZoomCall=await page.evaluate(()=>{var calls=window.__turnZoomCalls.slice();window.L.Map.prototype.setZoom=window.__turnZoomOriginal;delete window.__turnZoomOriginal;delete window.__turnZoomCalls;return calls.at(-1)});assert.ok(turnZoomCall&&turnZoomCall.to>turnZoomCall.from&&turnZoomCall.to-turnZoomCall.from<=0.46,'follow mode should ease toward the bend with a fractional zoom step');
-    const smoothZoom=await page.evaluate(()=>{var proto=window.L.Map.prototype,oldGet=proto.getZoom,oldSet=proto.setZoom,calls=[];
-      var synthetic={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.801,35.301],[136.801,35.302],[136.801,35.303]]},summary:{distance:400,duration:70}};
-      try{proto.getZoom=function(){return window.__fakeRouteZoom};proto.setZoom=function(value,options){calls.push({from:window.__fakeRouteZoom,to:value,animated:!!options?.animate});return this};
-      window.__fakeRouteZoom=16;window.applyTruckNavigationView(synthetic,null,{edge:0,t:0.9,point:{lng:136.8009,lat:35.3},distance:0});
-      window.__fakeRouteZoom=18.5;window.applyTruckNavigationView(synthetic,null,{edge:2,t:0.1,point:{lng:136.801,lat:35.3011},distance:0});
-      return calls;
-      }finally{proto.getZoom=oldGet;proto.setZoom=oldSet;delete window.__fakeRouteZoom;}});
-    assert.equal(smoothZoom.length,2,'follow mode must perform both approach zoom-in and post-turn zoom-out');assert.ok(smoothZoom[0].to>smoothZoom[0].from&&smoothZoom[1].to<smoothZoom[1].from,'zoom must increase before and decrease after a turn');assert.ok(smoothZoom.every(x=>Math.abs(x.to-x.from)<=0.46&&x.animated),'both directions should use fractional animated zoom');await page.locator('#mapFollowLocation').click();
+    await page.locator('#mapFollowLocation').click();
     const routePathAfter=await page.locator('#map path[stroke="#00e5ff"], #map path[stroke="#dc2626"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')).join('|'));
     assert.notEqual(routePathAfter,routePathBefore,'travelled route geometry should disappear from the displayed line');
     await page.waitForFunction(()=>document.querySelector('.vendrive-current-position')?.dataset.heading==='90.0');
@@ -104,6 +97,14 @@ for(const width of [320,390]){
     const settled=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.33,longitude:136.83,accuracy:250,heading:45}}));await page.waitForTimeout(1300);
     const afterPoor=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));assert.ok(Math.abs(afterPoor.lat-35.304)<0.00001&&Math.abs(afterPoor.lng-136.802)<0.00001,'poor-accuracy GPS must not move the displayed marker');
+    // Verify zoom-out on a real active route after GPS passes the first corner.
+    await page.locator('#mapFollowLocation').click();
+    for(let i=0;i<8;i++)await page.locator('#zoomIn').evaluate(el=>el.click());
+    await page.evaluate(()=>{window.__postTurnZoomCalls=[];window.__postTurnZoomOriginal=window.L.Map.prototype.setZoom;window.L.Map.prototype.setZoom=function(to,options){window.__postTurnZoomCalls.push({from:this.getZoom(),to,animated:!!options?.animate});return window.__postTurnZoomOriginal.call(this,to,options)};});
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.305,longitude:136.805,accuracy:8,heading:0,speed:10}}));await page.waitForTimeout(380);
+    const postTurnZoom=await page.evaluate(()=>{const calls=window.__postTurnZoomCalls.slice();window.L.Map.prototype.setZoom=window.__postTurnZoomOriginal;delete window.__postTurnZoomOriginal;delete window.__postTurnZoomCalls;return calls.filter(x=>x.to<x.from).at(-1)});
+    assert.ok(postTurnZoom&&postTurnZoom.from-postTurnZoom.to>0&&postTurnZoom.from-postTurnZoom.to<=0.46&&postTurnZoom.animated,'follow zoom must smoothly zoom OUT after passing a significant corner');
+    await page.locator('#mapFollowLocation').click();
     const afterSave=await stored();
     await page.locator('#allRoutes').click();await page.locator('#zoomIn').click();
     assert.equal(count,3);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
