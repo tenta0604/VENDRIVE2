@@ -1,42 +1,46 @@
 {
-  "evidenceVersion": 66,
-  "runType": "final47_production_release_closeout_20261009",
-  "phase": "DOCUMENTATION_ONLY_FINAL47_CLOSEOUT",
-  "status": "COMPLETE",
+  "evidenceVersion": 67,
+  "runType": "final48_nav_cue_pr_validation_20261009",
+  "phase": "FINAL48_NAV_CUE_MAINTENANCE",
+  "status": "PR_VALIDATED_RELEASE_PENDING",
   "base": {
-    "productionMainBefore": "5e67667a3d85c83f11aea43605226f84ce6a5b44",
-    "productionCodeChanged": false,
-    "safetyTag": "NOT_REQUIRED: documentation-only; product safety tag backup-pre-FINAL47-FIELD-UX-20261009 -> e1ce4b4091a799629d563669c659d4d6eb6757a5"
+    "productionMainBefore": "23f59b5a2c4e28934eaef9c0a2519d492d675a13",
+    "productionCodeChanged": true,
+    "safetyTag": "backup-pre-FINAL48-NAV-CUE-20261009-20261009 -> 23f59b5a2c4e28934eaef9c0a2519d492d675a13; workflow 37913311257 PASS"
   },
   "versions": {
-    "app": "2026.10.09-FINAL.47",
-    "frontend": "2026.10.09-FINAL.47",
-    "apiTarget": "2026.10.09-FINAL.47",
+    "app": "2026.10.09-FINAL.48",
+    "frontend": "2026.10.09-FINAL.48",
+    "apiTarget": "2026.10.09-FINAL.48",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.47 product merge and frontend/backend live verified; release evidence committed to canonical files without product code change.",
-    "productStatus": "PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
-    "productCodeChanged": false,
-    "ownerIntent": "Stop after selected FINAL.47 phase. No AN15 resumption or more features without explicit request"
+    "summary": "FINAL.48 upper-left landscape HUD and large arrows implemented; existing turn zoom unchanged. Node+real Edge confirm corner approach zoom-in and past-corner zoom-out. PR validated, merge and live checks pending.",
+    "productStatus": "PR_VERIFIED_PENDING_RELEASE",
+    "productCodeChanged": true,
+    "ownerIntent": "Landscape HUD positioning, prominent arrow, verify automatic zoom remains alive; stop after scoped maintenance."
   },
   "gates": {
-    "canonicalRecovery": "PASS: repository files consistent with released FINAL.47",
-    "productSafetyTag": "PASS: annotated immutable tag backup-pre-FINAL47-FIELD-UX-20261009, run 37907477873",
-    "prRouteAndEdge": "PASS 37909127571",
-    "prBrowser": "PASS 37909127498",
-    "productPR": "PASS merged #204 at 5e67667a3d85c83f11aea43605226f84ce6a5b44",
-    "mainBrowser": "PASS 37909629725",
-    "githubPages": "PASS 37909629247",
-    "vercelProduction": "PASS READY dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD exact source 5e67667a3d85c83f11aea43605226f84ce6a5b44",
-    "publicVersions": "PASS Pages/Vercel both 2026.10.09-FINAL.47",
-    "realIphoneNewFeatures": "NOT_PERFORMED: field UX confirmation pending",
-    "ownerTimeoutEvidence": "PASS: user says previous timeout OK",
-    "documentationSafetyTag": "NOT_REQUIRED: no production changes"
+    "safetyTag": "PASS immutable annotated tag at 23f59b5a2c4e28934eaef9c0a2519d492d675a13",
+    "prTruckRoute": "PASS 37913947231 (Node/API/real Edge 320/390)",
+    "prBrowser": "PASS 37913947189",
+    "realBrowserZoomOut": "PASS integrated PR route gate 37913947231",
+    "mainBrowser": "PENDING until merge",
+    "githubPages": "PENDING until merge",
+    "vercelProduction": "PENDING until merge",
+    "liveVersion": "PENDING until both public endpoints FINAL.48",
+    "realIphone": "NOT_PERFORMED owner field check later",
+    "dbMigration": "NOT_REQUIRED same DB/schema",
+    "deploymentCharge": "NOT_REQUIRED Git-integrated existing hosting"
   },
   "changedFiles": [
+    "index.html",
+    "truck-routing.js",
+    "version.json",
+    "tests/truck-route-client.test.mjs",
+    "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -44,16 +48,16 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "FINAL.47 field UX requires optional later real-device feedback; no current execution assigned",
-    "Highway-ON selection quality remains a separate outstanding field question",
-    "AN15 intentionally paused"
-  ],
-  "nextAction": "Stop and wait for explicit new owner instruction. On later resume fresh-check main/canonical files; do not automatically start AN15 or new routing work.",
-  "unresolved": [
-    "No further authorized implementation work",
-    "New FINAL.47 features lack owner device item-by-item signoff",
-    "Highway preference not certified",
+    "Production merge/Pages/Vercel FINAL.48 live check",
+    "Real iPhone confirmation later",
     "AN15 paused"
+  ],
+  "nextAction": "Complete final PR #207 release gates, update canonical closeout and stop. No new phase.",
+  "unresolved": [
+    "PR #207 not yet released",
+    "User device UX check pending",
+    "AN15 paused",
+    "Highway preference quality separate"
   ],
   "continuityCheckpoint": {
     "status": "PASS",

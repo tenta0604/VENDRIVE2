@@ -691,3 +691,8 @@ Preserve driving-hgv with registered restrictions, max two via-IC probes, warm 3
 ## 2026-10-09 — FINAL.47 release and stop boundary
 
 FINAL.47 PR #204 merged at `5e67667a3d85c83f11aea43605226f84ce6a5b44`; route/Edge `37909127571`, PR Browser `37909127498`, main Browser `37909629725`, Pages `37909629247` PASS. Vercel production deployment `dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD` READY for the exact merge. Both public versions show `2026.10.09-FINAL.47`. Earlier FINAL.47 PR-pending statements are historical, superseded by this release. The user had confirmed the old timeout OK; new FINAL.47 UX has not been individually field-certified. Preserve all HGV/FINAL.36/ORS limits, keep AN15 intentionally paused, and stop until owner explicitly authorizes new work.
+
+
+## 2026-10-09 — FINAL.48 upper-left fullscreen landscape cue and prominent arrow
+
+Owner explicitly chose to preserve portrait HUD location, move the HUD to upper-left only in landscape (native and MAP software-rotated), and add large directional arrows to existing trusted step/highway-category guidance. This is a visual change; no increase to provider call volume or HGV routing changes. Existing follow-mode automatic turn zoom-in and post-turn zoom-out were confirmed by new unit and real Edge tests, not replaced. Pre-edit immutable annotated tag `backup-pre-FINAL48-NAV-CUE-20261009-20261009` at `23f59b5a2c4e28934eaef9c0a2519d492d675a13`; PR #207 Node/Edge `37913947231` PASS and browser `37913947189` PASS, production not yet verified as of this PR record. AN15 stays paused.

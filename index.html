@@ -103,10 +103,16 @@ body.mapFullscreen.mapSoftRotated .modal.open .sheet .arrivalWorkSection+.arriva
 body.mapFullscreen.mapSoftRotated .modal.open .sheet .arrivalTaskRow{padding:3px 0}
 body.mapFullscreen.mapSoftRotated .modal.open .sheet .swipeRow{margin-top:4px}
 body.mapFullscreen.mapSoftRotated .modal.open .sheet .section{margin-top:7px}
-#mapRouteCue{display:none;position:absolute;z-index:1200;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(56%,390px);box-sizing:border-box;padding:9px 12px;background:#111e;color:#fff;border:1px solid #ffffff6b;border-radius:13px;box-shadow:0 3px 12px #0005;pointer-events:none;text-align:center;font-size:14px;font-weight:850;line-height:1.35}
+#mapRouteCue{display:none;position:absolute;z-index:1200;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(78%,390px);box-sizing:border-box;padding:9px 12px;background:#111e;color:#fff;border:1px solid #ffffff6b;border-radius:13px;box-shadow:0 3px 12px #0005;pointer-events:none;text-align:left;font-size:14px;font-weight:850;line-height:1.35}
 body.mapFullscreen #mapRouteCue:not(.hidden){display:block}
-#mapRouteCue .cueDistance{display:block;color:#cce6ff;font-size:11px;margin-top:2px}
-body.mapFullscreen.mapSoftRotated #mapRouteCue{width:min(60%,430px);font-size:13px}
+#mapRouteCue .cueContent{display:flex;align-items:center;gap:9px}
+#mapRouteCue .cueArrow{display:block;flex:0 0 60px;text-align:center;font-family:Arial,"Hiragino Sans",sans-serif;font-size:56px;font-weight:900;line-height:1.12;color:#fff}
+#mapRouteCue .cueDetail{min-width:0;flex:1}
+#mapRouteCue .cueInstruction{display:block;font-size:14px;line-height:1.3}
+#mapRouteCue .cueDistance{display:block;color:#cce6ff;font-size:12px;margin-top:3px}
+body.mapFullscreen.mapSoftRotated #mapRouteCue{top:max(52px,env(safe-area-inset-top));left:max(18px,env(safe-area-inset-left));transform:none;width:min(44%,410px)}
+@media (orientation:landscape){body.mapFullscreen:not(.mapSoftRotated) #mapRouteCue{top:max(52px,env(safe-area-inset-top));left:max(18px,env(safe-area-inset-left));transform:none;width:min(44%,410px)}}
+@media (max-width:360px){#mapRouteCue .cueArrow{flex-basis:50px;font-size:50px}#mapRouteCue .cueInstruction{font-size:13px}}
 .taskHistoryResult{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid #e5e7eb}
 .taskHistoryResult b{font-size:11px}.taskHistoryResult .meta{margin-top:2px}
 .taskHistoryOpen{flex:1;text-align:left;cursor:pointer}
@@ -291,7 +297,7 @@ body.mapFullscreen.mapSoftRotated #mapRouteCue{width:min(60%,430px);font-size:13
 <div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="truck-routing.js?v=2026.10.09-FINAL.47"></script>
+<script src="truck-routing.js?v=2026.10.09-FINAL.48"></script>
 <script>
 (function(){
 "use strict";
@@ -337,7 +343,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.10.09-FINAL.47',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.10.09-FINAL.48',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -547,9 +553,9 @@ function updateTruckRouteCue(route,progress){
  var cue=$id('mapRouteCue');if(!cue)return;
  var active=document.body.classList.contains('mapFullscreen')&&route&&window.VENDRIVETruckRouting&&window.VENDRIVETruckRouting.navigationCue;
  var instruction=active?window.VENDRIVETruckRouting.navigationCue(route,progress):null;
- if(!instruction){cue.classList.add('hidden');cue.textContent='';return}
+ if(!instruction){cue.classList.add('hidden');cue.textContent='';cue.removeAttribute('aria-label');return}
  var distance=instruction.meters>=1000?'約'+(instruction.meters/1000).toFixed(1)+'km':'約'+Math.round(instruction.meters/10)*10+'m';
- cue.innerHTML='<div>'+esc(instruction.label)+'</div><span class="cueDistance">'+esc(distance)+'先</span>';cue.classList.remove('hidden');
+ cue.innerHTML='<div class="cueContent"><span class="cueArrow" aria-hidden="true">'+esc(instruction.arrow||'↑')+'</span><div class="cueDetail"><span class="cueInstruction">'+esc(instruction.label)+'</span><span class="cueDistance">'+esc(distance)+'先</span></div></div>';cue.setAttribute('aria-label',instruction.label+' '+distance+'先');cue.classList.remove('hidden');
 }
 function applyTruckNavigationView(route,target,progress){
  updateTruckRouteCue(route,progress);

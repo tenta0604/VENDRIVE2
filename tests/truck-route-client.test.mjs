@@ -67,6 +67,9 @@ test('turn-aware zoom tightens as a significant route bend approaches',()=>{
   const far=routing.nextTurnMeters(turnRoute,atStart),near=routing.nextTurnMeters(turnRoute,nearTurn);
   assert.ok(far>70&&far<120);assert.ok(near>10&&near<50);assert.equal(routing.navigationZoomTarget(turnRoute,atStart),18);assert.equal(routing.navigationZoomTarget(turnRoute,nearTurn),19);
   const straight={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.802,35.3]]},summary:{distance:200,duration:30}};assert.equal(routing.nextTurnMeters(straight,null),null);assert.equal(routing.navigationZoomTarget(straight,null),16);
+  const singleBend={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.801,35.301],[136.801,35.302],[136.801,35.303]]},summary:{distance:400,duration:70}};
+  assert.equal(routing.navigationZoomTarget(singleBend,{edge:0,t:0.9,point:{lng:136.8009,lat:35.3},distance:0}),19,'approach the 90-degree bend with close zoom');
+  assert.equal(routing.navigationZoomTarget(singleBend,{edge:2,t:0.1,point:{lng:136.801,lat:35.3011},distance:0}),16,'after the bend, return to wide view without another upcoming sharp corner');
 });
 
 test('route sections highlight both motorway and toll-only spans',()=>{
@@ -77,7 +80,7 @@ test('route sections highlight both motorway and toll-only spans',()=>{
 });
 
 test('routing asset version matches FINAL.47 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.09-FINAL.47');
+  assert.equal(routing.assetVersion,'2026.10.09-FINAL.48');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -162,10 +165,24 @@ test('fitActive reuses the current remaining-route progress without a provider c
 test('fullscreen navigation cue follows provider turns and motorway category transitions',()=>{
  const base={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.802,35.3],[136.803,35.3]]},summary:{distance:300,duration:30},waycategory:[[0,2,0],[2,3,1]],maneuvers:[{type:11,at:0},{type:1,at:1}]};
  assert.equal(routing.navigationCue(base,null).label,'右折');
+ assert.equal(routing.navigationCue(base,null).arrow,'↱');
  const afterTurn=routing.navigationCue(base,{edge:1,point:{lat:35.3,lng:136.801}});
  assert.equal(afterTurn.label,'高速区間に入ります');
+ assert.equal(afterTurn.arrow,'↗');
  assert.ok(afterTurn.meters>0);
  assert.throws(()=>routing.route({...base,maneuvers:[{type:1,at:100}]}),/案内データ/);
  const noEvidence={...base,waycategory:undefined,maneuvers:[]};
  assert.equal(routing.navigationCue(noEvidence,null),null);
+});
+
+
+test('all recognized direction cues have large-arrow symbols, including motorway exit',()=>{
+ const geometry={type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.802,35.3]]},summary={distance:200,duration:40};
+ for(const [type,expected] of [[0,'↰'],[1,'↱'],[2,'←'],[3,'→'],[4,'↖'],[5,'↗'],[7,'⟳'],[8,'⟳'],[9,'↶'],[12,'↖'],[13,'↗']]){
+   const cue=routing.navigationCue({geometry,summary,maneuvers:[{type,at:1}]},null);
+   assert.equal(cue.arrow,expected,'type '+type);
+ }
+ const exiting=routing.navigationCue({geometry,summary,waycategory:[[0,1,1],[1,2,0]]},null);
+ assert.equal(exiting.label,'高速区間を出ます');
+ assert.equal(exiting.arrow,'↘');
 });

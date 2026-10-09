@@ -343,3 +343,8 @@ The owner confirmed FINAL.46's previously reported timeout resolved in real use 
 ## FINAL.47 production release and owner stop — 2026-10-09
 
 PR #204 merged `5e67667a3d85c83f11aea43605226f84ce6a5b44` after product gates `37909127571` (Truck route / API / real Edge 320/390 PASS) and `37909127498` (Browser regression PASS). Post-merge Browser regression `37909629725` PASS; Pages `37909629247` PASS; Vercel `dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD` READY at exact source SHA. Both public GitHub Pages and Vercel versions = `2026.10.09-FINAL.47`. Scope and invariants are recorded at end of HANDOFF.md. User confirmed FINAL.46 timeout OK; FINAL.47 real-device UI checks remain future evidence. Highway-ON route-choice accuracy independently outstanding. No further product work or AN15 progression is authorized without a new explicit owner instruction.
+
+
+## FINAL.48 nav cue landscape adjustment and zoom preservation — 2026-10-09
+
+Scoped owner maintenance: portrait HUD top-center stays; native/software-rotated fullscreen landscape HUD moves upper-left and shows a large maneuver arrow beside supported ORS-based text and distance. Preserved unmodified `navigationZoomTarget` and fractional zoom easing; tests explicitly verify zoom-in on approach and zoom-out after the last significant corner. No added route requests or HGV/FINAL.36/AN15 changes. Immutable safety tag `backup-pre-FINAL48-NAV-CUE-20261009-20261009` -> `23f59b5a2c4e28934eaef9c0a2519d492d675a13`. PR #207 product/test head `fd6d0fda80944518e6826f9242db5ee43af6bdd3` CI: Truck/Node/real Edge `37913947231` PASS; Browser `37913947189` PASS. Merge/live Pages/Vercel status **pending**, do not claim FINAL.48 in production yet.
