@@ -706,3 +706,8 @@ FINAL.48 PR #207 merged `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`; final PR rea
 ## 2026-10-09 — FINAL.49 owner iPhone screenshot: compact nav cue
 
 Owner rejected the FINAL.48 landscape guidance panel width because it intruded far into central map. Lock the replacement: native and software-rotated landscape fullscreen cue should hug the safe upper-left and be much shorter (cap 224 CSS px, safe-edge 8px); landscape MAP・本日 tag may be hidden; large navigation arrow/text/distance stay. Portrait HUD location is unchanged and the portrait MAP tag remains. No additional navigation provider calls, route/zoom algorithm, HGV/DB/schema/AN15 scope. Pre-edit safety tag `backup-pre-FINAL49-COMPACT-CUE-20261009` -> `5c2b3b26f625bc5b0912cf8b3704176a8182bd75`, PR #210 first corrected Edge + browser runs `37917405398` and `37917405381` PASS; production pending at PR checkpoint.
+
+
+## 2026-10-09 — FINAL.49 release and return to owner stop
+
+FINAL.49 PR #210 merged `bc83dda66c4f0676872006aa356dd0fba5e25ce5`, PR Truck/Edge `37917628703`, PR Browser `37917628558`, main Browser `37917777126`, Pages `37917776644` PASS, Vercel `dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ` READY on the merge SHA and both public endpoints FINAL.49. The old PR-pending description is historical. Owner field screen signoff remains; halt development pending explicit instruction and preserve AN15 pause.

@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-09.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.09-FINAL.48` (GitHub Pages and Vercel; FINAL.48 iPhone visual/drive confirmation pending).
+- Current visible production app version: `2026.10.09-FINAL.49` (GitHub Pages and Vercel; FINAL.48 iPhone visual/drive confirmation pending).
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -1066,3 +1066,10 @@ Owner provided an iPhone image of the software-rotated fullscreen map: FINAL.48 
 FINAL.49 PR [#210](https://github.com/tenta0604/VENDRIVE2/pull/210): native and soft-rotated landscape HUD width `min(224px, calc(100% - 16px))` rather than `min(44%,410px)`; top/left use `max(8px, env(safe-area-inset-*))`; slightly reduced landscape padding; hide MAP・本日 only during fullscreen landscape. Retain large direction arrow, instruction/distance, the pre-existing portrait top-center and portrait MAP tag. CSS/layout only; HGV, GPS, ORS calls/quotas, user data, engine/DB/schema, follow zoom-in/out and AN15 remain unchanged. APP_VERSION and routing cache/version metadata set `2026.10.09-FINAL.49`.
 
 Pre-edit immutable annotated tag `backup-pre-FINAL49-COMPACT-CUE-20261009` -> `5c2b3b26f625bc5b0912cf8b3704176a8182bd75`; workflow `37917016663` PASS. Product/test commit `ba2a317fc31c838db138e8b2105397ddadb8daa0`. PR Truck route/Node/API/real Edge at 320/390 `37917405398` PASS; PR Browser regression `37917405381` PASS. An earlier test-only flaky zoom-out gate was stabilized by fixing the test starting zoom, keeping the actual GPS callback. **At this checkpoint PR not merged and no production/live FINAL.49 verified.** Next: final PR gates, merge, main Browser and Pages PASS, Vercel READY on exact SHA, both public endpoints FINAL.49, then docs closeout and owner STOP. Real iPhone field acceptance remains separate.
+
+
+## 2026-10-09 FINAL.49 public release complete — owner STOP
+
+The preceding FINAL.49 PR-pending section is superseded. Owner iPhone screenshot showed FINAL.48 software-rotated landscape cue too large and intruding into map center; FINAL.49 reduces its width to max 224px, moves to safe 8px top-left, hides MAP・本日 only in fullscreen landscape and preserves 56px arrow, Japanese next-turn text/distance and portrait position. Code for GPS follow/zoom and HGV requests was not modified; only zoom regression test race was corrected. PR [#210](https://github.com/tenta0604/VENDRIVE2/pull/210) merged main at `bc83dda66c4f0676872006aa356dd0fba5e25ce5`. Final PR Truck/Node/real Edge `37917628703` PASS and Browser `37917628558` PASS. Main Browser `37917777126` PASS; GitHub Pages `37917776644` PASS; Vercel production `dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ` READY on exact main `bc83dda66c4f0676872006aa356dd0fba5e25ce5`. Both public Pages and Vercel version.json endpoints = `2026.10.09-FINAL.49` on 2026-10-09.
+
+**STOP:** User may now confirm visual comfort on iPhone; no real-device acceptance has been inferred from CI. Leave AN15 intentionally paused, high-speed motorway selection accuracy a separate field issue, and route safety/quotas unchanged. Do not reopen PR #210 or start new development without fresh owner direction; always fetch latest main first.
