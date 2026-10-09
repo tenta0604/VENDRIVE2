@@ -43,3 +43,18 @@ test('highway OFF always preserves explicit ferry and highway avoidance',async()
  try{await POST(request({...input,vehicle:{...vehicle,avoidTolls:true}}));assert.deepEqual(sent.options.avoid_features,['ferries','highways','tollways']);}
  finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+
+
+test('highway use near sixty percent of an otherwise valid baseline still probes for later exit',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const calls=[];
+ const body={origin:{lat:35.0,lng:136.0},destination:{lat:35.30,lng:136.4},vehicle:{...vehicle,avoidTolls:false}};
+ const baseline={geometry:{type:'LineString',coordinates:[[136,35],[136.26,35.18],[136.4,35.3]]},properties:{summary:{distance:50000,duration:3300},extras:{waycategory:{values:[[0,1,1],[1,2,0]]},tollways:{values:[[0,1,1],[1,2,0]]}}}};
+ globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});calls.push(JSON.parse(opts.body));return Response.json({features:[baseline]});};
+ try{
+  const response=await POST(request(body));assert.equal(response.status,200);const data=await response.json();
+  assert.equal(data.highwaySearch.attempted,true,'existing motorway usage should no longer bypass the early-exit search at the old 55% threshold');
+  assert.equal(data.highwaySearch.junctionQueryStatus,'no-junctions');
+  assert.equal(calls.length,1,'failed IC discovery must not produce unnecessary ORS requests');
+  assert.deepEqual(data.route.summary,{distance:50000,duration:3300});
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
