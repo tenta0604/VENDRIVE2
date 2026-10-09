@@ -133,11 +133,11 @@ test('highway ON prefers more expressway use only among near-fast bounded candid
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
   const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.304],[136.81,35.31]]},properties:{summary:{distance:1600,duration:180},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   const shortHighway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.301],[136.806,35.306],[136.81,35.31]]},properties:{summary:{distance:2000,duration:190},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,1,1],[1,3,0]]}}}};
-  const longHighway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.3],[136.808,35.3],[136.81,35.31]]},properties:{summary:{distance:2300,duration:225},extras:{waycategory:{values:[[0,2,1],[2,3,0]]},tollways:{values:[[0,2,1],[2,3,0]]}}}};
+  const longHighway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.3],[136.808,35.3],[136.81,35.31]]},properties:{summary:{distance:2300,duration:215},extras:{waycategory:{values:[[0,2,1],[2,3,0]]},tollways:{values:[[0,2,1],[2,3,0]]}}}};
   globalThis.fetch=async()=>Response.json({features:[surface,shortHighway,longHighway]});
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
-    const data=await response.json();assert.equal(data.selection,'expressway-natural-preferred');assert.deepEqual(data.route.summary,{distance:2300,duration:225});
+    const data=await response.json();assert.equal(data.selection,'expressway-natural-preferred');assert.deepEqual(data.route.summary,{distance:2300,duration:215});
     assert.ok(data.usage.priorityMeters>100);assert.equal(data.highwaySearch.baselineAlternatives,true);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
@@ -223,7 +223,7 @@ test('long-distance highway ON still searches farther IC access and does not sto
   globalThis.fetch=async(url,options)=>{
     if(String(url).includes('overpass-api.de')){overpassBody=String(options.body||'');return Response.json(junctions);}
     routeBodies.push(JSON.parse(options.body));
-    return Response.json({features:routeBodies.length===1?[surface,modestHighway]:[viaHighway]});
+    return Response.json({features:(routeBodies.length===1?[surface,modestHighway]:[viaHighway]).map(x=>withWaytype(x))});
   };
   try{
     const response=await POST(request(farInput));assert.equal(response.status,200);
@@ -290,15 +290,6 @@ test('highway diagnostics separate rejected ORS via-IC probes without increasing
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
-test('warm-instance quota guard caps upstream calls',async()=>{
-  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
-  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
-  try{
-    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
-    assert.equal(response.status,429);assert.ok(calls<=30);
-  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
-});
-
 test('if ORS rejects optional alternatives, retry one plain HGV baseline within budget',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const calls=[];
  globalThis.fetch=async(url,opts)=>{const body=JSON.parse(opts.body);calls.push(body);if(body.alternative_routes)return Response.json({error:{code:2004,message:'alternative distance cap'}},{status:400});return Response.json({features:[feature]});};
@@ -333,3 +324,13 @@ test('highway OFF always preserves explicit ferry and highway avoidance',async()
  try{await POST(request({...input,vehicle:{...vehicle,avoidTolls:true}}));assert.deepEqual(sent.options.avoid_features,['ferries','highways','tollways']);}
  finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+
+test('warm-instance quota guard caps upstream calls',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
+  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
+  try{
+    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
+    assert.equal(response.status,429);assert.ok(calls<=30);
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
