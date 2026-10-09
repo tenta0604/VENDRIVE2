@@ -139,7 +139,7 @@ async function handle(request) {
     const requestAlternatives=!vehicle.avoidTolls&&startHeading===null&&directMeters<ALTERNATIVES_DIRECT_LIMIT_METERS;
     let baselineRetried=false,baselineRetryCause='none',response;
     try{
-      response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:requestAlternatives,timeoutMs:requestAlternatives?ALTERNATIVE_FIRST_ATTEMPT_MS:9000,startHeading,verifyFerries});
+      response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:requestAlternatives,timeoutMs:requestAlternatives?ALTERNATIVE_FIRST_ATTEMPT_MS:12000,startHeading,verifyFerries});
     }catch(error){
       if(error?.name!=='AbortError'||!requestAlternatives)throw error;
       baselineRetried=true;baselineRetryCause='alternative-timeout';
@@ -179,8 +179,8 @@ async function handle(request) {
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
       const remainingTime=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       const viaBudget=Math.min(6500,Math.max(0,remainingTime));
-      if(viaBudget<1000){highwaySearch.timeBudgetLimited=true;highwaySearch.status='time-budget-skip';}
-      const viaResults=viaBudget<1000?[]:await Promise.all(pairs.map(async pair=>{
+      if(viaBudget<3000){highwaySearch.timeBudgetLimited=true;highwaySearch.status='time-budget-skip';}
+      const viaResults=viaBudget<3000?[]:await Promise.all(pairs.map(async pair=>{
         try{
           const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:viaBudget,startHeading,verifyFerries});
           if(!viaResponse.ok){highwaySearch.viaProviderRejected++;return null;}
