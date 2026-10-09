@@ -80,7 +80,7 @@ test('route sections highlight both motorway and toll-only spans',()=>{
 });
 
 test('routing asset version matches FINAL.47 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.09-FINAL.47');
+  assert.equal(routing.assetVersion,'2026.10.09-FINAL.48');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
