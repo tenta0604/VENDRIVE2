@@ -32,7 +32,8 @@ async function timedJsonFetch(url,options,timeoutMs){
   const controller=new AbortController();let timer;
   const work=(async()=>{
     const response=await fetch(url,{...options,signal:controller.signal});
-    return {ok:response.ok,status:response.status,data:response.ok?await response.json():null};
+    const data=await response.json().catch(()=>null);
+    return {ok:response.ok,status:response.status,data:response.ok?data:null,errorCode:!response.ok&&Number.isInteger(data?.error?.code)?data.error.code:null};
   })();
   const deadline=new Promise((_,reject)=>{timer=setTimeout(()=>{
     controller.abort();const error=new Error('upstream timed out');error.name='AbortError';reject(error);
@@ -135,7 +136,7 @@ async function handle(request) {
     const originDestination=[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]];
     // Long route first: uncomplicated HGV request. Alternatives are optional and can
     // exceed both ORS's 100km limit and its own CPU deadline.
-    const verifyFerries=!vehicle.avoidTolls&&directMeters>=LONG_ROUTE_FERRY_VERIFY_METERS;
+    let verifyFerries=!vehicle.avoidTolls&&directMeters>=LONG_ROUTE_FERRY_VERIFY_METERS;
     const requestAlternatives=!vehicle.avoidTolls&&startHeading===null&&directMeters<ALTERNATIVES_DIRECT_LIMIT_METERS;
     let baselineRetried=false,baselineRetryCause='none',response;
     try{
@@ -151,6 +152,16 @@ async function handle(request) {
       baselineRetried=true;baselineRetryCause='alternative-rejected';
       const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       if(remaining>=1200)response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(7000,remaining),startHeading,verifyFerries});
+    }
+    // For a medium-length HGV request whose explicit ferry avoidance exceeds ORS's
+    // dynamic-weighting ceiling, retry without that expensive condition exactly once.
+    // A verified full-coverage non-ferry waytype becomes mandatory for the response.
+    if(!response.ok&&!baselineRetried&&!requestAlternatives&&!vehicle.avoidTolls&&!verifyFerries&&response.status===400&&response.errorCode===2004){
+      const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
+      if(remaining>=2000){
+        verifyFerries=true;baselineRetried=true;baselineRetryCause='dynamic-distance-limit';
+        response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(9000,remaining),startHeading,verifyFerries:true});
+      }
     }
     if (!response.ok) {
       if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin,allowed);
@@ -172,8 +183,8 @@ async function handle(request) {
     for(let i=1;i<features.length;i++){try{const result=sanitizeFeature(features[i]);if(safeRoute(result))candidates.push(result);}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
-    if(!vehicle.avoidTolls&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
+    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
+    if(!vehicle.avoidTolls&&!baselineRetried&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
       const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
