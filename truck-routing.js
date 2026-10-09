@@ -52,6 +52,21 @@
     if(meters<=260)return 17;
     return 16;
   }
+  function navigationCue(value,currentProgress){
+    var coordinates=value&&value.geometry&&value.geometry.coordinates;
+    if(!Array.isArray(coordinates)||coordinates.length<2)return null;
+    var edge=currentProgress&&Number.isInteger(currentProgress.edge)?Math.max(0,Math.min(coordinates.length-2,currentProgress.edge)):0;
+    var events=[],labels={0:'左折',1:'右折',2:'大きく左折',3:'大きく右折',4:'斜め左方向',5:'斜め右方向',7:'ロータリーに入ります',8:'ロータリーを出ます',9:'Uターン',12:'左方向を維持',13:'右方向を維持'};
+    (value.maneuvers||[]).forEach(function(step){if(step&&Object.prototype.hasOwnProperty.call(labels,step.type)&&Number.isInteger(step.at)&&step.at>edge&&step.at<coordinates.length)events.push({at:step.at,label:labels[step.type]})});
+    var spans=value.waycategory||[],last=null;
+    spans.forEach(function(span){if(!Array.isArray(span)||span.length<3)return;var motorway=(span[2]&1)!==0;if(last!==null&&motorway!==last&&span[0]>edge&&span[0]<coordinates.length)events.push({at:span[0],label:motorway?'高速区間に入ります':'高速区間を出ます',priority:1});last=motorway});
+    events.sort(function(a,b){return a.at-b.at||(b.priority||0)-(a.priority||0)});
+    if(!events.length)return null;
+    var next=events[0],pointAt=function(i){return coordinatePoint(coordinates[i])},cursor=currentProgress&&point(currentProgress.point)?currentProgress.point:pointAt(edge),meters=0;
+    for(var index=edge+1;index<=next.at;index++){var following=pointAt(index);meters+=distanceMeters(cursor,following);cursor=following}
+    if(!Number.isFinite(meters))return null;
+    return {label:next.label,meters:Math.max(0,Math.round(meters)),kind:next.priority?'highway':'turn'};
+  }
   function vehicle(value){
     if(!value||typeof value!=='object')throw new Error('車検証などで確認した車両の寸法・総重量を登録してください');
     var result={};
@@ -79,6 +94,7 @@
     var tollways=cleanExtra(value&&value.tollways,geometry.coordinates.length,'有料道路',function(v){return v===0||v===1;});
     if(waycategory!==undefined)result.waycategory=waycategory;
     if(tollways!==undefined)result.tollways=tollways;
+    if(value.maneuvers!==undefined){if(!Array.isArray(value.maneuvers)||value.maneuvers.length>1000||!value.maneuvers.every(function(m){return m&&Number.isInteger(m.type)&&m.type>=0&&m.type<=13&&Number.isInteger(m.at)&&m.at>=0&&m.at<geometry.coordinates.length}))throw new Error('案内データを確認できませんでした');result.maneuvers=value.maneuvers.map(function(m){return {type:m.type,at:m.at}})}
     return result;
   }
   function routeSections(value){
@@ -307,6 +323,6 @@
     }
     return {init:init,start:start,end:end,onPosition:onPosition,redraw:draw,fitActive:fitActive,refreshNavigationView:navigationView,isBusy:function(){return busy;},refreshVehicle:function(){summary();syncHighwayToggle();}};
   }
-  return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,stableTravelHeading:stableTravelHeading,nextTurnMeters:nextTurnMeters,navigationZoomTarget:navigationZoomTarget,highwayDiagnosticReport:highwayDiagnosticReport,createClient:createClient};
+  return {assetVersion:ASSET_VERSION,point:point,vehicle:vehicle,route:route,routeSections:routeSections,routeUsage:routeUsage,routeProgress:routeProgress,remainingRouteSections:remainingRouteSections,distanceMeters:distanceMeters,bearing:bearing,resolveHeading:resolveHeading,stableTravelHeading:stableTravelHeading,nextTurnMeters:nextTurnMeters,navigationZoomTarget:navigationZoomTarget,navigationCue:navigationCue,highwayDiagnosticReport:highwayDiagnosticReport,createClient:createClient};
 });
 
