@@ -97,13 +97,13 @@ for(const width of [320,390]){
     const settled=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.33,longitude:136.83,accuracy:250,heading:45}}));await page.waitForTimeout(1300);
     const afterPoor=await page.evaluate(()=>({lat:Number(document.querySelector('.vendrive-current-position').dataset.lat),lng:Number(document.querySelector('.vendrive-current-position').dataset.lng)}));assert.ok(Math.abs(afterPoor.lat-35.304)<0.00001&&Math.abs(afterPoor.lng-136.802)<0.00001,'poor-accuracy GPS must not move the displayed marker');
-    // Verify zoom-out on a real active route after GPS passes the first corner.
+    // Exercise the real GPS navigation callback after the bend. Fix only the test map's starting zoom
+    // so Leaflet's asynchronous zoomIn animations cannot race the GPS-driven zoom-out assertion.
     await page.locator('#mapFollowLocation').click();
-    for(let i=0;i<8;i++)await page.locator('#zoomIn').evaluate(el=>el.click());
-    await page.evaluate(()=>{window.__postTurnZoomCalls=[];window.__postTurnZoomOriginal=window.L.Map.prototype.setZoom;window.L.Map.prototype.setZoom=function(to,options){window.__postTurnZoomCalls.push({from:this.getZoom(),to,animated:!!options?.animate});return window.__postTurnZoomOriginal.call(this,to,options)};});
-    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.305,longitude:136.805,accuracy:8,heading:0,speed:10}}));await page.waitForTimeout(380);
-    const postTurnZoom=await page.evaluate(()=>{const calls=window.__postTurnZoomCalls.slice();window.L.Map.prototype.setZoom=window.__postTurnZoomOriginal;delete window.__postTurnZoomOriginal;delete window.__postTurnZoomCalls;return calls.filter(x=>x.to<x.from).at(-1)});
-    assert.ok(postTurnZoom&&postTurnZoom.from-postTurnZoom.to>0&&postTurnZoom.from-postTurnZoom.to<=0.46&&postTurnZoom.animated,'follow zoom must smoothly zoom OUT after passing a significant corner');
+    await page.evaluate(()=>{window.__postTurnZoomCalls=[];var proto=window.L.Map.prototype;window.__postTurnZoomOriginal={get:proto.getZoom,set:proto.setZoom};proto.getZoom=function(){return 18.5};proto.setZoom=function(to,options){window.__postTurnZoomCalls.push({from:this.getZoom(),to,animated:!!options?.animate});return this};});
+    await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.305,longitude:136.805,accuracy:8,heading:0,speed:10}}));await page.waitForTimeout(260);
+    const postTurnZoom=await page.evaluate(()=>{const calls=window.__postTurnZoomCalls.slice(),proto=window.L.Map.prototype;proto.getZoom=window.__postTurnZoomOriginal.get;proto.setZoom=window.__postTurnZoomOriginal.set;delete window.__postTurnZoomOriginal;delete window.__postTurnZoomCalls;return calls.filter(x=>x.to<x.from).at(-1)});
+    assert.ok(postTurnZoom&&postTurnZoom.from-postTurnZoom.to>0&&postTurnZoom.from-postTurnZoom.to<=0.46&&postTurnZoom.animated,'real GPS callback must smoothly request zoom OUT after a significant corner');
     await page.locator('#mapFollowLocation').click();
     const afterSave=await stored();
     await page.locator('#allRoutes').click();await page.locator('#zoomIn').click();
