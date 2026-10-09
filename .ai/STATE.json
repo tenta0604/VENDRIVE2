@@ -5,21 +5,20 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.09-FINAL.47",
+  "appVersion": "2026.10.09-FINAL.48",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL47_PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
+  "status": "FINAL48_PR_VALIDATED_RELEASE_PENDING",
   "currentWork": {
-    "title": "FINAL.47 frontend and backend released, CI and public version verified; await owner field feedback",
-    "releaseStatus": "FINAL.47 PR #204 merged at 5e67667a3d85c83f11aea43605226f84ce6a5b44. Main Browser regression 37909629725 PASS, GitHub Pages 37909629247 PASS, Vercel dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD READY for exact main 5e67667a3d85c83f11aea43605226f84ce6a5b44. Both public version.json endpoints returned 2026.10.09-FINAL.47 on 2026-10-09. Owner previously confirmed FINAL.46 timeout OK.",
+    "title": "FINAL.48 native and software-rotated landscape navigation HUD plus large arrows, zoom-out verified on PR; release pending",
+    "releaseStatus": "PR #207 final product/test HEAD fd6d0fda80944518e6826f9242db5ee43af6bdd3 verified: Truck route API/Node/real Edge run 37913947231 PASS; Browser regression 37913947189 PASS. Not yet merged or publicly deployed.",
     "releaseScope": [
-      "Arrival candidate neighborhood anchored on registered destination (100m), today's unvisited plan only",
-      "Landscape treatment and modest size reduction for all fullscreen soft-rotated dialogs",
-      "Task completion snapshot and history drilldown listing completed/pending machines",
-      "Fullscreen-only provider-based turn/motorway section cues without voice or guessed names",
-      "Fractional gradual turn zoom instead of full zoom-level changes",
-      "Preserve existing HGV restrictions, quota/detour limits, AN15 pause, Analytics/DB/schema."
+      "Preserve portrait fullscreen navigation HUD at top-center",
+      "Place navigation HUD at upper-left during native landscape and MAP software-rotated landscape; avoid maptag",
+      "Prominent accessible direction arrow for trusted ORS maneuver/highway classification beside text/distance",
+      "Keep existing turn zoom code unchanged and explicitly verify zoom-in AND post-turn zoom-out in Node and real Edge",
+      "Protect HGV routing, two IC probes, API quotas, FINAL.36 detour caps, all data, and AN15 pause"
     ],
     "validationEvidence": {
       "safetyTag": "backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114dc8926425bff81555d305",
@@ -45,26 +44,30 @@
       "final47MainBrowser": "37909629725 PASS",
       "final47Pages": "37909629247 PASS",
       "final47Vercel": "dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD READY production exact 5e67667a3d85c83f11aea43605226f84ce6a5b44",
-      "final47Live": "Pages and Vercel public version.json = 2026.10.09-FINAL.47 (2026-10-09)"
+      "final47Live": "Pages and Vercel public version.json = 2026.10.09-FINAL.47 (2026-10-09)",
+      "final48SafetyTag": "backup-pre-FINAL48-NAV-CUE-20261009-20261009 -> 23f59b5a2c4e28934eaef9c0a2519d492d675a13; workflow 37913311257 PASS",
+      "final48PR": "PR #207 product branch head fd6d0fda80944518e6826f9242db5ee43af6bdd3",
+      "final48TruckRoute": "37913947231 PASS (Node, HGV/API, real Edge 320/390; explicit zoom-in/out)",
+      "final48Browser": "37913947189 PASS"
     },
     "decision": [
-      "Owner confirmed FINAL.46 timeout OK before FINAL.47",
-      "FINAL.47 product/CI/production release complete and both frontend/backend report same version",
-      "Protect driving-hgv, registered restrictions, two IC probes, warm 30/min, FINAL.36 detour envelope, no car/straight-line fallback",
-      "AN15 remains intentionally paused; no further development without next owner direction"
+      "Owner authorized exactly FINAL.48 HUD landscape position and large arrows, plus zoom-in/out verification",
+      "Portrait cue must retain its old top-center location; native/software landscape use upper-left, arrow must be prominent",
+      "Existing turn-zoom algorithm remains active without changing its limits or follow gating",
+      "Do not alter HGV, routing quotas, user data or paused AN15"
     ],
     "nextActions": [
-      "OWNER STOP: no additional product changes, PRs, deploys or AN15 progression without a fresh instruction",
-      "When user later elects to field-test FINAL.47: confirm nearby arrival card, all rotated fullscreen dialogs and compact sizing, task history drilldown, fullscreen next-turn/motorway cue and smoother zoom",
-      "If specific new device defects appear, recover fresh main and open a new bounded scope with a new immutable annotated safety tag",
-      "Highway selection accuracy remains separate from the confirmed-resolved old route timeout; diagnose only from real evidence"
+      "Merge verified FINAL.48 PR #207 after final PR head safety check, ensure postmerge main browser and Pages deployments pass",
+      "Verify Vercel production READY on exact merged main and both public version.json report 2026.10.09-FINAL.48",
+      "Update canonical documents from release-pending to production-verified after actual evidence",
+      "Stop and wait for new owner instruction; AN15 remains paused"
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.47 newly shipped interaction/appearance not individually confirmed on user's iPhone yet",
-    "Motorway preference quality remains separate future field evidence, but FINAL.46 timeout owner-confirmed OK",
-    "AN15 deliberately paused; OCR/Analysis stays withdrawn"
+    "FINAL.48 validated in PR; production merge/Pages/Vercel public version verification pending",
+    "FINAL.48 visual comfort and actual vehicle guidance not yet field-checked on owner's iPhone",
+    "Highway route-choice precision separate future issue; AN15 intentionally paused"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -79,15 +82,15 @@
     ],
     "shortResumePrompt": "VENDRIVE2の現状を引き継いで。GitHubの最新mainと7つのcanonical filesを指定順に確認し、FINAL.46本番反映済み・実機タイムアウト再確認待ち・高速選択はその後の未解決事項・AN15停止中・今はOwnerの明示指示まで開発しない、を報告して待機して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.47 released and live-verified at product merge 5e67667a3d85c83f11aea43605226f84ce6a5b44; final documentation-only closeout followed. User reported FINAL.46 timeout OK; FINAL.47 device UX confirmation is future evidence, highway preference secondary. New instruction required before more product work. Always fresh-check latest main.",
-    "latestContinuityCheckpoint": "2026-10-09 FINAL.47 live release complete, owner instruction boundary, AN15 paused",
+    "handoffBoundary": "Owner asked for upper-left fullscreen landscape navigation HUD and larger arrow, and to verify automatic zoom-out. FINAL.48 PR #207 Node/Edge and Browser PASS; production pending. AN15 stays paused.",
+    "latestContinuityCheckpoint": "2026-10-09 FINAL.48 PR validated, production release pending, stop after complete",
     "pauseMode": {
-      "active": true,
+      "active": false,
       "requestedBy": "phase terminal stop per owner scope/one-phase rule",
-      "intent": "FINAL.47 completed; wait for explicit next instruction",
+      "intent": "Authorized only scoped FINAL.48 maintenance until production terminal, then stop",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "2026-10-09 FINAL.47 release closeout",
+      "source": "2026-10-09 owner specific follow-up to FINAL.47",
       "productCodeChanged": false
     }
   }
