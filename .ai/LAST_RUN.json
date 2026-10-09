@@ -1,12 +1,12 @@
 {
-  "evidenceVersion": 69,
-  "runType": "final49_compact_navigation_cue_pr_validation_20261009",
-  "phase": "FINAL49_COMPACT_NAV_CUE_MAINTENANCE",
-  "status": "PR_VALIDATED_RELEASE_PENDING",
+  "evidenceVersion": 70,
+  "runType": "final49_production_closeout_20261009",
+  "phase": "DOCUMENTATION_ONLY_FINAL49_RELEASE_CLOSEOUT",
+  "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "5c2b3b26f625bc5b0912cf8b3704176a8182bd75",
-    "productionCodeChanged": true,
-    "safetyTag": "backup-pre-FINAL49-COMPACT-CUE-20261009 -> 5c2b3b26f625bc5b0912cf8b3704176a8182bd75; workflow 37917016663 PASS"
+    "productionMainBefore": "bc83dda66c4f0676872006aa356dd0fba5e25ce5",
+    "productionCodeChanged": false,
+    "safetyTag": "NOT_REQUIRED documentation only; product backup-pre-FINAL49-COMPACT-CUE-20261009 -> 5c2b3b26f625bc5b0912cf8b3704176a8182bd75"
   },
   "versions": {
     "app": "2026.10.09-FINAL.49",
@@ -17,30 +17,23 @@
     "schema": 4
   },
   "work": {
-    "summary": "Shrink native and soft-rotated fullscreen-landscape turn cue to max 224px anchored at safe 8px top-left; hide MAP・本日 tag in fullscreen landscape; keep portrait and large arrow; HGV/navigation unmodified.",
-    "ownerIntent": "Real iPhone screenshot showed FINAL.48 panel stretched too far toward map center.",
-    "productStatus": "PR_VERIFIED_PENDING_PRODUCTION",
-    "productCodeChanged": true
+    "summary": "FINAL.49 compact HUD shipped: PR #210 merged, final PR and main Edge/browser gates PASS; GitHub Pages and exact-main Vercel READY, both public version endpoints FINAL.49. Canonical docs reconciled; awaiting owner field check.",
+    "productStatus": "PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
+    "productCodeChanged": false
   },
   "gates": {
-    "annotatedSafetyTag": "PASS 37917016663",
-    "prTruckRoute": "PASS 37917405398, Node/API/real Edge 320/390",
-    "prBrowser": "PASS 37917405381",
-    "landscapeCompactHud": "PASS 37917405398, width/safe corner/arrow/landscape MAP label",
-    "portraitUnchanged": "PASS 37917405398",
-    "mainBrowser": "PENDING merge",
-    "githubPages": "PENDING merge",
-    "vercelProduction": "PENDING merge",
-    "liveVersion": "PENDING public FINAL.49",
-    "realIphone": "NOT_PERFORMED, owner later",
-    "dbMigration": "NOT_REQUIRED: db/schema 4 unchanged"
+    "productSafetyTag": "PASS 37917016663 annotated previous main",
+    "finalPRTruckNodeEdge": "PASS 37917628703",
+    "finalPRBrowser": "PASS 37917628558",
+    "mainBrowser": "PASS 37917777126",
+    "githubPages": "PASS 37917776644",
+    "vercelProduction": "READY dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ exact bc83dda66c4f0676872006aa356dd0fba5e25ce5",
+    "publicVersions": "PASS both 2026.10.09-FINAL.49",
+    "realIphone": "NOT_PERFORMED owner must view revised layout",
+    "dbMigration": "NOT_REQUIRED unchanged 4/4",
+    "newSafetyTag": "NOT_REQUIRED documentation-only"
   },
   "changedFiles": [
-    "index.html",
-    "truck-routing.js",
-    "version.json",
-    "tests/run-truck-route-gates.mjs",
-    "tests/truck-route-client.test.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -48,17 +41,15 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "PR #210 merge/public release evidence pending",
-    "Owner physical iPhone viewing pending",
-    "Separate highway-ON routing quality issue",
-    "AN15 intentionally paused"
+    "Owner iPhone acceptance pending",
+    "Highway route-choice separate future issue",
+    "AN15 pause remains"
   ],
-  "nextAction": "Merge verified PR #210, confirm main CI/Pages/Vercel/live versions, record docs-only closeout, stop.",
+  "nextAction": "STOP. When owner provides new instruction fetch latest main and canonical 7 files.",
   "unresolved": [
-    "PR #210 merge/public release evidence pending",
-    "Owner physical iPhone viewing pending",
-    "Separate highway-ON routing quality issue",
-    "AN15 intentionally paused"
+    "Owner iPhone acceptance pending",
+    "Highway route-choice separate future issue",
+    "AN15 pause remains"
   ],
   "continuityCheckpoint": {
     "status": "PASS",

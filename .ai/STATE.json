@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL49_PR_VALIDATED_RELEASE_PENDING",
+  "status": "FINAL49_PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
   "currentWork": {
-    "title": "FINAL.49 compact top-left landscape navigation HUD verified in PR; release pending",
-    "releaseStatus": "FINAL.49 PR #210 product/test head ba2a317fc31c838db138e8b2105397ddadb8daa0; Truck/Node/API/real Edge 37917405398 PASS; Browser regression 37917405381 PASS. Not yet merged, Pages/Vercel live checks pending.",
+    "title": "FINAL.49 compact landscape HUD released and public versions verified; stop awaiting owner iPhone feedback",
+    "releaseStatus": "FINAL.49 PR #210 merged at bc83dda66c4f0676872006aa356dd0fba5e25ce5. Final PR Truck/Node/real Edge 37917628703 PASS and Browser 37917628558 PASS on e8ea971ecc4d1f47faab1e766ecc1b91d75cf84b. Main Browser 37917777126 PASS, Pages 37917776644 PASS. Vercel dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ READY for exact main bc83dda66c4f0676872006aa356dd0fba5e25ce5. GitHub Pages and Vercel public version.json both returned 2026.10.09-FINAL.49 on 2026-10-09.",
     "releaseScope": [
       "Owner iPhone screenshot: previous soft-rotated landscape guidance stretched about 44% and visually intruded into map center",
       "Landscape cue width capped at 224 CSS px (no percent expansion); 8px safe-area-aware top/left margin; preserve large arrow/Japanese instruction/distance",
@@ -58,7 +58,14 @@
       "final49SafetyTag": "backup-pre-FINAL49-COMPACT-CUE-20261009 -> 5c2b3b26f625bc5b0912cf8b3704176a8182bd75; tag workflow 37917016663 PASS",
       "final49PR": "PR #210 product head ba2a317fc31c838db138e8b2105397ddadb8daa0",
       "final49TruckNodeEdge": "37917405398 PASS, including native/soft landscape compact HUD and portrait isolation",
-      "final49Browser": "37917405381 PASS"
+      "final49Browser": "37917405381 PASS",
+      "final49FinalPRTruck": "37917628703 PASS at final PR head e8ea971ecc4d1f47faab1e766ecc1b91d75cf84b",
+      "final49FinalPRBrowser": "37917628558 PASS",
+      "final49Merge": "PR #210 merged at bc83dda66c4f0676872006aa356dd0fba5e25ce5",
+      "final49MainBrowser": "37917777126 PASS",
+      "final49Pages": "37917776644 PASS",
+      "final49Vercel": "dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ READY production exact bc83dda66c4f0676872006aa356dd0fba5e25ce5",
+      "final49Public": "Both public version.json = 2026.10.09-FINAL.49"
     },
     "decision": [
       "Owner iPhone screenshot establishes visual usability defect in FINAL.48: panel too long, overlapping central map",
@@ -67,17 +74,17 @@
       "FINAL.49 release pending; AN15 stays intentionally paused"
     ],
     "nextActions": [
-      "Ensure final PR #210 head truck/Node/real Edge and browser gates PASS, merge after head safety check",
-      "Verify main Browser regression, GitHub Pages, Vercel READY exact merged main and both public version.json FINAL.49",
-      "Update canonical release closeout to COMPLETE after live evidence",
-      "STOP and await owner iPhone field feedback; do not auto-progress AN15"
+      "STOP: no additional product changes or AN15 progression until explicit new owner instruction",
+      "Owner iPhone confirmation when convenient: compact navigation HUD hugs top-left and no longer intrudes toward map center in landscape",
+      "Continue to preserve portrait HUD position and fullscreen MAP・本日 tag, turn zoom and HGV safety constraints",
+      "Any new device issue: fresh main and new bounded scoped safety-tagged maintenance, not continuation of merged PR #210"
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.49 PR validated, production merge/live checks pending",
-    "iPhone real-world compact HUD visual confirmation pending",
-    "Highway-ON route-choice accuracy separate field issue; AN15 intentionally paused"
+    "FINAL.49 iPhone visual acceptance not yet confirmed by owner",
+    "Highway-ON route quality separate potential field issue",
+    "AN15 intentionally paused; OCR/Analysis remains withdrawn"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -90,18 +97,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2の最新mainと7つのcanonical filesを読み、FINAL.48本番反映済み・実機UX確認は未実施・AN15は意図的に停止中、と確認して。次の明示指示があるまで開発しない。",
+    "shortResumePrompt": "VENDRIVE2の最新mainと7つのcanonical filesを読み、FINAL.49公開済み・実機表示確認は次回・AN15は意図的停止と理解し、明示指示まで開発を待機して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.49 PR #210 code/test validated but production merge/Pages/Vercel live checks pending; latest main remains .48. Complete only this scoped release, then STOP; AN15 paused.",
-    "latestContinuityCheckpoint": "2026-10-09 FINAL.49 PR tests PASS; release pending",
+    "handoffBoundary": "FINAL.49 PR #210 merged at bc83dda66c4f0676872006aa356dd0fba5e25ce5, CI/Pages/Vercel both public versions FINAL.49. Docs-only terminal closeout follows. Owner iPhone field confirmation next; AN15 paused.",
+    "latestContinuityCheckpoint": "2026-10-09 FINAL.49 deployed verified, owner STOP",
     "pauseMode": {
-      "active": false,
-      "requestedBy": "owner live-device screenshot of FINAL.48 layout issue",
-      "intent": "Complete only bounded FINAL.49 compact cue release then stop",
+      "active": true,
+      "requestedBy": "FINAL.49 release terminal completion",
+      "intent": "Wait for owner direction and actual iPhone field feedback",
       "automaticallyResume": false,
-      "noDevelopmentWithoutNewInstruction": false,
-      "source": "2026-10-09 explicit screenshot correction",
-      "productCodeChanged": true
+      "noDevelopmentWithoutNewInstruction": true,
+      "source": "FINAL.49 production verified 2026-10-09",
+      "productCodeChanged": false
     }
   }
 }

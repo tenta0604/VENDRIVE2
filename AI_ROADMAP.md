@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.09-FINAL.48** (destination-anchored nearby arrival cards, compact landscape overlays, per-machine task history, fullscreen guidance and smoother zoom; engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.09-FINAL.49** (destination-anchored nearby arrival cards, compact landscape overlays, per-machine task history, fullscreen guidance and smoother zoom; engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.48 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.49 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -358,3 +358,8 @@ PR #207 merged at `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`, after final PR rou
 ## FINAL.49 compact landscape HUD maintenance — 2026-10-09 (PR verified, production pending)
 
 Owner screenshot shows FINAL.48 software-rotated navigation overlay extends too far into central map. Bound the landscape-only cue width to 224 CSS px and safe upper-left 8px, hide MAP・本日 in fullscreen landscape, preserve portrait and big maneuver arrow. Pre-edit annotated safety tag `backup-pre-FINAL49-COMPACT-CUE-20261009` at `5c2b3b26f625bc5b0912cf8b3704176a8182bd75`. PR #210 product/test `ba2a317fc31c838db138e8b2105397ddadb8daa0`: Truck/real Edge `37917405398` PASS and Browser `37917405381` PASS. **Production release pending**; AN15 intentionally paused.
+
+
+## FINAL.49 production release / field handoff — 2026-10-09
+
+PR #210 merged at `bc83dda66c4f0676872006aa356dd0fba5e25ce5`; final PR Truck/Node/Edge `37917628703` and Browser `37917628558` PASS; main Browser `37917777126` and Pages `37917776644` PASS. Vercel `dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ` READY for exact main; public Pages/Vercel versions FINAL.49. Compact 224px landscape HUD and hidden landscape MAP label published; portrait and zoom/HGV unchanged. Owner field visual confirmation pending. No AN15 restart or speculative new phase.
