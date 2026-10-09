@@ -686,3 +686,8 @@ Preserve driving-hgv with registered restrictions, max two via-IC probes, warm 3
 - Task history must expose the actual per-machine completed/pending distinction, including partial threshold completion; do not mark all target machines done when a parent task completes at a threshold below 100%. Preserve old history and state without destructive migration.
 - Fullscreen route cues are display-only, sourced from ORS maneuver indices and known motorway-category boundaries. No voice, provider calls beyond existing requests, invented road names, unsupported turns or relaxed truck limits. Zoom may use fractional easing without altering GPS/re-route safety.
 - Pre-edit annotated tag backup-pre-FINAL47-FIELD-UX-20261009 -> e1ce4b4091a799629d563669c659d4d6eb6757a5; PR #204 validation route/Edge 37909127571 and browser 37909127498 passed. Production release not yet asserted at this PR checkpoint.
+
+
+## 2026-10-09 — FINAL.47 release and stop boundary
+
+FINAL.47 PR #204 merged at `5e67667a3d85c83f11aea43605226f84ce6a5b44`; route/Edge `37909127571`, PR Browser `37909127498`, main Browser `37909629725`, Pages `37909629247` PASS. Vercel production deployment `dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD` READY for the exact merge. Both public versions show `2026.10.09-FINAL.47`. Earlier FINAL.47 PR-pending statements are historical, superseded by this release. The user had confirmed the old timeout OK; new FINAL.47 UX has not been individually field-certified. Preserve all HGV/FINAL.36/ORS limits, keep AN15 intentionally paused, and stop until owner explicitly authorizes new work.

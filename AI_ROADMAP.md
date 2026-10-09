@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.08-FINAL.39** (FINAL.38 highway adoption plus visible fullscreen remaining-route fit, aligned route timeout budgets, and long-distance highway discovery beyond the old 18km caps; Analytics engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.09-FINAL.47** (destination-anchored nearby arrival cards, compact landscape overlays, per-machine task history, fullscreen guidance and smoother zoom; engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.39 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.47 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -338,3 +338,8 @@ Full reproduction and safety policy are documented in the newest section of .ai/
 ## FINAL.47 field UX PR validation — 2026-10-09
 
 The owner confirmed FINAL.46's previously reported timeout resolved in real use and authorized focused operational improvements. Draft PR #204 implements destination-anchored unvisited nearby planned arrival cards, compact landscape sheets for all software-rotated fullscreen MAP dialogs, task-history per-machine completion drilldown, fullscreen-only numeric-ORS-step/verified motorway-transition cues, and fractional eased turn zoom. Existing HGV restrictions/FINAL.36 detour caps/max two IC attempts/warm 30 calls-min guard remain. No new navigation service calls; DB/schema and AN15 unchanged. Pre-edit immutable annotated safety tag backup-pre-FINAL47-FIELD-UX-20261009 -> e1ce4b4091a799629d563669c659d4d6eb6757a5. PR #204 tests: Truck/API/real Edge run 37909127571 PASS; Browser regression 37909127498 PASS. **Production merge, deployment and live checks pending; do not label FINAL.47 shipped until terminal.** After completion, remain stopped at AN15 intentional pause awaiting explicit owner instruction.
+
+
+## FINAL.47 production release and owner stop — 2026-10-09
+
+PR #204 merged `5e67667a3d85c83f11aea43605226f84ce6a5b44` after product gates `37909127571` (Truck route / API / real Edge 320/390 PASS) and `37909127498` (Browser regression PASS). Post-merge Browser regression `37909629725` PASS; Pages `37909629247` PASS; Vercel `dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD` READY at exact source SHA. Both public GitHub Pages and Vercel versions = `2026.10.09-FINAL.47`. Scope and invariants are recorded at end of HANDOFF.md. User confirmed FINAL.46 timeout OK; FINAL.47 real-device UI checks remain future evidence. Highway-ON route-choice accuracy independently outstanding. No further product work or AN15 progression is authorized without a new explicit owner instruction.
