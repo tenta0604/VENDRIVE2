@@ -6,7 +6,7 @@ import routing from '../truck-routing.js';
 const origin='https://tenta0604.github.io';
 const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
 const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehicle};
-const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
+const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}],extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
 const request=(body=input,options={})=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json',...options.headers},body:JSON.stringify(body)});
 
 test('upstream timeout also covers a stalled response JSON body, not just response headers',async()=>{
@@ -90,11 +90,12 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     const data=await response.json(),body=JSON.parse(sent.options.body);
     assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
     assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
-    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);assert.equal(body.preference,'recommended');
+    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,true);assert.equal(body.preference,'recommended');
     assert.deepEqual(body.extra_info,['waycategory','tollways']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
     assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);assert.equal(body.alternative_routes,undefined);
     assert.deepEqual(data.route.summary,{distance:1800,duration:280});
+    assert.deepEqual(data.route.maneuvers,[{type:11,at:0},{type:1,at:1}]);assert.equal(JSON.stringify(data.route).includes('Turn right'),false);
     assert.deepEqual(data.route.waycategory,[[0,2,0]]);assert.deepEqual(data.route.tollways,[[0,1,0],[1,2,1]]);assert.deepEqual(routing.routeSections(data.route).map(x=>({motorway:x.motorway,tollway:x.tollway})),[{motorway:false,tollway:false},{motorway:false,tollway:true}]);
     assert.equal(JSON.stringify(data).includes('test-secret'),false);
     assert.equal(response.headers.get('cache-control'),'no-store');

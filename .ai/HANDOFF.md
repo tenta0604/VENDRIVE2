@@ -1008,3 +1008,16 @@ The owner initially described the remaining problem as "Google Maps uses an expr
 ### Stop condition for this chat
 
 Checkpoint documentation merged and internally validated; FINAL.46 live verified; **no new task started**. The next action is selected exclusively by a future explicit owner message. The intended output of the new-chat handoff is a concise status acknowledgment, not execution.
+
+
+## 2026-10-09 FINAL.47 field UX PR validation — release pending
+
+Owner explicitly confirmed the previous FINAL.46 route-acquisition timeout was OK in real use, and then authorized the previously requested field UX improvements. This closes the previously pending timeout observation on the strength of owner feedback; it does not certify the independent highway-preference concern.
+
+Safety tag `backup-pre-FINAL47-FIELD-UX-20261009` is annotated, immutable and points to main `e1ce4b4091a799629d563669c659d4d6eb6757a5`; tag workflow `37907477873` PASS. Product draft PR [#204](https://github.com/tenta0604/VENDRIVE2/pull/204) contains FINAL.47 app version `2026.10.09-FINAL.47`. PR route/API/Edge gate `37909127571` PASS; PR Browser regression `37909127498` PASS.
+
+Changes: nearby arrival candidates now use the destination-machine coordinate as the 100m reference (not the arrival GPS fix); it continues to restrict sequential actions to the unvisited machines on today's plan. All opened dialogs in software-rotated fullscreen MAP use rotated, more compact sheets (scroll only when content cannot fit). A completed task history entry can be tapped for an individual machine completion/pending breakdown. New task completions snapshot machine IDs/names/status/timestamps; older records derive from retained task data when available and report unavailable evidence honestly. Fullscreen MAP alone displays bounded next-turn/highway-section cues derived from provider numeric step indices and classified motorway transitions; no voice and no guessed expressway entrance names. Smooth fractional turn zoom replaces one full-level jump per GPS update. ORS `instructions:true` adds maneuver metadata to existing HGV requests, without additional route calls, and only small sanitized numeric data is returned to the client.
+
+Safety: `driving-hgv`, exact registered restrictions, no passenger-car/straight-line fallback, max two via-IC candidates, warm 30/min upstream-call guard, FINAL.36 dual detour caps, and AN15 pause remain unchanged. DB/schema 4/4, engine AN14B3B5 unchanged.
+
+**Not yet production-verified at this PR checkpoint.** Do not claim FINAL.47 is live until merged main Browser/Pages/Vercel READY and public version checks finish. Actual iPhone device confirmation of FINAL.47 UI remains future field evidence. The next operation is safe final release validation, merge and public verification, not another feature phase.

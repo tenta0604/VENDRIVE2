@@ -675,3 +675,14 @@ On future status/handoff requests: fresh-read main plus AGENTS.md, STATE, HANDOF
 On a future explicit troubleshooting request, first check the exact previously timed-out route on-device (safely parked/passenger). Do not infer successful field fix from completed CI and deployments. Only after a route is returned may the location-free highway diagnostics help classify IC/ORS selection failures.
 
 Preserve driving-hgv with registered restrictions, max two via-IC probes, warm 30 calls/min, FINAL.36 both detour caps, no passenger-car or straight-line fallback, and deliberate AN15 pause. No changes to billing, versions, database, or schema for the handoff.
+
+
+## 2026-10-09 — FINAL.46 field confirmation and FINAL.47 scoped UX decisions
+
+- Owner confirmed that the previously reported FINAL.46 route timeout was OK in actual use. Treat timeout as owner-reported resolved, not as an invitation to change HGV routing or as proof that highway choice is optimized.
+- Owner authorized a bounded FINAL.47 update for nearby arrival cards, landscape dialogs, task history and fullscreen visual guidance/zoom; AN15 is still independently paused.
+- Arrival neighborhood means other unvisited machines belonging to today's visit plan within 100 meters of the destination machine's registered point. Determine neighbors from that destination point, not the potentially offset arrival GPS point. Keep destination first and action semantics unchanged.
+- During software-rotated fullscreen MAP, dialogs and confirmations must rotate consistently; prefer a moderately compact sheet that preserves legibility and allows overflow for long content instead of tiny text.
+- Task history must expose the actual per-machine completed/pending distinction, including partial threshold completion; do not mark all target machines done when a parent task completes at a threshold below 100%. Preserve old history and state without destructive migration.
+- Fullscreen route cues are display-only, sourced from ORS maneuver indices and known motorway-category boundaries. No voice, provider calls beyond existing requests, invented road names, unsupported turns or relaxed truck limits. Zoom may use fractional easing without altering GPS/re-route safety.
+- Pre-edit annotated tag backup-pre-FINAL47-FIELD-UX-20261009 -> e1ce4b4091a799629d563669c659d4d6eb6757a5; PR #204 validation route/Edge 37909127571 and browser 37909127498 passed. Production release not yet asserted at this PR checkpoint.
