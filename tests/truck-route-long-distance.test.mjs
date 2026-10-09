@@ -58,3 +58,19 @@ test('highway use near sixty percent of an otherwise valid baseline still probes
   assert.deepEqual(data.route.summary,{distance:50000,duration:3300});
  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+
+
+test('medium mountain detour hitting ORS dynamic distance cap retries without ferry avoid, still rejects ferry',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const sent=[];
+ const body={origin:{lat:35.0,lng:136.0},destination:{lat:35.45,lng:136.40},vehicle:{...vehicle,avoidTolls:false}};
+ const hgv={geometry:{type:'LineString',coordinates:[[136,35],[136.25,35.25],[136.4,35.45]]},properties:{summary:{distance:98000,duration:5400},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
+ let ferry=false;
+ globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});const req=JSON.parse(opts.body);sent.push(req);if(req.options.avoid_features)return Response.json({error:{code:2004,message:'By dynamic weighting maximum 100000m'}},{status:400});return Response.json({features:[withWaytype(hgv,ferry?9:1)]});};
+ try{
+  let response=await POST(request(body));assert.equal(response.status,200);let result=await response.json();
+  assert.equal(result.highwaySearch.baselineRetried,true);assert.equal(result.highwaySearch.baselineRetryCause,'dynamic-distance-limit');
+  assert.equal(result.highwaySearch.longRouteFerryVerified,true);assert.equal(result.highwaySearch.attempted,false,'limited ORS budget prioritizes usable baseline, not via-IC probes');
+  assert.equal(sent.length,2);assert.deepEqual(sent[0].options.avoid_features,['ferries']);assert.equal(sent[1].options.avoid_features,undefined);
+  sent.length=0;ferry=true;response=await POST(request(body));assert.equal(response.status,502);assert.match((await response.json()).message,/フェリー/);
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
