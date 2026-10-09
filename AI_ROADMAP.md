@@ -2,9 +2,9 @@
 
 ## Current state
 
-- Visible app baseline: **2026.10.09-FINAL.47** (destination-anchored nearby arrival cards, compact landscape overlays, per-machine task history, fullscreen guidance and smoother zoom; engine **AN14B3B5**, DB/schema remain 4).
+- Visible app baseline: **2026.10.09-FINAL.48** (destination-anchored nearby arrival cards, compact landscape overlays, per-machine task history, fullscreen guidance and smoother zoom; engine **AN14B3B5**, DB/schema remain 4).
 - Latest intelligence milestone: **AN15G2 production transport closeout + AN15 lifecycle hardening**.
-- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.47 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
+- Active engineering phase: **AN15 real evidence accumulation and promotion gate — intentionally paused by product decision**. FINAL.48 is released and production-verified. Reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - 2026-10-07 evidence-gate decision: after confirming that the current field workflow has no authorized low-friction real sales-outcome source, the user chose to **pause AN15 learned numeric promotion for now**. This is an intentional product pause, not an active defect. Do not add a new manual outcome-capture flow, silently restore OCR/Analysis, or weaken exact/no-lookahead matching. Keep the deterministic production baseline unchanged and reopen AN15 evidence capture only with explicit authorization or a genuinely usable authorized outcome source.
 - Production forecast values remain on the established AN9/AN14B3B2 deterministic baseline. AN15 learned corrections remain evaluation-only.
 - AN15G2 `/api/explain` Vercel runtime blocker is resolved: the production adapter mismatch was fixed, PR #100 merged, and the matching production deployment is READY. The prior `FUNCTION_INVOCATION_FAILED` / `request.headers.get` crash no longer blocks the route.
@@ -348,3 +348,8 @@ PR #204 merged `5e67667a3d85c83f11aea43605226f84ce6a5b44` after product gates `3
 ## FINAL.48 nav cue landscape adjustment and zoom preservation — 2026-10-09
 
 Scoped owner maintenance: portrait HUD top-center stays; native/software-rotated fullscreen landscape HUD moves upper-left and shows a large maneuver arrow beside supported ORS-based text and distance. Preserved unmodified `navigationZoomTarget` and fractional zoom easing; tests explicitly verify zoom-in on approach and zoom-out after the last significant corner. No added route requests or HGV/FINAL.36/AN15 changes. Immutable safety tag `backup-pre-FINAL48-NAV-CUE-20261009-20261009` -> `23f59b5a2c4e28934eaef9c0a2519d492d675a13`. PR #207 product/test head `fd6d0fda80944518e6826f9242db5ee43af6bdd3` CI: Truck/Node/real Edge `37913947231` PASS; Browser `37913947189` PASS. Merge/live Pages/Vercel status **pending**, do not claim FINAL.48 in production yet.
+
+
+## FINAL.48 verified production closeout and owner stop — 2026-10-09
+
+PR #207 merged at `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`, after final PR route/Node/Edge `37914210715` PASS and final PR browser `37914210633` PASS. Main browser `37914366529` PASS and GitHub Pages `37914365913` PASS. Vercel production `dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1` READY at product SHA; both public version.json endpoints FINAL.48. Existing turn zoom-in and zoom-out was preserved and verified. Historical FINAL.48 PR-pending documentation is superseded by this checkpoint. Owner field visual validation is future evidence; no automatic AN15 restart or new development without a new owner instruction.
