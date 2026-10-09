@@ -313,3 +313,10 @@ User reported that a route cannot appear because search itself times out. FINAL.
 Safety tag backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 targets be83e6c8aee36caa114dc8926425bff81555d305. PR #199 merged at c2307edf38c1e1256c3eaa125e86d8e9fd461edc. PR Truck route 37754575289 and PR Browser 37754575245 PASS; main Browser 37754745261 and Pages 37754744610 PASS.
 
 NOT COMPLETE: Pages serves FINAL.46, Vercel route backend FINAL.45. Explicit production deploy was refused 402 payment_required api-deployments-free-per-day, retryAfter 86400. After quota reset, deploy exact latest main once, live verify correct backend, then request affected-route iPhone retest. AN15 paused.
+
+
+## FINAL.46 Vercel quota recovery and production release — 2026-10-09
+
+The former Vercel free daily deployment quota block was cleared without billing changes. Production deployment dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum is READY for git SHA 8155695040e877614081a927aa39d7cfe534da35, containing the already tested FINAL.46 timeout bounds. Both GitHub Pages and Vercel public version endpoints report 2026.10.08-FINAL.46.
+
+FINAL.46 release is verified, but the original iPhone route timeout and highway selection remain pending real-world retest. Next ask for the same route to be retried. If successful, collect location-free highway diagnostics to classify remaining expressway routing quality before further modifications. No HGV/FINAL.36 safety changes; AN15 remains paused.
