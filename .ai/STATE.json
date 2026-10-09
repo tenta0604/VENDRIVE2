@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL47_PR_VALIDATED_RELEASE_PENDING",
+  "status": "FINAL47_PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
   "currentWork": {
-    "title": "FINAL.47 field UX fixes validated on PR #204; production merge and live verification pending",
-    "releaseStatus": "Owner confirmed FINAL.46 timeout OK. FINAL.47 product branch validated at 542360f58f053e1e348f8c2b3c8b23e982284da0 (product/test tree): PR Truck/API/Edge 37909127571 PASS and Browser regression 37909127498 PASS. FINAL.47 is NOT yet merged or live.",
+    "title": "FINAL.47 frontend and backend released, CI and public version verified; await owner field feedback",
+    "releaseStatus": "FINAL.47 PR #204 merged at 5e67667a3d85c83f11aea43605226f84ce6a5b44. Main Browser regression 37909629725 PASS, GitHub Pages 37909629247 PASS, Vercel dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD READY for exact main 5e67667a3d85c83f11aea43605226f84ce6a5b44. Both public version.json endpoints returned 2026.10.09-FINAL.47 on 2026-10-09. Owner previously confirmed FINAL.46 timeout OK.",
     "releaseScope": [
       "Arrival candidate neighborhood anchored on registered destination (100m), today's unvisited plan only",
       "Landscape treatment and modest size reduction for all fullscreen soft-rotated dialogs",
@@ -40,28 +40,31 @@
       "final47PR": "PR #204 draft, product head 542360f58f053e1e348f8c2b3c8b23e982284da0 before documentation updates",
       "final47TruckRoute": "37909127571 PASS; API/Node/real Edge 320/390 and prior regression",
       "final47Browser": "37909127498 PASS",
-      "final46OwnerField": "Owner confirmed earlier reported timeout OK on 2026-10-09"
+      "final46OwnerField": "Owner confirmed earlier reported timeout OK on 2026-10-09",
+      "final47Merge": "5e67667a3d85c83f11aea43605226f84ce6a5b44 PR #204 merged",
+      "final47MainBrowser": "37909629725 PASS",
+      "final47Pages": "37909629247 PASS",
+      "final47Vercel": "dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD READY production exact 5e67667a3d85c83f11aea43605226f84ce6a5b44",
+      "final47Live": "Pages and Vercel public version.json = 2026.10.09-FINAL.47 (2026-10-09)"
     },
     "decision": [
-      "User requested and authorized FINAL.47 field-UX implementation after reporting FINAL.46 timeout OK",
-      "Keep driving-hgv, registered dimensions/mass, maximum two via-IC probes, 30/min warm route-call guard and FINAL.36 detour caps",
-      "No unsafe fallback, no new provider route call, no DB/schema or AN15 promotion",
-      "Do not claim FINAL.47 deployed until exact release evidence is obtained"
+      "Owner confirmed FINAL.46 timeout OK before FINAL.47",
+      "FINAL.47 product/CI/production release complete and both frontend/backend report same version",
+      "Protect driving-hgv, registered restrictions, two IC probes, warm 30/min, FINAL.36 detour envelope, no car/straight-line fallback",
+      "AN15 remains intentionally paused; no further development without next owner direction"
     ],
     "nextActions": [
-      "Check current latest PR head and ensure canonical JSON/status/roadmap consistent",
-      "Promote validated PR #204 when ready, then verify main browser regression, Pages and Vercel READY at matching production commit",
-      "Check public frontend and API version are both FINAL.47; only then mark release complete",
-      "Real iPhone verification of new FINAL.47 UI remains outstanding; highway-ON route quality remains separate future evidence",
-      "Stop after the scope finishes; AN15 stays paused"
+      "OWNER STOP: no additional product changes, PRs, deploys or AN15 progression without a fresh instruction",
+      "When user later elects to field-test FINAL.47: confirm nearby arrival card, all rotated fullscreen dialogs and compact sizing, task history drilldown, fullscreen next-turn/motorway cue and smoother zoom",
+      "If specific new device defects appear, recover fresh main and open a new bounded scope with a new immutable annotated safety tag",
+      "Highway selection accuracy remains separate from the confirmed-resolved old route timeout; diagnose only from real evidence"
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.47 PR tests passed; production merge/deployment/live evidence pending",
-    "FINAL.47 arrival/landscape/task-history/cue behavior not yet confirmed on real iPhone",
-    "Highway ON expressway-selection precision remains independently unresolved even though prior timeout reported OK",
-    "AN15 intentionally paused"
+    "FINAL.47 newly shipped interaction/appearance not individually confirmed on user's iPhone yet",
+    "Motorway preference quality remains separate future field evidence, but FINAL.46 timeout owner-confirmed OK",
+    "AN15 deliberately paused; OCR/Analysis stays withdrawn"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -76,15 +79,15 @@
     ],
     "shortResumePrompt": "VENDRIVE2の現状を引き継いで。GitHubの最新mainと7つのcanonical filesを指定順に確認し、FINAL.46本番反映済み・実機タイムアウト再確認待ち・高速選択はその後の未解決事項・AN15停止中・今はOwnerの明示指示まで開発しない、を報告して待機して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "Owner resumed only scoped FINAL.47 work after confirming FINAL.46 timeout OK. FINAL.47 PR #204 tests passed; production evidence pending. On new chat, fresh-check main; AN15 remains paused.",
-    "latestContinuityCheckpoint": "2026-10-09 FINAL.47 PR validated; release pending, no autonomous additional product phases",
+    "handoffBoundary": "FINAL.47 released and live-verified at product merge 5e67667a3d85c83f11aea43605226f84ce6a5b44; final documentation-only closeout followed. User reported FINAL.46 timeout OK; FINAL.47 device UX confirmation is future evidence, highway preference secondary. New instruction required before more product work. Always fresh-check latest main.",
+    "latestContinuityCheckpoint": "2026-10-09 FINAL.47 live release complete, owner instruction boundary, AN15 paused",
     "pauseMode": {
-      "active": false,
-      "requestedBy": "owner",
-      "intent": "Owner explicitly resumed scoped FINAL.47 UX work; finish this phase, then stop",
+      "active": true,
+      "requestedBy": "phase terminal stop per owner scope/one-phase rule",
+      "intent": "FINAL.47 completed; wait for explicit next instruction",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "2026-10-09 user instruction: timeout OK; proceed",
+      "source": "2026-10-09 FINAL.47 release closeout",
       "productCodeChanged": false
     }
   }

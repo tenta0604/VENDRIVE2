@@ -1,13 +1,13 @@
 # VENDRIVE2 Chat Handoff
 
-Updated for the current migration boundary on 2026-10-08.
+Updated for the current migration boundary on 2026-10-09.
 
 ## Authority
 
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.08-FINAL.46` (GitHub Pages and Vercel production; pending iPhone field retest).
+- Current visible production app version: `2026.10.09-FINAL.47` (GitHub Pages and Vercel production; FINAL.47 iPhone field confirmation pending).
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -1021,3 +1021,21 @@ Changes: nearby arrival candidates now use the destination-machine coordinate as
 Safety: `driving-hgv`, exact registered restrictions, no passenger-car/straight-line fallback, max two via-IC candidates, warm 30/min upstream-call guard, FINAL.36 dual detour caps, and AN15 pause remain unchanged. DB/schema 4/4, engine AN14B3B5 unchanged.
 
 **Not yet production-verified at this PR checkpoint.** Do not claim FINAL.47 is live until merged main Browser/Pages/Vercel READY and public version checks finish. Actual iPhone device confirmation of FINAL.47 UI remains future field evidence. The next operation is safe final release validation, merge and public verification, not another feature phase.
+
+
+## 2026-10-09 FINAL.47 production release complete — stop and wait
+
+FINAL.47 product PR #204 merged at `5e67667a3d85c83f11aea43605226f84ce6a5b44`. Pre-edit immutable annotated safety tag `backup-pre-FINAL47-FIELD-UX-20261009` -> `e1ce4b4091a799629d563669c659d4d6eb6757a5` (workflow 37907477873 PASS).
+
+- Final PR Truck route readiness / HGV API / real Edge 320/390 run `37909127571`: PASS.
+- Final PR Browser regression run `37909127498`: PASS.
+- Main Browser regression run `37909629725`: PASS.
+- GitHub Pages deployment run `37909629247`: PASS.
+- Vercel production `dpl_Hjzu9pLUYeERc1Z7NFyDuHdLxMgD`: READY for the exact product merge SHA.
+- Both public `/version.json` endpoints returned `2026.10.09-FINAL.47` when verified on 2026-10-09. No billing/tier change.
+
+Delivered: destination-anchored 100m neighbor discovery for today's unvisited planned machine visits; landscape/compact modal treatment while MAP is software rotated; per-machine completed/pending task history detail; fullscreen-only upcoming turn/highway-section text based only on ORS numeric maneuvers and verified motorway category changes; fractional zoom easing. No voice or invented IC guidance. Existing HGV restrictions, two additional via-IC maximum, warm 30/min ORS guard, FINAL.36 dual detour caps, user data/DB/schema, AN15 pause, and no-car/no-straight-line fallback preserved.
+
+Owner reported the previously pending FINAL.46 timeout OK **before this release**; this is separate from field certification of FINAL.47. Whether all new dialogs are comfortable on the user's iPhone, all nearby planned machines show correctly, and each cue matches the real approach remains **future owner field evidence**. Highway preference precision is a separate secondary outstanding issue.
+
+**STOP:** No new feature phase or troubleshooting is authorized by this checkpoint. On a later explicit user instruction, fetch fresh main and seven canonical files; do not assume this historical merge SHA is still latest main. AN15 remains intentionally paused.
