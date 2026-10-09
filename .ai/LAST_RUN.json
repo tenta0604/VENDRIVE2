@@ -1,12 +1,12 @@
 {
-  "evidenceVersion": 71,
-  "runType": "final50_hgv_root_cause_pr_validation_20261009",
-  "phase": "FINAL50_HGV_LONG_ROUTE_RELIABILITY_AND_HIGHWAY_SEARCH",
-  "status": "PR_VALIDATED_RELEASE_PENDING",
+  "evidenceVersion": 72,
+  "runType": "final50_production_release_documentation_closeout_20261009",
+  "phase": "DOCUMENTATION_ONLY_FINAL50_CLOSEOUT",
+  "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "59662534ff65b49cab69ada64c99557e24736054",
-    "productionCodeChanged": true,
-    "safetyTag": "backup-pre-FINAL50-HGV-ROUTING-ROOT-CAUSE-20261009 -> 59662534ff65b49cab69ada64c99557e24736054; action 37918957114 PASS"
+    "productionMainBefore": "1eb762dc1ed4cc5f573f07a6894b77bd02296deb",
+    "productionCodeChanged": false,
+    "safetyTag": "NOT_REQUIRED documentation-only; product immutable safety tag backup-pre-FINAL50-HGV-ROUTING-ROOT-CAUSE-20261009 -> 59662534ff65b49cab69ada64c99557e24736054"
   },
   "versions": {
     "app": "2026.10.09-FINAL.50",
@@ -17,31 +17,25 @@
     "schema": 4
   },
   "work": {
-    "summary": "Root-cause fixes for ORS 100km alternatives, dynamic avoid_features distance limits, baseline timeout, limited late/highway IC candidates, ferry-safe transport and privacy-safe diagnostics. PR CI PASS, public live evidence not yet done.",
-    "productStatus": "PR_VALIDATED_RELEASE_PENDING",
-    "productCodeChanged": true
+    "summary": "FINAL.50 production merge/CI/Pages/Vercel and both public versions verified. Known ORS alternatives/dynamic cap and highway selection code defects mitigated. Real owner's problematic route not independently reproduced or field validated; explicit next step is request approximate endpoints plus privacy-safe diagnostics.",
+    "productStatus": "PRODUCTION_VERIFIED_WAITING_FOR_OWNER_FIELD_ROUTE",
+    "productCodeChanged": false
   },
   "gates": {
-    "annotatedSafetyTag": "PASS action 37918957114",
-    "prTruckNodeEdge": "PASS 37920551366 (Node API, 5 long regressions separate warm quota, real Edge)",
-    "prBrowser": "PASS 37920551383",
-    "mainBrowser": "PENDING after merge",
-    "pages": "PENDING after merge",
-    "vercel": "PENDING after merge",
-    "publicVersions": "PENDING FINAL.50",
-    "realOwnerRoute": "NOT_PERFORMED: exact route data unavailable and preview URL login-protected",
-    "paidServices": "NOT_REQUIRED no new paid API",
-    "dbMigration": "NOT_REQUIRED DB/schema unchanged"
+    "productSafetyTag": "PASS action 37918957114 at original main",
+    "finalPRNodeRealEdge": "PASS 37920822527",
+    "finalPRBrowser": "PASS 37920822721",
+    "mainBrowser": "PASS 37920983030",
+    "githubPages": "PASS 37920982456",
+    "vercelProduction": "READY dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe exact 1eb762dc1ed4cc5f573f07a6894b77bd02296deb",
+    "publicLiveVersions": "PASS GitHub Pages/Vercel 2026.10.09-FINAL.50",
+    "realProviderHgvTrip": "NOT_PERFORMED: Vercel preview login-protected and original failing route unknown",
+    "ownerIphone": "NOT_PERFORMED: owner to verify",
+    "newProductSafetyTag": "NOT_REQUIRED docs-only",
+    "dbMigration": "NOT_REQUIRED DB/schema unchanged",
+    "paidService": "NOT_REQUIRED no billing change"
   },
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "index.html",
-    "version.json",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "tests/truck-route-long-distance.test.mjs",
-    ".github/workflows/truck-route-gates.yml",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -49,15 +43,15 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Production merge/main CI/Pages/Vercel/public FINAL.50 pending",
-    "Real user trouble route requires approximate origin/destination and user report",
-    "AN15 paused"
+    "Need owner route start/end or copied private-safe diagnostics to reproduce specific highway IC complaint",
+    "AN15 paused",
+    "No claim of guaranteed highway optimality"
   ],
-  "nextAction": "Complete PR release gates and live version verification, follow with docs-only FINAL.50 terminal closeout and OWNER STOP.",
+  "nextAction": "STOP. Await owner's actual representative long route and report; fetch latest GitHub main/canonical files before any new correction.",
   "unresolved": [
-    "Production merge/main CI/Pages/Vercel/public FINAL.50 pending",
-    "Real user trouble route requires approximate origin/destination and user report",
-    "AN15 paused"
+    "Need owner route start/end or copied private-safe diagnostics to reproduce specific highway IC complaint",
+    "AN15 paused",
+    "No claim of guaranteed highway optimality"
   ],
   "continuityCheckpoint": {
     "status": "PASS",
