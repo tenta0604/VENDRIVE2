@@ -664,3 +664,14 @@ The prior Vercel HTTP 402 api-deployments-free-per-day blocker has been resolved
 Public GitHub Pages and Vercel version.json both show FINAL.46. Mark only deployment/release as complete; do NOT claim the user’s route no longer times out until the exact iPhone route has been retested.
 
 Maintain exact driving-hgv restrictions, registered dimensions, 2 extra via-IC probes maximum, warm 30/min guard, FINAL.36 detour limits, and AN15 pause. If the route now renders but avoids motorways, use the sanitized FINAL.45 highway diagnostic before any further code changes.
+
+
+## 2026-10-09 — owner-requested FINAL.46 pause/handoff boundary
+
+Owner deliberately selected a project pause after successful FINAL.46 frontend/backend public release, with detailed GitHub-based continuity and a status-only reusable chat prompt. This documentation-only operation advances no product phase and authorizes no speculative development.
+
+On future status/handoff requests: fresh-read main plus AGENTS.md, STATE, HANDOFF, ROADMAP, LAST_RUN, DECISIONS and WORKFLOW, report precisely that FINAL.46 is live, the same-route device timeout is unverified, motorway route-quality issue remains a secondary question, and wait for further instructions.
+
+On a future explicit troubleshooting request, first check the exact previously timed-out route on-device (safely parked/passenger). Do not infer successful field fix from completed CI and deployments. Only after a route is returned may the location-free highway diagnostics help classify IC/ORS selection failures.
+
+Preserve driving-hgv with registered restrictions, max two via-IC probes, warm 30 calls/min, FINAL.36 both detour caps, no passenger-car or straight-line fallback, and deliberate AN15 pause. No changes to billing, versions, database, or schema for the handoff.

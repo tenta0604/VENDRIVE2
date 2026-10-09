@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL46_PRODUCTION_VERIFIED_PENDING_DEVICE_RETEST",
+  "status": "FINAL46_PRODUCTION_VERIFIED_PAUSED_PENDING_DEVICE_RETEST",
   "currentWork": {
-    "title": "FINAL.46 timeout bounds fully deployed to Vercel and GitHub Pages; one same-route iPhone retest pending",
-    "releaseStatus": "FINAL.46 product code (PR #199) and canonical checkpoint (#200) were previously merged; on 2026-10-09 the daily Vercel deployment quota had reset and production deploy dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum completed READY at exact main SHA 8155695040e877614081a927aa39d7cfe534da35. GitHub Pages and Vercel public version.json both report FINAL.46. The real iPhone timeout bug is not yet field-confirmed fixed.",
+    "title": "FINAL.46 frontend/backend live and tested in CI; owner-requested deliberate pause, iPhone field retest not yet performed",
+    "releaseStatus": "On 2026-10-09 the frontend and backend were live on FINAL.46. The exact previously timed-out iPhone route has NOT been retested. Vercel deployed the exact main SHA cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20 (docs-only release closeout), deployment dpl_EKLbpJ4rgm7mDenWcxZ4KidAqcqU READY. The owner has requested a detailed handoff and deliberate pause, NOT more implementation.",
     "releaseScope": [
       "The HGV route backend bounds upstream response-header and response-JSON-body wait times.",
       "A 14.5-second server budget limits optional IC probe time while preserving an already valid HGV baseline route.",
@@ -31,30 +31,33 @@
       "vercelProduction": "dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum READY, production, git SHA 8155695040e877614081a927aa39d7cfe534da35",
       "liveFrontend": "https://tenta0604.github.io/VENDRIVE2/version.json = 2026.10.08-FINAL.46",
       "liveBackend": "https://vendrive2-ocr-relay.vercel.app/version.json = 2026.10.08-FINAL.46",
-      "previousVercelQuotaBlocker": "Resolved: production deployment now accepted and READY without account billing/plan changes."
+      "previousVercelQuotaBlocker": "Resolved: production deployment now accepted and READY without account billing/plan changes.",
+      "finalBackendReady": "dpl_EKLbpJ4rgm7mDenWcxZ4KidAqcqU READY, target production, exact prior-main SHA cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20",
+      "finalReleaseDocumentation": "PR #201 merged at cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20",
+      "statusAtPause": "Pages/Vercel versions both FINAL.46. Original route timeout and preferred highway selection still not verified on user's iPhone."
     },
     "decision": [
       "Vercel quota limiter is no longer blocking FINAL.46; API and Pages have matching public FINAL.46.",
       "No new route-quality code change is justified before real-device same-route verification.",
       "Do not weaken HGV, FINAL.36 detour caps, warm 30/min route-call guard, or max-two IC candidate policy.",
       "If same route still times out, capture exact displayed error, route length or origin/destination with consent, and classify whether base HGV ORS fetch or optional IC exploration fails.",
-      "AN15 remains intentionally paused."
+      "AN15 remains intentionally paused.",
+      "Owner explicitly requested no further product work at this checkpoint; stop after recording a detailed, verifiable handoff."
     ],
     "nextActions": [
-      "Have the user retry the exact same highway-ON route that previously timed out on an iPhone while safely parked or as a passenger.",
-      "If it now displays, open the existing privacy-safe 高速診断 and copy the report to investigate why motorway routes may still not be selected.",
-      "If it still times out, note the exact error text and approximate route length for bounded follow-up.",
-      "Do not treat this production deployment as proof of field resolution."
+      "PAUSED BY OWNER: do not start new code, routing experiments, deployments or phase progression based solely on this checkpoint.",
+      "On a later explicit resume request, first fresh-fetch latest GitHub main and the seven canonical files in exact order.",
+      "Only when the owner chooses to test: safely retry the same iPhone highway-ON route that previously timed out; distinguish route-display success from motorway selection quality.",
+      "If a route appears but no expressway is used, inspect the privacy-safe 高速診断 copy; if it still times out, capture the exact onscreen error and approximate route length.",
+      "Keep AN15 paused; do not change HGV rules or route detour bounds without a separate grounded decision."
     ]
   },
-  "requiredUserInput": [
-    "After a safe same-route retest: report whether route appeared; if not, share the exact error text and approximate trip distance. If route appears but no expressway is chosen, share the existing privacy-safe 高速診断 report."
-  ],
+  "requiredUserInput": [],
   "unresolved": [
-    "Final.46 API deployment quota blocker resolved; no known remaining production-release issue.",
-    "Original iPhone route timeout is not user-confirmed resolved; pending a same-route field retest.",
-    "Whether the app selects appropriate expressways remains to be diagnosed after a successful route calculation.",
-    "AN15 intentionally paused."
+    "FIELD RETEST PENDING (not required during pause): the exact iPhone route timeout was not yet rechecked after FINAL.46 deployment.",
+    "Once route acquisition works, highway-ON route-selection quality may still need diagnosis; no location-free report from the failing route has been obtained.",
+    "Owner broadly says recent other improvements are basically OK, but this was not an item-by-item certification.",
+    "AN15 intentionally paused; no automatic OCR/Analysis or learned numeric work."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -67,9 +70,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE続き。GitHubの最新mainとcanonical filesを正として、FINAL.46本番反映完了後の実機タイムアウト再確認から再開して。",
+    "shortResumePrompt": "VENDRIVE2の現状を引き継いで。GitHubの最新mainと7つのcanonical filesを指定順に確認し、FINAL.46本番反映済み・実機タイムアウト再確認待ち・高速選択はその後の未解決事項・AN15停止中・今はOwnerの明示指示まで開発しない、を報告して待機して。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.46 is fully live: GitHub Pages & Vercel both report FINAL.46; Vercel deployment dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum READY for exact pre-closeout main 8155695040e877614081a927aa39d7cfe534da35. Await user same-route real iPhone retest before declaring timeout resolved or changing highway selection. AN15 paused.",
-    "latestContinuityCheckpoint": "FINAL.46 frontend/backend production verified — same-route iPhone retest pending"
+    "handoffBoundary": "Explicit owner-requested PAUSE after FINAL.46 production release. Latest known source main at checkpoint start cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20; first fetch fresh main on next chat. GitHub Pages and Vercel live FINAL.46; dpl_EKLbpJ4rgm7mDenWcxZ4KidAqcqU READY for that source main. No exact iPhone timeout retest yet; motorway preference secondary. Recovery is read/report/wait, not automatic code work.",
+    "latestContinuityCheckpoint": "2026-10-09 detailed FINAL.46 pause handoff — fully deployed, field retest pending, no new task authorized",
+    "pauseMode": {
+      "active": true,
+      "requestedBy": "owner",
+      "intent": "complete detailed project handoff, then deliberately stop",
+      "automaticallyResume": false,
+      "noDevelopmentWithoutNewInstruction": true,
+      "source": "2026-10-09 detailed FINAL.46 pause checkpoint at end of .ai/HANDOFF.md",
+      "productCodeChanged": false
+    }
   }
 }
