@@ -951,3 +951,60 @@ Prior tests remained green: FINAL.46 route readiness workflow 37754575289, PR br
 **Next HUMAN_REQUIRED step:** User retries once the same previously timed-out highway-ON route safely while parked. If route appears, use the existing privacy-safe 高速診断 for any motorway selection mismatch; if still timed out, record displayed error and trip distance (endpoints only with consent). Do not assert field issue fixed merely because deployment is READY.
 
 HGV vehicle constraints, max-two IC attempts, warm 30 route calls/min, FINAL.36 safety detour caps and AN15 pause are preserved.
+
+
+## 2026-10-09 FINAL.46 detailed pause checkpoint — no work automatically authorized
+
+**Owner intent (latest):** The owner asked for a detailed, durable handoff of what has been done and where work stopped, plus a reusable new-chat prompt. This is deliberately a **pause and documentation-only checkpoint**, **not** permission to start a new phase, run experiments, change routing, or ask the owner to work immediately. Wait for a new explicit instruction after reporting/recognizing the current state.
+
+### Source of truth and exact current boundary
+
+- Canonical repository: `tenta0604/VENDRIVE2`, production `main`, Windows project directory `E:\\VENDRIVE2`. Legacy `tenta0604/VENDRIVE` is not in scope.
+- This documentation checkpoint began from verified main `cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20` (PR #201 documentation closeout). On any future turn **fresh-check latest main**; this SHA is historical evidence, not a pinned future HEAD.
+- Canonical recovery order: `AGENTS.md` → `.ai/STATE.json` → `.ai/HANDOFF.md` → `AI_ROADMAP.md` → `.ai/LAST_RUN.json` → `.ai/DECISIONS.md` → `.ai/WORKFLOW.md`.
+- Latest visible app release: **`2026.10.08-FINAL.46`**, deployed both to GitHub Pages `https://tenta0604.github.io/VENDRIVE2/` and to the Vercel routing API `https://vendrive2-ocr-relay.vercel.app/`. Both public `version.json` endpoints were fresh-checked on 2026-10-09 and returned FINAL.46.
+- Vercel production deployment `dpl_EKLbpJ4rgm7mDenWcxZ4KidAqcqU` was **READY at exact source SHA `cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20`**; earlier first successful quota-recovery deployment `dpl_4hqEhQPKHQJUHgY3io8XCKj4Bpum` was READY at `8155695040e877614081a927aa39d7cfe534da35`. The 2026-10-08 daily-deployment cap (HTTP 402) is resolved, with **no owner billing or plan upgrade**.
+- Product release code PR #199 merged `c2307edf38c1e1256c3eaa125e86d8e9fd461edc`; documentation PR #200 merged `8155695040e877614081a927aa39d7cfe534da35`, and final backend-release documentation PR #201 merged `cadfc1ca5e5f65998dc5e5a54371ef7cdc9f7d20`. FINAL.46 route tests `37754575289`, PR Browser `37754575245`, main Browser `37754745261`, and Pages `37754744610` / `37755343380` passed. No fresh real-device test has occurred after FINAL.46.
+
+### Delivered changes, in release sequence
+
+| Release | Delivered / observed | Real-device evidence |
+|---|---|---|
+| FINAL.40 | Fullscreen MAP routing robustness; highway/JCT corridor and route geometry display improvements | Owner says recent changes are **basically OK**, but highway preference issue was later reported. Do not claim the highway issue is solved |
+| FINAL.41 | Direction-aware automatic off-route rerouting; follow-zoom approaching turns | General **basically OK** from owner, not detailed item-by-item certification |
+| FINAL.42 | Arrival card shows full pending order type/subtype/details/deadline and **every** incomplete task for arriving machine | Task display **explicitly confirmed OK**; other details included in later general basically-OK report, not separately confirmed |
+| FINAL.43 | Tapping office list/map pin opens internal VENDRIVE HGV routing; office arrival avoids vending-machine visit actions | General **basically OK**, no exhaustive field proof |
+| FINAL.44 | Task-card and task-detail progress gauges scale to each task's configured auto-completion threshold; actual numeric percent stays real | General **basically OK**, no exhaustive field proof |
+| FINAL.45 | Collapsible, copyable, location-free `高速診断（原因調査用）` covering selected motorway length, IC count/pairs, provider failures and rejection eligibility | Production delivered, but failing route **never returned a route**, so no useful real-device diagnosis report was obtained |
+| FINAL.46 | Safety-preserving timeout robustness: ORS/Overpass response-header **and JSON-body** timeouts; 14.5s server budget for *optional* via-IC probes; return an already validated HGV baseline instead of waiting for optional probes past deadline | Fully deployed to both hosts; the exact route that timed out **has not yet been retested on iPhone** |
+
+The owner initially described the remaining problem as "Google Maps uses an expressway but VENDRIVE does not." The subsequent **more specific and higher-priority field report** was: "いやそもそもタイムアウトして経路表示できない". Therefore the causal ordering is **(a) make the real HGV route appear without timeout, then (b) evaluate motorway preference**. Do not skip (a), declare it fixed based on CI, or assume Google Maps' passenger-car route is safe for a 2t truck.
+
+### Exact unresolved matters — preserve honest status
+
+1. **Primary unresolved user evidence:** Same iPhone highway-ON route previously failed with a timeout **before displaying any route**. FINAL.46 was deployed afterward, but no user same-route reproduction has confirmed it fixed. A passing test/deployment is not a device-level success.
+2. **Secondary route-quality issue:** Once a route can be shown, highway-ON may still under-select expressways compared with Google Maps. The exact failure class (ORS baseline candidates, Overpass IC availability, entry/exit pair discovery, HGV via-route rejection/timeouts, final bounded acceptance) remains unknown. The location-free FINAL.45 diagnostic can be used **only after a successful route response**.
+3. **Other functionality:** Owner's "基本全部OK" should be retained as **broad feedback**, not inflated into precise signoff for every earlier FINAL.40–44 subcheck.
+4. **AN15:** deliberately PAUSED. No OCR/Analysis UI restoration or learned numeric promotion without explicit separate request.
+5. **No outstanding FINAL.46 coding, CI or deployment blocker** at the pause checkpoint. No new product phase is selected.
+
+### Routing and repository safety invariants
+
+- Use only `driving-hgv` with the exact registered vehicle height, width, length, mass and axle load if specified. Never silently route as a passenger car, use an unrestricted route, or substitute straight-line navigation.
+- Highways OFF avoids highways/tolls/ferries; highways ON prefers viable HGV motorway routes without unbounded detours.
+- Maximum **two additional via-IC ORS candidate probes**; warm upstream route-call guard **30 calls/minute**.
+- FINAL.36 **both** final detour limits: duration `<= primary + min(20%, 8 minutes)` **AND** distance `<= primary + min(30%, 10 km)`. No silent relaxation.
+- No destructive Git operations, tag movement or speculative refactors. Before any later production-code edit, recover the latest main and make a **new immutable annotated safety tag** at that exact SHA; use bounded PR, CI, merge, Pages/Vercel deployment, same-SHA live verification and canonical closeout.
+- The current task is only documentation. Do **not** version-bump, change production JS/API, alter database/schema, use billing, or start new phase here.
+
+### When the owner *later* explicitly resumes troubleshooting
+
+- First recover latest main and seven canonical docs. State that FINAL.46 frontend/backend are deployed; **do not immediately write a new fix**.
+- Ask for **one safe, parked/passenger** iPhone retry of the *same* previously timed-out highway-ON route (unless the owner already provides that new result).
+- If it **shows a route** but avoids the desired expressway, have the owner open `高速診断（原因調査用）` on MAP route panel and tap `診断内容をコピー`. The copied report excludes raw coordinates and vehicle dimensions. Classify the actual IC/ORS/final-selection problem before scoped code changes.
+- If it **still times out**, capture the exact displayed message and approximate trip length, and only ask for origin/destination with consent if necessary. Separate GPS, client 20-second abort, baseline ORS fetch/JSON timeout, and optional via-IC budget. Do not blindly raise global client timeout or loosen HGV restrictions.
+- If owner simply requests a **status or handoff** in a new chat, **report status and wait**. No automatic implementation, speculative tests or provider deploy attempts.
+
+### Stop condition for this chat
+
+Checkpoint documentation merged and internally validated; FINAL.46 live verified; **no new task started**. The next action is selected exclusively by a future explicit owner message. The intended output of the new-chat handoff is a concise status acknowledgment, not execution.
