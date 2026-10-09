@@ -536,14 +536,31 @@ function rotatedMapPointerDown(event){if(!mapSoftRotationActive()||!leafletMap||
 function rotatedMapPointerMove(event){var gesture=rotatedMapPanGesture;if(!gesture||event.pointerId!==gesture.pointerId||!mapSoftRotationActive()||!leafletMap)return;var dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;if(dx||dy){leafletMap.panBy([-dy,dx],{animate:false});gesture.x=event.clientX;gesture.y=event.clientY}event.preventDefault();event.stopPropagation()}
 function rotatedMapPointerEnd(event){if(!rotatedMapPanGesture||event.pointerId!==rotatedMapPanGesture.pointerId)return;rotatedMapPanGesture=null;event.preventDefault();event.stopPropagation()}
 function installRotatedMapGesture(){var map=$id('map');if(!map||map.dataset.rotatedGestureInstalled==='1')return;map.dataset.rotatedGestureInstalled='1';map.addEventListener('pointerdown',rotatedMapPointerDown,true);map.addEventListener('pointermove',rotatedMapPointerMove,true);map.addEventListener('pointerup',rotatedMapPointerEnd,true);map.addEventListener('pointercancel',rotatedMapPointerEnd,true)}
-function setMapSoftRotation(active){document.body.classList.toggle('mapSoftRotated',!!active&&document.body.classList.contains('mapFullscreen'));updateMapRotateButton();syncRotatedMapGestureMode();refreshMapViewport(true)}
+function setMapSoftRotation(active){document.body.classList.toggle('mapSoftRotated',!!active&&document.body.classList.contains('mapFullscreen'));updateMapRotateButton();syncRotatedMapGestureMode();refreshMapViewport(true);if(truckRouting)truckRouting.refreshNavigationView()}
 function toggleMapRotation(){if(!document.body.classList.contains('mapFullscreen'))return;setMapSoftRotation(!document.body.classList.contains('mapSoftRotated'))}
-function enterMapFullscreen(){if(!mapPageActive())return;document.body.classList.add('mapFullscreen');document.body.classList.remove('mapSoftRotated');updateMapFullscreenButton();updateMapRotateButton();syncRotatedMapGestureMode();refreshMapViewport(true);tryOrientationLock('portrait')}
-function exitMapFullscreen(){document.body.classList.remove('mapFullscreen','mapSoftRotated');updateMapFullscreenButton();updateMapRotateButton();syncRotatedMapGestureMode();tryOrientationLock('portrait');refreshMapViewport(true)}
+function enterMapFullscreen(){if(!mapPageActive())return;document.body.classList.add('mapFullscreen');document.body.classList.remove('mapSoftRotated');updateMapFullscreenButton();updateMapRotateButton();syncRotatedMapGestureMode();refreshMapViewport(true);if(truckRouting)truckRouting.refreshNavigationView();tryOrientationLock('portrait')}
+function exitMapFullscreen(){document.body.classList.remove('mapFullscreen','mapSoftRotated');updateMapFullscreenButton();updateMapRotateButton();syncRotatedMapGestureMode();tryOrientationLock('portrait');refreshMapViewport(true);if(truckRouting)truckRouting.refreshNavigationView()}
 function toggleMapFullscreen(){if(document.body.classList.contains('mapFullscreen'))exitMapFullscreen();else enterMapFullscreen()}
 function syncOrientationForPage(pageId){var isMap=pageId==='mapPage';document.body.classList.toggle('mapPageActive',isMap);if(!isMap&&document.body.classList.contains('mapFullscreen'))exitMapFullscreen();tryOrientationLock('portrait');refreshMapViewport()}
 function updateMapFollowButton(){var button=$id('mapFollowLocation');if(!button)return;var active=mapFollowCurrentPosition,label='現在位置追尾：'+(active?'ON':'OFF');button.classList.toggle('active',active);button.setAttribute('aria-pressed',active?'true':'false');button.setAttribute('title',label);button.setAttribute('aria-label',label);button.textContent=active?'➤':'▷'}
-function applyTruckNavigationView(route,target,progress){if(!route||!leafletMap||!mapFollowCurrentPosition||mapPositionMode||$id('mapPage').classList.contains('hidden'))return;var desired=window.VENDRIVETruckRouting.navigationZoomTarget(route,progress),current=leafletMap.getZoom();if(!Number.isFinite(desired)||!Number.isFinite(current))return;var next=current;if(current<desired-0.1)next=Math.min(desired,Math.floor(current)+1);else if(current>desired+0.1)next=Math.max(desired,Math.ceil(current)-1);if(next!==current)leafletMap.setZoom(next,{animate:true})}
+function updateTruckRouteCue(route,progress){
+ var cue=$id('mapRouteCue');if(!cue)return;
+ var active=document.body.classList.contains('mapFullscreen')&&route&&window.VENDRIVETruckRouting&&window.VENDRIVETruckRouting.navigationCue;
+ var instruction=active?window.VENDRIVETruckRouting.navigationCue(route,progress):null;
+ if(!instruction){cue.classList.add('hidden');cue.textContent='';return}
+ var distance=instruction.meters>=1000?'約'+(instruction.meters/1000).toFixed(1)+'km':'約'+Math.round(instruction.meters/10)*10+'m';
+ cue.innerHTML='<div>'+esc(instruction.label)+'</div><span class="cueDistance">'+esc(distance)+'先</span>';cue.classList.remove('hidden');
+}
+function applyTruckNavigationView(route,target,progress){
+ updateTruckRouteCue(route,progress);
+ if(!route||!leafletMap||!mapFollowCurrentPosition||mapPositionMode||$id('mapPage').classList.contains('hidden'))return;
+ var desired=window.VENDRIVETruckRouting.navigationZoomTarget(route,progress),current=leafletMap.getZoom();
+ if(!Number.isFinite(desired)||!Number.isFinite(current))return;
+ // Fractional zoom plus easing avoids a full-level jump at each GPS update.
+ var delta=desired-current;if(Math.abs(delta)<0.16)return;
+ var next=current+Math.max(-0.45,Math.min(0.45,delta));
+ leafletMap.setZoom(next,{animate:true});
+}
 function toggleMapFollow(){mapFollowCurrentPosition=!mapFollowCurrentPosition;updateMapFollowButton();if(mapFollowCurrentPosition&&runtimeCurrentPosition&&leafletMap&&!mapPositionMode){leafletMap.panTo([runtimeCurrentPosition.lat,runtimeCurrentPosition.lng],{animate:true,duration:0.8,easeLinearity:0.25});if(truckRouting&&typeof truckRouting.refreshNavigationView==='function')truckRouting.refreshNavigationView()}}
 function syncWeeklyCountFields(prefix){var active=$id(prefix+'Cycle').value==='週N回';$id(prefix+'WeeklyCountFields').classList.toggle('hidden',!active)}
 function weeklyCountFor(prefix,days){var count=Number($id(prefix+'WeeklyCount').value);if($id(prefix+'Cycle').value!=='週N回')return null;if(!Number.isInteger(count)||count<1||count>7){toast('週何回は1〜7で設定してください');return false}if(days.length!==count){toast('週'+count+'回の場合は曜日を'+count+'つ選択してください');return false}return count}
@@ -744,7 +761,7 @@ function handleCurrentPositionError(){if(!runtimeCurrentPosition){currentLocatio
 function startCurrentPositionWatch(){if(currentPositionWatchId!==null||document.visibilityState!=='visible')return;if(!navigator.geolocation){handleCurrentPositionError();return}currentPositionWatchId=navigator.geolocation.watchPosition(function(position){updateRuntimeCurrentPosition(position)},function(){handleCurrentPositionError()},{enableHighAccuracy:true,maximumAge:5000,timeout:10000})}
 function stopCurrentPositionWatch(){if(currentPositionWatchId===null||!navigator.geolocation)return;navigator.geolocation.clearWatch(currentPositionWatchId);currentPositionWatchId=null}function ensureMap(){
   if(leafletMap||typeof L==='undefined')return;
-  leafletMap=L.map('map',{zoomControl:false,attributionControl:true,tap:true}).setView([35.30,136.80],13);
+  leafletMap=L.map('map',{zoomControl:false,attributionControl:true,tap:true,zoomSnap:0,zoomDelta:0.5}).setView([35.30,136.80],13);var cue=document.createElement('div');cue.id='mapRouteCue';cue.className='hidden';cue.setAttribute('aria-live','off');$id('map').appendChild(cue);
   L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',{minZoom:5,maxNativeZoom:18,maxZoom:20,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a>'}).addTo(leafletMap);
   machineLayer=L.layerGroup().addTo(leafletMap);routeLayer=L.layerGroup().addTo(leafletMap);currentLocationLayer=L.layerGroup().addTo(leafletMap);refreshCurrentLocationMarker();tryInitialMapCenter();setTimeout(function(){leafletMap.invalidateSize({pan:false})},100);
   leafletMap.on('click',function(e){if(mapPositionMode)return;if(addingOffice){addingOffice=false;$id('map').classList.remove('adding');officePoint={lat:e.latlng.lat,lng:e.latlng.lng};$id('officeGps').value=e.latlng.lat.toFixed(6)+', '+e.latlng.lng.toFixed(6);openModal('officeModal')}});leafletMap.getContainer().addEventListener('contextmenu',function(e){e.preventDefault()});leafletMap.on('zoomend moveend',function(){scheduleMachinePinFan()});leafletMap.on('dragstart',function(){mapInitialCenterPending=false});
