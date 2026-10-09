@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.09-FINAL.49';
+  var ASSET_VERSION='2026.10.09-FINAL.50';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -92,8 +92,10 @@
     var result={geometry:{type:'LineString',coordinates:geometry.coordinates.map(function(c){return [c[0],c[1]];})},summary:{distance:summary.distance,duration:summary.duration}};
     var waycategory=cleanExtra(value&&value.waycategory,geometry.coordinates.length,'道路種別',function(v){return v>=0;});
     var tollways=cleanExtra(value&&value.tollways,geometry.coordinates.length,'有料道路',function(v){return v===0||v===1;});
+    var waytype=cleanExtra(value&&value.waytype,geometry.coordinates.length,'道路種別補足',function(v){return v>=0&&v<=10;});
     if(waycategory!==undefined)result.waycategory=waycategory;
     if(tollways!==undefined)result.tollways=tollways;
+    if(waytype!==undefined)result.waytype=waytype;
     if(value.maneuvers!==undefined){if(!Array.isArray(value.maneuvers)||value.maneuvers.length>1000||!value.maneuvers.every(function(m){return m&&Number.isInteger(m.type)&&m.type>=0&&m.type<=13&&Number.isInteger(m.at)&&m.at>=0&&m.at<geometry.coordinates.length}))throw new Error('案内データを確認できませんでした');result.maneuvers=value.maneuvers.map(function(m){return {type:m.type,at:m.at}})}
     return result;
   }
