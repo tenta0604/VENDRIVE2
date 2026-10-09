@@ -37,7 +37,7 @@ async function timedJsonFetch(url,options,timeoutMs){
   finally{clearTimeout(timer);}
 }
 function routeRequestBody(coordinates,vehicle,restrictions,withAlternatives,startHeading=null){
-  const body={coordinates,instructions:false,preference:'recommended',extra_info:['waycategory','tollways'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'],profile_params:{restrictions}}};
+  const body={coordinates,instructions:true,instructions_format:'text',preference:'recommended',extra_info:['waycategory','tollways'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'],profile_params:{restrictions}}};
   if(withAlternatives&&!vehicle.avoidTolls)body.alternative_routes={target_count:3,share_factor:0.85,weight_factor:1.6};
   if(Number.isFinite(startHeading)){
     body.bearings=coordinates.map((_,index)=>index===0?[startHeading,60]:[]);
@@ -133,7 +133,12 @@ async function handle(request) {
     }
     const data=response.data,features=Array.isArray(data?.features)?data.features:[];
     if(!features.length)throw new Error('missing route');
-    function sanitizeFeature(feature){return routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary,waycategory:feature?.properties?.extras?.waycategory?.values,tollways:feature?.properties?.extras?.tollways?.values});}
+    function sanitizeFeature(feature){
+      const steps=(Array.isArray(feature?.properties?.segments)?feature.properties.segments:[]).flatMap(segment=>Array.isArray(segment?.steps)?segment.steps:[]);
+      // Retain only indexed maneuver types, never arbitrary upstream HTML/text.
+      const maneuvers=steps.slice(0,1000).filter(step=>Number.isInteger(step?.type)&&Number.isInteger(step?.way_points?.[0])).map(step=>({type:step.type,at:step.way_points[0]}));
+      return routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary,waycategory:feature?.properties?.extras?.waycategory?.values,tollways:feature?.properties?.extras?.tollways?.values,maneuvers});
+    }
     const primary=sanitizeFeature(features[0]),candidates=[primary];
     for(let i=1;i<features.length;i++){try{candidates.push(sanitizeFeature(features[i]));}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
