@@ -157,3 +157,15 @@ test('fitActive reuses the current remaining-route progress without a provider c
   h.setPosition({lat:35.305,lng:136.805,accuracy:8,updatedAt:Date.now()});h.client.onPosition({lat:35.305,lng:136.805,accuracy:8,updatedAt:Date.now()});
   h.client.fitActive();assert.equal(h.calls,calls);assert.ok(h.fits.length>=2);assert.equal(h.fits.at(-1).value.summary.distance,1800);assert.ok(h.fits.at(-1).progress&&Number.isInteger(h.fits.at(-1).progress.edge));
 });
+
+
+test('fullscreen navigation cue follows provider turns and motorway category transitions',()=>{
+ const base={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.3],[136.802,35.3],[136.803,35.3]]},summary:{distance:300,duration:30},waycategory:[[0,2,0],[2,3,1]],maneuvers:[{type:11,at:0},{type:1,at:1}]};
+ assert.equal(routing.navigationCue(base,null).label,'右折');
+ const afterTurn=routing.navigationCue(base,{edge:1,point:{lat:35.3,lng:136.801}});
+ assert.equal(afterTurn.label,'高速区間に入ります');
+ assert.ok(afterTurn.meters>0);
+ assert.throws(()=>routing.route({...base,maneuvers:[{type:1,at:100}]}),/案内データ/);
+ const noEvidence={...base,waycategory:undefined,maneuvers:[]};
+ assert.equal(routing.navigationCue(noEvidence,null),null);
+});
