@@ -81,6 +81,36 @@ body.modalOpen{position:fixed;left:0;right:0;width:100%;overflow:hidden}.modal{o
 .truckRoutePanel{margin:10px 0;padding:12px;border:1px solid #bfdbfe;border-radius:12px;background:#eff6ff}.truckRoutePanel b{display:block;font-size:13px;overflow-wrap:anywhere}.truckRoutePanel .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.truckRoutePanel .actions button{flex:1 1 80px;padding:10px 8px;font-size:11px}.truckVehicleGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.truckVehicleGrid input{min-width:0;width:100%;box-sizing:border-box}.truckVehicleGrid label{display:block;font-size:12px;margin-bottom:5px}.truckRouteFootnote{font-size:11px;line-height:1.6;margin-top:7px;color:#475569;overflow-wrap:anywhere}.truckRouteDiagnostics{margin-top:9px;border-top:1px solid #bfdbfe;padding-top:8px}.truckRouteDiagnostics summary{cursor:pointer;font-size:11px;font-weight:850;color:#1e40af}.truckRouteDiagnostics pre{font-family:system-ui,sans-serif;font-size:10px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;color:#334155;margin:8px 0}.truckRouteDiagnostics button{font-size:11px;padding:7px 10px}
 </style>
 <link rel="stylesheet" href="ops10a-stocktake.css">
+<style id="final47-field-ux">
+/* Soft-rotated fullscreen MAP uses the same landscape treatment for every open dialog. */
+body.mapFullscreen.mapSoftRotated .modal.open{align-items:center;justify-content:center;padding:0}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet{
+ position:absolute;left:50%;top:50%;
+ width:min(calc(100dvh - 44px),720px);max-width:none;
+ max-height:calc(100vw - 34px);min-height:0;
+ margin:0;padding:12px 15px;
+ transform:translate(-50%,-50%) rotate(90deg);transform-origin:center;
+ border-radius:17px;overflow-y:auto;box-sizing:border-box;
+}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .modalTop{align-items:center}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .modalTop .title{font-size:17px;line-height:1.2}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .formGroup{margin-top:7px}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .notice{padding:7px 9px;line-height:1.35}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .actions{margin-top:8px}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .arrivalWork{margin-top:5px;padding-top:5px}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .arrivalWorkSection+.arrivalWorkSection{margin-top:4px}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .arrivalTaskRow{padding:3px 0}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .swipeRow{margin-top:4px}
+body.mapFullscreen.mapSoftRotated .modal.open .sheet .section{margin-top:7px}
+#mapRouteCue{display:none;position:absolute;z-index:1200;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(56%,390px);box-sizing:border-box;padding:9px 12px;background:#111e;color:#fff;border:1px solid #ffffff6b;border-radius:13px;box-shadow:0 3px 12px #0005;pointer-events:none;text-align:center;font-size:14px;font-weight:850;line-height:1.35}
+body.mapFullscreen #mapRouteCue:not(.hidden){display:block}
+#mapRouteCue .cueDistance{display:block;color:#cce6ff;font-size:11px;margin-top:2px}
+body.mapFullscreen.mapSoftRotated #mapRouteCue{width:min(60%,430px);font-size:13px}
+.taskHistoryResult{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid #e5e7eb}
+.taskHistoryResult b{font-size:11px}.taskHistoryResult .meta{margin-top:2px}
+.taskHistoryOpen{flex:1;text-align:left;cursor:pointer}
+@media(max-width:360px){body.mapFullscreen.mapSoftRotated .modal.open .sheet{width:calc(100dvh - 34px);max-height:calc(100vw - 24px);padding:9px 11px}}
+</style>
 </head>
 <body>
 <div class="portraitGuard" id="portraitGuard" role="dialog" aria-modal="true" aria-label="縦画面で使用してください"><div class="portraitGuardCard"><div class="portraitGuardIcon">↻</div><b>この画面は縦向きで使用してください</b><span>MAPだけ横画面に対応しています。</span><button class="primary" id="portraitOpenMap" type="button">MAPを開く</button></div></div>
@@ -592,7 +622,7 @@ function renderToday(){
 
 function ensureArrivalVisitModal(){var modal=$id('arrivalVisitModal');if(modal)return modal;modal=document.createElement('div');modal.id='arrivalVisitModal';modal.className='modal';modal.innerHTML='<div class="sheet"><div class="modalTop"><div><div class="ey">ARRIVAL</div><div class="title">付近の訪問先</div></div><button class="pill" id="arrivalVisitClose" type="button">閉じる</button></div><div class="notice">1台ずつ確認します。左スワイプで訪問完了、右スワイプで本日の訪問をスキップします。</div><div class="meta" id="arrivalVisitProgress" style="margin-top:10px"></div><div id="arrivalVisitCard"></div></div>';document.body.appendChild(modal);$id('arrivalVisitClose').onclick=clearArrivalVisitDeck;return modal}
 function clearArrivalVisitDeck(){arrivalVisitQueue=[];arrivalVisitCurrentId=null;closeModal('arrivalVisitModal')}
-function arrivalVisitCandidates(target,position){var point=validMachineLocation(position),destination=target&&state.machines.find(function(machine){return machine&&String(machine.id)===String(target.id)}),todayMachines=todayActualTargets().filter(function(machine){return machine&&!machine.visited}),seen={},items=[];function add(machine,distance,priority){if(!machine||machine.visited||seen[String(machine.id)])return;seen[String(machine.id)]=true;items.push({machine:machine,distance:distance,priority:priority})}if(destination)add(destination,point&&validMachineLocation(destination)?distanceMeters(point,validMachineLocation(destination)):0,0);todayMachines.forEach(function(machine){if(destination&&String(machine.id)===String(destination.id))return;var location=validMachineLocation(machine);if(!point||!location)return;var distance=distanceMeters(point,location);if(distance<=100)add(machine,distance,1)});return items.sort(function(a,b){return a.priority-b.priority||a.distance-b.distance}).map(function(item){return item.machine})}
+function arrivalVisitCandidates(target,position){var point=validMachineLocation(position),destination=target&&state.machines.find(function(machine){return machine&&String(machine.id)===String(target.id)}),anchor=(destination&&validMachineLocation(destination))||point,todayMachines=todayActualTargets().filter(function(machine){return machine&&!machine.visited}),seen={},items=[];function add(machine,distance,priority){if(!machine||machine.visited||seen[String(machine.id)])return;seen[String(machine.id)]=true;items.push({machine:machine,distance:distance,priority:priority})}if(destination)add(destination,point&&validMachineLocation(destination)?distanceMeters(point,validMachineLocation(destination)):0,0);todayMachines.forEach(function(machine){if(destination&&String(machine.id)===String(destination.id))return;var location=validMachineLocation(machine);if(!anchor||!location)return;var distance=distanceMeters(anchor,location);if(distance<=100)add(machine,distance,1)});return items.sort(function(a,b){return a.priority-b.priority||a.distance-b.distance}).map(function(item){return item.machine})}
 function handleTruckRouteDestinationArrival(target,position){if(target&&target.kind==='office')return;handleTruckRouteArrival(target,position)}
 function handleTruckRouteArrival(target,position){var candidates=arrivalVisitCandidates(target,position);if(!candidates.length)return;arrivalVisitQueue=candidates.map(function(machine){return String(machine.id)});arrivalVisitCurrentId=null;ensureArrivalVisitModal();renderArrivalVisitDeck();openModal('arrivalVisitModal')}
 function appendArrivalWorkDetails(visitCard,machine){
