@@ -23,8 +23,9 @@ jobs:
         run: |
           node --check truck-routing.js
           node --check api/route.mjs
+          node --check tests/truck-route-long-distance.test.mjs
           node --check tests/run-truck-route-gates.mjs
-          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs
+          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs tests/truck-route-long-distance.test.mjs
           git diff --check
       - name: Install isolated browser test dependencies
         run: |

@@ -711,3 +711,8 @@ Owner rejected the FINAL.48 landscape guidance panel width because it intruded f
 ## 2026-10-09 — FINAL.49 release and return to owner stop
 
 FINAL.49 PR #210 merged `bc83dda66c4f0676872006aa356dd0fba5e25ce5`, PR Truck/Edge `37917628703`, PR Browser `37917628558`, main Browser `37917777126`, Pages `37917776644` PASS, Vercel `dpl_37PEBYHwQKMzf5YkrsdjdQNS4WvZ` READY on the merge SHA and both public endpoints FINAL.49. The old PR-pending description is historical. Owner field screen signoff remains; halt development pending explicit instruction and preserve AN15 pause.
+
+
+## 2026-10-09 — FINAL.50 HGV routing reliability under ORS public-provider limits
+
+Owner demands genuine root-cause investigation of long-route timeouts, too-early expressway exits, missed entries despite highway ON. Authenticated HGV request remains the only route authority; no car/straight-line fallback, unsafe shortcut, paid service, increased IC probe count, or AN15 resumption. Public ORS imposes 100km alternative cap and ferries avoidance may activate dynamic distance ceilings. Bound retries to at most one, require complete non-ferry `waytype` on long HGV highway-ON requests that omit avoid_ferries, fail closed if unverified, and preserve 8min/10km route detour cap and 30/min warm quota. Motorway usage target now 85% of baseline distance with bounded near-fast preference. See [PR #213](https://github.com/tenta0604/VENDRIVE2/pull/213) with Node/API/Edge `37920551366` PASS and Browser `37920551383` PASS, pre-edit tag `backup-pre-FINAL50-HGV-ROUTING-ROOT-CAUSE-20261009`. Tests are not real origin/destination iPhone route signoff; source/destination info necessary before promising specific IC correctness. PR-pending checkpoint, not yet public FINAL.50.

@@ -8,6 +8,10 @@ const MAX_ACTIVE_HIGHWAY_ROUTES = 2;
 const JUNCTION_CACHE_TTL_MS = 15*60*1000;
 const ROUTE_SERVER_BUDGET_MS = 14500;
 const ROUTE_RESPONSE_RESERVE_MS = 700;
+// ORS allows alternatives only for trips below 100 km. Reserve a plain HGV fallback.
+const ALTERNATIVES_DIRECT_LIMIT_METERS=55000;
+const LONG_ROUTE_FERRY_VERIFY_METERS=70000;
+const ALTERNATIVE_FIRST_ATTEMPT_MS=6200;
 // Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
 const recent = [];
 const junctionCache = new Map();
@@ -28,7 +32,8 @@ async function timedJsonFetch(url,options,timeoutMs){
   const controller=new AbortController();let timer;
   const work=(async()=>{
     const response=await fetch(url,{...options,signal:controller.signal});
-    return {ok:response.ok,status:response.status,data:response.ok?await response.json():null};
+    const data=await response.json().catch(()=>null);
+    return {ok:response.ok,status:response.status,data:response.ok?data:null,errorCode:!response.ok&&Number.isInteger(data?.error?.code)?data.error.code:null};
   })();
   const deadline=new Promise((_,reject)=>{timer=setTimeout(()=>{
     controller.abort();const error=new Error('upstream timed out');error.name='AbortError';reject(error);
@@ -36,8 +41,12 @@ async function timedJsonFetch(url,options,timeoutMs){
   try{return await Promise.race([work,deadline]);}
   finally{clearTimeout(timer);}
 }
-function routeRequestBody(coordinates,vehicle,restrictions,withAlternatives,startHeading=null){
-  const body={coordinates,instructions:true,instructions_format:'text',preference:'recommended',extra_info:['waycategory','tollways'],options:{vehicle_type:'hgv',avoid_features:vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'],profile_params:{restrictions}}};
+function routeRequestBody(coordinates,vehicle,restrictions,withAlternatives,startHeading=null,verifyFerries=false){
+  // For long highway-ON journeys avoid a provider dynamic-weighting cap caused by avoid_features.
+  // Instead request waytype and accept a route only after proving that every span is non-ferry.
+  const profileOptions={vehicle_type:'hgv',profile_params:{restrictions}};
+  if(!verifyFerries)profileOptions.avoid_features=vehicle.avoidTolls?['ferries','highways','tollways']:['ferries'];
+  const body={coordinates,instructions:true,instructions_format:'text',preference:'recommended',extra_info:['waycategory','tollways','waytype'],options:profileOptions};
   if(withAlternatives&&!vehicle.avoidTolls)body.alternative_routes={target_count:3,share_factor:0.85,weight_factor:1.6};
   if(Number.isFinite(startHeading)){
     body.bearings=coordinates.map((_,index)=>index===0?[startHeading,60]:[]);
@@ -50,15 +59,15 @@ function reserveUpstreamRouteCall(){
   if(recent.length>=30)return false;
   recent.push(now);return true;
 }
-async function requestOrsRoute(coordinates,vehicle,restrictions,key,{alternatives=false,timeoutMs=9000,startHeading=null}={}){
+async function requestOrsRoute(coordinates,vehicle,restrictions,key,{alternatives=false,timeoutMs=9000,startHeading=null,verifyFerries=false}={}){
   if(!reserveUpstreamRouteCall())return {ok:false,status:429,data:null};
-  return timedJsonFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives,startHeading))},timeoutMs);
+  return timedJsonFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives,startHeading,verifyFerries))},timeoutMs);
 }
 function junctionCacheKey(origin,destination,radius){return [rounded(origin.lat),rounded(origin.lng),rounded(destination.lat),rounded(destination.lng),radius].join(':');}
 async function findMotorwayJunctions(origin,destination,radius){
   const cacheKey=junctionCacheKey(origin,destination,radius),cached=junctionCache.get(cacheKey),now=Date.now();
   if(cached&&now-cached.at<JUNCTION_CACHE_TTL_MS)return cached.value;
-  const query='[out:json][timeout:2];(node(around:'+radius+','+origin.lat+','+origin.lng+')["highway"="motorway_junction"];node(around:'+radius+','+destination.lat+','+destination.lng+')["highway"="motorway_junction"];);out body 80;';
+  const query='[out:json][timeout:2];(node(around:'+radius+','+origin.lat+','+origin.lng+')["highway"="motorway_junction"];node(around:'+radius+','+destination.lat+','+destination.lng+')["highway"="motorway_junction"];);out body 200;';
   try{
     const response=await timedJsonFetch(OVERPASS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},2800);
     if(!response.ok)return {items:[],status:'provider-error'};
@@ -124,11 +133,40 @@ async function handle(request) {
   const directMeters=routing.distanceMeters(body.origin,body.destination),junctionRadius=Math.round(Math.max(8000,Math.min(25000,directMeters*0.35+4000)));
   const junctionPromise=!vehicle.avoidTolls&&directMeters>=6000?findMotorwayJunctions(body.origin,body.destination,junctionRadius):Promise.resolve({items:[],status:'not-requested'});
   try {
-    const response=await requestOrsRoute([[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:true,timeoutMs:9000,startHeading});
+    const originDestination=[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]];
+    // Long route first: uncomplicated HGV request. Alternatives are optional and can
+    // exceed both ORS's 100km limit and its own CPU deadline.
+    let verifyFerries=!vehicle.avoidTolls&&directMeters>=LONG_ROUTE_FERRY_VERIFY_METERS;
+    const requestAlternatives=!vehicle.avoidTolls&&startHeading===null&&directMeters<ALTERNATIVES_DIRECT_LIMIT_METERS;
+    let baselineRetried=false,baselineRetryCause='none',response;
+    try{
+      response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:requestAlternatives,timeoutMs:requestAlternatives?ALTERNATIVE_FIRST_ATTEMPT_MS:12000,startHeading,verifyFerries});
+    }catch(error){
+      if(error?.name!=='AbortError'||!requestAlternatives)throw error;
+      baselineRetried=true;baselineRetryCause='alternative-timeout';
+      const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
+      if(remaining<1200)throw error;
+      response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(7000,remaining),startHeading,verifyFerries});
+    }
+    if(!response.ok&&requestAlternatives&&response.status===400){
+      baselineRetried=true;baselineRetryCause='alternative-rejected';
+      const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
+      if(remaining>=1200)response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(7000,remaining),startHeading,verifyFerries});
+    }
+    // For a medium-length HGV request whose explicit ferry avoidance exceeds ORS's
+    // dynamic-weighting ceiling, retry without that expensive condition exactly once.
+    // A verified full-coverage non-ferry waytype becomes mandatory for the response.
+    if(!response.ok&&!baselineRetried&&!requestAlternatives&&!vehicle.avoidTolls&&!verifyFerries&&response.status===400&&response.errorCode===2004){
+      const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
+      if(remaining>=2000){
+        verifyFerries=true;baselineRetried=true;baselineRetryCause='dynamic-distance-limit';
+        response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(9000,remaining),startHeading,verifyFerries:true});
+      }
+    }
     if (!response.ok) {
       if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin,allowed);
       if(response.status===401||response.status===403)return json(503,{ok:false,message:'経路サービスの認証を確認する必要があります'},origin,allowed);
-      if(response.status===400||response.status===404)return json(422,{ok:false,message:'車両条件に合う経路が見つかりません。位置と車両設定を確認してください'},origin,allowed);
+      if(response.status===400||response.status===404)return json(422,{ok:false,message:directMeters>=70000?'経路提供元の長距離・車両制限に達しました。安全なHGV経路を作れないためトラック対応外部ナビをご利用ください':'車両条件に合う経路が見つかりません。位置と車両設定を確認してください'},origin,allowed);
       return json(502,{ok:false,message:'経路サービスに接続できません。時間をおいて再計算してください'},origin,allowed);
     }
     const data=response.data,features=Array.isArray(data?.features)?data.features:[];
@@ -137,27 +175,29 @@ async function handle(request) {
       const steps=(Array.isArray(feature?.properties?.segments)?feature.properties.segments:[]).flatMap(segment=>Array.isArray(segment?.steps)?segment.steps:[]);
       // Retain only indexed maneuver types, never arbitrary upstream HTML/text.
       const maneuvers=steps.slice(0,1000).filter(step=>Number.isInteger(step?.type)&&Number.isInteger(step?.way_points?.[0])).map(step=>({type:step.type,at:step.way_points[0]}));
-      return routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary,waycategory:feature?.properties?.extras?.waycategory?.values,tollways:feature?.properties?.extras?.tollways?.values,maneuvers});
+      return routing.route({geometry:feature?.geometry,summary:feature?.properties?.summary,waycategory:feature?.properties?.extras?.waycategory?.values,tollways:feature?.properties?.extras?.tollways?.values,waytype:feature?.properties?.extras?.waytype?.values,maneuvers});
     }
     const primary=sanitizeFeature(features[0]),candidates=[primary];
-    for(let i=1;i<features.length;i++){try{candidates.push(sanitizeFeature(features[i]));}catch{}}
+    function safeRoute(candidate){if(!verifyFerries)return true;return Array.isArray(candidate.waytype)&&candidate.waytype.length>0&&candidate.waytype[0][0]===0&&candidate.waytype.at(-1)[1]===candidate.geometry.coordinates.length-1&&!candidate.waytype.some(span=>span[2]===9);}
+    if(!safeRoute(primary))return json(502,{ok:false,message:'長距離経路のフェリー不使用を確認できません。トラック対応外部ナビで安全なルートを確認してください'},origin,allowed);
+    for(let i=1;i<features.length;i++){try{const result=sanitizeFeature(features[i]);if(safeRoute(result))candidates.push(result);}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=Math.min(80000,primary.summary.distance*0.55),highwaySearch={attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
-    if(!vehicle.avoidTolls&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
+    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
+    if(!vehicle.avoidTolls&&!baselineRetried&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
       const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
       const remainingTime=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       const viaBudget=Math.min(6500,Math.max(0,remainingTime));
-      if(viaBudget<1000){highwaySearch.timeBudgetLimited=true;highwaySearch.status='time-budget-skip';}
-      const viaResults=viaBudget<1000?[]:await Promise.all(pairs.map(async pair=>{
+      if(viaBudget<3000){highwaySearch.timeBudgetLimited=true;highwaySearch.status='time-budget-skip';}
+      const viaResults=viaBudget<3000?[]:await Promise.all(pairs.map(async pair=>{
         try{
-          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:viaBudget,startHeading});
+          const viaResponse=await requestOrsRoute([[body.origin.lng,body.origin.lat],[pair.entry.lng,pair.entry.lat],[pair.exit.lng,pair.exit.lat],[body.destination.lng,body.destination.lat]],vehicle,restrictions,key,{alternatives:false,timeoutMs:viaBudget,startHeading,verifyFerries});
           if(!viaResponse.ok){highwaySearch.viaProviderRejected++;return null;}
           const viaData=viaResponse.data,feature=Array.isArray(viaData?.features)?viaData.features[0]:null;
           if(!feature){highwaySearch.viaNoFeature++;return null;}
-          const viaRoute=sanitizeFeature(feature),viaUsage=routing.routeUsage(viaRoute),meaningfulMotorway=Math.max(1500,primary.summary.distance*0.15);
+          const viaRoute=sanitizeFeature(feature);if(!safeRoute(viaRoute)){highwaySearch.viaErrors++;return null;}const viaUsage=routing.routeUsage(viaRoute),meaningfulMotorway=Math.max(1500,primary.summary.distance*0.15);
           if(viaUsage.motorwayMeters<meaningfulMotorway){highwaySearch.viaLowMotorway++;return null;}
           return {route:viaRoute,usage:viaUsage,via:{entry:{id:pair.entry.id,ref:pair.entry.ref,name:pair.entry.name},exit:{id:pair.exit.id,ref:pair.exit.ref,name:pair.exit.name}}};
         }catch(error){if(error?.name==='AbortError')highwaySearch.viaTimeouts++;else highwaySearch.viaErrors++;return null;}
@@ -174,11 +214,12 @@ async function handle(request) {
         const activeEligible=eligible.filter(item=>activeHighwayRoutes.has(item.route)).sort((a,b)=>b.usage.motorwayMeters-a.usage.motorwayMeters||b.usage.priorityMeters-a.usage.priorityMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);highwaySearch.finalEligible=activeEligible.length;
         if(activeEligible.length){route=activeEligible[0].route;usage=activeEligible[0].usage;selection='active-ic-expressway-preferred';}
         else{
-          const fastest=eligible[0],nearFast=eligible.filter(item=>item.route.summary.duration<=fastest.route.summary.duration+Math.min(120,fastest.route.summary.duration*0.10)&&item.route.summary.distance<=fastest.route.summary.distance+Math.min(3000,fastest.route.summary.distance*0.15)).sort((a,b)=>b.usage.priorityMeters-a.usage.priorityMeters||b.usage.motorwayMeters-a.usage.motorwayMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
+          const fastest=eligible[0],nearFast=eligible.filter(item=>item.route.summary.duration<=fastest.route.summary.duration+Math.min(300,fastest.route.summary.duration*0.15)&&item.route.summary.distance<=fastest.route.summary.distance+Math.min(8000,fastest.route.summary.distance*0.20)).sort((a,b)=>b.usage.priorityMeters-a.usage.priorityMeters||b.usage.motorwayMeters-a.usage.motorwayMeters||a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
           route=nearFast[0].route;usage=nearFast[0].usage;selection='expressway-natural-preferred';
         }
       } else selection=highwaySearch.attempted?'active-highway-unavailable':'highway-unavailable';
     }else selection='highway-avoided';
+    highwaySearch.selectedMotorwayMeters=Math.round(usage.motorwayMeters);highwaySearch.availableCandidateCount=candidates.length;
     return json(200,{ok:true,profile:'driving-hgv',route,selection,usage,highwaySearch,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
   } catch(error) {
     return json(502,{ok:false,message:error?.name==='AbortError'?'基本のHGV経路取得がタイムアウトしました。時間をおいて再検索してください':'経路を取得できませんでした'},origin,allowed);

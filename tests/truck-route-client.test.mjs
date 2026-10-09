@@ -80,7 +80,7 @@ test('route sections highlight both motorway and toll-only spans',()=>{
 });
 
 test('routing asset version matches FINAL.47 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.09-FINAL.49');
+  assert.equal(routing.assetVersion,'2026.10.09-FINAL.50');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -185,4 +185,9 @@ test('all recognized direction cues have large-arrow symbols, including motorway
  const exiting=routing.navigationCue({geometry,summary,waycategory:[[0,1,1],[1,2,0]]},null);
  assert.equal(exiting.label,'高速区間を出ます');
  assert.equal(exiting.arrow,'↘');
+});
+
+test('waytype ferry classification is validated for HGV route transport',()=>{
+ const v={...route,waytype:[[0,1,1],[1,2,9]]};assert.deepEqual(routing.route(v).waytype,v.waytype);
+ assert.throws(()=>routing.route({...v,waytype:[[0,2,99]]}),/道路種別補足/);
 });
