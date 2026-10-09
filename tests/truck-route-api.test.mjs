@@ -90,7 +90,7 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     const data=await response.json(),body=JSON.parse(sent.options.body);
     assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
     assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
-    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,false);assert.equal(body.preference,'recommended');
+    assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,true);assert.equal(body.preference,'recommended');
     assert.deepEqual(body.extra_info,['waycategory','tollways']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
     assert.deepEqual(body.options.avoid_features,['ferries','highways','tollways']);assert.equal(body.alternative_routes,undefined);
@@ -294,4 +294,21 @@ test('warm-instance quota guard caps upstream calls',async()=>{
     let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
     assert.equal(response.status,429);assert.ok(calls<=30);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+
+test('provider turn instructions are reduced to safe maneuver types and geometry indices',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;
+ process.env.ORS_API_KEY='test-secret';
+ globalThis.fetch=async(url,opts)=>{
+   if(String(url).includes('overpass-api'))return Response.json({elements:[]});
+   return Response.json({features:[{...feature,properties:{...feature.properties,segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}]}}]});
+ };
+ try{
+   const response=await POST(request());
+   assert.equal(response.status,200);
+   const data=await response.json();
+   assert.deepEqual(data.route.maneuvers,[{type:11,at:0},{type:1,at:1}]);
+   assert.equal(JSON.stringify(data.route).includes('Turn right'),false,'upstream instruction text must not be persisted');
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
