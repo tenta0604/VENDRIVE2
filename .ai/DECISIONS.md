@@ -696,3 +696,8 @@ FINAL.47 PR #204 merged at `5e67667a3d85c83f11aea43605226f84ce6a5b44`; route/Edg
 ## 2026-10-09 — FINAL.48 upper-left fullscreen landscape cue and prominent arrow
 
 Owner explicitly chose to preserve portrait HUD location, move the HUD to upper-left only in landscape (native and MAP software-rotated), and add large directional arrows to existing trusted step/highway-category guidance. This is a visual change; no increase to provider call volume or HGV routing changes. Existing follow-mode automatic turn zoom-in and post-turn zoom-out were confirmed by new unit and real Edge tests, not replaced. Pre-edit immutable annotated tag `backup-pre-FINAL48-NAV-CUE-20261009-20261009` at `23f59b5a2c4e28934eaef9c0a2519d492d675a13`; PR #207 Node/Edge `37913947231` PASS and browser `37913947189` PASS, production not yet verified as of this PR record. AN15 stays paused.
+
+
+## 2026-10-09 — FINAL.48 product release complete, no automatic continuation
+
+FINAL.48 PR #207 merged `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`; final PR real Edge/Node `37914210715`, PR Browser `37914210633`, main Browser `37914366529`, and Pages `37914365913` all PASS. Vercel READY deployment `dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1` matches the merge SHA. Both public version endpoints serve `2026.10.09-FINAL.48`. The earlier PR-pending note is historical. Stop this scope; user iPhone visual confirmation remains pending; AN15 remains intentionally paused, and highway route-choice accuracy remains independent future evidence.

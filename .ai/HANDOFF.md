@@ -7,7 +7,7 @@ Updated for the current migration boundary on 2026-10-09.
 - The only authoritative development baseline is the latest synchronized GitHub `main` plus the canonical recovery files.
 - Do **not** resume work from old validation branches simply because they still exist.
 - Do **not** infer the current revision from this file; fetch latest `main` first.
-- Current visible production app version: `2026.10.09-FINAL.47` (GitHub Pages and Vercel production; FINAL.47 iPhone field confirmation pending).
+- Current visible production app version: `2026.10.09-FINAL.48` (GitHub Pages and Vercel; FINAL.48 iPhone visual/drive confirmation pending).
 - Engine: `AN14B3B5`.
 - DB/schema: `4 / 4`.
 
@@ -1048,3 +1048,12 @@ Owner requested: keep vertical/portrait navigation cue at its existing top-cente
 Pre-edit main `23f59b5a2c4e28934eaef9c0a2519d492d675a13`. Immutable annotated safety tag `backup-pre-FINAL48-NAV-CUE-20261009-20261009` points exactly to that SHA, workflow `37913311257` PASS. Draft PR [#207](https://github.com/tenta0604/VENDRIVE2/pull/207) implements a large arrow for each supported numeric ORS maneuver and verified motorway transition, portrait centered HUD, native-landscape upper-left HUD and soft-rotated MAP-local upper-left HUD with a margin below the map tag. No new provider calls, unsafe directions, voice, model, HGV vehicle-profile, data or schema changes. Version `2026.10.09-FINAL.48` app/asset.
 
 Product/test head `fd6d0fda80944518e6826f9242db5ee43af6bdd3`: PR Truck route Node/API/real Edge (320/390 incl zoom-out) run `37913947231` PASS, Browser regression run `37913947189` PASS. **At this checkpoint not merged or publicly verified.** Before claiming FINAL.48 shipped, require merged main browser/Pages/Vercel READY plus both public version.json values FINAL.48; document terminal evidence. AN15 remains intentionally paused, no new phase.
+
+
+## 2026-10-09 FINAL.48 production verification COMPLETE — owner STOP
+
+The preceding FINAL.48 PR-pending section is historical. Product PR [#207](https://github.com/tenta0604/VENDRIVE2/pull/207) merged at `6a84a0139f74cee5c2118ad4c3eaaad996d4256b`. Final PR Truck route Node/API/real Edge (320/390, approach zoom-in and past-corner zoom-out) `37914210715` PASS; final PR Browser regression `37914210633` PASS. Main Browser regression `37914366529` PASS; GitHub Pages deployment `37914365913` PASS. Vercel production deployment `dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1` READY on the exact product merge SHA. Both public Pages and Vercel `version.json` endpoints returned `2026.10.09-FINAL.48`, verified on 2026-10-09.
+
+Features shipped: portrait fullscreen guidance remains top-center; native-landscape and MAP software-rotated landscape guidance at upper-left with large semantic arrow, ORS-based Japanese text and distance. Existing follow-enabled, turn-distance-based fractional automatic zoom-in and zoom-out was preserved and tested. HGV restrictions, provider call limits, FINAL.36 detour limits, no passenger-car fallback, user data, DB/schema 4/4, engine AN14B3B5, and AN15 intentional pause remain unchanged.
+
+**STOP / next owner action:** FINAL.48 is complete. The owner may later test visual comfort and guidance on their iPhone; that live-device signoff has not been performed by automation. No further code changes, unrelated phases, or AN15 progression without explicit user instruction. Fresh-check latest main rather than assuming the above historic merge remains HEAD.

@@ -1,12 +1,12 @@
 {
-  "evidenceVersion": 67,
-  "runType": "final48_nav_cue_pr_validation_20261009",
-  "phase": "FINAL48_NAV_CUE_MAINTENANCE",
-  "status": "PR_VALIDATED_RELEASE_PENDING",
+  "evidenceVersion": 68,
+  "runType": "final48_live_release_documentation_closeout_20261009",
+  "phase": "DOCUMENTATION_ONLY_FINAL48_RELEASE_CLOSEOUT",
+  "status": "COMPLETE",
   "base": {
-    "productionMainBefore": "23f59b5a2c4e28934eaef9c0a2519d492d675a13",
-    "productionCodeChanged": true,
-    "safetyTag": "backup-pre-FINAL48-NAV-CUE-20261009-20261009 -> 23f59b5a2c4e28934eaef9c0a2519d492d675a13; workflow 37913311257 PASS"
+    "productionMainBefore": "6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
+    "productionCodeChanged": false,
+    "safetyTag": "NOT_REQUIRED: canonical documentation only; prior FINAL.48 product annotated tag backup-pre-FINAL48-NAV-CUE-20261009-20261009 -> 23f59b5a2c4e28934eaef9c0a2519d492d675a13"
   },
   "versions": {
     "app": "2026.10.09-FINAL.48",
@@ -17,30 +17,24 @@
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.48 upper-left landscape HUD and large arrows implemented; existing turn zoom unchanged. Node+real Edge confirm corner approach zoom-in and past-corner zoom-out. PR validated, merge and live checks pending.",
-    "productStatus": "PR_VERIFIED_PENDING_RELEASE",
-    "productCodeChanged": true,
-    "ownerIntent": "Landscape HUD positioning, prominent arrow, verify automatic zoom remains alive; stop after scoped maintenance."
+    "summary": "FINAL.48 product PR #207 merged; final PR and main browser/Edge CI PASS; Pages and Vercel production READY with both public versions FINAL.48; docs-only closeout maintains owner STOP.",
+    "productStatus": "PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
+    "productCodeChanged": false
   },
   "gates": {
-    "safetyTag": "PASS immutable annotated tag at 23f59b5a2c4e28934eaef9c0a2519d492d675a13",
-    "prTruckRoute": "PASS 37913947231 (Node/API/real Edge 320/390)",
-    "prBrowser": "PASS 37913947189",
-    "realBrowserZoomOut": "PASS integrated PR route gate 37913947231",
-    "mainBrowser": "PENDING until merge",
-    "githubPages": "PENDING until merge",
-    "vercelProduction": "PENDING until merge",
-    "liveVersion": "PENDING until both public endpoints FINAL.48",
-    "realIphone": "NOT_PERFORMED owner field check later",
-    "dbMigration": "NOT_REQUIRED same DB/schema",
-    "deploymentCharge": "NOT_REQUIRED Git-integrated existing hosting"
+    "productSafetyTag": "PASS annotated immutable pre-edit tag via 37913311257",
+    "finalPRTruckNodeEdge": "PASS 37914210715",
+    "finalPRBrowser": "PASS 37914210633",
+    "productMerge": "PASS PR #207 at 6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
+    "mainBrowser": "PASS 37914366529",
+    "githubPages": "PASS 37914365913",
+    "vercelProduction": "READY dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1 exact 6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
+    "publicLiveVersions": "PASS GitHub Pages and Vercel 2026.10.09-FINAL.48",
+    "realIphone": "NOT_PERFORMED: real-world signoff requires user device/drive",
+    "newSafetyTag": "NOT_REQUIRED: documentation-only",
+    "appSourceVersion": "PASS APP_VERSION/ASSET_VERSION/cache key/version.json all FINAL.48"
   },
   "changedFiles": [
-    "index.html",
-    "truck-routing.js",
-    "version.json",
-    "tests/truck-route-client.test.mjs",
-    "tests/run-truck-route-gates.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -48,23 +42,22 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Production merge/Pages/Vercel FINAL.48 live check",
-    "Real iPhone confirmation later",
-    "AN15 paused"
+    "Optional owner-device view/drive confirmation for new FINAL.48 UI",
+    "Highway-ON route quality separate unresolved item",
+    "AN15 intentional pause"
   ],
-  "nextAction": "Complete final PR #207 release gates, update canonical closeout and stop. No new phase.",
+  "nextAction": "STOP: wait for explicit owner instruction, then refresh main/canonical state. No automatic AN15 phase.",
   "unresolved": [
-    "PR #207 not yet released",
-    "User device UX check pending",
-    "AN15 paused",
-    "Highway preference quality separate"
+    "Owner FINAL.48 iPhone visual confirmation not yet performed",
+    "HGV motorway selection quality remains separate field concern",
+    "AN15 intentionally paused"
   ],
   "continuityCheckpoint": {
     "status": "PASS",
-    "createdFor": "FINAL.47 new chat recovery",
-    "sourceProductMerge": "5e67667a3d85c83f11aea43605226f84ce6a5b44",
+    "createdFor": "FINAL.48 new-chat recovery",
+    "sourceProductMerge": "6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
     "productCodeChanged": false,
-    "appVersion": "2026.10.09-FINAL.47",
-    "intent": "report and wait; no automatically initiated next phase"
+    "appVersion": "2026.10.09-FINAL.48",
+    "intent": "Wait for owner instruction"
   }
 }

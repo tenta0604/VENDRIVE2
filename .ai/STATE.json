@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL48_PR_VALIDATED_RELEASE_PENDING",
+  "status": "FINAL48_PRODUCTION_VERIFIED_WAITING_FOR_OWNER",
   "currentWork": {
-    "title": "FINAL.48 native and software-rotated landscape navigation HUD plus large arrows, zoom-out verified on PR; release pending",
-    "releaseStatus": "PR #207 final product/test HEAD fd6d0fda80944518e6826f9242db5ee43af6bdd3 verified: Truck route API/Node/real Edge run 37913947231 PASS; Browser regression 37913947189 PASS. Not yet merged or publicly deployed.",
+    "title": "FINAL.48 navigation HUD released, CI and both public endpoints verified; stop for owner field feedback",
+    "releaseStatus": "FINAL.48 PR #207 merged at 6a84a0139f74cee5c2118ad4c3eaaad996d4256b. PR Truck route/Node/real Edge 37914210715 PASS and Browser 37914210633 PASS on final PR head 8924bb65c571a02a774db54b51e6c8ae987e2c9c; main Browser 37914366529 PASS, Pages deployment 37914365913 PASS. Vercel production dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1 READY for exact main 6a84a0139f74cee5c2118ad4c3eaaad996d4256b. Public Pages and Vercel version.json both returned 2026.10.09-FINAL.48.",
     "releaseScope": [
       "Preserve portrait fullscreen navigation HUD at top-center",
       "Place navigation HUD at upper-left during native landscape and MAP software-rotated landscape; avoid maptag",
@@ -48,26 +48,33 @@
       "final48SafetyTag": "backup-pre-FINAL48-NAV-CUE-20261009-20261009 -> 23f59b5a2c4e28934eaef9c0a2519d492d675a13; workflow 37913311257 PASS",
       "final48PR": "PR #207 product branch head fd6d0fda80944518e6826f9242db5ee43af6bdd3",
       "final48TruckRoute": "37913947231 PASS (Node, HGV/API, real Edge 320/390; explicit zoom-in/out)",
-      "final48Browser": "37913947189 PASS"
+      "final48Browser": "37913947189 PASS",
+      "final48FinalPRTruckRoute": "37914210715 PASS at final PR head 8924bb65c571a02a774db54b51e6c8ae987e2c9c",
+      "final48FinalPRBrowser": "37914210633 PASS",
+      "final48Merge": "PR #207 merged at 6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
+      "final48MainBrowser": "37914366529 PASS",
+      "final48Pages": "37914365913 PASS",
+      "final48Vercel": "dpl_oapZwu7kCr8JQBBPVQaaHqvWisd1 READY production exact 6a84a0139f74cee5c2118ad4c3eaaad996d4256b",
+      "final48Live": "Both public version.json = 2026.10.09-FINAL.48 (verified 2026-10-09)"
     },
     "decision": [
-      "Owner authorized exactly FINAL.48 HUD landscape position and large arrows, plus zoom-in/out verification",
-      "Portrait cue must retain its old top-center location; native/software landscape use upper-left, arrow must be prominent",
-      "Existing turn-zoom algorithm remains active without changing its limits or follow gating",
-      "Do not alter HGV, routing quotas, user data or paused AN15"
+      "Owner-authorized FINAL.48 scope closed after verified production deployment",
+      "Portrait cue remains top-centered; native and soft-rotated landscape cue upper-left with prominent maneuver arrow",
+      "Auto zoom-in on bends and post-turn zoom-out were validated by Node and real Edge while follow ON; zoom algorithm unchanged",
+      "HGV limits and two via-IC maximum, 30/min warm guard, FINAL.36 detour envelope, data schema and AN15 pause protected"
     ],
     "nextActions": [
-      "Merge verified FINAL.48 PR #207 after final PR head safety check, ensure postmerge main browser and Pages deployments pass",
-      "Verify Vercel production READY on exact merged main and both public version.json report 2026.10.09-FINAL.48",
-      "Update canonical documents from release-pending to production-verified after actual evidence",
-      "Stop and wait for new owner instruction; AN15 remains paused"
+      "STOP: FINAL.48 complete and live; no further product change or AN15 progression without a new owner instruction",
+      "Owner iPhone visual/drive confirmation when convenient: portrait center retained, native/soft-rotated landscape upper-left arrow/distance, zoom-in and zoom-out with follow ON",
+      "If real device issue is found, open a new scoped maintenance task and pre-edit immutable safety tag at fresh main; do not reopen old PR #207",
+      "Highway-ON route quality remains separate from cue display and past timeout"
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.48 validated in PR; production merge/Pages/Vercel public version verification pending",
-    "FINAL.48 visual comfort and actual vehicle guidance not yet field-checked on owner's iPhone",
-    "Highway route-choice precision separate future issue; AN15 intentionally paused"
+    "Owner's iPhone field comfort/real-driving check of FINAL.48 not yet performed",
+    "Highway-ON route choice accuracy is a separate possible field issue",
+    "AN15 intentionally paused; do not auto-promote numeric learning"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -80,17 +87,17 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2の現状を引き継いで。GitHubの最新mainと7つのcanonical filesを指定順に確認し、FINAL.46本番反映済み・実機タイムアウト再確認待ち・高速選択はその後の未解決事項・AN15停止中・今はOwnerの明示指示まで開発しない、を報告して待機して。",
+    "shortResumePrompt": "VENDRIVE2の最新mainと7つのcanonical filesを読み、FINAL.48本番反映済み・実機UX確認は未実施・AN15は意図的に停止中、と確認して。次の明示指示があるまで開発しない。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "Owner asked for upper-left fullscreen landscape navigation HUD and larger arrow, and to verify automatic zoom-out. FINAL.48 PR #207 Node/Edge and Browser PASS; production pending. AN15 stays paused.",
-    "latestContinuityCheckpoint": "2026-10-09 FINAL.48 PR validated, production release pending, stop after complete",
+    "handoffBoundary": "FINAL.48 released and both public endpoints verified at product merge 6a84a0139f74cee5c2118ad4c3eaaad996d4256b; documentation-only closeout follows. Current status owner STOP. For next instruction reload newest main. AN15 intentionally paused.",
+    "latestContinuityCheckpoint": "2026-10-09 FINAL.48 production verified and owner stop",
     "pauseMode": {
-      "active": false,
-      "requestedBy": "phase terminal stop per owner scope/one-phase rule",
-      "intent": "Authorized only scoped FINAL.48 maintenance until production terminal, then stop",
+      "active": true,
+      "requestedBy": "bounded FINAL.48 scope completed",
+      "intent": "Wait for new owner instruction after final release",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "2026-10-09 owner specific follow-up to FINAL.47",
+      "source": "FINAL.48 2026-10-09 production verified",
       "productCodeChanged": false
     }
   }
