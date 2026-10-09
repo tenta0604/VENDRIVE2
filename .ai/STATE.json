@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL50_PR_VALIDATED_RELEASE_PENDING",
+  "status": "FINAL50_PRODUCTION_VERIFIED_WAITING_FOR_OWNER_FIELD_ROUTE",
   "currentWork": {
-    "title": "FINAL.50 long-distance HGV routing timeout and highway underuse maintenance: verified PR, deployment pending",
-    "releaseStatus": "PR #213, product/test head 233c775e6dc9383b40fbc00021d6c7a161a638ee; final Node/API + real Microsoft Edge 320/390 run 37920551366 PASS, PR Browser regression 37920551383 PASS. NOT YET MERGED/PRODUCTION.",
+    "title": "FINAL.50 HGV route-engine corrections deployed, CI/public verified; await real failing route evidence",
+    "releaseStatus": "FINAL.50 PR #213 merged 1eb762dc1ed4cc5f573f07a6894b77bd02296deb. Final PR Truck/Node/real Edge 37920822527 PASS, PR Browser 37920822721 PASS, main Browser 37920983030 PASS, Pages 37920982456 PASS. Vercel production dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe READY at exact main 1eb762dc1ed4cc5f573f07a6894b77bd02296deb. Public GitHub Pages and Vercel version.json both FINAL.50 on 2026-10-09. No real owner route or unauthenticated protected preview route smoke was performed.",
     "releaseScope": [
       "Avoid public ORS 100km alternative-route cap: request up to 3 alternatives only for <55km direct, not for long trips or reroutes",
       "When a short optional alternative request times out or ORS rejects it, retry a plain HGV baseline once within fixed 14.5s server/20s client budget",
@@ -75,7 +75,14 @@
       "final50ProductPR": "PR #213 validated head 233c775e6dc9383b40fbc00021d6c7a161a638ee",
       "final50TruckNodeEdge": "37920551366 PASS (API, failure/dynamic-ferry regression, real Edge 320/390)",
       "final50Browser": "37920551383 PASS",
-      "final50DocsReferences": "https://openrouteservice.org/restrictions/; https://giscience.github.io/openrouteservice/v9.10.0/api-reference/endpoints/directions/extra-info/waytype"
+      "final50DocsReferences": "https://openrouteservice.org/restrictions/; https://giscience.github.io/openrouteservice/v9.10.0/api-reference/endpoints/directions/extra-info/waytype",
+      "final50FinalPRRoute": "37920822527 PASS",
+      "final50FinalPRBrowser": "37920822721 PASS",
+      "final50Merge": "PR #213 merged at 1eb762dc1ed4cc5f573f07a6894b77bd02296deb",
+      "final50MainBrowser": "37920983030 PASS",
+      "final50Pages": "37920982456 PASS",
+      "final50Vercel": "dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe READY exact 1eb762dc1ed4cc5f573f07a6894b77bd02296deb",
+      "final50Public": "GitHub Pages & Vercel both 2026.10.09-FINAL.50"
     },
     "decision": [
       "Owner explicitly prioritizes hard investigation of recurring real-device long-distance timeout and early/missed motorway access",
@@ -85,17 +92,17 @@
       "Stop AN15 unrelated work and no subscription or pricing change"
     ],
     "nextActions": [
-      "Finish final PR CI on documentation head, ready and merge PR #213 only if all pass",
-      "Verify main browser regression, GitHub Pages and Vercel exact-main READY; both public version endpoints FINAL.50",
-      "Complete documentation-only verified release closeout and stop",
-      "Owner real iPhone retest for representative long route; request approximate source/destination or privacy-safe 高速診断 report to diagnose remaining exact IC underuse"
+      "OWNER FIELD CHECK: on actual problematic long highway-ON route, test FINAL.50 timeout and selected entry/exit",
+      "If not correct, collect just approximate start/destination and privacy-safe MAP 高速診断; no address/coordinates/tokens needed in shared diagnostic",
+      "STOP: do not start unrelated product phase, further code, paid APIs or AN15 without new user direction",
+      "Highway provider/OSM topology limitations are not proven fixed by mock tests; treat real-device findings as a new scoped maintenance task"
     ]
   },
   "requiredUserInput": [],
   "unresolved": [
-    "PR #213 validated but not merged or live; status is pending until public FINAL.50 checks",
-    "Public preview deployment is login-protected and the user has not yet supplied one failing origin/destination; real provider and IC route quality not verified",
-    "ORS OSM/IC data/provider capacity may still limit exact highway route suitability; no guarantee without route-specific live evidence",
+    "Real HGV provider response and actual user-described highway entrance/exit quality not independently field verified",
+    "User's representative start/destination for reproducing wrong/early IC selection not provided",
+    "HGV restrictions and waytype metadata depend on provider data correctness; no automatic fallback to passenger-car routing",
     "AN15 intentionally paused"
   ],
   "recovery": {
@@ -109,18 +116,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2の最新mainと7つのcanonical filesを読み、FINAL.49公開済み・実機表示確認は次回・AN15は意図的停止と理解し、明示指示まで開発を待機して。",
+    "shortResumePrompt": "VENDRIVE2の最新mainと7つのcanonical filesを確認して。FINAL.50はGitHub PagesとVercelで本番確認済みだが、遠距離タイムアウトと高速IC選択の実機走行は未検証。私の失敗ルートや高速診断が届くまで勝手な改修やAN15再開をしないで。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.50 HGV timeout/expressway root-cause PR #213 validated at 233c775e6dc9383b40fbc00021d6c7a161a638ee; need merge/Pages/Vercel LIVE FINAL.50, terminal docs closeout. User exact failing route not supplied, do not assert route-quality cured. AN15 paused.",
-    "latestContinuityCheckpoint": "2026-10-09 FINAL.50 PR tests PASS, public deployment pending",
+    "handoffBoundary": "FINAL.50 PR #213 deployed at 1eb762dc1ed4cc5f573f07a6894b77bd02296deb; real provider/owner-specific IC route remains unverified; request approximate route/highway diagnostics when user returns, do not assert guaranteed correction. AN15 paused.",
+    "latestContinuityCheckpoint": "2026-10-09 FINAL.50 deployed and live verified; owner route field validation pending",
     "pauseMode": {
-      "active": false,
-      "requestedBy": "owner new field evidence",
-      "intent": "Complete scoped FINAL.50 production release then await owner route case",
+      "active": true,
+      "requestedBy": "FINAL.50 bounded production release complete",
+      "intent": "Wait for owner's representative real failed HGV route and privacy-safe diagnostic",
       "automaticallyResume": false,
-      "noDevelopmentWithoutNewInstruction": false,
-      "source": "2026-10-09 owner long-distance timeout and highway-IC report",
-      "productCodeChanged": true
+      "noDevelopmentWithoutNewInstruction": true,
+      "source": "2026-10-09 FINAL.50 release verification",
+      "productCodeChanged": false
     }
   }
 }
