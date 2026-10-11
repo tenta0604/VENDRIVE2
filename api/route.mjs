@@ -2,7 +2,10 @@ import routing from '../truck-routing.js';
 
 const ALLOWED_ORIGINS = new Set(['https://tenta0604.github.io','http://localhost:8000','http://127.0.0.1:8000']);
 const ENDPOINT = 'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson';
-const OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+// Both are independently operated, publicly documented free OSM Overpass instances.
+// Never dispatch more than one bounded backup request on the first failure.
+const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+const OVERPASS_REQUEST_TIMEOUT_MS = 3100;
 const MAX_BODY_BYTES = 4096;
 const MAX_ACTIVE_HIGHWAY_ROUTES = 2;
 const JUNCTION_CACHE_TTL_MS = 15*60*1000;
@@ -65,23 +68,48 @@ async function requestOrsRoute(coordinates,vehicle,restrictions,key,{alternative
   return timedJsonFetch(ENDPOINT,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/geo+json, application/json'},body:JSON.stringify(routeRequestBody(coordinates,vehicle,restrictions,alternatives,startHeading,verifyFerries))},timeoutMs);
 }
 function junctionCacheKey(origin,destination,radius){return [rounded(origin.lat),rounded(origin.lng),rounded(destination.lat),rounded(destination.lng),radius].join(':');}
+function motorwayJunctionBbox(center,radius){
+  // Bounding-box lookup performs better than large Overpass "around" scans.
+  // Filter returned nodes by their real distance below to preserve the original radius.
+  const latOffset=radius/111320,lonOffset=radius/(111320*Math.max(0.1,Math.abs(Math.cos(center.lat*Math.PI/180))));
+  return [Math.max(-90,center.lat-latOffset),Math.max(-180,center.lng-lonOffset),Math.min(90,center.lat+latOffset),Math.min(180,center.lng+lonOffset)].map(value=>value.toFixed(5)).join(',');
+}
+function overpassFailureLabel(response){
+  if(response?.status===429)return 'http-429';
+  if(Number.isInteger(response?.status)&&response.status>=400&&response.status<=599)return 'http-'+response.status;
+  return 'invalid-payload';
+}
 async function findMotorwayJunctions(origin,destination,radius){
   const cacheKey=junctionCacheKey(origin,destination,radius),cached=junctionCache.get(cacheKey),now=Date.now();
   if(cached&&now-cached.at<JUNCTION_CACHE_TTL_MS)return cached.value;
-  const query='[out:json][timeout:2];(node(around:'+radius+','+origin.lat+','+origin.lng+')["highway"="motorway_junction"];node(around:'+radius+','+destination.lat+','+destination.lng+')["highway"="motorway_junction"];);out body 200;';
-  try{
-    const response=await timedJsonFetch(OVERPASS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},2800);
-    if(!response.ok)return {items:[],status:'provider-error'};
-    const data=response.data,seen=new Set(),items=[];
-    for(const element of Array.isArray(data?.elements)?data.elements:[]){
-      if(element?.type!=='node'||!Number.isFinite(element.lat)||!Number.isFinite(element.lon)||seen.has(element.id))continue;
-      seen.add(element.id);items.push({id:element.id,lat:element.lat,lng:element.lon,ref:typeof element.tags?.ref==='string'?element.tags.ref:'',name:typeof element.tags?.name==='string'?element.tags.name:''});
+  const startBbox=motorwayJunctionBbox(origin,radius),endBbox=motorwayJunctionBbox(destination,radius);
+  const query='[out:json][timeout:6];(node["highway"="motorway_junction"]('+startBbox+');node["highway"="motorway_junction"]('+endBbox+'););out body 200;';
+  let firstFailure='none',lastFailure='none';
+  for(let index=0;index<OVERPASS_ENDPOINTS.length;index++){
+    const provider=index===0?'primary':'backup';
+    let response,reason;
+    try{
+      response=await timedJsonFetch(OVERPASS_ENDPOINTS[index],{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},OVERPASS_REQUEST_TIMEOUT_MS);
+      if(!response.ok)reason=overpassFailureLabel(response);
+      else if(!Array.isArray(response.data?.elements)||typeof response.data?.remark==='string')reason='invalid-payload';
+    }catch(error){reason=error?.name==='AbortError'?'timeout':'network-error';}
+    if(!reason){
+      const seen=new Set(),items=[];
+      for(const element of response.data.elements){
+        if(element?.type!=='node'||!Number.isFinite(element.lat)||!Number.isFinite(element.lon)||seen.has(element.id))continue;
+        const loc={lat:element.lat,lng:element.lon};
+        if(routing.distanceMeters(origin,loc)>radius&&routing.distanceMeters(destination,loc)>radius)continue;
+        seen.add(element.id);items.push({id:element.id,lat:element.lat,lng:element.lon,ref:typeof element.tags?.ref==='string'?element.tags.ref:'',name:typeof element.tags?.name==='string'?element.tags.name:''});
+      }
+      const result={items,status:items.length?'ok':'no-junctions',provider,attempts:index+1,firstFailure,lastFailure:'none'};
+      junctionCache.set(cacheKey,{at:now,value:result});
+      while(junctionCache.size>40)junctionCache.delete(junctionCache.keys().next().value);
+      return result;
     }
-    const value={items,status:items.length?'ok':'no-junctions'};
-    junctionCache.set(cacheKey,{at:now,value});
-    while(junctionCache.size>40)junctionCache.delete(junctionCache.keys().next().value);
-    return value;
-  }catch(error){return {items:[],status:error?.name==='AbortError'?'timeout':'provider-error'};}
+    if(index===0)firstFailure=reason;
+    lastFailure=reason;
+  }
+  return {items:[],status:lastFailure==='timeout'?'timeout':'provider-error',provider:'none',attempts:OVERPASS_ENDPOINTS.length,firstFailure,lastFailure};
 }
 function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   const direct=routing.distanceMeters(origin,destination);
@@ -184,14 +212,14 @@ async function handle(request) {
     for(let i=1;i<features.length;i++){try{const result=sanitizeFeature(features[i]);if(safeRoute(result))candidates.push(result);}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
+    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',junctionProvider:'none',junctionAttempts:0,junctionFirstFailure:'none',junctionLastFailure:'none',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
     // A timeout/rejection of optional alternatives must not suppress IC discovery if the HGV fallback
     // returned quickly enough; the existing remaining-time guard below still prevents late probes.
     // Dynamic-distance retries continue to prioritize the verified ferry-safe baseline only.
     const icAfterFallbackAllowed=!baselineRetried||baselineRetryCause==='alternative-timeout'||baselineRetryCause==='alternative-rejected';
     if(!vehicle.avoidTolls&&icAfterFallbackAllowed&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
-      const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;
+      const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;highwaySearch.junctionProvider=junctionResult.provider||'none';highwaySearch.junctionAttempts=junctionResult.attempts||0;highwaySearch.junctionFirstFailure=junctionResult.firstFailure||'none';highwaySearch.junctionLastFailure=junctionResult.lastFailure||'none';
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
       const remainingTime=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       const viaBudget=Math.min(6500,Math.max(0,remainingTime));

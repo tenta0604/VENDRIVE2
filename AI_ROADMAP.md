@@ -386,3 +386,7 @@ FINAL.50 received field report near DCM尾西店 → 飛島コンテナ confirme
 ## 2026-10-11 FINAL.51 release verified; user field boundary
 
 PR #217 merged `5cc7c0b258af705c6996d6018e669a722b45a100`; final PR HGV Node/API/real Edge `38104482648` PASS and Browser `38104482589` PASS; postmerge Browser `38104563171` PASS, Pages `38104563073` PASS; Vercel production `dpl_Adv5Pnp5Q5b1K5bbBp1jF5eV6vrV` READY. Both live version endpoints reported `2026.10.11-FINAL.51`. Above release-pending note superseded. Real operator DCM尾西店→飛島コンテナ IC/motorway quality still requires new FINAL.51 field report; do not confuse mocked tests with real route success. AN15 remains intentionally paused.
+
+## 2026-10-11 FINAL.52 public Overpass IC reliability — PR release pending
+
+Owner's FINAL.51 field data for DCM尾西店→飛島コンテナ shows safe basic HGV selected but `provider-error` while loading IC nodes; no highway and zero candidate evaluation. FINAL.52 PR #220 addresses the IC data provider single point of failure with bounded and independent free backup, faster bbox query and original local radial filtering, plus source/HTTP/timeout sanitized diagnostics; HGV safety/quota/policy, AN15 pause unchanged. Safety tag `backup-pre-FINAL52-OVERPASS-RESILIENCE-20261011` at c6869522; code/test PR HGV Node/API/real Edge `38105181217` PASS, Browser `38105181191` PASS at dfa4806. Pending final PR doc-aligned gates/merge/public FINAL.52 verification. No real IC outcome verified; request a NEW owner diagnostic only after live release.

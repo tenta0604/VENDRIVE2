@@ -25,6 +25,7 @@ test('upstream timeout also covers a stalled response JSON body, not just respon
   }finally{globalThis.fetch=previous;}
 });
 
+
 test('time budget skips optional via-IC probes and still delivers an already fetched safe HGV route',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch,realNow=Date.now;
   process.env.ORS_API_KEY='test-secret';
@@ -197,7 +198,7 @@ test('active highway IC discovery fails open to the safe baseline HGV route',asy
   const farInput={origin:{lat:35.05,lng:136.50},destination:{lat:35.28,lng:136.78},vehicle:{...vehicle,avoidTolls:false}};
   const surface={geometry:{type:'LineString',coordinates:[[136.50,35.05],[136.64,35.16],[136.78,35.28]]},properties:{summary:{distance:34000,duration:2500},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   globalThis.fetch=async(url)=>{
-    if(String(url).includes('overpass-api.de'))throw new Error('overpass unavailable');
+    if(String(url).includes('overpass'))throw new Error('overpass unavailable');
     return Response.json({features:[surface]});
   };
   try{
@@ -229,7 +230,8 @@ test('long-distance highway ON still searches farther IC access and does not sto
     const response=await POST(request(farInput));assert.equal(response.status,200);
     const data=await response.json();assert.equal(data.highwaySearch.attempted,true);assert.ok(data.highwaySearch.radiusMeters>18000);assert.ok(data.highwaySearch.accepted>=1);assert.equal(data.selection,'active-ic-expressway-preferred');
     assert.deepEqual(data.route.summary,{distance:125000,duration:7600});assert.ok(data.usage.motorwayMeters>45000);
-    assert.ok(decodeURIComponent(overpassBody).includes('around:25000'),'long-distance search should expand beyond the old 18km radius');
+    assert.match(decodeURIComponent(overpassBody),/node\["highway"="motorway_junction"\]\(/,'long-distance search must use bounded OSM motorway junction lookups');
+    assert.ok(!decodeURIComponent(overpassBody).includes('around:'),'prefer faster bounding boxes instead of huge circles');
     assert.equal(routeBodies[0].alternative_routes,undefined,'long distance must never request ORS alternatives');assert.equal(routeBodies[0].options.avoid_features,undefined,'long highway ON avoids dynamic-weight distance cap; ferry safety verified via waytype');assert.equal(data.highwaySearch.longRouteFerryVerified,true);
     assert.ok(routeBodies.some(body=>body.coordinates.length===4),'a long-distance via-IC HGV route must be evaluated even when endpoint IC access exceeds the old combined 18km cap');
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}

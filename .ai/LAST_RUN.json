@@ -1,41 +1,49 @@
 {
-  "evidenceVersion": 75,
-  "runType": "final51_production_release_closeout_20261011",
-  "phase": "FINAL51_HIGHWAY_IC_RETRY_RELEASE",
-  "status": "COMPLETE",
+  "evidenceVersion": 76,
+  "runType": "final52_overpass_ic_resilience_pr_validation_20261011",
+  "phase": "FINAL52_OVERPASS_IC_DISCOVERY_RESILIENCE",
+  "status": "PR_VALIDATED_RELEASE_PENDING",
   "base": {
-    "productionMainBefore": "6fd1250c3388a06caad5b0d3f4ba1fef013ea81f",
-    "productMergedMain": "5cc7c0b258af705c6996d6018e669a722b45a100",
+    "productionMainBefore": "c68695223f3473c0674c0e7655aa042f4243b2ea",
     "productionCodeChanged": true,
-    "safetyTag": "PASS backup-pre-FINAL51-IC-RETRY-GATE-20261011 immutable annotated -> 6fd1250c3388a06caad5b0d3f4ba1fef013ea81f"
+    "safetyTag": "PASS annotated backup-pre-FINAL52-OVERPASS-RESILIENCE-20261011 -> c68695223f3473c0674c0e7655aa042f4243b2ea; issue #219"
   },
   "versions": {
-    "app": "2026.10.11-FINAL.51",
-    "frontend": "2026.10.11-FINAL.51",
-    "apiTarget": "2026.10.11-FINAL.51",
+    "app": "2026.10.11-FINAL.52",
+    "frontend": "2026.10.11-FINAL.52",
+    "apiTarget": "2026.10.11-FINAL.52",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.51 production closed: routing fix prevents medium HGV alternative timeout starving IC exploration and re-allows IC after quickly recovered alternative fallbacks, retains safety constraints. Source owner FINAL.50 report analyzed; user-specific real ORS provider/IC results after FINAL.51 still unverified.",
-    "productStatus": "PRODUCTION_VERIFIED_AWAITING_OWNER_HIGHWAY_RETEST",
+    "summary": "FINAL.51 operator field diagnostic: IC discovery provider-error, no junctions/candidates, 0 motorway. FINAL.52 uses faster Overpass bounding boxes with local radius filtering, one independent free backup on upstream failure, sanitized HTTP/timeout source diagnostics. HGV quotas and safety unchanged.",
     "productCodeChanged": true,
-    "ownerIntent": "Safely improve expressway candidate choice without paid provider or 2t constraint relaxation"
+    "productStatus": "PR_CODE_GATES_PASS_RELEASE_PENDING",
+    "ownerIntent": "Make previously confirmed IC discovery stage resilient without paying or relaxing registered 2t limits."
   },
   "gates": {
-    "safetyTag": "PASS 38104135671",
-    "finalPRTruckNodeEdge": "PASS 38104482648 exact PR head 31b7fbc...",
-    "finalPRBrowser": "PASS 38104482589 exact PR head 31b7fbc...",
-    "merge": "PASS PR #217 5cc7c0b258af705c6996d6018e669a722b45a100",
-    "mainBrowser": "PASS 38104563171",
-    "githubPages": "PASS 38104563073",
-    "vercelProduction": "PASS READY dpl_Adv5Pnp5Q5b1K5bbBp1jF5eV6vrV exact merged main",
-    "bothLiveVersions": "PASS frontend/backend 2026.10.11-FINAL.51 via fresh public fetch",
-    "dbMigration": "NOT_REQUIRED DB/schema 4",
-    "exactOwnerRoute": "NOT_PERFORMED; HUMAN_REQUIRED field retest after release"
+    "safetyTag": "PASS exact annotated pre-edit target c6869522...",
+    "prTruckNodeRealEdge": "PASS 38105181217 at dfa480672ab193d95b0f7f158fcaf83871a74e8a",
+    "prBrowser": "PASS 38105181191 at dfa480672ab193d95b0f7f158fcaf83871a74e8a",
+    "regression": "PASS isolated provider HTTP 504 fallback and both-unavailable safe-baseline mocks",
+    "mainMerge": "PENDING",
+    "mainBrowser": "PENDING",
+    "githubPages": "PENDING",
+    "vercelProduction": "PENDING",
+    "publicVersions": "PENDING",
+    "exactUserRoute": "NOT PERFORMED; original error only diagnosed to Overpass retrieval class",
+    "dbMigration": "NOT_REQUIRED DB/schema 4"
   },
   "changedFiles": [
+    "api/route.mjs",
+    "truck-routing.js",
+    "index.html",
+    "version.json",
+    "tests/truck-route-api.test.mjs",
+    "tests/truck-route-client.test.mjs",
+    "tests/truck-route-overpass.test.mjs",
+    ".github/workflows/truck-route-gates.yml",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -43,20 +51,20 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Owner field route test and fresh privacy-safe FINAL.51 diagnostic (old FINAL.50 already received)",
-    "Potential route-specific IC selection defect only if real evidence justifies a new bounded change"
+    "Final docs-aligned PR HEAD checks and merge, main Browser/Pages/Vercel/versions",
+    "Real owner exact route safe retest and NEW FINAL.52 diagnostic"
   ],
-  "nextAction": "HUMAN_REQUIRED: after parking/safely not driving, owner shares NEW FINAL.51 高速診断 for DCM尾西店→飛島コンテナ; analyze without guessing real IC outcome.",
+  "nextAction": "Merge FINAL.52 only after final PR gate PASS, then verify both public versions; HUMAN_REQUIRED next copied FINAL.52 report.",
   "unresolved": [
-    "Actual HGV provider expressway/IC result on original corridor still unverified",
-    "AN15 intentionally paused; no additional product development without field evidence"
+    "Real owner route and upstream availability remain unknown",
+    "AN15 paused, free/safety constraints maintained"
   ],
   "continuityCheckpoint": {
-    "status": "PASS_RELEASE_VERIFIED",
-    "createdFor": "FINAL.51 field root fix production closeout",
-    "sourceProductMerge": "5cc7c0b258af705c6996d6018e669a722b45a100",
-    "productCodeChanged": false,
-    "appVersion": "2026.10.11-FINAL.51",
-    "intent": "Await new owner field diagnostic"
+    "status": "PR_GATES_PASS_LIVE_RELEASE_PENDING",
+    "createdFor": "FINAL.52 Overpass diagnostic response",
+    "sourceProductMerge": "NOT_YET_MERGED",
+    "productCodeChanged": true,
+    "appVersion": "2026.10.11-FINAL.52",
+    "intent": "Complete bounded production release, then owner field verification"
   }
 }
