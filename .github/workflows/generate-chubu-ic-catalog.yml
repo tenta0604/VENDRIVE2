@@ -1,0 +1,104 @@
+name: Generate Chubu IC snapshot (manual, guarded)
+
+on:
+  pull_request:
+    paths:
+      - 'tools/build-chubu-ic-catalog.py'
+      - 'tests/test-chubu-catalog.py'
+      - '.github/workflows/generate-chubu-ic-catalog.yml'
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Existing FINAL.54 branch (never main)'
+        required: true
+        type: string
+      expected_branch_sha:
+        description: 'Expected exact pre-generation branch HEAD'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  validate-source:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax and synthetic directional graph tests
+        run: |
+          python -m py_compile tools/build-chubu-ic-catalog.py
+          python tests/test-chubu-catalog.py
+          git diff --check
+  generate:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify pinned source and guarded destination
+        shell: bash
+        env:
+          BRANCH: \${{ inputs.target_branch }}
+          EXPECTED: \${{ inputs.expected_branch_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BRANCH" =~ ^chatgpt/final54-static-ic-[a-z0-9-]+$ ]] || { echo 'INVALID BRANCH'; exit 1; }
+          [[ "$EXPECTED" =~ ^[a-f0-9]{40}$ ]] || { echo 'INVALID SHA'; exit 1; }
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          test "$(git rev-parse "refs/remotes/origin/$BRANCH")" = "$EXPECTED"
+          git config user.name "VENDRIVE OSM Snapshot Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c catalog-generation "refs/remotes/origin/$BRANCH"
+      - name: Download pinned Chubu OSM snapshot once
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE=https://download.geofabrik.de/asia/japan/chubu-261009.osm.pbf
+          curl --fail --location --retry 2 --max-time 720 --silent --show-error "$SOURCE" --output /tmp/chubu.osm.pbf
+          test "$(stat -c%s /tmp/chubu.osm.pbf)" -gt 100000000
+          sha256sum /tmp/chubu.osm.pbf
+      - name: Generate audited directional on/off-ramps
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'osmium>=4,<5'
+          python tools/build-chubu-ic-catalog.py /tmp/chubu.osm.pbf \
+            --source-url https://download.geofabrik.de/asia/japan/chubu-261009.osm.pbf \
+            --source-date 2026-10-09
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('data/chubu-ic-catalog-meta.json').read_text())
+          assert x['entryCount']>=15 and x['exitCount']>=15
+          assert Path('api/chubu-ic-catalog.mjs').stat().st_size<500000
+          assert len(x['source']['pbfSha256'])==64
+          print('CHUBU_METADATA_PASS',x['entryCount'],x['exitCount'])
+          PY
+          node --check api/chubu-ic-catalog.mjs
+          git diff --check
+      - name: Commit only proven sourced data to the guarded branch
+        shell: bash
+        env:
+          BRANCH: \${{ inputs.target_branch }}
+          EXPECTED: \${{ inputs.expected_branch_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          test "$(git rev-parse "refs/remotes/origin/$BRANCH")" = "$EXPECTED"
+          git add api/chubu-ic-catalog.mjs data/chubu-ic-catalog-meta.json
+          git diff --cached --check
+          git diff --cached --quiet && { echo 'EMPTY CATALOG'; exit 1; }
+          git commit -m 'data(FINAL.54): publish versioned Geofabrik Chubu directed ramps'
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo 'SNAPSHOT_COMMITTED from immutable source onto guarded PR branch.'
