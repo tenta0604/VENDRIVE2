@@ -23,6 +23,7 @@ const ALTERNATIVE_FIRST_ATTEMPT_MS=6200;
 // Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
 const recent = [];
 const junctionCache = new Map();
+const junctionInflight = new Map();
 // Warm-instance cooldowns only. This is not a cross-instance/global rate limiter.
 let overpassBlockedUntil = 0;
 function originAllowed(request,origin) {
@@ -85,7 +86,7 @@ function overpassFailureLabel(response){
   if(Number.isInteger(response?.status)&&response.status>=400&&response.status<=599)return 'http-'+response.status;
   return 'invalid-payload';
 }
-async function findMotorwayJunctions(origin,destination,radius){
+async function queryMotorwayJunctions(origin,destination,radius){
   const cacheKey=junctionCacheKey(origin,destination,radius),cached=junctionCache.get(cacheKey),now=Date.now();
   if(cached&&now-cached.at<JUNCTION_CACHE_TTL_MS)return cached.value;
   if(now<overpassBlockedUntil)return {items:[],status:'provider-error',provider:'none',attempts:0,firstFailure:'cooldown',lastFailure:'cooldown'};
@@ -124,6 +125,16 @@ async function findMotorwayJunctions(origin,destination,radius){
     }
   }
   return {items:[],status:lastFailure==='timeout'?'timeout':'provider-error',provider:'none',attempts,firstFailure,lastFailure};
+}
+// Share a single lookup among overlapping route requests in the same warm instance.
+async function findMotorwayJunctions(origin,destination,radius){
+  const key=junctionCacheKey(origin,destination,radius);
+  const existing=junctionInflight.get(key);
+  if(existing)return existing;
+  const pending=queryMotorwayJunctions(origin,destination,radius);
+  junctionInflight.set(key,pending);
+  try{return await pending;}
+  finally{if(junctionInflight.get(key)===pending)junctionInflight.delete(key);}
 }
 function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   const direct=routing.distanceMeters(origin,destination);
