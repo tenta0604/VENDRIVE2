@@ -74,3 +74,65 @@ test('medium mountain detour hitting ORS dynamic distance cap retries without fe
   sent.length=0;ferry=true;response=await POST(request(body));assert.equal(response.status,502);assert.match((await response.json()).message,/フェリー/);
  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+
+test('FINAL.51: medium 2t HGV trip around 42km skips costly alternatives and evaluates a bounded IC route',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+ // Approximate corridor only, not real-provider evidence or actual shop/customer coordinates.
+ const trip={origin:{lat:35.30,lng:136.72},destination:{lat:35.07,lng:136.82},vehicle:{...vehicle,avoidTolls:false}};
+ const base={geometry:{type:'LineString',coordinates:[[136.72,35.30],[136.765,35.18],[136.82,35.07]]},properties:{summary:{distance:42000,duration:2800},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+ const via={geometry:{type:'LineString',coordinates:[[136.72,35.30],[136.74,35.28],[136.765,35.22],[136.79,35.14],[136.82,35.07]]},properties:{summary:{distance:46000,duration:3010},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+ const bodies=[];
+ globalThis.fetch=async(url,opts)=>{
+  if(String(url).includes('overpass-api.de'))return Response.json({elements:[
+   {type:'node',id:91001,lat:35.28,lon:136.74,tags:{ref:'ENTRY'}},
+   {type:'node',id:91002,lat:35.09,lon:136.815,tags:{ref:'EXIT'}}]});
+  const body=JSON.parse(opts.body);bodies.push(body);
+  assert.equal(body.options.vehicle_type,'hgv');
+  assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});
+  assert.deepEqual(body.options.avoid_features,['ferries']);
+  return Response.json({features:[withWaytype(body.coordinates.length===2?base:via)]});
+ };
+ try{
+  const response=await POST(request(trip));assert.equal(response.status,200);
+  const result=await response.json();
+  assert.equal(result.highwaySearch.baselineAlternatives,false,'40km-class HGV trips must skip expensive alternatives');
+  assert.equal(result.highwaySearch.baselineRetried,false);
+  assert.equal(result.highwaySearch.attempted,true);
+  assert.equal(result.highwaySearch.junctionQueryStatus,'ok');
+  assert.ok(result.highwaySearch.accepted>=1);
+  assert.equal(result.selection,'active-ic-expressway-preferred');
+  assert.ok(result.usage.motorwayMeters>6000);
+  assert.ok(bodies.length<=3,'one baseline and at most two via-IC calls');
+  assert.ok(bodies.some(b=>b.coordinates.length===4),'IC route must be evaluated');
+  assert.ok(bodies.every(b=>!b.alternative_routes),'medium-distance ORS requests must remain simple');
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
+test('FINAL.51: quick fallback after alternative timeout can still discover safe IC candidate within budget',async()=>{
+ const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+ const trip={origin:{lat:35.30,lng:136.80},destination:{lat:35.42,lng:136.89},vehicle:{...vehicle,avoidTolls:false}};
+ const base={geometry:{type:'LineString',coordinates:[[136.80,35.30],[136.845,35.36],[136.89,35.42]]},properties:{summary:{distance:19000,duration:1900},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+ const via={geometry:{type:'LineString',coordinates:[[136.80,35.30],[136.81,35.315],[136.84,35.35],[136.88,35.405],[136.89,35.42]]},properties:{summary:{distance:22000,duration:2150},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+ const bodies=[];
+ globalThis.fetch=async(url,opts)=>{
+  if(String(url).includes('overpass-api.de'))return Response.json({elements:[
+   {type:'node',id:92001,lat:35.315,lon:136.81,tags:{ref:'E'}},
+   {type:'node',id:92002,lat:35.405,lon:136.88,tags:{ref:'X'}}]});
+  const body=JSON.parse(opts.body);bodies.push(body);
+  if(body.alternative_routes){const error=new Error('simulated alternative timeout');error.name='AbortError';throw error;}
+  return Response.json({features:[withWaytype(body.coordinates.length===2?base:via)]});
+ };
+ try{
+  const response=await POST(request(trip));assert.equal(response.status,200);
+  const data=await response.json();
+  assert.equal(data.highwaySearch.baselineAlternatives,true);
+  assert.equal(data.highwaySearch.baselineRetried,true);
+  assert.equal(data.highwaySearch.baselineRetryCause,'alternative-timeout');
+  assert.equal(data.highwaySearch.attempted,true,'fallback may not unconditionally suppress IC search');
+  assert.ok(data.highwaySearch.accepted>=1);
+  assert.equal(data.selection,'active-ic-expressway-preferred');
+  assert.ok(bodies.length<=4,'alternative, fallback, and at most two via-IC probes');
+  assert.ok(bodies.some(b=>b.coordinates.length===4));
+  assert.ok(bodies.every(b=>b.options.vehicle_type==='hgv'));
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});

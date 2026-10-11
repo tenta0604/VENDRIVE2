@@ -79,8 +79,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.47 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.09-FINAL.50');
+test('routing asset version matches FINAL.51 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.11-FINAL.51');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -90,6 +90,8 @@ test('highway diagnostic report has actionable IC/ORS status without location or
   const report=routing.highwayDiagnosticReport({...sample,origin:{lat:35.3,lng:136.8},destination:{lat:35.4,lng:136.9},apiKey:'SECRET'},{avoidTolls:false,height:2.85,weight:4.8});
   assert.match(report,/高速設定：ON/);assert.match(report,/IC取得件数：7/);assert.match(report,/IC組合せ評価数：2/);
   assert.match(report,/応答拒否 1/);assert.match(report,/タイムアウト 1/);
+  const skipped=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,attempted:true,junctions:0,junctionQueryStatus:'not-requested',status:'time-budget-skip',timeBudgetLimited:true}},{avoidTolls:false});
+  assert.match(skipped,/追加IC探索は時間不足で実行せず/,'time-budget skips must not pretend that zero ICs were returned');
   for(const secret of ['35.3','35.4','136.8','136.9','SECRET','2.85','4.8'])assert.ok(!report.includes(secret),'report must exclude '+secret);
   const rejected=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,accepted:1,finalEligible:0}},{avoidTolls:false});
   assert.match(rejected,/最終採用0件/);
