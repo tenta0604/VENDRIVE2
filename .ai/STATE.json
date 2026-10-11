@@ -9,10 +9,10 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL55_IC_POLICY_DIAGNOSTICS_CODE_PR_AWAITING_CI_RELEASE",
+  "status": "FINAL55_PRODUCTION_VERIFIED_AWAITING_OWNER_HGV_ELIGIBILITY_REPORT",
   "currentWork": {
-    "title": "FINAL.55 time/distance gate rejection telemetry added, product PR #238 verification pending",
-    "releaseStatus": "Owner authorized Issue #235, after real FINAL.54 report with 244 saved OSM IC nodes and 2 ORS via HGV motorway candidates but final eligible 0. FINAL.55 PR #238 code head e2ee0cf7512044354adb5357d421b16742b15293: privacy-safe per-gate counts and 1min/1km-ceiled anonymous excess, with unchanged final route eligibility. PR CI and release remain pending at this checkpoint; public FINAL.54 until both live versions verified.",
+    "title": "FINAL.55 released: time/distance eligibility diagnostics, awaiting NEW real corridor report",
+    "releaseStatus": "FINAL.55 PR #238 merged at f16ee87e6b4dbd1dc0fd416162ef5cff5adef095. Final PR Truck Node/API/real Edge 38157458757 PASS, PR Browser 38157458791 PASS, postmerge main Browser 38157565052 PASS and GitHub Pages 38157558531 PASS. Vercel production dpl_GTqKaCX8ozsSGhbztfWK4rnQpRNk READY exact merged main, fresh public frontend/backend version.json both 2026.10.11-FINAL.55. NEW owner real IC eligibility report not yet received; no proof actual route meets unchanged detour caps.",
     "releaseScope": [
       "Instrument only final eligibility policy: accepted via-HGV routes categorized as time-only/distance-only/both/eligible using exact existing maxDuration baseline+min(480s,20%) and maxDistance baseline+min(10000m,30%).",
       "Return no more than 2 anonymous candidate results containing only whole-minute/kilometer upward-rounded *positive excess*; include threshold increments one decimal, zero exact geometry, route IDs, coordinates, addresses, vehicle details, credentials.",
@@ -128,7 +128,15 @@
       "final55SafetyTag": "PASS annotated backup-pre-FINAL55-IC-ELIGIBILITY-DIAGNOSTICS-20261011 -> b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47; workflow 38156923713 PASS; Issue #237",
       "final55PR": "PR #238; code head e2ee0cf7512044354adb5357d421b16742b15293, final docs head pending",
       "final55CodeGates": "PENDING GitHub Actions run at source head; DO NOT claim CI PASS until actual checks complete",
-      "final55Production": "PENDING main merge, main browser/Pages, Vercel READY, both public version FINAL.55"
+      "final55Production": "PASS fresh public Pages and Vercel version.json both 2026.10.11-FINAL.55 on 2026-10-12 Tokyo date; real owner via-IC route not field checked",
+      "final55ProductPR": "PR #238 merged exact main f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
+      "final55InitialTruck": "38157339554 PASS code-only e2ee0cf7512044354adb5357d421b16742b15293",
+      "final55InitialBrowser": "38157339616 PASS code-only e2ee0cf7512044354adb5357d421b16742b15293",
+      "final55FinalPRTruck": "38157458757 PASS at e15ac7505e25b47894b44a0e0e80a6d036ecd2ab",
+      "final55FinalPRBrowser": "38157458791 PASS at e15ac7505e25b47894b44a0e0e80a6d036ecd2ab",
+      "final55MainBrowser": "38157565052 PASS",
+      "final55Pages": "38157558531 PASS",
+      "final55Vercel": "dpl_GTqKaCX8ozsSGhbztfWK4rnQpRNk READY production exact product main f16ee87e6b4dbd1dc0fd416162ef5cff5adef095"
     },
     "decision": [
       "Owner says 進めて, explicitly approving Issue #235 narrow FINAL.55 telemetry. Implement as diagnostic ONLY, no tolerance increase, no routes/traffic safety changes.",
@@ -138,18 +146,18 @@
       "Mock fixtures are not real-user field truth. After FINAL.55 live, owner provides NEW FINAL.55 privacy-safe report from same corridor to decide whether any user-visible routing preference change is justified."
     ],
     "nextActions": [
-      "Obtain PR #238 Node/API/real Edge and Browser CI PASS at exact docs-aligned head, fix only evidence-based failures, never merge failing/unknown gates.",
-      "Then merge PR #238, verify postmerge main Browser/Pages and Vercel production exact SHA READY and fresh both version.json FINAL.55.",
-      "After full release, HUMAN_REQUIRED: owner safely parked or passenger repeats DCM尾西店 → 飛島コンテナ vicinity highway ON and pastes NEW FINAL.55 copied highway diagnosis including candidate rejection categories; old FINAL.54 already supplied.",
-      "Do not increase route delay/detour policy nor add external API calls, resume AN15, or weaken registered 2t HGV restrictions."
+      "HUMAN_REQUIRED: owner, safely parked or passenger, reruns DCM尾西店→飛島コンテナ付近 with highway ON on live FINAL.55 and copies NEW privacy-safe 高速診断.",
+      "Examine time-only vs distance-only vs both counts and per-candidate upward-rounded extra minutes/km under unchanged duration max baseline + min(8min,20%) and distance max baseline + min(10km,30%).",
+      "Only after the actual field overage metrics, discuss whether to change IC pair choices or user preference; do not automatically widen caps or force a toll highway.",
+      "Preserve restricted 2t ORS driving-hgv, full safety/ferry controls, max 2 optional IC provider probes, free quotas, static Chubu OSM source refresh and intentional AN15 pause."
     ],
     "fieldEvidenceIntake": {
-      "status": "FINAL54_REAL_REPORT_RECEIVED_FINAL55_TELEMETRY_PR_CODED_NOT_LIVE",
+      "status": "FINAL55_PUBLIC_RELEASE_VERIFIED_AWAITING_NEW_REAL_GATE_DIAGNOSTIC",
       "ownerConfirmationDate": "2026-10-11",
-      "nextInput": "After verified release, NEW VENDRIVE 高速診断 2026.10.11-FINAL.55 with time/distance/both rejection and rounded excess.",
-      "criticalBoundary": "Diagnostic derives only from ORS HGV returned route summary and exact untouched policy; mock tests and production version verification cannot prove any real IC highway route actually satisfies caps.",
-      "expectedData": "Future diagnostic should include time-only/distance-only/both rejection breakdown and rounded exceeding minutes/km, without locations/secrets.",
-      "firstAction": "Finish PR #238 code/test gates and live release before requesting any new user field report. No need to repeat FINAL.54.",
+      "nextInput": "VENDRIVE 高速診断 2026.10.11-FINAL.55 with IC採用上限 and per-candidate time/distance/both rejection/excess.",
+      "criticalBoundary": "FINAL.55 production and mocked CI PASS. Only actual route retest can reveal real candidate overages, and no safety/selection conditions have been relaxed.",
+      "expectedData": "Reject counts time-only/distance-only/both/eligible, max-2 anonymous whole-minute/km overruns, existing IC local source and accepted HGV candidates, selected motorway km.",
+      "firstAction": "NEW owner FINAL.55 copied privacy-safe highway report after safe same-route retest. Do not ask to repeat already received FINAL.54 244 IC/two HGV candidates/zero eligible report.",
       "analysisSequence": [
         "Validate copied diagnostic version; if pre-FINAL.50, do not attribute results to FINAL.50.",
         "Differentiate provider baseline timeout vs Vercel/client timeout vs ORS rejection and quota using actual text plus code.",
@@ -158,15 +166,16 @@
         "Provide an evidence-backed, narrowly scoped remedy and tests before any further production code changes."
       ],
       "privacy": "Do not paste secrets/API keys, exact live GPS or private addresses into public repo. Diagnostics are intended to omit those fields.",
-      "productionBoundary": "FINAL.55 code PR not merged or live at this checkpoint; public remains FINAL.54.",
+      "productionBoundary": "FINAL.55 published on both frontend and backend. Real DCM尾西店→飛島コンテナ selection remains blocked until new report proves otherwise.",
       "preservedConstraints": "Registered 2t vehicle via driving-hgv, no driving-car/straight-line fallback, free usage, warm 30 calls/min and max 2 optional via-IC probes, 14.5s server/20s client budgets, original detour caps, DB/schema 4, AN15 intentionally paused."
     }
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.55 PR #238 full Node/API/real Edge/browser CI unverified; cannot release until PASS",
-    "Actual HGV via-IC routes' overages in DCM尾西店→飛島コンテナ remain unknown until new FINAL.55 real report",
-    "AN15 paused; unchanged OSM sourced ICs/registered HGV routes and ORS free quota"
+    "Owner-specific actual via-IC rejection time/distance/both unknown until NEW FINAL.55 report; current product may still select 0km motorway",
+    "Future design change to selection caps or candidate IC order would require new user choice and actual evidence, not assumed from mocks",
+    "Snapshot valid 120 days from 2026-10-09 OSM and needs intentional manual ODbL refresh, avoid unbounded paid external APIs",
+    "AN15 paused, exact registered driving-hgv/ORS quotas and ferry detour safety unchanged"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -179,18 +188,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2最新main/7正本を読み直す。ユーザーはFINAL.55採用基準の診断追加に進めてと承認。PR #238に時間超過のみ／距離超過のみ／両方超過の件数と各候補の切り上げ超過分（匿名・最大2件）を追加、元の+8分/20%、+10km/30%と2t HGV経路は一切変えず。安全タグ backup-pre-FINAL55-IC-ELIGIBILITY-DIAGNOSTICS-20261011 は b6361548...に。まずPRの実CIが動いてPASSしているか確認、未起動ならGitHub Actionsの技術ブロック切り分け、成功したらmerge/Pages/Vercel双方FINAL.55を確認しオーナー実機診断を依頼。AN15停止維持。",
+    "shortResumePrompt": "VENDRIVE2最新mainと7canonicalを参照。FINAL.55 PR #238 merged at f16ee87e6b4dbd1dc0fd416162ef5cff5adef095: 時間のみ/距離のみ/両方超過の件数と最大2候補の匿名超過分診断を追加。元の2t HGV・フェリー/迂回採用上限+8分/20%, +10km/30%、ORS無料枠、AN15停止は一切変更なし。PR Node/API/real Edge 38157458757、Browser 38157458791、main Browser 38157565052、Pages 38157558531 PASS、Vercel dpl_GTqKaCX8ozsSGhbztfWK4rnQpRNk READY、公開両者FINAL.55確認済み。次は安全に停車して同一路線の新しいFINAL.55高速診断を受け、時間距離どちらが失敗したか検討。旧FINAL.54は再提出不要。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.55 privacy-safe IC eligibility telemetry code committed PR #238; CI, merge and live release pending. Old FINAL.54 user report received; next owner report only AFTER FINAL.55 release.",
-    "latestContinuityCheckpoint": "2026-10-11 UTC FINAL.55 PR #238 code written, exact safety tag verified, instrumentation-only CI pending",
+    "handoffBoundary": "FINAL.55 fully shipped and verified. Real FINAL.54 report 244 ICs, 2 HGV via candidates, 0 eligible already received; next HUMAN_REQUIRED NEW FINAL.55 report explaining time/distance rejection. No more speculative code.",
+    "latestContinuityCheckpoint": "2026-10-12 FINAL.55 HGV IC rejection diagnostics product PR #238 merged, main Browser Pages Vercel and both live versions verified, awaiting safe owner report",
     "pauseMode": {
-      "active": false,
-      "requestedBy": "Owner explicitly authorized issue #235 on 2026-10-12 Tokyo time",
-      "intent": "Complete FINAL.55 diagnostics-only release after required gates",
+      "active": true,
+      "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
+      "intent": "No automatic highway threshold change; wait for one new privacy-safe field report",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "User 進めて",
-      "productCodeChanged": true
+      "source": "2026-10-12 FINAL.55 verified",
+      "productCodeChanged": false
     }
   }
 }

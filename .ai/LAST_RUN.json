@@ -1,10 +1,11 @@
 {
-  "evidenceVersion": 84,
-  "runType": "final55_real_hgv_ic_gate_diagnostics_pr_20261011",
-  "phase": "FINAL55_IC_FINAL_SELECTION_DIAGNOSTICS",
-  "status": "CODE_PR_CREATED_GATES_PENDING",
+  "evidenceVersion": 85,
+  "runType": "final55_eligibility_gate_diag_production_release_closeout_20261012",
+  "phase": "FINAL55_IC_HGV_TIME_DISTANCE_DIAGNOSTICS_PRODUCTION",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47",
+    "productMergedMain": "f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
     "productionCodeChanged": true,
     "safetyTag": "PASS annotated backup-pre-FINAL55-IC-ELIGIBILITY-DIAGNOSTICS-20261011 -> b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47"
   },
@@ -17,31 +18,26 @@
     "schema": 4
   },
   "work": {
-    "summary": "Owner authorized diagnostic-only FINAL.55 to show which of two sourced ORS HGV via-IC motorway routes exceeded unchanged baseline +8min/20% or +10km/30% selection caps; no changes to actual eligibility or provider volume.",
-    "productStatus": "PR_CREATED_NO_CI_EVIDENCE_YET",
+    "summary": "FINAL.55 shipped: two real HGV via motorway candidates which fail unchanged time and/or distance policy can now be explained with aggregate counts and two anonymous upward-rounded positive minute/km overages. No change to chosen route, 2t HGV, quotas, ferries or selection caps.",
+    "productStatus": "PRODUCTION_VERIFIED_OWNER_DIAGNOSTIC_PENDING",
     "productCodeChanged": true,
-    "ownerIntent": "Trace why local IC source succeeds but two via HGV candidate routes are not selected before considering any routing policy change"
+    "ownerIntent": "Disambiguate duration vs distance gate in real FINAL.54 case before any further highway routing policy revision"
   },
   "gates": {
-    "safetyTag": "PASS workflow 38156923713",
-    "codeCommit": "e2ee0cf7512044354adb5357d421b16742b15293",
-    "mockRegression": "PENDING GitHub CI",
-    "prTruckNodeRealEdge": "PENDING",
-    "prBrowser": "PENDING",
-    "mainMerge": "PENDING",
-    "mainBrowser": "PENDING",
-    "githubPages": "PENDING",
-    "vercelProduction": "PENDING",
-    "publicVersions": "PENDING",
-    "realOwnerDiagnostic": "HUMAN_REQUIRED only after live release"
+    "immutableSafetyTag": "PASS workflow 38156923713",
+    "codePRTruckNodeRealEdge": "PASS 38157339554",
+    "codePRBrowser": "PASS 38157339616",
+    "finalPRTruckNodeRealEdge": "PASS 38157458757",
+    "finalPRBrowser": "PASS 38157458791",
+    "merge": "PASS PR #238 f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
+    "mainBrowser": "PASS 38157565052",
+    "githubPages": "PASS 38157558531",
+    "vercelProduction": "PASS READY dpl_GTqKaCX8ozsSGhbztfWK4rnQpRNk exact product main",
+    "bothPublicVersions": "PASS fresh Pages and Vercel version.json 2026.10.11-FINAL.55",
+    "dbMigration": "NOT_REQUIRED DB/schema4 unchanged",
+    "ownerFieldReport": "HUMAN_REQUIRED fresh FINAL.55 copied safe highway diagnosis"
   },
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "tests/truck-route-local-catalog.test.mjs",
-    "tests/truck-route-client.test.mjs",
-    "index.html",
-    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -49,21 +45,21 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Get actual PR CI results and resolve any code errors",
-    "Merge and verify exact production main and live FINAL.55 if and only if gates PASS",
-    "New owner safe FINAL.55 diagnostic for actual rejection reason"
+    "Human sends NEW privacy-safe FINAL.55 report same origin destination after safely stopped passenger retest",
+    "Interpret actual time/distance/both overages, do not relax 8min/10km caps until user sees evidence",
+    "Maintain dated OSM source refresh and paused AN15"
   ],
-  "nextAction": "PASS PR #238 node/real Edge/browser gates, merge and production version checks. Current product FINAL.54 until verified.",
+  "nextAction": "HUMAN_REQUIRED owner same-corridor new FINAL.55 highway diagnosis.",
   "unresolved": [
-    "Actual route duration/distance overshoots unknown",
-    "AN15 paused, HGV safety unchanged"
+    "No real per-candidate rejection data until user field test; highway0km may persist",
+    "AN15 remains paused"
   ],
   "continuityCheckpoint": {
-    "status": "CODE_PR_AWAITING_VERIFICATION",
-    "createdFor": "FINAL.55 privacy-safe IC route eligibility diagnosis",
-    "sourceProductMerge": "NOT_MERGED",
-    "productCodeChanged": true,
+    "status": "FINAL55_PRODUCTION_VERIFIED",
+    "createdFor": "FINAL.55 exact HGV via-IC acceptance gate diagnostics",
+    "sourceProductMerge": "f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
+    "productCodeChanged": false,
     "appVersion": "2026.10.11-FINAL.55",
-    "intent": "Exact CI first, then production"
+    "intent": "Wait for new real operator diagnostic"
   }
 }
