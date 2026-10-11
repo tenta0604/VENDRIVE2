@@ -9,9 +9,9 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL50_PRODUCTION_VERIFIED_WAITING_FOR_OWNER_FIELD_ROUTE",
+  "status": "FINAL50_PRODUCTION_VERIFIED_AWAITING_COPIED_HIGHWAY_DIAGNOSTIC",
   "currentWork": {
-    "title": "FINAL.50 HGV route-engine corrections deployed, CI/public verified; await real failing route evidence",
+    "title": "FINAL.50 shipped; owner already copied MAP highway diagnostic, next chat must accept pasted text FIRST",
     "releaseStatus": "FINAL.50 PR #213 merged 1eb762dc1ed4cc5f573f07a6894b77bd02296deb. Final PR Truck/Node/real Edge 37920822527 PASS, PR Browser 37920822721 PASS, main Browser 37920983030 PASS, Pages 37920982456 PASS. Vercel production dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe READY at exact main 1eb762dc1ed4cc5f573f07a6894b77bd02296deb. Public GitHub Pages and Vercel version.json both FINAL.50 on 2026-10-09. No real owner route or unauthenticated protected preview route smoke was performed.",
     "releaseScope": [
       "Avoid public ORS 100km alternative-route cap: request up to 3 alternatives only for <55km direct, not for long trips or reroutes",
@@ -92,18 +92,38 @@
       "Stop AN15 unrelated work and no subscription or pricing change"
     ],
     "nextActions": [
-      "OWNER FIELD CHECK: on actual problematic long highway-ON route, test FINAL.50 timeout and selected entry/exit",
-      "If not correct, collect just approximate start/destination and privacy-safe MAP 高速診断; no address/coordinates/tokens needed in shared diagnostic",
-      "STOP: do not start unrelated product phase, further code, paid APIs or AN15 without new user direction",
-      "Highway provider/OSM topology limitations are not proven fixed by mock tests; treat real-device findings as a new scoped maintenance task"
-    ]
+      "FIRST ON NEXT CHAT: ask user to paste the MAP highway diagnostic they have ALREADY COPIED; do not make them recopy it.",
+      "Read diagnostic header/version and every search/selection/candidate/error line; map values to current api/route.mjs and truck-routing.js.",
+      "Separate actual measured cause from unverified hypothesis, including long-trip timeout, premature IC exit and missing entry.",
+      "Only if needed for geographic IC decisions, ask for approximate origin/destination and expected entry/exit IC after the diagnostic is reviewed; no precise location or private details required.",
+      "Do not code, deploy, restart AN15 or open a new product PR until the diagnostic has been reviewed and a bounded fix is justified."
+    ],
+    "fieldEvidenceIntake": {
+      "status": "COPIED_BY_OWNER_NOT_YET_PASTED_IN_CHAT",
+      "ownerConfirmationDate": "2026-10-11",
+      "nextInput": "Full text of existing copied VENDRIVE 高速診断, to be posted by owner in the next new chat as the very next step.",
+      "criticalBoundary": "Diagnostic text is NOT present in this conversation or repository. Do not infer its contents, mark it analyzed, ask owner to repeat the copy operation, or start an unscoped fix.",
+      "expectedData": "Version line, highway ON/OFF, selection mode, selected motorway km vs existing ORS motorway km, whether baseline alternatives/retry/long ferry test happened, extra IC search/IC counts/probe failures/remaining time and diagnostic conclusion.",
+      "firstAction": "Recover latest synchronized GitHub main and seven canonical files; explicitly ask user to paste the already-copied text. When pasted, analyze exact lines rather than heuristics; establish whether report version is FINAL.50.",
+      "analysisSequence": [
+        "Validate copied diagnostic version; if pre-FINAL.50, do not attribute results to FINAL.50.",
+        "Differentiate provider baseline timeout vs Vercel/client timeout vs ORS rejection and quota using actual text plus code.",
+        "Explain if highway underuse came from search skipped, no junctions, too-few pairs, rejected/timeout via-IC, ferry verification, route eligibility/detour caps, or final selection; classify proven vs possible causes.",
+        "Compare offered motorway distance with user observation; ask approximate start/end and expected IC names only if the copied diagnosis alone cannot localize the discrepancy.",
+        "Provide an evidence-backed, narrowly scoped remedy and tests before any further production code changes."
+      ],
+      "privacy": "Do not paste secrets/API keys, exact live GPS or private addresses into public repo. Diagnostics are intended to omit those fields.",
+      "productionBoundary": "FINAL.50 is shipped and CI/live-version verified; user route was never independently reproduced with real ORS. PR #213 and old validation branches are closed; do not resume or merge them.",
+      "preservedConstraints": "Registered 2t vehicle via driving-hgv, no driving-car/straight-line fallback, free usage, warm 30 calls/min and max 2 optional via-IC probes, 14.5s server/20s client budgets, original detour caps, DB/schema 4, AN15 intentionally paused."
+    }
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Real HGV provider response and actual user-described highway entrance/exit quality not independently field verified",
-    "User's representative start/destination for reproducing wrong/early IC selection not provided",
-    "HGV restrictions and waytype metadata depend on provider data correctness; no automatic fallback to passenger-car routing",
-    "AN15 intentionally paused"
+    "OWNER HAS COPIED privacy-safe VENDRIVE highway diagnosis but has NOT pasted it yet: next chat's first user-provided evidence.",
+    "Exact diagnostic mode, route/version, provider errors/timeout and motorway/IC probe counters not yet known: no conclusions can be drawn from unseen text.",
+    "User reported far-trip timeouts, missed expressway entries and premature exits; FINAL.50 automated CI/public deployment passed, but this representative trip remains unverified.",
+    "Approximate start/end and expected ICs may be requested after diagnostic review if truly needed; do not block receiving the copied text.",
+    "AN15 intentionally paused; HGV route/cost/quota and DB/schema constraints unchanged."
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -116,17 +136,17 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2の最新mainと7つのcanonical filesを確認して。FINAL.50はGitHub PagesとVercelで本番確認済みだが、遠距離タイムアウトと高速IC選択の実機走行は未検証。私の失敗ルートや高速診断が届くまで勝手な改修やAN15再開をしないで。",
+    "shortResumePrompt": "VENDRIVE2の最新GitHub mainと7つのcanonical filesを読んで。FINAL.50本番公開済み。次は私が既にコピーした「高速診断」の全文をこのチャットに貼るので、まず受け取り、バージョンと各数値を一行ずつ分析して。内容を見る前に修正やマージをしない。AN15停止・2t車HGV安全制約は維持。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.50 PR #213 deployed at 1eb762dc1ed4cc5f573f07a6894b77bd02296deb; real provider/owner-specific IC route remains unverified; request approximate route/highway diagnostics when user returns, do not assert guaranteed correction. AN15 paused.",
-    "latestContinuityCheckpoint": "2026-10-09 FINAL.50 deployed and live verified; owner route field validation pending",
+    "handoffBoundary": "2026-10-11 migration checkpoint: FINAL.50 deployed, PR #213 merged/closed. User has copied privacy-safe MAP高速診断 but has NOT submitted text yet. New chat must receive and analyze copied diagnostic as FIRST task, then determine whether specific highway entry/exit or timeout needs a follow-up fix. No premature code/deploy; AN15 paused.",
+    "latestContinuityCheckpoint": "2026-10-11 copied-highway-diagnostic awaiting paste, FINAL.50 public release confirmed earlier",
     "pauseMode": {
       "active": true,
-      "requestedBy": "FINAL.50 bounded production release complete",
-      "intent": "Wait for owner's representative real failed HGV route and privacy-safe diagnostic",
+      "requestedBy": "Owner new chat migration while copying highway diagnostic",
+      "intent": "Do not continue routing code until owner pastes and we analyze their already-copied highway diagnosis",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "2026-10-09 FINAL.50 release verification",
+      "source": "Owner explicit 2026-10-11 transition request",
       "productCodeChanged": false
     }
   }

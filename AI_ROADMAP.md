@@ -373,3 +373,8 @@ Owner's real-device field complaint on FINAL.49: long route API timeouts and pre
 ## FINAL.50 production verification and field boundary — 2026-10-09
 
 PR #213 merged `1eb762dc1ed4cc5f573f07a6894b77bd02296deb`; final PR Truck/Node/real Edge `37920822527` PASS, Browser `37920822721` PASS, main Browser `37920983030` PASS, Pages `37920982456` PASS. Vercel `dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe` READY exact main; public frontend/backend FINAL.50 verified. Code mitigating ORS alternatives/dynamic distance caps and limited expressway search is deployed. **Real owner's long trip/IC quality is still unverified**, not equivalent to CI. Owner should supply approximate failed route start/destination and safe MAP 高速診断 if ongoing. AN15 pause and HGV/cost constraints unchanged. No further phase on its own.
+
+
+## 2026-10-11 migration / next evidence intake (no new product phase)
+
+FINAL.50 is already merged and live-verified, but not route-specific iPhone-confirmed. Owner has copied the private-safe `VENDRIVE 高速診断` and will PASTE IT at the START of a new chat; it has not been provided yet. First analyze that exact report, including its app version, routing decision, motorway usage and IC search counters, before seeking approximate route/IC location or considering further code changes. Historical PR #213 is merged/closed; do not treat it as pending work. This is a docs-only cross-chat handoff and does not change product priority, engine, DB/schema, costs, or the intentionally paused AN15 phase.
