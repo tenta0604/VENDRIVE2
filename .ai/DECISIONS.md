@@ -737,3 +737,9 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 
 - PR #217 merged at `5cc7c0b258af705c6996d6018e669a722b45a100` after final PR, main, Pages and Vercel release gates passed, live app/API both FINAL.51.
 - Approval of release does not certify specific DCM尾西店→飛島コンテナ expressway IC sequence; await NEW copied FINAL.51 diagnosis for factual real-route conclusion. Preserve all registered 2t driving-hgv safety and cost restrictions, keep AN15 paused.
+
+## 2026-10-11 — FINAL.52 bounded Overpass IC discovery resilience
+
+- User's privacy-safe FINAL.51 highway diagnosis confirms `provider-error` on attempted IC discovery with zero junctions. Do not infer HTTP 429/504, connection failure, or exact missing junction from this old report because the old diagnostics suppressed these details.
+- Permit one backup of public Overpass independent instance on provider failure, optimize bbox lookup with final strict radial inclusion, retain bounded 3.1s/provider and at most two lookup attempts. Diagnostic may show sanitized provider/HTTP/error categories, without coordinates, names or secrets. Never manufacture an IC/route when both providers fail.
+- No change to ORS `driving-hgv` restrictions, warm free ORS 30/min cap, maximum 2 optional IC HGV probes, global time and detour limits, ferry safety, cost tier, AN15 pause, DB/schema/engine. User's actual route/IC usability remains a postrelease validation task.
