@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "provider": "Geofabrik",
+    "region": "Chubu Japan",
+    "url": "https://download.geofabrik.de/asia/japan/chubu-261009.osm.pbf",
+    "pbfSha256": "3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150",
+    "sourceDate": "2026-10-09",
+    "license": "OpenStreetMap contributors, ODbL 1.0"
+  },
+  "generatedAt": "2026-10-11T11:59:46.367252+00:00",
+  "bounds": [
+    34.83,
+    136.42,
+    35.56,
+    137.28
+  ],
+  "entryCount": 299,
+  "exitCount": 298,
+  "method": "shared directed motorway/motorway_link nodes, explicit/access-gated"
+}
