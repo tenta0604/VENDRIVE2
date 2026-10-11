@@ -85,3 +85,82 @@ test('FINAL.54: covered regional HGV search never calls Overpass; only restricte
     else process.env.ORS_API_KEY=key;
   }
 });
+
+test('FINAL.55: real regional catalog reports time-only and distance-only exclusions without relaxing rules',async()=>{
+  const key=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;
+  process.env.ORS_API_KEY='test-only';
+  let calls=0;
+  const rejectedRoutes=[
+    {...via,properties:{...via.properties,summary:{distance:45500,duration:3841}}}, // time exceeds 3780s by 61s -> ceil 2min
+    {...via,properties:{...via.properties,summary:{distance:53501,duration:3520}}} // distance exceeds 52500m by 1001m -> ceil 2km
+  ];
+  globalThis.fetch=async(url,opts)=>{
+    assert.ok(String(url).includes('/driving-hgv/'));
+    assert.ok(!String(url).includes('overpass'));
+    const data=JSON.parse(opts.body);
+    assert.equal(data.options.vehicle_type,'hgv');
+    assert.deepEqual(data.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});
+    calls++;
+    if(data.coordinates.length===2)return Response.json({features:[baseline]});
+    return Response.json({features:[rejectedRoutes[Math.min(calls-2,1)]]});
+  };
+  try{
+    const res=await POST(request({origin,destination,vehicle}));
+    assert.equal(res.status,200);
+    const data=await res.json(),h=data.highwaySearch;
+    assert.equal(data.selection,'active-highway-unavailable');
+    assert.equal(h.accepted,2);
+    assert.equal(h.finalEligible,0);
+    assert.equal(h.viaGateTimeOnly,1);
+    assert.equal(h.viaGateDistanceOnly,1);
+    assert.equal(h.viaGateBoth,0);
+    assert.equal(h.viaGateEligible,0);
+    assert.equal(h.viaDurationLimitMinutes,8);
+    assert.equal(h.viaDistanceLimitKm,10);
+    assert.deepEqual(h.viaGateDetails,[
+      {outcome:'time-only',overMinutes:2,overKm:0},
+      {outcome:'distance-only',overMinutes:0,overKm:2}
+    ]);
+    assert.equal(h.junctionProvider,'local');
+    assert.equal(h.junctionAttempts,0);
+    assert.equal(calls,3,'baseline and at most two HGV candidate calls');
+    assert.equal(data.usage.motorwayMeters,0);
+  }finally{
+    globalThis.fetch=oldFetch;
+    if(key===undefined)delete process.env.ORS_API_KEY;
+    else process.env.ORS_API_KEY=key;
+  }
+});
+
+test('FINAL.55: double-gate exclusions are diagnosed, existing safe selection remains unchanged',async()=>{
+  const key=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;
+  process.env.ORS_API_KEY='test-only';
+  let calls=0;
+  globalThis.fetch=async(url,opts)=>{
+    assert.ok(String(url).includes('/driving-hgv/'));
+    assert.ok(!String(url).includes('overpass'));
+    const data=JSON.parse(opts.body);calls++;
+    assert.equal(data.options.vehicle_type,'hgv');
+    return Response.json({features:[data.coordinates.length===2?baseline:
+      {...via,properties:{...via.properties,summary:{distance:54500,duration:3900}}}]});
+  };
+  try{
+    const res=await POST(request({origin,destination,vehicle}));
+    assert.equal(res.status,200);
+    const data=await res.json(),h=data.highwaySearch;
+    assert.equal(data.selection,'active-highway-unavailable');
+    assert.equal(h.viaGateBoth,2);
+    assert.equal(h.viaGateTimeOnly,0);
+    assert.equal(h.viaGateDistanceOnly,0);
+    assert.equal(h.viaGateEligible,0);
+    assert.deepEqual(h.viaGateDetails,[
+      {outcome:'both',overMinutes:2,overKm:2},
+      {outcome:'both',overMinutes:2,overKm:2}
+    ]);
+    assert.equal(calls,3);
+  }finally{
+    globalThis.fetch=oldFetch;
+    if(key===undefined)delete process.env.ORS_API_KEY;
+    else process.env.ORS_API_KEY=key;
+  }
+});

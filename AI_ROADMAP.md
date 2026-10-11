@@ -418,3 +418,7 @@ Product PR #233 merged `6bd92036f9cc8439a1d7c359173dde17481387b8` after final No
 ## 2026-10-11 FINAL.54 field report received: eligibility gates are remaining blocker (Issue #235)
 
 Live FINAL.54 already solved volatile IC sourcing: 244 local OSM nodes and zero external requests; 2 entry/exit pairs, 2 via HGV candidate routes with highway, but final eligibility 0 and selected motorway 0.0km. Both valid via candidates were excluded by time (baseline + min(8min,20%)) and/or distance (baseline + min(10km,30%)) limits. Exact failing dimension cannot be determined until diagnostic adds safe rounded rejection details. Propose FINAL.55 in Issue #235 **only** for source-free duration/distance gate reporting; cap relaxation/new ORS calls/highway forcing not approved. Preserve AN15 pause, OSM snapshots and registered 2t HGV.
+
+## 2026-10-12 JST FINAL.55 approved diagnostic-only gate provenance
+
+Owner approved Issue #235. PR #238 adds specific duration-only/distance-only/both route rejection counts, up to 2 anonymous candidate overages rounded upwards, threshold policy in copied diagnosis. Eligibility (baseline+min(8min,20%) and +min(10km,30%)), full HGV safety, ORS call count, ferry, free provider, OSM snapshot, and AN15 pause unchanged. Annotated safety tag on b6361548... confirmed. PR real Edge/Node/browser CI not yet observed; do not merge until PASS. Public is FINAL.54 pending true FINAL.55 deploy, then get NEW owner real corridor diagnosis.

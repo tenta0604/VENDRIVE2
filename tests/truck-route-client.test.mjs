@@ -79,8 +79,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.54 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.11-FINAL.54');
+test('routing asset version matches FINAL.55 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.11-FINAL.55');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -95,6 +95,18 @@ test('highway diagnostic report has actionable IC/ORS status without location or
   for(const secret of ['35.3','35.4','136.8','136.9','SECRET','2.85','4.8'])assert.ok(!report.includes(secret),'report must exclude '+secret);
   const rejected=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,accepted:1,finalEligible:0}},{avoidTolls:false});
   assert.match(rejected,/最終採用0件/);
+  assert.match(rejected,/時間のみ超過 未取得/,'old backend response must remain readable');
+  const tested=routing.highwayDiagnosticReport({...sample,highwaySearch:{
+    ...sample.highwaySearch,accepted:2,finalEligible:0,
+    viaDurationLimitMinutes:8,viaDistanceLimitKm:10,
+    viaGateTimeOnly:1,viaGateDistanceOnly:0,viaGateBoth:1,viaGateEligible:0,
+    viaGateDetails:[{outcome:'time-only',overMinutes:2,overKm:0},{outcome:'both',overMinutes:3,overKm:4}]
+  }},{avoidTolls:false});
+  assert.match(tested,/IC採用上限.*時間 \+8\.0分.*距離 \+10\.0km/);
+  assert.match(tested,/時間のみ超過 1／距離のみ超過 0／両方超過 1／条件内 0/);
+  assert.match(tested,/候補1 時間のみ（時間超過 \+2分／距離超過 \+0km）/);
+  assert.match(tested,/候補2 時間と距離（時間超過 \+3分／距離超過 \+4km）/);
+  for(const privateText of ['35.3','136.8','SECRET','2.85','4.8'])assert.ok(!tested.includes(privateText));
   const noPairs=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,evaluated:0}},{avoidTolls:false});
   assert.match(noPairs,/IC組合せ0件/);
   const overpassError=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctions:0}},{avoidTolls:false});

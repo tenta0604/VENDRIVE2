@@ -777,3 +777,9 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - New real owner diagnostic proves FINAL.54 local catalog works (244 IC, no external calls) and both bounded ORS HGV via-IC requests resulted in meaningful motorway route candidates, but both failed final route-selection eligibility.
 - `priorityMeters>100` is satisfied for accepted HGV candidates with meaningful motorway; remaining rejection is the time or distance cap (or both). The report does **not** expose which and must not justify relaxing thresholds blindly. Keep +min(8min,20%) and +min(10km,30%), exactly registered truck, ORS provider and existing quota and ferry checks.
 - Record Issue #235 as proposed privacy-safe FINAL.55 rejection-gate telemetry, not implemented or authorized. Do not ask user to repeat FINAL.54 and do not resume AN15.
+
+## 2026-10-12 JST — FINAL.55 owner authorized diagnostics only, no route policy relaxation
+
+- Owner's 進めて authorizes Issue #235: explain final via HGV gate failures using categorical time-only, distance-only, both, and pass counts, no more than 2 anonymized exceeded minutes/km, upward rounded. Never expose raw geocoordinates, routes, vehicle numbers/dimensions, addresses or keys in copied report.
+- Preserve existing final eligibility logic unchanged: time <= baseline + min(480s,20%), distance <= baseline + min(10000m,30%); HGV-only restrictions, no new calls, original ferry, ORS free guards, OSM source and AN15 paused. This is NOT authority to increase the caps or force motorway travel.
+- PR #238 product code drafted with verified immutable safety tag; CI + live release still required. Mocked new fixtures are diagnostic checks, not proof of real user route safety. Obtain NEW owner FINAL.55 report only after full production verified.

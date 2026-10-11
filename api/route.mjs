@@ -243,7 +243,7 @@ async function handle(request) {
     for(let i=1;i<features.length;i++){try{const result=sanitizeFeature(features[i]);if(safeRoute(result))candidates.push(result);}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',junctionProvider:'none',junctionAttempts:0,junctionFirstFailure:'none',junctionLastFailure:'none',junctionCatalogDate:'none',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
+    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',junctionProvider:'none',junctionAttempts:0,junctionFirstFailure:'none',junctionLastFailure:'none',junctionCatalogDate:'none',evaluated:0,accepted:0,finalEligible:0,viaGateTimeOnly:0,viaGateDistanceOnly:0,viaGateBoth:0,viaGateEligible:0,viaGateDetails:[],viaDurationLimitMinutes:null,viaDistanceLimitKm:null,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
     // A timeout/rejection of optional alternatives must not suppress IC discovery if the HGV fallback
     // returned quickly enough; the existing remaining-time guard below still prevents late probes.
     // Dynamic-distance retries continue to prioritize the verified ferry-safe baseline only.
@@ -271,6 +271,26 @@ async function handle(request) {
       if(highwaySearch.status!=='time-budget-skip')highwaySearch.status=highwaySearch.accepted?'via-ic-candidates-added':highwaySearch.timeBudgetLimited&&pairs.length?'time-budget-exhausted':junctions.length?'no-valid-via-route':'junction-search-unavailable';
     }
     const maxDuration=primary.summary.duration+Math.min(480,primary.summary.duration*0.20),maxDistance=primary.summary.distance+Math.min(10000,primary.summary.distance*0.30);
+    // Diagnostic only: inspect the EXACT existing eligibility thresholds without
+    // changing the decision, ORS requests, selected route, or vehicle restrictions.
+    if(highwaySearch.accepted>0){
+      highwaySearch.viaDurationLimitMinutes=Math.round((maxDuration-primary.summary.duration)/60*10)/10;
+      highwaySearch.viaDistanceLimitKm=Math.round((maxDistance-primary.summary.distance)/1000*10)/10;
+      for(const viaRoute of candidates.filter(item=>activeHighwayRoutes.has(item))){
+        const timeOver=Math.max(0,viaRoute.summary.duration-maxDuration);
+        const distanceOver=Math.max(0,viaRoute.summary.distance-maxDistance);
+        const timeFailed=timeOver>0,distanceFailed=distanceOver>0;
+        const outcome=timeFailed?(distanceFailed?'both':'time-only'):(distanceFailed?'distance-only':'eligible');
+        if(outcome==='both')highwaySearch.viaGateBoth++;
+        else if(outcome==='time-only')highwaySearch.viaGateTimeOnly++;
+        else if(outcome==='distance-only')highwaySearch.viaGateDistanceOnly++;
+        else highwaySearch.viaGateEligible++;
+        // Only rounded, positive excess and anonymous order (max 2); no points,
+        // road names, geometry, identifiers, keys or raw route distances/times.
+        highwaySearch.viaGateDetails.push({outcome,
+          overMinutes:Math.ceil(timeOver/60),overKm:Math.ceil(distanceOver/1000)});
+      }
+    }
     let route=primary,selection='optimal',usage=primaryItem.usage;
     if(!vehicle.avoidTolls){
       const eligible=candidates.map(candidate).filter(item=>item.usage.priorityMeters>100&&item.route.summary.duration<=maxDuration&&item.route.summary.distance<=maxDistance).sort((a,b)=>a.route.summary.duration-b.route.summary.duration||a.route.summary.distance-b.route.summary.distance);
