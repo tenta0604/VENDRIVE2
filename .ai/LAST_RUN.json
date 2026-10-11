@@ -1,39 +1,47 @@
 {
-  "evidenceVersion": 83,
-  "runType": "final54_field_hgv_candidates_selection_policy_diagnosis_20261011",
-  "phase": "FINAL54_POSTRELEASE_REAL_ROUTE_ANALYSIS",
-  "status": "FIELD_REPORT_ANALYZED_FINAL55_INSTRUMENTATION_PROPOSED",
+  "evidenceVersion": 84,
+  "runType": "final55_real_hgv_ic_gate_diagnostics_pr_20261011",
+  "phase": "FINAL55_IC_FINAL_SELECTION_DIAGNOSTICS",
+  "status": "CODE_PR_CREATED_GATES_PENDING",
   "base": {
-    "productionMainBefore": "6ba7f0d6fa6d9ca18530b2bd241a3bf5a1a15f50",
-    "productionCodeChanged": false,
-    "safetyTag": "NOT_REQUIRED: docs-only evidence; existing FINAL.54 immutable tag untouched"
+    "productionMainBefore": "b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47",
+    "productionCodeChanged": true,
+    "safetyTag": "PASS annotated backup-pre-FINAL55-IC-ELIGIBILITY-DIAGNOSTICS-20261011 -> b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47"
   },
   "versions": {
-    "app": "2026.10.11-FINAL.54",
-    "frontend": "2026.10.11-FINAL.54",
-    "apiTarget": "2026.10.11-FINAL.54",
+    "app": "2026.10.11-FINAL.55",
+    "frontend": "2026.10.11-FINAL.55",
+    "apiTarget": "2026.10.11-FINAL.55",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Owner FINAL.54 report: highway ON, 244 local OSM ICs, 0 Overpass attempts, 2 entry/exit pairs, 2 HGV via-IC routes accepted with meaningful motorway, none eligible for final selection, motorway selected0km. Code's >100m priority gate necessarily passes; via candidates failed max +8min/20% duration and/or +10km/30% distance. Missing which/both and how much.",
-    "productStatus": "LIVE_FINAL54_UNCHANGED",
-    "productCodeChanged": false,
-    "ownerIntent": "Confirm remaining blocker before changing selection policy"
+    "summary": "Owner authorized diagnostic-only FINAL.55 to show which of two sourced ORS HGV via-IC motorway routes exceeded unchanged baseline +8min/20% or +10km/30% selection caps; no changes to actual eligibility or provider volume.",
+    "productStatus": "PR_CREATED_NO_CI_EVIDENCE_YET",
+    "productCodeChanged": true,
+    "ownerIntent": "Trace why local IC source succeeds but two via HGV candidate routes are not selected before considering any routing policy change"
   },
   "gates": {
-    "mainRead": "PASS verified production main 6ba7f0d6fa6d9ca18530b2bd241a3bf5a1a15f50",
-    "diagnosticEvidence": "PASS exact owner copied FINAL.54 report plus code criterion",
-    "productSyntax": "NOT_REQUIRED: docs only",
-    "realEdge": "NOT_REQUIRED: no product code modification",
-    "noExtraExternalRequests": "PASS no new Overpass or ORS calls initiated",
-    "gitHubEvidenceIssue": "#235",
-    "mainMerge": "PENDING docs-only PR",
+    "safetyTag": "PASS workflow 38156923713",
+    "codeCommit": "e2ee0cf7512044354adb5357d421b16742b15293",
+    "mockRegression": "PENDING GitHub CI",
+    "prTruckNodeRealEdge": "PENDING",
+    "prBrowser": "PENDING",
+    "mainMerge": "PENDING",
+    "mainBrowser": "PENDING",
     "githubPages": "PENDING",
-    "vercelProduction": "PENDING"
+    "vercelProduction": "PENDING",
+    "publicVersions": "PENDING",
+    "realOwnerDiagnostic": "HUMAN_REQUIRED only after live release"
   },
   "changedFiles": [
+    "api/route.mjs",
+    "truck-routing.js",
+    "tests/truck-route-local-catalog.test.mjs",
+    "tests/truck-route-client.test.mjs",
+    "index.html",
+    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -41,21 +49,21 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Owner may authorize Issue #235 narrow privacy-safe duration/distance rejection telemetry",
-    "Do not change convenience caps or legal 2t HGV constraints until justified",
-    "Owner FINAL.54 report already received; don't ask to resend"
+    "Get actual PR CI results and resolve any code errors",
+    "Merge and verify exact production main and live FINAL.55 if and only if gates PASS",
+    "New owner safe FINAL.55 diagnostic for actual rejection reason"
   ],
-  "nextAction": "Await owner's explicit next direction for FINAL.55 diagnostic telemetry under unchanged detour caps.",
+  "nextAction": "PASS PR #238 node/real Edge/browser gates, merge and production version checks. Current product FINAL.54 until verified.",
   "unresolved": [
-    "Per-candidate eligibility exclusion reason/overrun cannot be known from current diagnostic",
-    "AN15 paused"
+    "Actual route duration/distance overshoots unknown",
+    "AN15 paused, HGV safety unchanged"
   ],
   "continuityCheckpoint": {
-    "status": "FIELD_EVIDENCE_ANALYZED_NO_PRODUCT_CHANGE",
-    "createdFor": "FINAL54 final-selection gate real report",
-    "sourceProductMerge": "NO_CHANGE",
-    "productCodeChanged": false,
-    "appVersion": "2026.10.11-FINAL.54",
-    "intent": "Issue #235 diagnostic proposal only"
+    "status": "CODE_PR_AWAITING_VERIFICATION",
+    "createdFor": "FINAL.55 privacy-safe IC route eligibility diagnosis",
+    "sourceProductMerge": "NOT_MERGED",
+    "productCodeChanged": true,
+    "appVersion": "2026.10.11-FINAL.55",
+    "intent": "Exact CI first, then production"
   }
 }
