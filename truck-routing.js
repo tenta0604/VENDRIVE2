@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.11-FINAL.54';
+  var ASSET_VERSION='2026.10.11-FINAL.55';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -178,8 +178,17 @@
     else if(h.evaluated===0)reason='IC組合せ0件：入口・出口の探索条件で候補なし';
     else if(h.timeBudgetLimited&&h.accepted===0)reason='追加IC探索が処理時間の上限に達したため、安全な基本HGV経路を表示';
     else if(h.accepted===0)reason='IC経由の成立候補なし：提供元の応答・通行条件・高速区間を確認';
+    else if(h.finalEligible===0&&Number.isFinite(h.viaGateTimeOnly)&&Number.isFinite(h.viaGateDistanceOnly)&&Number.isFinite(h.viaGateBoth))reason='IC経由候補は所要時間・距離の採用上限で不採用：超過の内訳を確認';
     else if(h.finalEligible===0)reason='IC経由候補あり／最終採用0件：迂回上限などの採用条件を確認';
     else reason='IC経由候補は採用条件に適合。最終選択と高速距離を確認';
+    // Older provider responses may not contain FINAL.55 telemetry.
+    var hasGateDetails=Number.isFinite(h.viaGateTimeOnly)&&Number.isFinite(h.viaGateDistanceOnly)&&Number.isFinite(h.viaGateBoth);
+    var labels={'time-only':'時間のみ','distance-only':'距離のみ','both':'時間と距離','eligible':'条件内'};
+    var boundedDetails=Array.isArray(h.viaGateDetails)?h.viaGateDetails.slice(0,2).map(function(v,i){
+      if(!v||!Object.prototype.hasOwnProperty.call(labels,v.outcome))return null;
+      if(!Number.isInteger(v.overMinutes)||v.overMinutes<0||!Number.isInteger(v.overKm)||v.overKm<0)return null;
+      return '候補'+(i+1)+' '+labels[v.outcome]+'（時間超過 +'+v.overMinutes+'分／距離超過 +'+v.overKm+'km）';
+    }).filter(Boolean):[];
     return [
       'VENDRIVE 高速診断 '+ASSET_VERSION,
       '高速設定：'+(highwayOn?'ON':'OFF'),
@@ -202,6 +211,9 @@
       'IC組合せ評価数：'+count(h.evaluated),
       'IC経由成立数：'+count(h.accepted),
       '最終採用条件に適合：'+count(h.finalEligible),
+      'IC採用上限（基本経路からの増加）：時間 +'+(Number.isFinite(h.viaDurationLimitMinutes)?h.viaDurationLimitMinutes.toFixed(1)+'分':'未取得')+'／距離 +'+(Number.isFinite(h.viaDistanceLimitKm)?h.viaDistanceLimitKm.toFixed(1)+'km':'未取得'),
+      'IC候補の採用判定：時間のみ超過 '+(hasGateDetails?count(h.viaGateTimeOnly):'未取得')+'／距離のみ超過 '+(hasGateDetails?count(h.viaGateDistanceOnly):'未取得')+'／両方超過 '+(hasGateDetails?count(h.viaGateBoth):'未取得')+'／条件内 '+(hasGateDetails?count(h.viaGateEligible):'未取得'),
+      'IC候補の超過量（1分・1km単位切り上げ）：'+(boundedDetails.length?boundedDetails.join('／'):'なし'),
       'IC経由失敗：応答拒否 '+count(h.viaProviderRejected)+'／経路なし '+count(h.viaNoFeature)+'／高速区間不足 '+count(h.viaLowMotorway)+'／タイムアウト '+count(h.viaTimeouts)+'／その他 '+count(h.viaErrors),
       '探索基準の高速距離：'+kilometers(h.motorwayTargetMeters),
       '判定の手掛かり：'+reason,
