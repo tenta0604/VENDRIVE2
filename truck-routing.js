@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.11-FINAL.52';
+  var ASSET_VERSION='2026.10.11-FINAL.53';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -167,6 +167,9 @@
     else if(!h.attempted&&h.baselineRetried)reason='再試行後の安全制限でIC探索なし：経路の時間予算・条件を確認';
     else if(!h.attempted)reason='追加IC探索なし：短距離、または既存候補で高速区間が十分と判定';
     else if(h.status==='time-budget-skip')reason='追加IC探索は時間不足で実行せず：安全な基本HGV経路を表示';
+    else if(h.junctionFirstFailure==='cooldown')reason='IC取得元へのアクセス制限中：再検索を控えてしばらく時間をおいてください';
+    else if(h.junctionFirstFailure==='http-429'||h.junctionLastFailure==='http-429')reason='IC取得元が回数制限中（429）：連続再試行せず時間をおいてください';
+    else if(h.junctionFirstFailure==='http-406')reason='IC取得元が接続を拒否（406）：アプリ識別情報と提供元の利用条件を確認';
     else if(h.junctionQueryStatus==='timeout'||h.junctionQueryStatus==='provider-error')reason='IC取得元が応答できず：IC探索サービス要確認';
     else if(h.junctions===0)reason='IC取得0件：探索範囲かICデータの不足の可能性';
     else if(h.evaluated===0)reason='IC組合せ0件：入口・出口の探索条件で候補なし';
