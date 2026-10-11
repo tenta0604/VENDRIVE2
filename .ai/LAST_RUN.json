@@ -1,12 +1,13 @@
 {
-  "evidenceVersion": 78,
-  "runType": "final53_overpass_user_agent_access_controls_pr_validation_20261011",
-  "phase": "FINAL53_OVERPASS_OPERATOR_COMPLIANCE",
-  "status": "PR_VALIDATED_RELEASE_PENDING",
+  "evidenceVersion": 79,
+  "runType": "final53_production_release_closeout_20261011",
+  "phase": "FINAL53_OVERPASS_CLIENT_COMPLIANCE_RELEASE",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "82e5c83a6a2774e747a64a54b6959da0c537cd0c",
+    "productMergedMain": "c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd",
     "productionCodeChanged": true,
-    "safetyTag": "PASS annotated backup-pre-FINAL53-OVERPASS-CLIENT-COMPLIANCE-20261011 -> 82e5c83a6a2774e747a64a54b6959da0c537cd0c"
+    "safetyTag": "PASS immutable annotated backup-pre-FINAL53-OVERPASS-CLIENT-COMPLIANCE-20261011 -> 82e5c83a6a2774e747a64a54b6959da0c537cd0c"
   },
   "versions": {
     "app": "2026.10.11-FINAL.53",
@@ -17,31 +18,24 @@
     "schema": 4
   },
   "work": {
-    "summary": "User FINAL.52 highway IC report: primary HTTP 406 and backup HTTP 429. FINAL.53 adds stable identifying backend Overpass UA, refuses backup on explicit operator 406/429 with warm-instance cooldown, coalesces concurrent IC requests, and clarifies safe diagnostics.",
-    "productStatus": "CODE_PR_GATES_PASS_RELEASE_PENDING",
+    "summary": "FINAL.53 shipped: honest HTTP Overpass VENDRIVE2 User-Agent, respect 406/429 with warm-instance cooldown and no public-provider bypass, coalesce duplicate IC queries. Preserves safe HGV baseline and provider quotas.",
+    "productStatus": "PRODUCTION_VERIFIED_AWAITING_REAL_OPERATOR_DIAGNOSTIC",
     "productCodeChanged": true,
-    "ownerIntent": "Honor public OSM infrastructure policy and improve IC reliability without paid services, increased quotas or vehicle-policy relaxation"
+    "ownerIntent": "Fix free public IC lookup compliance while retaining registered 2t truck safety and free/no-pay design"
   },
   "gates": {
-    "safetyTag": "PASS exact annotated pre-edit main 82e5c83a...",
-    "productPRTruckNodeRealEdge": "PASS 38107598478 at d6f288e295b680e0e5d06949268aa113b3d32026",
-    "productPRBrowser": "PASS 38107598454 at d6f288e295b680e0e5d06949268aa113b3d32026",
-    "regression": "PASS new UA, no 406/429 fallback, cooldown and in-flight de-dup fixtures (mocked)",
-    "mainMerge": "PENDING",
-    "mainBrowser": "PENDING",
-    "githubPages": "PENDING",
-    "vercelProduction": "PENDING",
-    "bothPublicVersions": "PENDING",
-    "exactRealUserRoute": "NOT PERFORMED; HUMAN_REQUIRED after live release",
-    "dbMigration": "NOT_REQUIRED DB/schema unchanged"
+    "safetyTag": "PASS immutable exact old main",
+    "finalPRTruckNodeRealEdge": "PASS 38107720855 head 0754fd1...",
+    "finalPRBrowser": "PASS 38107720853",
+    "merge": "PASS PR #223 c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd",
+    "mainBrowser": "PASS 38107793467",
+    "githubPages": "PASS 38107792826",
+    "vercelProduction": "PASS READY dpl_GuK54BrgqsYCqHUP8gAgfhdW9WtJ exact product merge main",
+    "bothPublicVersions": "PASS fresh frontend/backend 2026.10.11-FINAL.53",
+    "dbMigration": "NOT_REQUIRED DB/schema 4",
+    "exactRealOwnerRoute": "NOT PERFORMED; HUMAN_REQUIRED new report"
   },
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "index.html",
-    "version.json",
-    "tests/truck-route-client.test.mjs",
-    "tests/truck-route-overpass.test.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -49,22 +43,21 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Pass final head gates after docs and merge PR #223",
-    "Verify main browser, Pages, Vercel, public app/backend FINAL.53",
-    "After live release obtain NEW owner safe field IC report"
+    "Owner parked/passenger same corridor new FINAL.53 copied highway diagnosis",
+    "Evaluate IC fetching/provider controls and real HGV route only after actual evidence"
   ],
-  "nextAction": "Finish PR #223 release and production checks, then HUMAN_REQUIRED fresh FINAL.53 diagnosis",
+  "nextAction": "HUMAN_REQUIRED: owner sends NEW VENDRIVE 高速診断 2026.10.11-FINAL.53 from safely checked DCM尾西店 → 飛島コンテナ region route",
   "unresolved": [
-    "Real IC choice unavailable until after-field retest",
-    "Warm instance cooldown is not shared across Vercel instances",
-    "AN15 paused"
+    "No live safe motorway/IC guarantee until owner diagnosis",
+    "Warm-instance backoff not distributed; operator limits must be respected",
+    "AN15 intentionally paused"
   ],
   "continuityCheckpoint": {
-    "status": "CODE_PR_PASS_RELEASE_PENDING",
-    "createdFor": "FINAL.53 compliant Overpass IC discovery",
-    "sourceProductMerge": "NOT_YET_MERGED",
-    "productCodeChanged": true,
+    "status": "PASS_RELEASE_VERIFIED",
+    "createdFor": "FINAL.53 production compliance closeout",
+    "sourceProductMerge": "c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd",
+    "productCodeChanged": false,
     "appVersion": "2026.10.11-FINAL.53",
-    "intent": "Complete exact-main release and collect new operator field evidence"
+    "intent": "Await fresh owner field report before additional changes"
   }
 }
