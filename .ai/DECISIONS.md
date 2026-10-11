@@ -732,3 +732,8 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - Received actual privacy-safe FINAL.50 highway report: alternatives timed out and base HGV retry succeeded but reported highway 0.0km; implementation skipped IC solely because `baselineRetried` was true. Do not mislabel this as short route/sufficient motorway.
 - Approved focused maintenance: optional ORS alternatives only for direct <25km; simple restricted HGV baseline first for medium trips; optional IC search may proceed after recovered alternative timeout/rejection only when residual time and existing 30/min/max-two-probe limits allow. Keep dynamic-distance ferry-safe recovery IC suppression, truck restrictions, the no-car fallback rule and FINAL.36 detour caps.
 - Test fixtures are not proof of safe/accurate IC in the DCM尾西店 → 飛島コンテナ route. Require NEW post-deploy FINAL.51 owner field diagnosis. Do not restart AN15 or change payment tier, engine/DB/schema.
+
+## 2026-10-11 — FINAL.51 production sign-off and real-road evidence boundary
+
+- PR #217 merged at `5cc7c0b258af705c6996d6018e669a722b45a100` after final PR, main, Pages and Vercel release gates passed, live app/API both FINAL.51.
+- Approval of release does not certify specific DCM尾西店→飛島コンテナ expressway IC sequence; await NEW copied FINAL.51 diagnosis for factual real-route conclusion. Preserve all registered 2t driving-hgv safety and cost restrictions, keep AN15 paused.
