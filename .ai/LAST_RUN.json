@@ -1,12 +1,13 @@
 {
-  "evidenceVersion": 74,
-  "runType": "final51_hgv_medium_ic_retry_pr_20261011",
-  "phase": "FINAL51_HIGHWAY_IC_RETRY_MAINTENANCE",
-  "status": "PR_VALIDATED_RELEASE_PENDING",
+  "evidenceVersion": 75,
+  "runType": "final51_production_release_closeout_20261011",
+  "phase": "FINAL51_HIGHWAY_IC_RETRY_RELEASE",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "6fd1250c3388a06caad5b0d3f4ba1fef013ea81f",
+    "productMergedMain": "5cc7c0b258af705c6996d6018e669a722b45a100",
     "productionCodeChanged": true,
-    "safetyTag": "PASS annotated backup-pre-FINAL51-IC-RETRY-GATE-20261011 -> 6fd1250c3388a06caad5b0d3f4ba1fef013ea81f; workflow 38104135671"
+    "safetyTag": "PASS backup-pre-FINAL51-IC-RETRY-GATE-20261011 immutable annotated -> 6fd1250c3388a06caad5b0d3f4ba1fef013ea81f"
   },
   "versions": {
     "app": "2026.10.11-FINAL.51",
@@ -17,31 +18,24 @@
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.50 field diagnosis from DCM尾西店 to 飛島コンテナ: alternatives timed out, baseline fallback provided 0km highway and blocked IC. Code fix reserves medium-trip ORS budget, enables optional IC after alt retry within safety limits and fixes diagnostics.",
+    "summary": "FINAL.51 production closed: routing fix prevents medium HGV alternative timeout starving IC exploration and re-allows IC after quickly recovered alternative fallbacks, retains safety constraints. Source owner FINAL.50 report analyzed; user-specific real ORS provider/IC results after FINAL.51 still unverified.",
+    "productStatus": "PRODUCTION_VERIFIED_AWAITING_OWNER_HIGHWAY_RETEST",
     "productCodeChanged": true,
-    "productStatus": "PR_GATE_PASS_RELEASE_PENDING",
-    "ownerIntent": "Restore safe IC exploration without relaxing driving-hgv constraints"
+    "ownerIntent": "Safely improve expressway candidate choice without paid provider or 2t constraint relaxation"
   },
   "gates": {
     "safetyTag": "PASS 38104135671",
-    "productPRTruckNodeEdge": "PASS 38104318588 at ea92f3a9850edd1b5419343a7f0f75ee911b1f45",
-    "productPRBrowser": "PASS 38104318680 at ea92f3a9850edd1b5419343a7f0f75ee911b1f45",
-    "syntheticRegression": "PASS 2 new HGV diagnostics/IC tests (not real provider)",
-    "mainMerge": "PENDING",
-    "mainBrowser": "PENDING",
-    "githubPages": "PENDING",
-    "vercelProduction": "PENDING",
-    "bothLiveVersions": "PENDING",
-    "realFieldTrip": "NOT PERFORMED",
-    "dbMigration": "NOT REQUIRED DB/schema 4"
+    "finalPRTruckNodeEdge": "PASS 38104482648 exact PR head 31b7fbc...",
+    "finalPRBrowser": "PASS 38104482589 exact PR head 31b7fbc...",
+    "merge": "PASS PR #217 5cc7c0b258af705c6996d6018e669a722b45a100",
+    "mainBrowser": "PASS 38104563171",
+    "githubPages": "PASS 38104563073",
+    "vercelProduction": "PASS READY dpl_Adv5Pnp5Q5b1K5bbBp1jF5eV6vrV exact merged main",
+    "bothLiveVersions": "PASS frontend/backend 2026.10.11-FINAL.51 via fresh public fetch",
+    "dbMigration": "NOT_REQUIRED DB/schema 4",
+    "exactOwnerRoute": "NOT_PERFORMED; HUMAN_REQUIRED field retest after release"
   },
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
-    "index.html",
-    "version.json",
-    "tests/truck-route-long-distance.test.mjs",
-    "tests/truck-route-client.test.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -49,19 +43,20 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "PR final head gates and merge",
-    "Main CI, Pages and Vercel READY on exact main, live version endpoints both FINAL.51",
-    "Owner postrelease new anonymized highway diagnosis"
+    "Owner field route test and fresh privacy-safe FINAL.51 diagnostic (old FINAL.50 already received)",
+    "Potential route-specific IC selection defect only if real evidence justifies a new bounded change"
   ],
-  "nextAction": "PR #217 final gate → merge → live FINAL.51 verification; then owner physical field check",
+  "nextAction": "HUMAN_REQUIRED: after parking/safely not driving, owner shares NEW FINAL.51 高速診断 for DCM尾西店→飛島コンテナ; analyze without guessing real IC outcome.",
   "unresolved": [
-    "User's exact road/IC results remain unverified",
-    "AN15 paused"
+    "Actual HGV provider expressway/IC result on original corridor still unverified",
+    "AN15 intentionally paused; no additional product development without field evidence"
   ],
   "continuityCheckpoint": {
-    "status": "PR_GATES_VERIFIED_RELEASE_PENDING",
+    "status": "PASS_RELEASE_VERIFIED",
+    "createdFor": "FINAL.51 field root fix production closeout",
+    "sourceProductMerge": "5cc7c0b258af705c6996d6018e669a722b45a100",
+    "productCodeChanged": false,
     "appVersion": "2026.10.11-FINAL.51",
-    "productCodeChanged": true,
-    "intent": "Complete exact-main live release then collect real owner evidence"
+    "intent": "Await new owner field diagnostic"
   }
 }

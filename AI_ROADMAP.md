@@ -382,3 +382,7 @@ FINAL.50 is already merged and live-verified, but not route-specific iPhone-conf
 ## FINAL.51 (2026-10-11) — HGV IC search after alternative timeout (release pending)
 
 FINAL.50 received field report near DCM尾西店 → 飛島コンテナ confirmed alternative-timeout fallback with highway 0.0km and no IC exploration. Code `!baselineRetried` guard suppressed search. PR #217 fixes bounded retry gate and prioritizes simple HGV for medium direct trips >=25km; two synthetic regressions passed. Annotated safety tag `backup-pre-FINAL51-IC-RETRY-GATE-20261011` at old main; PR Node/API/real Edge `38104318588` PASS, Browser `38104318680` PASS at product head `ea92f3a9...`. Still awaiting merge/public FINAL.51 verification. Correct entry/exit IC and truck feasibility unverified in real ORS. AN15 intentionally paused.
+
+## 2026-10-11 FINAL.51 release verified; user field boundary
+
+PR #217 merged `5cc7c0b258af705c6996d6018e669a722b45a100`; final PR HGV Node/API/real Edge `38104482648` PASS and Browser `38104482589` PASS; postmerge Browser `38104563171` PASS, Pages `38104563073` PASS; Vercel production `dpl_Adv5Pnp5Q5b1K5bbBp1jF5eV6vrV` READY. Both live version endpoints reported `2026.10.11-FINAL.51`. Above release-pending note superseded. Real operator DCM尾西店→飛島コンテナ IC/motorway quality still requires new FINAL.51 field report; do not confuse mocked tests with real route success. AN15 remains intentionally paused.
