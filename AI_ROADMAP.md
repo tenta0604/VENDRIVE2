@@ -402,3 +402,7 @@ New owner FINAL.52 copied field report showed primary 406 and backup 429 while s
 ## 2026-10-11 FINAL.53 public release verified — next safe operator field test
 
 Previous FINAL.53 PR pending is superseded. PR #223 product merged `c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd`; final PR HGV/Node/API/real Edge `38107720855` PASS, PR Browser `38107720853` PASS, postmerge Browser `38107793467` PASS, Pages `38107792826` PASS, Vercel production dpl_GuK54BrgqsYCqHUP8gAgfhdW9WtJ READY exact product main; both public endpoints `2026.10.11-FINAL.53`. Next owner safely retests same DCM尾西店→飛島コンテナ route and shares a NEW location-free FINAL.53 highway diagnosis. Real safe highway IC route remains unproven. AN15 paused.
+
+## 2026-10-11 FINAL.53 actual field data: offline IC proposal pending decision (Issue #225)
+
+Owner reported same DCM尾西店→飛島コンテナ vicinity: baseline `driving-hgv` route available, motorway 0.0km, IC lookup primary timeout / backup HTTP500, zero IC candidate generation. Public Overpass availability remains runtime bottleneck despite FINAL.50-53 bounded fixes. Architecture **proposal only** in Issue #225: build versioned Chubu local OSM IC/entry-ramp catalog offline rather than runtime querying; respect correct exit/entry semantics and ODbL, validate resulting routes with original restricted HGV engine/quotas/detour/ferry rules. No FINAL.54 implementation/release authorized; AN15 remains paused. Do not request unchanged FINAL.53 report again.
