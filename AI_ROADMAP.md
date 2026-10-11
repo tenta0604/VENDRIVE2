@@ -410,3 +410,7 @@ Owner reported same DCM尾西店→飛島コンテナ vicinity: baseline `drivin
 ## 2026-10-11 FINAL.54 Chubu offline IC source (approved; PR gates passed, release pending)
 
 Owner approved static IC data for 一宮〜名古屋〜飛島 pilot after FINAL.53 primary timeout/backup HTTP500. Generated from pinned Geofabrik Chubu 2026-10-09 ODbL PBF with SHA256 3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150: 299 directional entrances, 298 directional exits, 51.9 KB ESM + metadata, source reproducible with manual GitHub Actions guarded workflow; snapshot expires after 120 days. Product PR #233 code/Node/API/real Edge 38137741378 and Browser 38137741373 PASS. Restricted HGV remains final route authority with old ferry/detour/quotas. Pending final docs HEAD gates/main merge/Pages/Vercel FINAL.54. Do not infer real safe motorway route until owner NEW FINAL.54 report. AN15 paused.
+
+## 2026-10-11 FINAL.54 shipped, await owner same-route motorway diagnosis
+
+Product PR #233 merged `6bd92036f9cc8439a1d7c359173dde17481387b8` after final Node/API/real Edge `38137934135` PASS, Browser `38137934150` PASS, main Browser `38138035028` PASS and GitHub Pages `38138034770` PASS. Vercel production dpl_EHKs8HDyjsuogURvphmFuNMj7S4h READY exact product main, public Pages and backend both FINAL.54. Target-area calls now use static sourced Chubu IC snapshot (299/298) with zero runtime Overpass, HGV only route verification. Real safe IC and motorway success remains unproven until owner NEW FINAL.54 report. Update snapshot within 120d, preserve ODbL source; AN15 remains paused.
