@@ -8,8 +8,9 @@ const MAX_ACTIVE_HIGHWAY_ROUTES = 2;
 const JUNCTION_CACHE_TTL_MS = 15*60*1000;
 const ROUTE_SERVER_BUDGET_MS = 14500;
 const ROUTE_RESPONSE_RESERVE_MS = 700;
-// ORS allows alternatives only for trips below 100 km. Reserve a plain HGV fallback.
-const ALTERNATIVES_DIRECT_LIMIT_METERS=55000;
+// Keep expensive ORS alternatives to short local trips; medium HGV trips need time for IC search.
+// ORS also rejects alternative-route requests beyond its 100 km public-provider cap.
+const ALTERNATIVES_DIRECT_LIMIT_METERS=25000;
 const LONG_ROUTE_FERRY_VERIFY_METERS=70000;
 const ALTERNATIVE_FIRST_ATTEMPT_MS=6200;
 // Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
@@ -184,7 +185,11 @@ async function handle(request) {
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
     const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
-    if(!vehicle.avoidTolls&&!baselineRetried&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
+    // A timeout/rejection of optional alternatives must not suppress IC discovery if the HGV fallback
+    // returned quickly enough; the existing remaining-time guard below still prevents late probes.
+    // Dynamic-distance retries continue to prioritize the verified ferry-safe baseline only.
+    const icAfterFallbackAllowed=!baselineRetried||baselineRetryCause==='alternative-timeout'||baselineRetryCause==='alternative-rejected';
+    if(!vehicle.avoidTolls&&icAfterFallbackAllowed&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
       const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
