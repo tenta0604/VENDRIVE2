@@ -771,3 +771,9 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - PR #233 FINAL.54 versioned Geofabrik Chubu on/off-ramp catalog is live on both production endpoints at 2026.10.11-FINAL.54, with PR HGV Node/real Edge, browser, main browser, Pages and Vercel READY evidence PASS.
 - No more runtime public Overpass queries within fully covered Chubu pilot. Catalog candidates are OSM-directionally grounded but NOT certified drivable for the truck; real ORS driving-hgv is still required, preserves vehicle limits, ferry and detour limits and max two optional IC probes. No passenger-car/straight-line fallback, no paid services.
 - Do not claim DCM尾西店→飛島コンテナ highway routing solved until new actual FINAL.54 field diagnostics; older FINAL.53 timeout/HTTP500 report already analyzed. SNAPSHOT ODbL/Geofabrik provenance and 120-day manual refresh obligation remain. AN15 intentionally paused.
+
+## 2026-10-11 — FINAL.54 field candidates exist, do not guess time/distance eligibility failure
+
+- New real owner diagnostic proves FINAL.54 local catalog works (244 IC, no external calls) and both bounded ORS HGV via-IC requests resulted in meaningful motorway route candidates, but both failed final route-selection eligibility.
+- `priorityMeters>100` is satisfied for accepted HGV candidates with meaningful motorway; remaining rejection is the time or distance cap (or both). The report does **not** expose which and must not justify relaxing thresholds blindly. Keep +min(8min,20%) and +min(10km,30%), exactly registered truck, ORS provider and existing quota and ferry checks.
+- Record Issue #235 as proposed privacy-safe FINAL.55 rejection-gate telemetry, not implemented or authorized. Do not ask user to repeat FINAL.54 and do not resume AN15.
