@@ -110,11 +110,17 @@ jobs:
           PY
           node --check api/chubu-ic-catalog.mjs
           git diff --check
+      - name: Upload tiny auditable snapshot for recovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: final54-chubu-ic-generated
+          path: |
+            api/chubu-ic-catalog.mjs
+            data/chubu-ic-catalog-meta.json
+          retention-days: 7
       - name: Commit only proven sourced data to the guarded branch
         shell: bash
-        env:
-          BRANCH: ${{ inputs.target_branch }}
-          EXPECTED: ${{ inputs.expected_branch_sha }}
+        # BRANCH/EXPECTED come from the validated resolver via GITHUB_ENV.
         run: |
           set -euo pipefail
           git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
