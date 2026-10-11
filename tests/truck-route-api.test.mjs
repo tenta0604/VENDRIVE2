@@ -331,7 +331,7 @@ test('FINAL.52: failed primary Overpass HTTP 504 uses one documented backup, ret
     assert.equal(data.selection,'active-ic-expressway-preferred');
     assert.equal(queried.length,2,'one initial and one backup lookup maximum');
     assert.ok(orsBodies.length<=3,'no more than two optional HGV IC probes');
-    assert.match(decodeURIComponent(String(queried[0]).split('?')[1]||''),/./);
+    assert.ok(queried[0].includes('overpass-api.de')&&queried[1].includes('overpass.private.coffee'),'backup must use a distinct provider');
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
