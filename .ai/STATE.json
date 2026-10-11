@@ -5,21 +5,21 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.11-FINAL.53",
+  "appVersion": "2026.10.11-FINAL.54",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL53_FIELD_PROVIDER_OUTAGE_CONFIRMED_STATIC_CATALOG_PROPOSAL_PENDING_DECISION",
+  "status": "FINAL54_PRODUCT_PR_VALIDATED_AWAITING_PRODUCTION_RELEASE",
   "currentWork": {
-    "title": "FINAL.53 user report received: Overpass timeout then HTTP 500; offline IC catalog proposed, not implemented",
-    "releaseStatus": "PR #223 merged c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd; final PR Truck Node/API/real Edge 38107720855 PASS, Browser 38107720853 PASS; postmerge main Browser 38107793467 PASS, GitHub Pages 38107792826 PASS; Vercel production dpl_GuK54BrgqsYCqHUP8gAgfhdW9WtJ READY exact product merge SHA; BOTH live public frontend and backend version.json 2026.10.11-FINAL.53. Owner's exact real route after FINAL.53 NOT TESTED. New 2026-10-11 owner field evidence after FINAL.53: main safe HGV baseline, highway ON, 0.0km motorway, IC retrieval failed primary timeout/backup HTTP500, 0 junctions and 0 via evaluations. FINAL.53 release remains unchanged and live. Design proposal is Issue #225, not implemented or approved.",
+    "title": "FINAL.54 offline Chubu IC catalog product PR #233 validated; production release pending",
+    "releaseStatus": "FINAL.54 product PR #233 preliminary code/test head f035c0c104b1ba7fcec25de646d339a26780a04e passed Truck/Node/API/real Edge 38137741378 and Browser 38137741373. GitHub Pages/Vercel live still FINAL.53 until merge verified. No owner real-road final54 diagnosis yet.",
     "releaseScope": [
-      "Send stable honest User-Agent VENDRIVE2/1.0 with public app URL to public Overpass instance on backend",
-      "Treat Overpass HTTP 406 access refusal and HTTP 429 rate limit as operator controls; do not bypass by attempting secondary instance; cool down 10min for 406 and 30s minimum for 429 per warm backend instance",
-      "Coalesce overlapping identical IC lookup requests through a warm-instance inflight promise cache while retaining the successful 15min IC cache",
-      "Preserve bounded backup lookup only for other transient errors. Return safe baseline HGV route and sanitized diagnostic classifications instead of fabricated motorway data",
-      "Add isolated Node mock tests for 406/429 and cooldown, User-Agent and concurrent identical query, preserving existing free provider fallback tests",
-      "Preserve 2t driving-hgv vehicle restrictions, warm ORS 30/min quota guard, max 2 optional via IC probes, 14.5/20s timeouts, ferry and detour caps, engine/DB/schema, AN15 pause"
+      "Owner approved Issue #225: offline pinned Geofabrik Chubu 2026-10-09 OSM PBF into audited directional shared motorway/motorway_link node candidates; 299 entries and 298 exits; source SHA256 3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150; 51,887B catalog",
+      "Within published [34.83,136.42,35.56,137.28] region use server-bundled catalog and never request public Overpass per route; classify source/date/stale/corrupt/outside coverage in privacy-safe diagnostic",
+      "Enforce entry-only/exit-only OSM connectivity, one-way flow and explicit hgv/access deny at extraction; catalog is candidate evidence, only restricted ORS driving-hgv route validation can select",
+      "Retain basic restricted HGV route on missing/expired catalog or ORS via rejection, max two optional HGV calls and 30/min warm ORS guard, 14.5s/20s timing, +8min/+10km and ferry checks, no paid/car/fabricated fallback",
+      "Manual GitHub Actions generator from immutable dated OSM PBF, auditable SHA256/provenance/ODbL; Node synthetic directional extractor tests and actual OSM corridor candidate/pair + mocked HGV, real Edge/browser pass",
+      "No db/schema/engine changes or AN15 resumption; field verification still necessary after product release"
     ],
     "validationEvidence": {
       "safetyTag": "backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114dc8926425bff81555d305",
@@ -112,27 +112,36 @@
       "final53Merge": "PR #223 merged c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd",
       "final53MainBrowser": "38107793467 PASS",
       "final53Pages": "38107792826 PASS",
-      "final53Vercel": "dpl_GuK54BrgqsYCqHUP8gAgfhdW9WtJ READY production exact product main c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd"
+      "final53Vercel": "dpl_GuK54BrgqsYCqHUP8gAgfhdW9WtJ READY production exact product main c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd",
+      "final54SafetyTag": "backup-pre-FINAL54-STATIC-CHUBU-IC-CATALOG-20261011 annotated -> bba42c482ebbdb8378ac49c7701900cc6d159eb1; issue #227",
+      "final54GeneratorPRs": "PR #228 generator bootstrap; PR #229 guarded issue invocation; PR #231 commit-env repair; all merged pre-product",
+      "final54Snapshot": "Github Actions 38137403761 PASS, 299 on-ramps, 298 off-ramps, 51,887B ESM catalog from pinned 2026-10-09 Geofabrik PBF SHA256 3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150",
+      "final54ProductPR": "PR #233 draft product head f035c0c104b1ba7fcec25de646d339a26780a04e before docs",
+      "final54Truck": "38137741378 PASS Node/API/real Edge at code/test head f035c0c",
+      "final54Browser": "38137741373 PASS at code/test head f035c0c",
+      "final54Production": "PENDING final doc-aligned CI, merge main, postmerge Browser and Pages, Vercel READY and live Pages/API FINAL.54"
     },
     "decision": [
-      "The owner already supplied the NEW FINAL.53 highway diagnosis; stop repeatedly requesting it.",
-      "Root defect currently blocked on real-time external Overpass IC retrieval: first timeout, secondary HTTP500, zero ICs/pairs; cannot infer which safe motorway should be chosen.",
-      "Proposed, NOT APPROVED: reproducibly extract Chubu regional junction and motorway_link directional geometry from a Geofabrik OSM PBF snapshot, ship lightweight static catalog, defer to driving-hgv for final safe routing, retain public-service controls.",
-      "See GitHub Issue #225 for source links, acceptance criteria, ODbL, operational costs and sharp exit-vs-entry caveat; no production code change authorized by a diagnosis-only message."
+      "Owner 2026-10-11 explicitly authorized offline Chubu IC catalog FINAL.54 after FINAL.53 primary timeout + backup HTTP500/0 IC field report",
+      "Real pinned OSM/Geofabrik snapshot generated only in GitHub Actions, never runtime; explicit source/license/update metadata and directionality via shared motorway/motorway_link nodes",
+      "Catalog proves OSM graph candidate connectivity only; legal/usable HGV motorway route must still be returned by ORS driving-hgv with registered 2t restrictions and ferries/detours verified",
+      "Do not reroute through public Overpass for fully covered journey; no 406/429 bypass, no repeated external service calls; outside geographical coverage existing compliant fallback preserved",
+      "New owner REAL FINAL.54 privacy-safe report required after deployment to establish actual selected IC and highway km; mocks do not prove route works",
+      "Preserve safety tag, ORS warm quotas/2 IC probes, no added paid services, AN15 intentionally paused"
     ],
     "nextActions": [
-      "HUMAN/PRODUCT CHOICE: decide whether to implement Issue #225 scoped offline Chubu IC data catalog pilot; no repeated same-app field tests before an actual change.",
-      "If authorized, preserve 2t driving-hgv restrictions, warm ORS 30/min, maximum two via-IC attempts, ferry/detour/time budgets, real Edge gating and OSM ODbL attribution.",
-      "On completion of any subsequent release, run same DCM尾西店→飛島コンテナ corridor test with location-free diagnosis and verify actual IC candidate and highway selection.",
-      "AN15 remains intentionally paused; do not claim source-side HTTP500/timeout is fixed by FINAL.53."
+      "Verify exact final PR #233 HEAD node/API/real Edge and browser gates after canonical docs commit, then merge and verify GitHub Pages, Vercel production and both public version.json FINAL.54",
+      "Owner after release safely parked/as passenger reruns DCM尾西店 to 飛島コンテナ附近 highway ON and provides NEW privacy-safe FINAL.54 高速診断; do not ask for older FINAL.53",
+      "Analyze local-catalog usage, on/off IC counts, ORS viaprobe rejections and motorway distance before declaring field problem solved",
+      "AN15 remains paused; no other routing code expansion without new concrete evidence"
     ],
     "fieldEvidenceIntake": {
-      "status": "FINAL53_REAL_DIAGNOSIS_RECEIVED_OVERPASS_PRIMARY_TIMEOUT_BACKUP_HTTP500",
+      "status": "FINAL54_SOURCED_CATALOG_PR_TESTED_NOT_LIVE",
       "ownerConfirmationDate": "2026-10-11",
-      "nextInput": "No further repeated diagnostics on unchanged FINAL.53. Await explicit approval for Issue #225 implementation; after a released change, a NEW same-corridor field report.",
-      "criticalBoundary": "FINAL.53 report confirmed IC retrieval failure primary timeout/backup HTTP500 and zero IC candidates. No proof that a legal HGV expressway route cannot exist. Static offline catalog is a proposal, not implemented.",
+      "nextInput": "NEW VENDRIVE 高速診断 2026.10.11-FINAL.54 after full public release",
+      "criticalBoundary": "Real OSM 299 entry/298 exit candidates generated, mocked HGV candidates tested, but exact owner ORS route not independently confirmed; public currently FINAL.53.",
       "expectedData": "After future changes: IC data source, provenance/snapshot state, actual IC candidate counts, via HGV accepted and motorway km; current FINAL.53 is already supplied.",
-      "firstAction": "Do not ask for the previous FINAL.53 diagnosis again. Explain confirmed failure and propose static offline catalog pilot Issue #225; await owner instruction on architecture change.",
+      "firstAction": "Complete PR #233 release gates. After both public FINAL.54 versions verified, owner may safely send NEW FINAL.54 highway diagnostic.",
       "analysisSequence": [
         "Validate copied diagnostic version; if pre-FINAL.50, do not attribute results to FINAL.50.",
         "Differentiate provider baseline timeout vs Vercel/client timeout vs ORS rejection and quota using actual text plus code.",
@@ -141,15 +150,16 @@
         "Provide an evidence-backed, narrowly scoped remedy and tests before any further production code changes."
       ],
       "privacy": "Do not paste secrets/API keys, exact live GPS or private addresses into public repo. Diagnostics are intended to omit those fields.",
-      "productionBoundary": "Live product unchanged at 2026.10.11-FINAL.53; Issue #225 open. No code fixes and no new release in this evidence-intake operation.",
+      "productionBoundary": "FINAL.54 PR passed preliminary code/test gates, deployment pending; do not yet declare live.",
       "preservedConstraints": "Registered 2t vehicle via driving-hgv, no driving-car/straight-line fallback, free usage, warm 30 calls/min and max 2 optional via-IC probes, 14.5s server/20s client budgets, original detour caps, DB/schema 4, AN15 intentionally paused."
     }
   },
   "requiredUserInput": [],
   "unresolved": [
-    "FINAL.53 owner field report primary Overpass timeout/backup HTTP500 with 0 junctions and highway 0.0km; runtime dependency remains unresolved",
-    "Offline Geofabrik Chubu OSM IC catalog with exit/entry direction proof is PROPOSED in Issue #225, not authorized or implemented; assess ODbL, data freshness and processing resources",
-    "AN15 paused; registered 2t driving-hgv, ORS free/quota/time/ferry/detour limits remain unchanged"
+    "FINAL.54 product PR requires final doc-aligned CI, main merge, Pages/Vercel READY and public endpoint verification",
+    "Source role-specific 597 OSM candidate nodes are not a guarantee real 2t HGV route can adopt an IC; operator safe real-route test required",
+    "GitHub Actions storage/minutes and 120-day snapshot expiration require responsible manual refresh; no claim unlimited zero operational cost",
+    "AN15 paused, no schema/engine changes"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -162,18 +172,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2最新main/7 canonical files確認。所有者のFINAL.53実機高速診断は受領済み: 一宮DCM尾西店→飛島コンテナ付近、高速ONだが0km、Overpass通常timeout/予備HTTP500、IC0件。FINAL.53コード修正の再試行増加は勧めない。Geofabrik Chubu OSMから方向別IC／ランプを事前抽出してバージョン管理する静的データ案をIssue #225に記録（未承認・未実装）。次は設計変更のユーザー指示。2t HGV・無料/上限・AN15停止維持。",
+    "shortResumePrompt": "VENDRIVE2最新 main/7 canonical を取得。FINAL.53実機で通常Overpass timeout/予備HTTP500、IC0件。ユーザー承認FINAL.54: Geofabrik Chubuの2026-10-09実データから入口299/出口298の一方通行接続候補を抽出し、PR #233で対象エリアはローカルICを使いORS driving-hgvで検証する方式へ。Node/Edge/Browser preliminary PASS。PR #233の最終HEADゲート→merge→Pages/Vercel双方FINAL.54確認、その後所有者のNEW FINAL.54高速診断を受ける。AN15停止、2t HGV/無料枠保持。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.53 remains live; newly received real field diagnostic showed provider timeout+HTTP500. Issue #225 contains next architecture proposal only; await owner instruction, not another duplicate field report.",
-    "latestContinuityCheckpoint": "2026-10-11 owner FINAL.53 real report received and analyzed: Overpass timeout+HTTP500, 0 ICs; Issue #225 is proposed offline Chubu pilot, no product code changed",
+    "handoffBoundary": "FINAL.54 PR #233 final documentation snapshot, final HEAD CI/merge and Pages/Vercel live FINAL.54 pending; actual 2t route field acceptance not yet proven.",
+    "latestContinuityCheckpoint": "2026-10-11 FINAL.54 PR #233 code/Node API/real Edge/browser PASS with sourced Chubu IC dataset, release pending",
     "pauseMode": {
-      "active": true,
-      "requestedBy": "Evidence analyzed; static IC catalog architecture proposal awaits product decision",
-      "intent": "No production code changes without approval for new offline data architecture",
+      "active": false,
+      "requestedBy": "Owner explicitly approved FINAL.54 offline Geofabrik catalog implementation",
+      "intent": "Finish bounded FINAL.54 production release and verify deployment before requesting owner field diagnostic",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "Owner FINAL.53 report 2026-10-11",
-      "productCodeChanged": false
+      "source": "2026-10-11 owner yes",
+      "productCodeChanged": true
     }
   }
 }
