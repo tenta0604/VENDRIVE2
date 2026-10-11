@@ -291,16 +291,6 @@ test('highway diagnostics separate rejected ORS via-IC probes without increasing
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
 
-test('warm-instance quota guard caps upstream calls',async()=>{
-  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
-  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
-  try{
-    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
-    assert.equal(response.status,429);assert.ok(calls<=30);
-  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
-});
-
-
 test('FINAL.52: failed primary Overpass HTTP 504 uses one documented backup, retaining HGV safety and IC preference',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
   const far={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
@@ -357,3 +347,14 @@ test('FINAL.52: two failed Overpass providers never fabricate ICs or trigger ext
     assert.equal(hgvCalls,1,'keep the usable base HGV route when junction providers fail');
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
 });
+
+
+test('warm-instance quota guard caps upstream calls',async()=>{
+  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';let calls=0;
+  globalThis.fetch=async()=>{calls++;return Response.json({features:[feature]});};
+  try{
+    let response;for(let i=0;i<31;i++){response=await POST(request());if(response.status===429)break;}
+    assert.equal(response.status,429);assert.ok(calls<=30);
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
+});
+
