@@ -378,3 +378,7 @@ PR #213 merged `1eb762dc1ed4cc5f573f07a6894b77bd02296deb`; final PR Truck/Node/r
 ## 2026-10-11 migration / next evidence intake (no new product phase)
 
 FINAL.50 is already merged and live-verified, but not route-specific iPhone-confirmed. Owner has copied the private-safe `VENDRIVE 高速診断` and will PASTE IT at the START of a new chat; it has not been provided yet. First analyze that exact report, including its app version, routing decision, motorway usage and IC search counters, before seeking approximate route/IC location or considering further code changes. Historical PR #213 is merged/closed; do not treat it as pending work. This is a docs-only cross-chat handoff and does not change product priority, engine, DB/schema, costs, or the intentionally paused AN15 phase.
+
+## FINAL.51 (2026-10-11) — HGV IC search after alternative timeout (release pending)
+
+FINAL.50 received field report near DCM尾西店 → 飛島コンテナ confirmed alternative-timeout fallback with highway 0.0km and no IC exploration. Code `!baselineRetried` guard suppressed search. PR #217 fixes bounded retry gate and prioritizes simple HGV for medium direct trips >=25km; two synthetic regressions passed. Annotated safety tag `backup-pre-FINAL51-IC-RETRY-GATE-20261011` at old main; PR Node/API/real Edge `38104318588` PASS, Browser `38104318680` PASS at product head `ea92f3a9...`. Still awaiting merge/public FINAL.51 verification. Correct entry/exit IC and truck feasibility unverified in real ORS. AN15 intentionally paused.

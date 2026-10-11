@@ -5,24 +5,19 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.09-FINAL.50",
+  "appVersion": "2026.10.11-FINAL.51",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL50_PRODUCTION_VERIFIED_AWAITING_COPIED_HIGHWAY_DIAGNOSTIC",
+  "status": "FINAL51_PR_GATES_PASS_RELEASE_PENDING",
   "currentWork": {
-    "title": "FINAL.50 shipped; owner already copied MAP highway diagnostic, next chat must accept pasted text FIRST",
-    "releaseStatus": "FINAL.50 PR #213 merged 1eb762dc1ed4cc5f573f07a6894b77bd02296deb. Final PR Truck/Node/real Edge 37920822527 PASS, PR Browser 37920822721 PASS, main Browser 37920983030 PASS, Pages 37920982456 PASS. Vercel production dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe READY at exact main 1eb762dc1ed4cc5f573f07a6894b77bd02296deb. Public GitHub Pages and Vercel version.json both FINAL.50 on 2026-10-09. No real owner route or unauthenticated protected preview route smoke was performed.",
+    "title": "FINAL.51 repair of HGV alternative-timeout/IC suppression — validated PR #217, release pending",
+    "releaseStatus": "FINAL.51 PR #217 head ea92f3a9850edd1b5419343a7f0f75ee911b1f45 verified: Node/API/real Edge 38104318588 PASS and Browser 38104318680 PASS. Not yet merged/deployed; public FINAL.50 remains authoritative until verified. Actual DCM尾西店 → 飛島コンテナ provider field route NOT revalidated.",
     "releaseScope": [
-      "Avoid public ORS 100km alternative-route cap: request up to 3 alternatives only for <55km direct, not for long trips or reroutes",
-      "When a short optional alternative request times out or ORS rejects it, retry a plain HGV baseline once within fixed 14.5s server/20s client budget",
-      "For highway-ON direct >=70km, omit ferry-avoidance dynamic weighting only while demanding provider waytype full coverage and rejecting ferry (9) or missing classification",
-      "For medium-distance ORS 2004 cap, retry once without expensive ferry avoid, still requiring complete non-ferry waytype",
-      "Up to 12s basic HGV provider response on long trips; skip optional IC probes if remaining budget <3s or after baseline retry",
-      "Broaden high-speed target from 55%/max80km to 85% route distance; allow more highway among near-fast candidates while preserving global 8min/10km bounds",
-      "Overpass junction cap increases from 80 to 200 results, with the same one request and no more than two optional HGV IC probes",
-      "Add privacy-safe baseline retry, mode and candidate counts to copyable highway diagnostics",
-      "Never replace driving-hgv and registered 2t truck limits with passenger-car/straight-line fallback; preserve 30/min guard, AN15 pause and DB/schema 4"
+      "Keep expensive ORS alternative_routes to direct trips under 25km, basic restricted HGV first for medium trips",
+      "Allow bounded optional via-IC search after recovered alternative-timeout/alternative-rejected while budget remains; preserve dynamic-distance-limit ferry-safe retry IC suppression",
+      "Preserve 2t driving-hgv exact restrictions, registered dimensions, ferry verification, warm 30/min, max two extra IC candidates, 14.5s server/20s client, FINAL.36 detour caps, paused AN15",
+      "Clear diagnostics for skipped IC search and add synthetic medium-route and timeout fallback regression tests"
     ],
     "validationEvidence": {
       "safetyTag": "backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114dc8926425bff81555d305",
@@ -82,29 +77,31 @@
       "final50MainBrowser": "37920983030 PASS",
       "final50Pages": "37920982456 PASS",
       "final50Vercel": "dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe READY exact 1eb762dc1ed4cc5f573f07a6894b77bd02296deb",
-      "final50Public": "GitHub Pages & Vercel both 2026.10.09-FINAL.50"
+      "final50Public": "GitHub Pages & Vercel both 2026.10.09-FINAL.50",
+      "final51SafetyTag": "backup-pre-FINAL51-IC-RETRY-GATE-20261011 annotated -> 6fd1250c3388a06caad5b0d3f4ba1fef013ea81f, action 38104135671 PASS",
+      "final51PR": "PR #217 draft, validated code/test head ea92f3a9850edd1b5419343a7f0f75ee911b1f45",
+      "final51TruckRoute": "38104318588 PASS (Node/API + real Edge)",
+      "final51Browser": "38104318680 PASS",
+      "final51Production": "PENDING — do not claim production until merge + Pages/Vercel + live version both FINAL.51"
     },
     "decision": [
-      "Owner explicitly prioritizes hard investigation of recurring real-device long-distance timeout and early/missed motorway access",
-      "Follow public ORS 100km alternative cap; retain bounded provider cost and HGV restrictions",
-      "Where route safety cannot be proven (e.g. long ferry risk with no waytype), fail closed and explain instead of inventing road route",
-      "Field-specific source/destination and highway diagnostic are still needed to verify precise IC choices; CI does not prove real traffic quality",
-      "Stop AN15 unrelated work and no subscription or pricing change"
+      "Owner copied FINAL.50 actual diagnosis now received: alternative-timeout HGV retry, one 0.0km motorway candidate and IC suppressed by source guard !baselineRetried",
+      "Targeted FINAL.51 fix to prioritize medium HGV baseline and permit IC exploration after alternative-retry within existing budget",
+      "Real truck route/IC eligibility remains unverified; require new FINAL.51 diagnosis after production. Never assume Google Maps car routing applies",
+      "AN15 paused, no paid tier or schema/engine changes"
     ],
     "nextActions": [
-      "FIRST ON NEXT CHAT: ask user to paste the MAP highway diagnostic they have ALREADY COPIED; do not make them recopy it.",
-      "Read diagnostic header/version and every search/selection/candidate/error line; map values to current api/route.mjs and truck-routing.js.",
-      "Separate actual measured cause from unverified hypothesis, including long-trip timeout, premature IC exit and missing entry.",
-      "Only if needed for geographic IC decisions, ask for approximate origin/destination and expected entry/exit IC after the diagnostic is reviewed; no precise location or private details required.",
-      "Do not code, deploy, restart AN15 or open a new product PR until the diagnostic has been reviewed and a bounded fix is justified."
+      "Finish final doc-aligned PR #217 gates, merge and confirm main Browser, Pages, Vercel READY and both public FINAL.51 versions",
+      "Owner (parked/passenger) repeats DCM尾西店 to 飛島コンテナ vicinity highway ON and shares NEW copied FINAL.51 highway diagnosis",
+      "Analyze real IC counts/results before further route algorithm changes; keep exact 2t restrictions and AN15 pause"
     ],
     "fieldEvidenceIntake": {
-      "status": "COPIED_BY_OWNER_NOT_YET_PASTED_IN_CHAT",
+      "status": "ORIGINAL_FINAL50_DIAGNOSIS_RECEIVED_ANALYZED_FINAL51_PR_VALIDATED",
       "ownerConfirmationDate": "2026-10-11",
-      "nextInput": "Full text of existing copied VENDRIVE 高速診断, to be posted by owner in the next new chat as the very next step.",
-      "criticalBoundary": "Diagnostic text is NOT present in this conversation or repository. Do not infer its contents, mark it analyzed, ask owner to repeat the copy operation, or start an unscoped fix.",
-      "expectedData": "Version line, highway ON/OFF, selection mode, selected motorway km vs existing ORS motorway km, whether baseline alternatives/retry/long ferry test happened, extra IC search/IC counts/probe failures/remaining time and diagnostic conclusion.",
-      "firstAction": "Recover latest synchronized GitHub main and seven canonical files; explicitly ask user to paste the already-copied text. When pasted, analyze exact lines rather than heuristics; establish whether report version is FINAL.50.",
+      "nextInput": "After FINAL.51 public deployment, new privacy-safe highway diagnosis from safely parked/passenger same approximate corridor.",
+      "criticalBoundary": "Original FINAL.50 diagnostic received and source cause (retry suppressed IC) confirmed; new FINAL.51 provider outcomes still unverified, no guarantee correct motorway/IC.",
+      "expectedData": "FINAL.51 selection, motorway km, retry, IC query/result/accepted count, provider errors and time-budget guard. Compare against received FINAL.50 highway=0.0km, alternative-timeout, IC not attempted.",
+      "firstAction": "Release validated PR #217, then ask only for new FINAL.51 field report. Never ask for already-provided FINAL.50 report.",
       "analysisSequence": [
         "Validate copied diagnostic version; if pre-FINAL.50, do not attribute results to FINAL.50.",
         "Differentiate provider baseline timeout vs Vercel/client timeout vs ORS rejection and quota using actual text plus code.",
@@ -113,17 +110,15 @@
         "Provide an evidence-backed, narrowly scoped remedy and tests before any further production code changes."
       ],
       "privacy": "Do not paste secrets/API keys, exact live GPS or private addresses into public repo. Diagnostics are intended to omit those fields.",
-      "productionBoundary": "FINAL.50 is shipped and CI/live-version verified; user route was never independently reproduced with real ORS. PR #213 and old validation branches are closed; do not resume or merge them.",
+      "productionBoundary": "PR #217 validated, production pending. Mocked tests do not prove actual road/IC safe.",
       "preservedConstraints": "Registered 2t vehicle via driving-hgv, no driving-car/straight-line fallback, free usage, warm 30 calls/min and max 2 optional via-IC probes, 14.5s server/20s client budgets, original detour caps, DB/schema 4, AN15 intentionally paused."
     }
   },
   "requiredUserInput": [],
   "unresolved": [
-    "OWNER HAS COPIED privacy-safe VENDRIVE highway diagnosis but has NOT pasted it yet: next chat's first user-provided evidence.",
-    "Exact diagnostic mode, route/version, provider errors/timeout and motorway/IC probe counters not yet known: no conclusions can be drawn from unseen text.",
-    "User reported far-trip timeouts, missed expressway entries and premature exits; FINAL.50 automated CI/public deployment passed, but this representative trip remains unverified.",
-    "Approximate start/end and expected ICs may be requested after diagnostic review if truly needed; do not block receiving the copied text.",
-    "AN15 intentionally paused; HGV route/cost/quota and DB/schema constraints unchanged."
+    "FINAL.51 release pending, both public production endpoints last verified FINAL.50",
+    "Exact DCM尾西店 → 飛島コンテナ real-provider routing quality and IC access not independently proven; fresh iPhone report required",
+    "AN15 intentionally paused; 2t HGV safety and free quotas preserved"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -136,18 +131,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2の最新GitHub mainと7つのcanonical filesを読んで。FINAL.50本番公開済み。次は私が既にコピーした「高速診断」の全文をこのチャットに貼るので、まず受け取り、バージョンと各数値を一行ずつ分析して。内容を見る前に修正やマージをしない。AN15停止・2t車HGV安全制約は維持。",
+    "shortResumePrompt": "VENDRIVE2 latest main/7 canonical files first. FINAL.50 copied highway diagnosis already received: alternative-timeout fallback blocked IC. FINAL.51 PR #217 tests PASS; finish merge/Pages/Vercel FINAL.51 live verification, then request NEW FINAL.51 report. 2t HGV safeguards/AN15 pause preserved.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "2026-10-11 migration checkpoint: FINAL.50 deployed, PR #213 merged/closed. User has copied privacy-safe MAP高速診断 but has NOT submitted text yet. New chat must receive and analyze copied diagnostic as FIRST task, then determine whether specific highway entry/exit or timeout needs a follow-up fix. No premature code/deploy; AN15 paused.",
-    "latestContinuityCheckpoint": "2026-10-11 copied-highway-diagnostic awaiting paste, FINAL.50 public release confirmed earlier",
+    "handoffBoundary": "FINAL.51 PR #217 validated pending merge/Pages/Vercel release; owner original FINAL.50 diagnosis analyzed. New final field evidence after release.",
+    "latestContinuityCheckpoint": "2026-10-11 FINAL.51 PR #217 pass pending live; original FINAL.50 diagnostic already analyzed",
     "pauseMode": {
-      "active": true,
-      "requestedBy": "Owner new chat migration while copying highway diagnostic",
-      "intent": "Do not continue routing code until owner pastes and we analyze their already-copied highway diagnosis",
+      "active": false,
+      "requestedBy": "Owner approved FINAL.51 scoped routing repair",
+      "intent": "Release approved repair and await postrelease field data",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "Owner explicit 2026-10-11 transition request",
-      "productCodeChanged": false
+      "source": "Owner continuation 2026-10-11",
+      "productCodeChanged": true
     }
   }
 }

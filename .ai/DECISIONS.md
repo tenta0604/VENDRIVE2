@@ -726,3 +726,9 @@ FINAL.50 PR #213 merged at `1eb762dc1ed4cc5f573f07a6894b77bd02296deb`, final PR 
 ## 2026-10-11 — migration stop for owner-copied motorway diagnostic
 
 Owner confirms their privacy-safe highway diagnostic has already been COPIED but was **not yet provided**. The new chat must receive the copied text as its first input after current-main/canonical recovery, then analyze the report version and every relevant status/counter; request approximate endpoints/expected ICs only if further context is necessary *after* diagnostic inspection. Never invent or infer the unseen report; do not require the owner to generate a new one prematurely. FINAL.50 remains published, and an already merged PR #213 must not be resumed as draft work. This handoff does not authorize code changes. Retain registered HGV route safety, existing ORS free quotas/budgets, no paid provider, DB/schema 4/4 and paused AN15.
+
+## 2026-10-11 — FINAL.51 medium-distance 2t HGV highway IC retry
+
+- Received actual privacy-safe FINAL.50 highway report: alternatives timed out and base HGV retry succeeded but reported highway 0.0km; implementation skipped IC solely because `baselineRetried` was true. Do not mislabel this as short route/sufficient motorway.
+- Approved focused maintenance: optional ORS alternatives only for direct <25km; simple restricted HGV baseline first for medium trips; optional IC search may proceed after recovered alternative timeout/rejection only when residual time and existing 30/min/max-two-probe limits allow. Keep dynamic-distance ferry-safe recovery IC suppression, truck restrictions, the no-car fallback rule and FINAL.36 detour caps.
+- Test fixtures are not proof of safe/accurate IC in the DCM尾西店 → 飛島コンテナ route. Require NEW post-deploy FINAL.51 owner field diagnosis. Do not restart AN15 or change payment tier, engine/DB/schema.
