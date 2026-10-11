@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.11-FINAL.51';
+  var ASSET_VERSION='2026.10.11-FINAL.52';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -187,6 +187,10 @@
       '追加IC探索：'+(h.attempted?'実施':'未実施'),
       '時間制限で追加探索を短縮：'+(h.timeBudgetLimited?'あり（基本のHGV経路を優先）':'なし'),
       'IC取得状態：'+String(h.junctionQueryStatus||'不明'),
+      'IC取得先：'+({primary:'通常',backup:'予備',none:'未取得'}[h.junctionProvider]||'不明'),
+      'IC取得試行数：'+count(h.junctionAttempts),
+      'IC初回失敗：'+String(h.junctionFirstFailure||'none'),
+      'IC最終失敗：'+String(h.junctionLastFailure||'none'),
       'IC取得件数：'+count(h.junctions),
       'IC組合せ評価数：'+count(h.evaluated),
       'IC経由成立数：'+count(h.accepted),
