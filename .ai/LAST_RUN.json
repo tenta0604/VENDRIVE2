@@ -1,13 +1,12 @@
 {
-  "evidenceVersion": 82,
-  "runType": "final54_production_release_closeout_20261011",
-  "phase": "FINAL54_CHUBU_STATIC_IC_PRODUCTION_RELEASE",
-  "status": "COMPLETE",
+  "evidenceVersion": 83,
+  "runType": "final54_field_hgv_candidates_selection_policy_diagnosis_20261011",
+  "phase": "FINAL54_POSTRELEASE_REAL_ROUTE_ANALYSIS",
+  "status": "FIELD_REPORT_ANALYZED_FINAL55_INSTRUMENTATION_PROPOSED",
   "base": {
-    "productionMainBefore": "bba42c482ebbdb8378ac49c7701900cc6d159eb1",
-    "productMergedMain": "6bd92036f9cc8439a1d7c359173dde17481387b8",
-    "productionCodeChanged": true,
-    "safetyTag": "PASS immutable annotated backup-pre-FINAL54-STATIC-CHUBU-IC-CATALOG-20261011 -> bba42c482ebbdb8378ac49c7701900cc6d159eb1"
+    "productionMainBefore": "6ba7f0d6fa6d9ca18530b2bd241a3bf5a1a15f50",
+    "productionCodeChanged": false,
+    "safetyTag": "NOT_REQUIRED: docs-only evidence; existing FINAL.54 immutable tag untouched"
   },
   "versions": {
     "app": "2026.10.11-FINAL.54",
@@ -18,23 +17,21 @@
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.54 production shipped. Real Geofabrik Chubu PBF 2026-10-09 source SHA256 3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150 produced 299 directional motorway entrances and 298 exits. Pilot trips use bundled local snapshot with zero public Overpass IC queries, existing restricted 2t HGV provider remains only real-route authority.",
-    "productStatus": "PRODUCTION_VERIFIED_OWNER_FIELD_CONFIRMATION_PENDING",
-    "productCodeChanged": true,
-    "ownerIntent": "Avoid unstable public Overpass dependence at no new paid service while preserving actual truck road restrictions"
+    "summary": "Owner FINAL.54 report: highway ON, 244 local OSM ICs, 0 Overpass attempts, 2 entry/exit pairs, 2 HGV via-IC routes accepted with meaningful motorway, none eligible for final selection, motorway selected0km. Code's >100m priority gate necessarily passes; via candidates failed max +8min/20% duration and/or +10km/30% distance. Missing which/both and how much.",
+    "productStatus": "LIVE_FINAL54_UNCHANGED",
+    "productCodeChanged": false,
+    "ownerIntent": "Confirm remaining blocker before changing selection policy"
   },
   "gates": {
-    "safetyTag": "PASS immutable annotated prior main",
-    "snapshotGeneration": "PASS GitHub Actions 38137403761, 299/298 ramps and 51887-byte catalog + metadata",
-    "prTruckNodeRealEdge": "PASS 38137934135",
-    "prBrowser": "PASS 38137934150",
-    "merge": "PASS PR #233 6bd92036f9cc8439a1d7c359173dde17481387b8",
-    "mainBrowser": "PASS 38138035028",
-    "githubPages": "PASS 38138034770",
-    "vercelProduction": "PASS READY dpl_EHKs8HDyjsuogURvphmFuNMj7S4h exact product SHA",
-    "bothPublicVersions": "PASS fresh Pages and Vercel version.json 2026.10.11-FINAL.54",
-    "dbMigration": "NOT_REQUIRED engine/DB/schema unchanged",
-    "realOwnerRoute": "NOT VERIFIED, HUMAN_REQUIRED postrelease copied highway diagnosis"
+    "mainRead": "PASS verified production main 6ba7f0d6fa6d9ca18530b2bd241a3bf5a1a15f50",
+    "diagnosticEvidence": "PASS exact owner copied FINAL.54 report plus code criterion",
+    "productSyntax": "NOT_REQUIRED: docs only",
+    "realEdge": "NOT_REQUIRED: no product code modification",
+    "noExtraExternalRequests": "PASS no new Overpass or ORS calls initiated",
+    "gitHubEvidenceIssue": "#235",
+    "mainMerge": "PENDING docs-only PR",
+    "githubPages": "PENDING",
+    "vercelProduction": "PENDING"
   },
   "changedFiles": [
     ".ai/STATE.json",
@@ -44,21 +41,21 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "HUMAN_REQUIRED new FINAL.54 copied privacy-safe highway report for same route",
-    "Do not assume OSM candidate means HGV route valid until real ORS field result",
-    "Refresh ODbL snapshot before 120d stale gate, within free usage limits"
+    "Owner may authorize Issue #235 narrow privacy-safe duration/distance rejection telemetry",
+    "Do not change convenience caps or legal 2t HGV constraints until justified",
+    "Owner FINAL.54 report already received; don't ask to resend"
   ],
-  "nextAction": "Owner safely parked/passenger checks DCM尾西店 → 飛島コンテナ with highway ON and sends NEW FINAL.54 高速診断.",
+  "nextAction": "Await owner's explicit next direction for FINAL.55 diagnostic telemetry under unchanged detour caps.",
   "unresolved": [
-    "Specific accepted safe motorway and IC sequence cannot be proven until new operator report",
+    "Per-candidate eligibility exclusion reason/overrun cannot be known from current diagnostic",
     "AN15 paused"
   ],
   "continuityCheckpoint": {
-    "status": "FINAL54_PRODUCTION_VERIFIED",
-    "createdFor": "Actual sourced local IC pilot product release",
-    "sourceProductMerge": "6bd92036f9cc8439a1d7c359173dde17481387b8",
+    "status": "FIELD_EVIDENCE_ANALYZED_NO_PRODUCT_CHANGE",
+    "createdFor": "FINAL54 final-selection gate real report",
+    "sourceProductMerge": "NO_CHANGE",
     "productCodeChanged": false,
     "appVersion": "2026.10.11-FINAL.54",
-    "intent": "Await owner real route report before next scoped change"
+    "intent": "Issue #235 diagnostic proposal only"
   }
 }

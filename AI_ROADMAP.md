@@ -414,3 +414,7 @@ Owner approved static IC data for 一宮〜名古屋〜飛島 pilot after FINAL.
 ## 2026-10-11 FINAL.54 shipped, await owner same-route motorway diagnosis
 
 Product PR #233 merged `6bd92036f9cc8439a1d7c359173dde17481387b8` after final Node/API/real Edge `38137934135` PASS, Browser `38137934150` PASS, main Browser `38138035028` PASS and GitHub Pages `38138034770` PASS. Vercel production dpl_EHKs8HDyjsuogURvphmFuNMj7S4h READY exact product main, public Pages and backend both FINAL.54. Target-area calls now use static sourced Chubu IC snapshot (299/298) with zero runtime Overpass, HGV only route verification. Real safe IC and motorway success remains unproven until owner NEW FINAL.54 report. Update snapshot within 120d, preserve ODbL source; AN15 remains paused.
+
+## 2026-10-11 FINAL.54 field report received: eligibility gates are remaining blocker (Issue #235)
+
+Live FINAL.54 already solved volatile IC sourcing: 244 local OSM nodes and zero external requests; 2 entry/exit pairs, 2 via HGV candidate routes with highway, but final eligibility 0 and selected motorway 0.0km. Both valid via candidates were excluded by time (baseline + min(8min,20%)) and/or distance (baseline + min(10km,30%)) limits. Exact failing dimension cannot be determined until diagnostic adds safe rounded rejection details. Propose FINAL.55 in Issue #235 **only** for source-free duration/distance gate reporting; cap relaxation/new ORS calls/highway forcing not approved. Preserve AN15 pause, OSM snapshots and registered 2t HGV.

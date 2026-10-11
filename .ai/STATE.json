@@ -9,9 +9,9 @@
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL54_PRODUCTION_VERIFIED_AWAITING_OWNER_HIGHWAY_DIAGNOSTIC",
+  "status": "FINAL54_FIELD_VIA_HGV_TWO_ACCEPTED_FINAL_POLICY_ZERO_ANALYZED",
   "currentWork": {
-    "title": "FINAL.54 production verified on Pages+Vercel, awaiting safe owner motorway diagnostic",
+    "title": "FINAL.54 real field report analyzed: local IC source and 2 HGV routes work; both excluded by final time/distance policy",
     "releaseStatus": "FINAL.54 product PR #233 merged main at 6bd92036f9cc8439a1d7c359173dde17481387b8. Exact final PR Truck Node/API/real Edge action 38137934135 PASS, PR Browser 38137934150 PASS, postmerge main Browser 38138035028 PASS, Pages 38138034770 PASS, Vercel production dpl_EHKs8HDyjsuogURvphmFuNMj7S4h READY exact main SHA. Fresh public frontend and backend version.json both show 2026.10.11-FINAL.54 on 2026-10-11. Actual owner route motorway/IC still not proven.",
     "releaseScope": [
       "Owner approved Issue #225: offline pinned Geofabrik Chubu 2026-10-09 OSM PBF into audited directional shared motorway/motorway_link node candidates; 299 entries and 298 exits; source SHA256 3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150; 51,887B catalog",
@@ -128,26 +128,24 @@
       "final54Vercel": "dpl_EHKs8HDyjsuogURvphmFuNMj7S4h READY production exact merged SHA 6bd92036f9cc8439a1d7c359173dde17481387b8"
     },
     "decision": [
-      "Owner 2026-10-11 explicitly authorized offline Chubu IC catalog FINAL.54 after FINAL.53 primary timeout + backup HTTP500/0 IC field report",
-      "Real pinned OSM/Geofabrik snapshot generated only in GitHub Actions, never runtime; explicit source/license/update metadata and directionality via shared motorway/motorway_link nodes",
-      "Catalog proves OSM graph candidate connectivity only; legal/usable HGV motorway route must still be returned by ORS driving-hgv with registered 2t restrictions and ferries/detours verified",
-      "Do not reroute through public Overpass for fully covered journey; no 406/429 bypass, no repeated external service calls; outside geographical coverage existing compliant fallback preserved",
-      "New owner REAL FINAL.54 privacy-safe report required after deployment to establish actual selected IC and highway km; mocks do not prove route works",
-      "Preserve safety tag, ORS warm quotas/2 IC probes, no added paid services, AN15 intentionally paused"
+      "FINAL.54 owner privacy-safe highway report already received. Local Chubu OSM catalog successfully retrieved 244 IC candidate nodes with zero remote requests, 2 entry/exit pairs evaluated and 2 HGV via route candidates with meaningful motorway; final eligible zero and selected motorway 0.0km.",
+      "Current `api/route.mjs` candidate filter requires priorityMeters>100 (guaranteed for accepted nonzero motorway candidates), extra duration <= min(8min,20% baseline) AND extra distance <= min(10km,30% baseline). Both accepted via routes failed one or both extra time/distance limits. Current report does NOT reveal the relative duration/distance, hence no assertion which one is exceeded.",
+      "Do NOT relax the current time/distance selection caps, force toll highways or increase ORS calls without evidence/owner's explicit product choice; candidate legal usability remains subject to registered 2t driving-hgv.",
+      "Proposed narrow FINAL.55 instrumentation: privacy-safe time/distance rejection counters and rounded excess per via candidate, in separate Issue #235. Not yet implemented or authorized.",
+      "Keep FINAL.54 in production; AN15 paused, OSM source/ODbL and 120-day freshness, ORS 30/min and max two optional IC probes, ferry and HGV constraints untouched."
     ],
     "nextActions": [
-      "HUMAN_REQUIRED: safely parked or as passenger, owner reruns VENDRIVE2 FINAL.54 DCM尾西店 to 飛島コンテナ周辺 highway ON and shares NEW copied privacy-safe 高速診断",
-      "Check IC取得先 = 保存済みOSM and remote attempts = 0, IC nodes, evaluated pairs, HGV via result, selected motorway km and eligibility",
-      "If local catalog returns junctions but via routes fail, analyze actual ORS HGV provider response, geometry category, route detours/safety before another narrow correction; do not force any IC",
-      "Do not request old FINAL.53 provider timeout+HTTP500 report again; keep free ORS rate, 2 optional IC max, ferry/safety limits, AN15 pause and refresh OSM snapshot within 120 days"
+      "HUMAN PRODUCT CHOICE: approve or direct Issue #235 narrow FINAL.55 diagnosis instrumentation showing whether 2 via HGV candidates violated time, distance or both and approximate excess; maintain existing selection caps.",
+      "Only after new instrument is released, retest same DCM尾西店→飛島コンテナ surroundings with highway ON and collect NEW versioned privacy-safe diagnosis (not the already-received FINAL.54).",
+      "Do not change HGV restrictions, usage limits, ferry avoidance, original +8min/+10km bounded detour policy, or AN15 pause without separate user decision."
     ],
     "fieldEvidenceIntake": {
-      "status": "FINAL54_RELEASE_LIVE_AWAITING_NEW_FIELD_DIAGNOSTIC",
+      "status": "FINAL54_REAL_REPORT_RECEIVED_LOCAL_CATALOG_244_VIA_ACCEPTED_2_FINAL_ELIGIBLE_0",
       "ownerConfirmationDate": "2026-10-11",
-      "nextInput": "NEW FINAL.54 copied location-free motorway diagnosis including local catalog used, zero remote IC attempts, junctions/pairs/via candidates and final motorway km",
-      "criticalBoundary": "Published static OSM 299 entry/298 exit candidate snapshot and mocked ORS tests prove IC discovery phase is source-independent within pilot, NOT that physical exact 2t truck expressway path is viable or chosen.",
-      "expectedData": "IC取得状態/先/試行数/データ基準日/取得件数/組合せ評価/経由成立/最終選択/高速区間距離; whether real HGV route rejects a pair.",
-      "firstAction": "Receive NEW copied VENDRIVE 高速診断 2026.10.11-FINAL.54 from safely parked/passenger same route, NOT old FINAL.53 report.",
+      "nextInput": "Owner direction about FINAL.55 safe gating instrumentation. After a new release, fresh numbered diagnosis only.",
+      "criticalBoundary": "FINAL.54 IC retrieval succeeded and 2 via HGV candidates had meaningful motorway. `priorityMeters>100` was satisfied, therefore selection failure is duration and/or distance cap; which is unknown from this report.",
+      "expectedData": "Future diagnostic should include time-only/distance-only/both rejection breakdown and rounded exceeding minutes/km, without locations/secrets.",
+      "firstAction": "No need to ask again for FINAL.54 report. Explain proven final duration/distance gate rejection; propose safe aggregate rejection diagnostics in Issue #235 and wait for user direction.",
       "analysisSequence": [
         "Validate copied diagnostic version; if pre-FINAL.50, do not attribute results to FINAL.50.",
         "Differentiate provider baseline timeout vs Vercel/client timeout vs ORS rejection and quota using actual text plus code.",
@@ -156,16 +154,16 @@
         "Provide an evidence-backed, narrowly scoped remedy and tests before any further production code changes."
       ],
       "privacy": "Do not paste secrets/API keys, exact live GPS or private addresses into public repo. Diagnostics are intended to omit those fields.",
-      "productionBoundary": "FINAL.54 production verified, Pages and Vercel live. New owner field evidence required for actual corridor safety and motorway adoption.",
+      "productionBoundary": "FINAL.54 remains live. No new product code change or weakened highway selection policy was authorized or performed.",
       "preservedConstraints": "Registered 2t vehicle via driving-hgv, no driving-car/straight-line fallback, free usage, warm 30 calls/min and max 2 optional via-IC probes, 14.5s server/20s client budgets, original detour caps, DB/schema 4, AN15 intentionally paused."
     }
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Actual DCM尾西店→飛島コンテナ field route after FINAL.54 not yet measured; new privacy-safe diagnostic required",
-    "Offline OSM entry/exit node candidates are not legal proof; final restricted HGV provider may reject waypoints or lack meaningful motorway usage",
-    "Manual static snapshot dated 2026-10-09 expires under 120d freshness gate; refresh licensed data on controlled schedule within resource allowance",
-    "AN15 intentionally paused; DB/schema 4 and engine AN14B3B5 unchanged"
+    "Owner FINAL.54 real report proves local IC 244, 2 via HGV accepted, 0 final eligible due duration and/or distance limits; specific gate and overrun unknown",
+    "Issue #235 proposes diagnostic instrumentation only, not authorized or implemented",
+    "No reason to reuse unstable public Overpass on covered routes; no need for owner to resend same FINAL.54 report",
+    "AN15 deliberately paused, HGV, ferries, ORS free quotas and OSM snapshot 120-day rule unchanged"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -178,17 +176,17 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2の最新GitHub mainと7 canonicalを読んで。FINAL.54はPR #233 merged、2026-10-09 Geofabrik Chubu OSMから入口299/出口298件を生成。対象地域はOverpass通信なし、ORS 2t driving-hgvで検証。PR Node/API/real Edge, Browser, main Browser/Pages、Vercel READY、公開両方のFINAL.54確認済み。次はDCM尾西店→飛島コンテナ周辺の新しいFINAL.54高速診断を安全に停車して提供してもらう。FINAL.53のtimeout+HTTP500は分析済み。AN15停止、無料枠/2t制限を維持。",
+    "shortResumePrompt": "VENDRIVE2最新main/7 canonical取得。FINAL.54所有者実機高速診断は受領済み: ローカルOSM244件/外部通信0、IC組合せ2件、ORS HGV高速経由候補2件成立、最終適合0、高速0km。コードより優先距離ゲートは成立し、少なくとも時間最大+8分/20%または距離最大+10km/30%を2件とも超えている。どちらかは不明。Issue #235はFINAL.55で時間/距離別不採用理由・超過量を秘密情報なしで出す提案（未実装）。上限は緩めず、AN15停止・2t HGV維持。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.54 production & final PR Node/API/Edge/main Browser/Pages/Vercel + public versions PASS. Next USER FIELD REPORT. Old FINAL.53 report already processed, avoid duplicate requests and no extra code without new evidence.",
-    "latestContinuityCheckpoint": "2026-10-11 FINAL.54 product shipped PR #233, real Chubu OSM 299/298 and both public versions verified. Await NEW owner safe field IC/hwy report",
+    "handoffBoundary": "Real FINAL.54 report already received; source issue solved, final eligibility gate sole remaining known blocker. Await owner instruction to implement privacy-safe rejection telemetry Issue #235, without weakening +8min/+10km caps.",
+    "latestContinuityCheckpoint": "2026-10-11 FINAL.54 field evidence: catalog local/0 remote, IC244, pairs2, via accepted2, eligible0 due time/distance cap; Issue #235 proposed FINAL.55 safe diagnostics",
     "pauseMode": {
       "active": true,
-      "requestedBy": "Post-FINAL54 production field-evidence boundary",
-      "intent": "No speculative route changes until owner submits NEW FINAL.54 real test or explicit follow-up",
+      "requestedBy": "New FINAL.54 field report analyzed; further product gate behavior needs owner's direction",
+      "intent": "No speculative acceptance-cap modification, await approval of safe diagnostics Issue #235",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "2026-10-11 FINAL.54 production verified",
+      "source": "Owner pasted FINAL.54 diagnostic",
       "productCodeChanged": false
     }
   }
