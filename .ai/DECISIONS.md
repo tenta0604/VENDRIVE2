@@ -721,3 +721,8 @@ Owner demands genuine root-cause investigation of long-route timeouts, too-early
 ## 2026-10-09 — FINAL.50 release verified, actual route evidence remains mandatory
 
 FINAL.50 PR #213 merged at `1eb762dc1ed4cc5f573f07a6894b77bd02296deb`, final PR Truck/real Edge `37920822527` and Browser `37920822721` PASS; main Browser `37920983030`, Pages `37920982456` PASS. Vercel `dpl_4pQfJK7u7oGeLufkLikZ45k7Egwe` READY for this exact SHA and both public version endpoints FINAL.50. Prior PR-pending note historical. The UI/engine fixes are real and tested, but neither protected preview nor user-specific bad route was available for true-provider origin/destination route-quality confirmation; do not assert that specific IC entry/exit is optimized. Owner may share an approximate route and privacy-safe diagnostic for next scoped iteration. Preserve HGV, free quota and intentional AN15 pause until explicit new instruction.
+
+
+## 2026-10-11 — migration stop for owner-copied motorway diagnostic
+
+Owner confirms their privacy-safe highway diagnostic has already been COPIED but was **not yet provided**. The new chat must receive the copied text as its first input after current-main/canonical recovery, then analyze the report version and every relevant status/counter; request approximate endpoints/expected ICs only if further context is necessary *after* diagnostic inspection. Never invent or infer the unseen report; do not require the owner to generate a new one prematurely. FINAL.50 remains published, and an already merged PR #213 must not be resumed as draft work. This handoff does not authorize code changes. Retain registered HGV route safety, existing ORS free quotas/budgets, no paid provider, DB/schema 4/4 and paused AN15.
