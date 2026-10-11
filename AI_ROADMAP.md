@@ -394,3 +394,7 @@ Owner's FINAL.51 field data for DCM尾西店→飛島コンテナ shows safe bas
 ## FINAL.52 2026-10-11 released; field evidence pending
 
 PR #220 merged `f6290b52858f5c41c33076ae0d6b78430d730358`, HGV/Node/API/real Edge `38105299934` PASS, PR Browser `38105299950` PASS, postmerge main Browser `38105375746` PASS and Pages `38105375057` PASS; Vercel dpl_6ZUy9Cu4U55nueU3AsG7GwaoZFKC READY exact main. Public frontend/backend both `2026.10.11-FINAL.52`. Prior PR pending state superseded. True motorway IC outcomes for DCM尾西店→飛島コンテナ require new safe parked/passenger operator diagnostic; no conclusion from synthetic provider tests. AN15 intentionally paused, no further product work without evidence.
+
+## FINAL.53 2026-10-11 — Overpass identity, explicit refusal and cooldown (pending live release)
+
+New owner FINAL.52 copied field report showed primary 406 and backup 429 while searching ICs, all IC candidates zero and motorway 0km. FINAL.53 PR #223 identifies VENDRIVE2 with a true HTTP UA, stops fallback on public operator 406/429, cools down instead of spamming, and deduplicates identical concurrent IC requests. Mocked gates Node/API/real Edge `38107598478` PASS and Browser `38107598454` PASS at product head d6f288e. Annotated safety tag backup-pre-FINAL53-OVERPASS-CLIENT-COMPLIANCE-20261011 to old main. Pending final-head docs CI, merge and public FRONTEND+API FINAL.53 checks. Next after release is the owner's NEW privacy-safe highway report for same corridor. 2t HGV/quotas, AN15 pause preserved.

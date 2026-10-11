@@ -6,6 +6,10 @@ const ENDPOINT = 'https://api.heigit.org/openrouteservice/v2/directions/driving-
 // Never dispatch more than one bounded backup request on the first failure.
 const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter','https://overpass.private.coffee/api/interpreter'];
 const OVERPASS_REQUEST_TIMEOUT_MS = 3100;
+// Identify this application to public Overpass operators instead of sending the runtime default UA.
+const OVERPASS_USER_AGENT = 'VENDRIVE2/1.0 (+https://tenta0604.github.io/VENDRIVE2/)';
+const OVERPASS_RATE_LIMIT_COOLDOWN_MS = 30000;
+const OVERPASS_ACCESS_BLOCK_COOLDOWN_MS = 600000;
 const MAX_BODY_BYTES = 4096;
 const MAX_ACTIVE_HIGHWAY_ROUTES = 2;
 const JUNCTION_CACHE_TTL_MS = 15*60*1000;
@@ -19,6 +23,9 @@ const ALTERNATIVE_FIRST_ATTEMPT_MS=6200;
 // Per-warm-instance guard complements the provider's hard free quota. It is not a distributed limiter.
 const recent = [];
 const junctionCache = new Map();
+const junctionInflight = new Map();
+// Warm-instance cooldowns only. This is not a cross-instance/global rate limiter.
+let overpassBlockedUntil = 0;
 function originAllowed(request,origin) {
   if (ALLOWED_ORIGINS.has(origin)) return true;
   try { return !!origin && new URL(request.url).origin===origin; } catch { return false; }
@@ -79,17 +86,19 @@ function overpassFailureLabel(response){
   if(Number.isInteger(response?.status)&&response.status>=400&&response.status<=599)return 'http-'+response.status;
   return 'invalid-payload';
 }
-async function findMotorwayJunctions(origin,destination,radius){
+async function queryMotorwayJunctions(origin,destination,radius){
   const cacheKey=junctionCacheKey(origin,destination,radius),cached=junctionCache.get(cacheKey),now=Date.now();
   if(cached&&now-cached.at<JUNCTION_CACHE_TTL_MS)return cached.value;
+  if(now<overpassBlockedUntil)return {items:[],status:'provider-error',provider:'none',attempts:0,firstFailure:'cooldown',lastFailure:'cooldown'};
   const startBbox=motorwayJunctionBbox(origin,radius),endBbox=motorwayJunctionBbox(destination,radius);
   const query='[out:json][timeout:6];(node["highway"="motorway_junction"]('+startBbox+');node["highway"="motorway_junction"]('+endBbox+'););out body 200;';
-  let firstFailure='none',lastFailure='none';
+  let firstFailure='none',lastFailure='none',attempts=0;
   for(let index=0;index<OVERPASS_ENDPOINTS.length;index++){
     const provider=index===0?'primary':'backup';
+    attempts++;
     let response,reason;
     try{
-      response=await timedJsonFetch(OVERPASS_ENDPOINTS[index],{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},OVERPASS_REQUEST_TIMEOUT_MS);
+      response=await timedJsonFetch(OVERPASS_ENDPOINTS[index],{method:'POST',headers:{'User-Agent':OVERPASS_USER_AGENT,'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json'},body:'data='+encodeURIComponent(query)},OVERPASS_REQUEST_TIMEOUT_MS);
       if(!response.ok)reason=overpassFailureLabel(response);
       else if(!Array.isArray(response.data?.elements)||typeof response.data?.remark==='string')reason='invalid-payload';
     }catch(error){reason=error?.name==='AbortError'?'timeout':'network-error';}
@@ -108,8 +117,24 @@ async function findMotorwayJunctions(origin,destination,radius){
     }
     if(index===0)firstFailure=reason;
     lastFailure=reason;
+    // Neither an explicit access block nor a 429 may be circumvented by switching servers.
+    if(reason==='http-406'||reason==='http-429'){
+      const cooldown=reason==='http-429'?OVERPASS_RATE_LIMIT_COOLDOWN_MS:OVERPASS_ACCESS_BLOCK_COOLDOWN_MS;
+      overpassBlockedUntil=Math.max(overpassBlockedUntil,Date.now()+cooldown);
+      break;
+    }
   }
-  return {items:[],status:lastFailure==='timeout'?'timeout':'provider-error',provider:'none',attempts:OVERPASS_ENDPOINTS.length,firstFailure,lastFailure};
+  return {items:[],status:lastFailure==='timeout'?'timeout':'provider-error',provider:'none',attempts,firstFailure,lastFailure};
+}
+// Share a single lookup among overlapping route requests in the same warm instance.
+async function findMotorwayJunctions(origin,destination,radius){
+  const key=junctionCacheKey(origin,destination,radius);
+  const existing=junctionInflight.get(key);
+  if(existing)return existing;
+  const pending=queryMotorwayJunctions(origin,destination,radius);
+  junctionInflight.set(key,pending);
+  try{return await pending;}
+  finally{if(junctionInflight.get(key)===pending)junctionInflight.delete(key);}
 }
 function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   const direct=routing.distanceMeters(origin,destination);

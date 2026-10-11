@@ -79,8 +79,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.52 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.11-FINAL.52');
+test('routing asset version matches FINAL.53 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.11-FINAL.53');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -99,6 +99,10 @@ test('highway diagnostic report has actionable IC/ORS status without location or
   assert.match(noPairs,/IC組合せ0件/);
   const overpassError=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctions:0}},{avoidTolls:false});
   assert.match(overpassError,/IC取得元が応答できず/);
+  const accessRejected=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctionFirstFailure:'http-406'}},{avoidTolls:false});
+  assert.match(accessRejected,/接続を拒否/);
+  const throttled=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctionFirstFailure:'http-429'}},{avoidTolls:false});
+  assert.match(throttled,/回数制限中/);
   assert.match(routing.highwayDiagnosticReport(sample,{avoidTolls:true}),/高速OFF/);
   assert.equal(routing.highwayDiagnosticReport({ok:true},{avoidTolls:false}),null);
 });
