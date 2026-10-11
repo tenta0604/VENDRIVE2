@@ -754,3 +754,8 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - Owner's FINAL.52 real route report identified HTTP 406 primary and 429 backup (no IC data); these are explicit external access/refusal signals, not safe IC absence evidence.
 - Correct the backend's generic User-Agent by a stable, truthful app identity with public VENDRIVE2 URL. Respect a 406/429 without trying another public host to evade the refusal; apply at least 30s warm-instance 429 cooldown and longer 406 hold. Coalesce concurrent identical IC requests; keep bounded fallback for other transient errors.
 - Do not increase public API load to fix highway preference. This is per-warm-instance mitigation, not distributed coordination; ultimately the correct IC/route outcome remains unproven until new owner FINAL.53 field data. Keep registered 2t `driving-hgv`, safe ferry/detour/time bounds, max two ORS IC probes, 30/min ORS, no paid tier, AN15 paused.
+
+## 2026-10-11 — FINAL.53 public release signed off; 406/429 not bypassed
+
+- Product PR #223 released at `c3589d30ff2c6ae5dcd33cd65778ecc5f5348bdd`, all real Edge/browser/main Pages/Vercel/version gates PASS. Stable application User-Agent and operator-controlled refusal/cooldown now active. Identical concurrent IC searches coalesce per warm instance.
+- Do not claim primary Overpass 406 or backup 429 are cured globally or that a DCM尾西店→飛島コンテナ motorway/IC candidate is safe before a NEW FINAL.53 operator report. Do not retry 429 repeatedly or bypass another public instance on 406/429. Maintain 2t restricted HGV, ORS free quotas, max 2 IC probes, 14.5/20s, ferry/detour bounds, AN15 intentional pause.
