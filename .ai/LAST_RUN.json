@@ -1,41 +1,47 @@
 {
-  "evidenceVersion": 77,
-  "runType": "final52_production_release_closeout_20261011",
-  "phase": "FINAL52_OVERPASS_IC_RESILIENCE_RELEASE",
-  "status": "COMPLETE",
+  "evidenceVersion": 78,
+  "runType": "final53_overpass_user_agent_access_controls_pr_validation_20261011",
+  "phase": "FINAL53_OVERPASS_OPERATOR_COMPLIANCE",
+  "status": "PR_VALIDATED_RELEASE_PENDING",
   "base": {
-    "productionMainBefore": "c68695223f3473c0674c0e7655aa042f4243b2ea",
-    "productMergedMain": "f6290b52858f5c41c33076ae0d6b78430d730358",
+    "productionMainBefore": "82e5c83a6a2774e747a64a54b6959da0c537cd0c",
     "productionCodeChanged": true,
-    "safetyTag": "PASS immutable annotated backup-pre-FINAL52-OVERPASS-RESILIENCE-20261011 -> c68695223f3473c0674c0e7655aa042f4243b2ea"
+    "safetyTag": "PASS annotated backup-pre-FINAL53-OVERPASS-CLIENT-COMPLIANCE-20261011 -> 82e5c83a6a2774e747a64a54b6959da0c537cd0c"
   },
   "versions": {
-    "app": "2026.10.11-FINAL.52",
-    "frontend": "2026.10.11-FINAL.52",
-    "apiTarget": "2026.10.11-FINAL.52",
+    "app": "2026.10.11-FINAL.53",
+    "frontend": "2026.10.11-FINAL.53",
+    "apiTarget": "2026.10.11-FINAL.53",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.52 production released: bounded Overpass primary+one independent backup, faster junction bboxes with original local radius filter, sanitized failure-source diagnostics. CI/live verified; real DCM尾西店→飛島コンテナ IC route remains unknown until owner safe retest.",
-    "productStatus": "PRODUCTION_VERIFIED_AWAITING_OWNER_REAL_ROUTE_DIAGNOSTIC",
+    "summary": "User FINAL.52 highway IC report: primary HTTP 406 and backup HTTP 429. FINAL.53 adds stable identifying backend Overpass UA, refuses backup on explicit operator 406/429 with warm-instance cooldown, coalesces concurrent IC requests, and clarifies safe diagnostics.",
+    "productStatus": "CODE_PR_GATES_PASS_RELEASE_PENDING",
     "productCodeChanged": true,
-    "ownerIntent": "Preserve safe 2t routing and free quotas while improving IC discovery resilience."
+    "ownerIntent": "Honor public OSM infrastructure policy and improve IC reliability without paid services, increased quotas or vehicle-policy relaxation"
   },
   "gates": {
-    "safetyTag": "PASS annotated exact pre-edit main; issue #219",
-    "finalPRTruckNodeRealEdge": "PASS 38105299934 at f5b1dae6e9593011f5435f4b64226e1221e6a3bd",
-    "finalPRBrowser": "PASS 38105299950",
-    "merge": "PASS PR #220 at f6290b52858f5c41c33076ae0d6b78430d730358",
-    "mainBrowser": "PASS 38105375746",
-    "githubPages": "PASS 38105375057",
-    "vercelProduction": "PASS READY dpl_6ZUy9Cu4U55nueU3AsG7GwaoZFKC exact merge main",
-    "bothLiveVersions": "PASS frontend/backend 2026.10.11-FINAL.52 after fresh public fetch",
-    "dbMigration": "NOT REQUIRED DB/schema 4",
-    "realOwnerRoute": "NOT PERFORMED; HUMAN_REQUIRED new field report"
+    "safetyTag": "PASS exact annotated pre-edit main 82e5c83a...",
+    "productPRTruckNodeRealEdge": "PASS 38107598478 at d6f288e295b680e0e5d06949268aa113b3d32026",
+    "productPRBrowser": "PASS 38107598454 at d6f288e295b680e0e5d06949268aa113b3d32026",
+    "regression": "PASS new UA, no 406/429 fallback, cooldown and in-flight de-dup fixtures (mocked)",
+    "mainMerge": "PENDING",
+    "mainBrowser": "PENDING",
+    "githubPages": "PENDING",
+    "vercelProduction": "PENDING",
+    "bothPublicVersions": "PENDING",
+    "exactRealUserRoute": "NOT PERFORMED; HUMAN_REQUIRED after live release",
+    "dbMigration": "NOT_REQUIRED DB/schema unchanged"
   },
   "changedFiles": [
+    "api/route.mjs",
+    "truck-routing.js",
+    "index.html",
+    "version.json",
+    "tests/truck-route-client.test.mjs",
+    "tests/truck-route-overpass.test.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -43,20 +49,22 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "NEW FINAL.52 privacy-safe motorway diagnostic from user's parked/passenger same-corridor route",
-    "Potential further bounded corrective work only if new evidence supports"
+    "Pass final head gates after docs and merge PR #223",
+    "Verify main browser, Pages, Vercel, public app/backend FINAL.53",
+    "After live release obtain NEW owner safe field IC report"
   ],
-  "nextAction": "HUMAN_REQUIRED: owner safely reproduces same DCM尾西店→飛島コンテナ route with highway ON and sends NEW copied FINAL.52 高速診断",
+  "nextAction": "Finish PR #223 release and production checks, then HUMAN_REQUIRED fresh FINAL.53 diagnosis",
   "unresolved": [
-    "Actual real Overpass/ORS IC availability not independently verified",
-    "AN15 intentionally paused; 2t HGV/free safety unchanged"
+    "Real IC choice unavailable until after-field retest",
+    "Warm instance cooldown is not shared across Vercel instances",
+    "AN15 paused"
   ],
   "continuityCheckpoint": {
-    "status": "PASS_RELEASE_VERIFIED",
-    "createdFor": "FINAL.52 provider-reliability production closeout",
-    "sourceProductMerge": "f6290b52858f5c41c33076ae0d6b78430d730358",
-    "productCodeChanged": false,
-    "appVersion": "2026.10.11-FINAL.52",
-    "intent": "Await owner new field report before further coding"
+    "status": "CODE_PR_PASS_RELEASE_PENDING",
+    "createdFor": "FINAL.53 compliant Overpass IC discovery",
+    "sourceProductMerge": "NOT_YET_MERGED",
+    "productCodeChanged": true,
+    "appVersion": "2026.10.11-FINAL.53",
+    "intent": "Complete exact-main release and collect new operator field evidence"
   }
 }

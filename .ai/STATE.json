@@ -5,20 +5,21 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.11-FINAL.52",
+  "appVersion": "2026.10.11-FINAL.53",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL52_PRODUCTION_VERIFIED_AWAITING_OWNER_FIELD_DIAGNOSTIC",
+  "status": "FINAL53_PRODUCT_PR_VALIDATED_RELEASE_PENDING",
   "currentWork": {
-    "title": "FINAL.52 Overpass IC provider resilience live; awaiting NEW highway diagnosis from owner",
-    "releaseStatus": "FINAL.52 PR #220 merged at f6290b52858f5c41c33076ae0d6b78430d730358. Final PR Truck/Node/API/real Edge 38105299934 PASS and PR Browser 38105299950 PASS; main Browser 38105375746 PASS, GitHub Pages 38105375057 PASS. Vercel production dpl_6ZUy9Cu4U55nueU3AsG7GwaoZFKC READY exact merge main. Both live frontend and backend version.json fetched 2026-10-11 show 2026.10.11-FINAL.52. Real Overpass response/owner route and accepted IC remain NOT VERIFIED.",
+    "title": "FINAL.53 Overpass respectful identification and 406/429 cooldown — PR #223 verified, release pending",
+    "releaseStatus": "FINAL.53 PR #223 code/test head d6f288e295b680e0e5d06949268aa113b3d32026. Truck/Node/API/real Edge workflow 38107598478 PASS; Browser workflow 38107598454 PASS. NOT YET MERGED OR RELEASED at this checkpoint. Public VENDRIVE remains FINAL.52 until both live endpoints verified.",
     "releaseScope": [
-      "Overpass single point of failure: bounded primary overpass-api.de query and one secondary independently-operated overpass.private.coffee query only on failure",
-      "Replace expensive large-radius around filters with faster bbox OSM motorway_junction query; discard elements outside original radii",
-      "Give Overpass internal query a 6s budget but client response max 3.1s each, two sequential providers at most; accept only a valid elements array without provider remark and cache only good replies",
-      "Copy location-free IC diagnostics: used provider, attempt count, first and final sanitized network/HTTP/timeout/malformed reason",
-      "Preserve 2t driving-hgv vehicle dimensions, warm ORS 30/min, max 2 extra IC HGV probes, original 14.5/20s time budgets, detour and ferry restrictions, paused AN15, DB/schema/engine"
+      "Send stable honest User-Agent VENDRIVE2/1.0 with public app URL to public Overpass instance on backend",
+      "Treat Overpass HTTP 406 access refusal and HTTP 429 rate limit as operator controls; do not bypass by attempting secondary instance; cool down 10min for 406 and 30s minimum for 429 per warm backend instance",
+      "Coalesce overlapping identical IC lookup requests through a warm-instance inflight promise cache while retaining the successful 15min IC cache",
+      "Preserve bounded backup lookup only for other transient errors. Return safe baseline HGV route and sanitized diagnostic classifications instead of fabricated motorway data",
+      "Add isolated Node mock tests for 406/429 and cooldown, User-Agent and concurrent identical query, preserving existing free provider fallback tests",
+      "Preserve 2t driving-hgv vehicle restrictions, warm ORS 30/min quota guard, max 2 optional via IC probes, 14.5/20s timeouts, ferry and detour caps, engine/DB/schema, AN15 pause"
     ],
     "validationEvidence": {
       "safetyTag": "backup-pre-FINAL46-HGV-TIMEOUT-BOUNDS-20261008 -> be83e6c8aee36caa114dc8926425bff81555d305",
@@ -100,26 +101,33 @@
       "final52Merge": "PR #220 merged f6290b52858f5c41c33076ae0d6b78430d730358",
       "final52MainBrowser": "38105375746 PASS",
       "final52Pages": "38105375057 PASS",
-      "final52Vercel": "dpl_6ZUy9Cu4U55nueU3AsG7GwaoZFKC READY production, git SHA f6290b52858f5c41c33076ae0d6b78430d730358"
+      "final52Vercel": "dpl_6ZUy9Cu4U55nueU3AsG7GwaoZFKC READY production, git SHA f6290b52858f5c41c33076ae0d6b78430d730358",
+      "final53SafetyTag": "backup-pre-FINAL53-OVERPASS-CLIENT-COMPLIANCE-20261011 annotated -> 82e5c83a6a2774e747a64a54b6959da0c537cd0c, Issue #222",
+      "final53PR": "PR #223 draft at product head d6f288e295b680e0e5d06949268aa113b3d32026",
+      "final53Truck": "38107598478 PASS (API/Node, real Edge)",
+      "final53Browser": "38107598454 PASS (browser regression)",
+      "final53Production": "PENDING main merge, Pages+Vercel READY and both public versions FINAL.53"
     },
     "decision": [
-      "FINAL.51 owner field diagnosis received: IC search attempted but provider-error with 0 ICs/0 pair evaluations and 0.0km motorway. Gate fix worked; failure was at external IC data retrieval, but underlying HTTP status/network cause was absent from old report",
-      "Overpass free public instances may rate-limit or fail under load; add one bounded independent backup and privacy-safe reason codes without adding ORS route probes or paid services",
-      "Keep original circular inclusion semantics by applying radial distance filtering after faster bbox lookup, ensure safe baseline returned if providers fail",
-      "No real operator-route or exact safe IC claim until postrelease FINAL.52 diagnostics; AN15 paused"
+      "FINAL.52 real copied diagnosis received: basic HGV route returned highway 0.0km, IC queries tried twice, primary HTTP 406, backup HTTP 429 and no valid motorway candidate due to unavailable junctions",
+      "Public Overpass operators have blocked generic UA requests since 2026 and apply explicit 406/429 admission controls. Use real identifiable app UA and never bypass rate-limit/access refusal via another server; honor bounded warm-instance cooldown",
+      "Concurrently duplicated same IC query should share a single in-flight request, not multiply public requests",
+      "Keep existing 2t HGV safety, free quotas, ferry verification, detour/time limits, no forced highway, no paid external providers, AN15 paused",
+      "Do not assume FINAL.53 fixes real IC selection; require new route-specific owner diagnosis after release"
     ],
     "nextActions": [
-      "HUMAN_REQUIRED: while parked or passenger repeat DCM尾西店 → 飛島コンテナ vicinity highway ON in live FINAL.52 and paste NEW location-free VENDRIVE 高速診断",
-      "Compare IC取得先/試行数/初回失敗/最終失敗/件数/IC組合せ/経由成立 and highway km; do not infer real OSM/ORS effectiveness until this report is received",
-      "Keep 2t driving-hgv registered restrictions, warm 30/min, max 2 optional HGV via-IC probes, ferry/detour safety and 14.5s/20s time budgets; AN15 paused"
+      "Complete final doc-aligned PR #223 CI, merge and verify main Browser/Pages/Vercel READY exact main and both live version.json FINAL.53",
+      "After live verified, HUMAN_REQUIRED owner safely parked/passenger repeats DCM尾西店 → 飛島コンテナ around highway ON and shares NEW FINAL.53 privacy-safe diagnosis; don't ask for old FINAL.52",
+      "Analyze primary/secondary query status, attempts, first/last error, IC counts/pairs/via candidates and final highway km before any more code",
+      "Do not restart AN15 or relax any HGV restrictions and quotas"
     ],
     "fieldEvidenceIntake": {
-      "status": "FINAL52_PUBLIC_RELEASE_VERIFIED_AWAITING_NEW_REAL_DIAGNOSTIC",
+      "status": "FINAL52_RECEIVED_HTTP406_HTTP429_FINAL53_PR_PASS_AWAITING_RELEASE",
       "ownerConfirmationDate": "2026-10-11",
-      "nextInput": "New location-safe FINAL.52 motorway diagnosis: include IC取得先/試行数/初回失敗/最終失敗 and selected motorway/IC candidate stats.",
-      "criticalBoundary": "FINAL.52 API/frontend production, GitHub Actions and version endpoints verified, but live Overpass retrieval from real user route NOT measured; not guaranteed highway routing.",
-      "expectedData": "IC取得状態, IC取得先, IC取得試行数, IC初回失敗, IC最終失敗, 取得IC件数, IC経由候補数/失敗, 最終高速km.",
-      "firstAction": "Receive NEW VENDRIVE 高速診断 2026.10.11-FINAL.52 after the owner's parked/passenger retest. FINAL.51 report already received and analyzed; never ask them to repeat it.",
+      "nextInput": "NEW VENDRIVE 高速診断 2026.10.11-FINAL.53 after safe parked/passenger retest",
+      "criticalBoundary": "Owner FINAL.52 provider errors are known: primary HTTP 406, backup HTTP 429. FINAL.53 unit/browser tests pass; actual Vercel outgoing UA behavior and real OSM IC route not yet verified.",
+      "expectedData": "IC取得状態、IC取得先、IC取得試行数、IC初回失敗、IC最終失敗、IC取得件数、組合せ・成立数、高速区間距離",
+      "firstAction": "After verified FINAL.53 live release, collect NEW FINAL.53 location-free highway report for same origin/destination. Do not request previous FINAL.52 diagnostic again.",
       "analysisSequence": [
         "Validate copied diagnostic version; if pre-FINAL.50, do not attribute results to FINAL.50.",
         "Differentiate provider baseline timeout vs Vercel/client timeout vs ORS rejection and quota using actual text plus code.",
@@ -128,15 +136,16 @@
         "Provide an evidence-backed, narrowly scoped remedy and tests before any further production code changes."
       ],
       "privacy": "Do not paste secrets/API keys, exact live GPS or private addresses into public repo. Diagnostics are intended to omit those fields.",
-      "productionBoundary": "FINAL.52 shipped. Mocked backup success and both-fail scenarios cannot guarantee public Overpass availability from Vercel; physical same-corridor test is the only next required evidence.",
+      "productionBoundary": "PR verified, FINAL.53 not publicly live at this checkpoint. Simulated tests cannot guarantee public Overpass availability or selected safe IC.",
       "preservedConstraints": "Registered 2t vehicle via driving-hgv, no driving-car/straight-line fallback, free usage, warm 30 calls/min and max 2 optional via-IC probes, 14.5s server/20s client budgets, original detour caps, DB/schema 4, AN15 intentionally paused."
     }
   },
   "requiredUserInput": [],
   "unresolved": [
-    "Actual DCM尾西店→飛島コンテナ real HGV road/IC route after FINAL.52 not confirmed; NEW owner location-safe copied diagnostic required",
-    "Primary/backup Overpass reachability from production and route's actual IC allowance not proven by fixture tests",
-    "AN15 intentionally paused, no additional unscoped code development"
+    "FINAL.53 validated PR #223 is not merged/published yet at this checkpoint",
+    "Actual DCM尾西店→飛島コンテナ real HGV IC/motorway route after FINAL.53 is not verified; NEW owner diagnostic required",
+    "Cooldown shared only per warm Vercel instance, not distributed; public 429 may persist; no provider bypass allowed",
+    "AN15 intentionally paused, no speculative route modifications"
   ],
   "recovery": {
     "authority": "latest synchronized main plus canonical state files",
@@ -149,18 +158,18 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2最新GitHub main/7 canonical filesを確認。FINAL.52はPR #220 merged, Pages/Vercel実稼働ともFINAL.52確認済み。FINAL.51のprovider-errorは既に調査した。現在はDCM尾西店→飛島コンテナで安全に停車した状態のNEW FINAL.52 高速診断の貼付を待つ。ICの取得先/試行数/HTTP失敗カテゴリ、IC評価/採用と高速kmを事実分析してから次の修正判断。2t HGVと無料枠、AN15停止維持。",
+    "shortResumePrompt": "VENDRIVE2最新 main と7 canonicalを取得。実機FINAL.52診断はHTTP406(通常)＋429(予備)。FINAL.53 PR #223が正規User-Agent、406/429の迂回禁止/待機、IC同時取得の重複排除を実装し、PR Node/Edge/BrowserはPASS。未反映なら最終PRゲート→main merge→Pages/Vercel双方FINAL.53確認。その後ユーザーの新しいFINAL.53高速診断を待つ。2t HGVと無料枠、AN15停止維持。",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.52 PR #220 merged and live; PR test/Node/real Edge plus main Browser/Pages and Vercel READY and public versions all PASS. New copied FINAL.52 owner report is HUMAN_REQUIRED, older FINAL.51 already analyzed.",
-    "latestContinuityCheckpoint": "2026-10-11 FINAL.52 shipped, main/Pages/Vercel and both public versions verified; new real owner IC diagnosis required",
+    "handoffBoundary": "FINAL.53 PR #223 verified on product head, pending final docs gate, merge/Pages/Vercel live; require fresh owner FINAL.53 route report. Original FINAL.52 diagnosis already analyzed.",
+    "latestContinuityCheckpoint": "2026-10-11 FINAL.53 PR #223 CI PASS at d6f288e, release pending; FINAL.52 HTTP406/429 user diagnosis already received",
     "pauseMode": {
-      "active": true,
-      "requestedBy": "Field evidence boundary after FINAL.52 live release",
-      "intent": "Do not start more routing code until owner returns NEW FINAL.52 real highway diagnosis",
+      "active": false,
+      "requestedBy": "Owner explicit 2026-10-11 instruction to proceed with compliant IC source repair",
+      "intent": "Release FINAL.53 after bounded gates, then request field report",
       "automaticallyResume": false,
       "noDevelopmentWithoutNewInstruction": true,
-      "source": "2026-10-11 FINAL.52 production field retest",
-      "productCodeChanged": false
+      "source": "Owner yes to policy-compliant Overpass repair",
+      "productCodeChanged": true
     }
   }
 }

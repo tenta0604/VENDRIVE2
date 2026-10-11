@@ -748,3 +748,9 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 
 - FINAL.52 IC provider-resilience PR #220 passed final Node/API/real Edge, browser, main Pages, Vercel READY and both public version checks, and is in production at `2026.10.11-FINAL.52`.
 - Do not claim DCM尾西店→飛島コンテナ usable IC/highway is fixed until NEW postrelease privacy-safe highway diagnosis arrives. Old FINAL.51 report is already analyzed. Retain safe 2t `driving-hgv`, no car fallback, free rate guard, max two HGV IC probes, ferry and detour/time bounds, deliberate AN15 pause.
+
+## 2026-10-11 — FINAL.53 public Overpass operator compliance
+
+- Owner's FINAL.52 real route report identified HTTP 406 primary and 429 backup (no IC data); these are explicit external access/refusal signals, not safe IC absence evidence.
+- Correct the backend's generic User-Agent by a stable, truthful app identity with public VENDRIVE2 URL. Respect a 406/429 without trying another public host to evade the refusal; apply at least 30s warm-instance 429 cooldown and longer 406 hold. Coalesce concurrent identical IC requests; keep bounded fallback for other transient errors.
+- Do not increase public API load to fix highway preference. This is per-warm-instance mitigation, not distributed coordination; ultimately the correct IC/route outcome remains unproven until new owner FINAL.53 field data. Keep registered 2t `driving-hgv`, safe ferry/detour/time bounds, max two ORS IC probes, 30/min ORS, no paid tier, AN15 paused.
