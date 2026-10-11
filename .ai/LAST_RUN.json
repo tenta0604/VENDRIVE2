@@ -1,12 +1,13 @@
 {
-  "evidenceVersion": 81,
-  "runType": "final54_offline_chubu_motorway_ic_product_pr_verification_20261011",
-  "phase": "FINAL54_CHUBU_MOTORWAY_IC_SNAPSHOT",
-  "status": "PR_VALIDATED_RELEASE_PENDING",
+  "evidenceVersion": 82,
+  "runType": "final54_production_release_closeout_20261011",
+  "phase": "FINAL54_CHUBU_STATIC_IC_PRODUCTION_RELEASE",
+  "status": "COMPLETE",
   "base": {
     "productionMainBefore": "bba42c482ebbdb8378ac49c7701900cc6d159eb1",
+    "productMergedMain": "6bd92036f9cc8439a1d7c359173dde17481387b8",
     "productionCodeChanged": true,
-    "safetyTag": "PASS annotated backup-pre-FINAL54-STATIC-CHUBU-IC-CATALOG-20261011 -> bba42c482ebbdb8378ac49c7701900cc6d159eb1"
+    "safetyTag": "PASS immutable annotated backup-pre-FINAL54-STATIC-CHUBU-IC-CATALOG-20261011 -> bba42c482ebbdb8378ac49c7701900cc6d159eb1"
   },
   "versions": {
     "app": "2026.10.11-FINAL.54",
@@ -17,41 +18,25 @@
     "schema": 4
   },
   "work": {
-    "summary": "Approved Issue #225 regional offline IC source: Geofabrik pinned Chubu PBF generated 299 motorway on-ramp nodes, 298 exits, 51,887B static catalog plus SHA256/provenance. In-region runtime uses catalog zero public Overpass; exact restricted HGV route still validated with original budgets. Tested synthetic offline routing and real Edge/browser.",
-    "productStatus": "PR_TESTED_NOT_LIVE",
+    "summary": "FINAL.54 production shipped. Real Geofabrik Chubu PBF 2026-10-09 source SHA256 3c654074f641466a5ee7be802be3e270f7521682fad67b29835a94b06442e150 produced 299 directional motorway entrances and 298 exits. Pilot trips use bundled local snapshot with zero public Overpass IC queries, existing restricted 2t HGV provider remains only real-route authority.",
+    "productStatus": "PRODUCTION_VERIFIED_OWNER_FIELD_CONFIRMATION_PENDING",
     "productCodeChanged": true,
-    "ownerIntent": "Remove volatile public Overpass IC lookup from critical routing path at no new paid service, preserve genuine 2t HGV constraints"
+    "ownerIntent": "Avoid unstable public Overpass dependence at no new paid service while preserving actual truck road restrictions"
   },
   "gates": {
-    "immutableSafetyTag": "PASS pre-edit bba42c...",
-    "generatedDataset": "PASS GitHub Action 38137403761, pinned 2026-10-09 OSM PBF checksum",
-    "syntheticGraph": "PASS directed entry/exit and hgv deny gate",
-    "localHgvMock": "PASS zero Overpass in covered corridor, actual grounded local entry/exit and via HGV candidate mock",
-    "prelimPRTruckNodeRealEdge": "PASS 38137741378",
-    "prelimPRBrowser": "PASS 38137741373",
-    "finalPRCI": "PENDING after docs",
-    "merge": "PENDING",
-    "mainBrowser": "PENDING",
-    "githubPages": "PENDING",
-    "vercelProduction": "PENDING",
-    "bothPublicVersions": "PENDING",
-    "realOwnerRoute": "NOT_YET_OBSERVED",
-    "dbMigration": "NOT_REQUIRED schema 4 unchanged"
+    "safetyTag": "PASS immutable annotated prior main",
+    "snapshotGeneration": "PASS GitHub Actions 38137403761, 299/298 ramps and 51887-byte catalog + metadata",
+    "prTruckNodeRealEdge": "PASS 38137934135",
+    "prBrowser": "PASS 38137934150",
+    "merge": "PASS PR #233 6bd92036f9cc8439a1d7c359173dde17481387b8",
+    "mainBrowser": "PASS 38138035028",
+    "githubPages": "PASS 38138034770",
+    "vercelProduction": "PASS READY dpl_EHKs8HDyjsuogURvphmFuNMj7S4h exact product SHA",
+    "bothPublicVersions": "PASS fresh Pages and Vercel version.json 2026.10.11-FINAL.54",
+    "dbMigration": "NOT_REQUIRED engine/DB/schema unchanged",
+    "realOwnerRoute": "NOT VERIFIED, HUMAN_REQUIRED postrelease copied highway diagnosis"
   },
   "changedFiles": [
-    "api/chubu-ic-catalog.mjs",
-    "data/chubu-ic-catalog-meta.json",
-    "api/chubu-ic-source.mjs",
-    "api/route.mjs",
-    "truck-routing.js",
-    "index.html",
-    "version.json",
-    "tests/truck-route-client.test.mjs",
-    "tests/truck-route-local-catalog.test.mjs",
-    "tests/truck-route-api.test.mjs",
-    "tests/truck-route-long-distance.test.mjs",
-    "tests/truck-route-overpass.test.mjs",
-    ".github/workflows/truck-route-gates.yml",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -59,21 +44,21 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Exact final PR gates, merge, main Browser/Pages/Vercel/public FINAL.54 versions",
-    "Owner safe route test with NEW FINAL.54 privacy-safe report",
-    "A bounded refresh policy for ODbL snapshot within 120 days"
+    "HUMAN_REQUIRED new FINAL.54 copied privacy-safe highway report for same route",
+    "Do not assume OSM candidate means HGV route valid until real ORS field result",
+    "Refresh ODbL snapshot before 120d stale gate, within free usage limits"
   ],
-  "nextAction": "Finish final HEAD PR #233 CI and production release then HUMAN_REQUIRED new owner FINAL.54 IC route report",
+  "nextAction": "Owner safely parked/passenger checks DCM尾西店 → 飛島コンテナ with highway ON and sends NEW FINAL.54 高速診断.",
   "unresolved": [
-    "Real ORS safe route/IC selection not yet measured",
-    "AN15 intentionally paused"
+    "Specific accepted safe motorway and IC sequence cannot be proven until new operator report",
+    "AN15 paused"
   ],
   "continuityCheckpoint": {
-    "status": "SOURCE_AND_CODE_PR_GATES_PASS_RELEASE_PENDING",
-    "createdFor": "FINAL.54 approved regional static motorway IC catalog",
-    "sourceProductMerge": "NOT_YET_MERGED",
-    "productCodeChanged": true,
+    "status": "FINAL54_PRODUCTION_VERIFIED",
+    "createdFor": "Actual sourced local IC pilot product release",
+    "sourceProductMerge": "6bd92036f9cc8439a1d7c359173dde17481387b8",
+    "productCodeChanged": false,
     "appVersion": "2026.10.11-FINAL.54",
-    "intent": "Finish final production gates, then field evidence"
+    "intent": "Await owner real route report before next scoped change"
   }
 }
