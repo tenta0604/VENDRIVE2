@@ -783,3 +783,9 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - Owner's 進めて authorizes Issue #235: explain final via HGV gate failures using categorical time-only, distance-only, both, and pass counts, no more than 2 anonymized exceeded minutes/km, upward rounded. Never expose raw geocoordinates, routes, vehicle numbers/dimensions, addresses or keys in copied report.
 - Preserve existing final eligibility logic unchanged: time <= baseline + min(480s,20%), distance <= baseline + min(10000m,30%); HGV-only restrictions, no new calls, original ferry, ORS free guards, OSM source and AN15 paused. This is NOT authority to increase the caps or force motorway travel.
 - PR #238 product code drafted with verified immutable safety tag; CI + live release still required. Mocked new fixtures are diagnostic checks, not proof of real user route safety. Obtain NEW owner FINAL.55 report only after full production verified.
+
+## 2026-10-12 — FINAL.55 diagnostic-only release confirmed
+
+- Owner-approved time/distance/both gate telemetry is LIVE in production, PR #238 `f16ee87e6b4dbd1dc0fd416162ef5cff5adef095`, all Node/API/real Edge/browser/main Pages/Vercel and version gates PASS.
+- No HGV route is forced or accepted outside pre-existing min(8min,20%) time and min(10km,30%) extra distance limits; 2t legal constraints, ferry verification, ORS 30/min and 2 extra IC HGV provider calls, OSM sources and ODbL refresh policy, AN15 pause remain.
+- Real FINAL.54 report already supplied and shows two source-grounded HGV motorway candidates both ineligible; only NEW FINAL.55 report can explain the time vs distance rejection dimension and actual overage. Do not generalize mocked values to the user's actual corridor.

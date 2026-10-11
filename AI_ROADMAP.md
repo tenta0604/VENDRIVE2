@@ -422,3 +422,7 @@ Live FINAL.54 already solved volatile IC sourcing: 244 local OSM nodes and zero 
 ## 2026-10-12 JST FINAL.55 approved diagnostic-only gate provenance
 
 Owner approved Issue #235. PR #238 adds specific duration-only/distance-only/both route rejection counts, up to 2 anonymous candidate overages rounded upwards, threshold policy in copied diagnosis. Eligibility (baseline+min(8min,20%) and +min(10km,30%)), full HGV safety, ORS call count, ferry, free provider, OSM snapshot, and AN15 pause unchanged. Annotated safety tag on b6361548... confirmed. PR real Edge/Node/browser CI not yet observed; do not merge until PASS. Public is FINAL.54 pending true FINAL.55 deploy, then get NEW owner real corridor diagnosis.
+
+## 2026-10-12 JST FINAL.55 deployed — HGV via-IC gate causes now exposed
+
+PR #238 merged `f16ee87e6b4dbd1dc0fd416162ef5cff5adef095`; final PR Truck/Node/API/Edge `38157458757` and Browser `38157458791` PASS; main Browser `38157565052`, Pages `38157558531` PASS, Vercel READY `dpl_GTqKaCX8ozsSGhbztfWK4rnQpRNk` exact SHA; public frontend/backend both `2026.10.11-FINAL.55`. Final route eligibility remains exact previous +min(8min,20%) time, +min(10km,30%) distance. New privacy-safe diagnostic alone categorizes route rejection. Next is one human safe same-route FINAL.55 report; no further code or altered truck limits without evidence. AN15 paused.
