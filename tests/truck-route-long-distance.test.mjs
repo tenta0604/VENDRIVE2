@@ -25,7 +25,7 @@ test('if ORS rejects optional alternatives, retry one plain HGV baseline within 
 test('long HGV highway ON takes simple fast route, enforces exact truck profile and verified ferry-free waytype',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const bodies=[];
  const body={origin:{lat:35.0,lng:138.0},destination:{lat:36.0,lng:139.1},vehicle:{...vehicle,avoidTolls:false}};
- const longRoute={geometry:{type:'LineString',coordinates:[[136,35],[138.5,35.5],[139.1,36]]},properties:{summary:{distance:180000,duration:9000},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
+ const longRoute={geometry:{type:'LineString',coordinates:[[138,35],[138.5,35.5],[139.1,36]]},properties:{summary:{distance:180000,duration:9000},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
  let waytype=1;
  globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});bodies.push(JSON.parse(opts.body));return Response.json({features:[waytype===null?longRoute:withWaytype(longRoute,waytype)]});};
  try{
@@ -50,7 +50,7 @@ test('highway OFF always preserves explicit ferry and highway avoidance',async()
 test('highway use near sixty percent of an otherwise valid baseline still probes for later exit',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const calls=[];
  const body={origin:{lat:35.0,lng:138.0},destination:{lat:35.30,lng:138.4},vehicle:{...vehicle,avoidTolls:false}};
- const baseline={geometry:{type:'LineString',coordinates:[[136,35],[138.26,35.18],[138.4,35.3]]},properties:{summary:{distance:50000,duration:3300},extras:{waycategory:{values:[[0,1,1],[1,2,0]]},tollways:{values:[[0,1,1],[1,2,0]]}}}};
+ const baseline={geometry:{type:'LineString',coordinates:[[138,35],[138.26,35.18],[138.4,35.3]]},properties:{summary:{distance:50000,duration:3300},extras:{waycategory:{values:[[0,1,1],[1,2,0]]},tollways:{values:[[0,1,1],[1,2,0]]}}}};
  globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});calls.push(JSON.parse(opts.body));return Response.json({features:[baseline]});};
  try{
   const response=await POST(request(body));assert.equal(response.status,200);const data=await response.json();
@@ -65,7 +65,7 @@ test('highway use near sixty percent of an otherwise valid baseline still probes
 test('medium mountain detour hitting ORS dynamic distance cap retries without ferry avoid, still rejects ferry',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const sent=[];
  const body={origin:{lat:35.0,lng:138.0},destination:{lat:35.45,lng:138.40},vehicle:{...vehicle,avoidTolls:false}};
- const hgv={geometry:{type:'LineString',coordinates:[[136,35],[138.25,35.25],[138.4,35.45]]},properties:{summary:{distance:98000,duration:5400},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
+ const hgv={geometry:{type:'LineString',coordinates:[[138,35],[138.25,35.25],[138.4,35.45]]},properties:{summary:{distance:98000,duration:5400},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
  let ferry=false;
  globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});const req=JSON.parse(opts.body);sent.push(req);if(req.options.avoid_features)return Response.json({error:{code:2004,message:'By dynamic weighting maximum 100000m'}},{status:400});return Response.json({features:[withWaytype(hgv,ferry?9:1)]});};
  try{
