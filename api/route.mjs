@@ -1,4 +1,5 @@
 import routing from '../truck-routing.js';
+import { lookupChubuIcs } from './chubu-ic-source.mjs';
 
 const ALLOWED_ORIGINS = new Set(['https://tenta0604.github.io','http://localhost:8000','http://127.0.0.1:8000']);
 const ENDPOINT = 'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson';
@@ -140,8 +141,8 @@ function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   const direct=routing.distanceMeters(origin,destination);
   if(!Number.isFinite(direct)||direct<5000)return [];
   const perEndAccessLimit=Math.min(25000,Math.max(9000,baselineDistance*0.25)),combinedAccessLimit=Math.min(35000,Math.max(16000,baselineDistance*0.35));
-  const entries=junctions.map(j=>({...j,access:routing.distanceMeters(origin,j)})).filter(j=>Number.isFinite(j.access)&&j.access<=perEndAccessLimit).sort((a,b)=>a.access-b.access).slice(0,12);
-  const exits=junctions.map(j=>({...j,egress:routing.distanceMeters(j,destination)})).filter(j=>Number.isFinite(j.egress)&&j.egress<=perEndAccessLimit).sort((a,b)=>a.egress-b.egress).slice(0,12);
+  const entries=junctions.filter(j=>!j.role||j.role==='entry').map(j=>({...j,access:routing.distanceMeters(origin,j)})).filter(j=>Number.isFinite(j.access)&&j.access<=perEndAccessLimit).sort((a,b)=>a.access-b.access).slice(0,12);
+  const exits=junctions.filter(j=>!j.role||j.role==='exit').map(j=>({...j,egress:routing.distanceMeters(j,destination)})).filter(j=>Number.isFinite(j.egress)&&j.egress<=perEndAccessLimit).sort((a,b)=>a.egress-b.egress).slice(0,12);
   const pairs=[];
   for(const entry of entries)for(const exit of exits){
     if(entry.id===exit.id)continue;
@@ -185,7 +186,12 @@ async function handle(request) {
   const restrictions={height:vehicle.height,width:vehicle.width,length:vehicle.length,weight:vehicle.weight};
   if (vehicle.axleload!==undefined)restrictions.axleload=vehicle.axleload;
   const directMeters=routing.distanceMeters(body.origin,body.destination),junctionRadius=Math.round(Math.max(8000,Math.min(25000,directMeters*0.35+4000)));
-  const junctionPromise=!vehicle.avoidTolls&&directMeters>=6000?findMotorwayJunctions(body.origin,body.destination,junctionRadius):Promise.resolve({items:[],status:'not-requested'});
+  // A covered journey never depends on a public Overpass server at route time.
+  // Catalog is source-only: every candidate still goes through the restricted HGV provider.
+  const localJunctions=lookupChubuIcs(body.origin,body.destination,junctionRadius);
+  const junctionPromise=!vehicle.avoidTolls&&directMeters>=6000
+    ?(localJunctions.covered?Promise.resolve(localJunctions):findMotorwayJunctions(body.origin,body.destination,junctionRadius))
+    :Promise.resolve({items:[],status:'not-requested'});
   try {
     const originDestination=[[body.origin.lng,body.origin.lat],[body.destination.lng,body.destination.lat]];
     // Long route first: uncomplicated HGV request. Alternatives are optional and can
@@ -237,14 +243,14 @@ async function handle(request) {
     for(let i=1;i<features.length;i++){try{const result=sanitizeFeature(features[i]);if(safeRoute(result))candidates.push(result);}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
-    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',junctionProvider:'none',junctionAttempts:0,junctionFirstFailure:'none',junctionLastFailure:'none',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
+    const motorwayTarget=primary.summary.distance*0.85,highwaySearch={baselineAlternatives:requestAlternatives,baselineRetried,baselineRetryCause,longRouteFerryVerified:verifyFerries,attempted:false,junctions:0,junctionQueryStatus:'not-requested',junctionProvider:'none',junctionAttempts:0,junctionFirstFailure:'none',junctionLastFailure:'none',junctionCatalogDate:'none',evaluated:0,accepted:0,finalEligible:0,viaTimeouts:0,viaProviderRejected:0,viaNoFeature:0,viaLowMotorway:0,viaErrors:0,timeBudgetLimited:false,status:baselineRetried?'baseline-fallback':'not-needed',radiusMeters:junctionRadius,motorwayTargetMeters:Math.round(motorwayTarget),bestExistingMotorwayMeters:Math.round(bestExistingMotorway),pairStrategy:'balanced+diverse-corridor'},activeHighwayRoutes=new Set();
     // A timeout/rejection of optional alternatives must not suppress IC discovery if the HGV fallback
     // returned quickly enough; the existing remaining-time guard below still prevents late probes.
     // Dynamic-distance retries continue to prioritize the verified ferry-safe baseline only.
     const icAfterFallbackAllowed=!baselineRetried||baselineRetryCause==='alternative-timeout'||baselineRetryCause==='alternative-rejected';
     if(!vehicle.avoidTolls&&icAfterFallbackAllowed&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
-      const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;highwaySearch.junctionProvider=junctionResult.provider||'none';highwaySearch.junctionAttempts=junctionResult.attempts||0;highwaySearch.junctionFirstFailure=junctionResult.firstFailure||'none';highwaySearch.junctionLastFailure=junctionResult.lastFailure||'none';
+      const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;highwaySearch.junctionProvider=junctionResult.provider||'none';highwaySearch.junctionAttempts=junctionResult.attempts||0;highwaySearch.junctionFirstFailure=junctionResult.firstFailure||'none';highwaySearch.junctionLastFailure=junctionResult.lastFailure||'none';highwaySearch.junctionCatalogDate=junctionResult.catalogDate||'none';
       const pairs=activeHighwayPairs(junctions,body.origin,body.destination,primary.summary.distance);highwaySearch.evaluated=pairs.length;
       const remainingTime=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       const viaBudget=Math.min(6500,Math.max(0,remainingTime));

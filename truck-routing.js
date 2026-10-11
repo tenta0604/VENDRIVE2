@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.11-FINAL.53';
+  var ASSET_VERSION='2026.10.11-FINAL.54';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -167,6 +167,9 @@
     else if(!h.attempted&&h.baselineRetried)reason='再試行後の安全制限でIC探索なし：経路の時間予算・条件を確認';
     else if(!h.attempted)reason='追加IC探索なし：短距離、または既存候補で高速区間が十分と判定';
     else if(h.status==='time-budget-skip')reason='追加IC探索は時間不足で実行せず：安全な基本HGV経路を表示';
+    else if(h.junctionQueryStatus==='catalog-invalid')reason='保存済みICデータを検証できず：基本のHGV経路を表示';
+    else if(h.junctionQueryStatus==='catalog-stale')reason='保存済みICデータの更新期限を超過：更新まで追加IC探索停止';
+    else if(h.junctionQueryStatus==='catalog-empty')reason='保存済みICの検索範囲内候補0件：データ内容と対象地域を確認';
     else if(h.junctionFirstFailure==='cooldown')reason='IC取得元へのアクセス制限中：再検索を控えてしばらく時間をおいてください';
     else if(h.junctionFirstFailure==='http-429'||h.junctionLastFailure==='http-429')reason='IC取得元が回数制限中（429）：連続再試行せず時間をおいてください';
     else if(h.junctionFirstFailure==='http-406')reason='IC取得元が接続を拒否（406）：アプリ識別情報と提供元の利用条件を確認';
@@ -190,8 +193,9 @@
       '追加IC探索：'+(h.attempted?'実施':'未実施'),
       '時間制限で追加探索を短縮：'+(h.timeBudgetLimited?'あり（基本のHGV経路を優先）':'なし'),
       'IC取得状態：'+String(h.junctionQueryStatus||'不明'),
-      'IC取得先：'+({primary:'通常',backup:'予備',none:'未取得'}[h.junctionProvider]||'不明'),
+      'IC取得先：'+({primary:'通常',backup:'予備',local:'保存済みOSM（通信不要）',none:'未取得'}[h.junctionProvider]||'不明'),
       'IC取得試行数：'+count(h.junctionAttempts),
+      'ICデータ基準日：'+String(h.junctionCatalogDate||'none'),
       'IC初回失敗：'+String(h.junctionFirstFailure||'none'),
       'IC最終失敗：'+String(h.junctionLastFailure||'none'),
       'IC取得件数：'+count(h.junctions),

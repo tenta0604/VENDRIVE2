@@ -5,6 +5,8 @@ on:
       - 'index.html'
       - 'truck-routing.js'
       - 'api/route.mjs'
+      - 'api/chubu-ic-*.mjs'
+      - 'data/chubu-ic-catalog-meta.json'
       - 'tests/*truck-route*'
       - '.github/workflows/truck-route-gates.yml'
   workflow_dispatch:
@@ -23,10 +25,12 @@ jobs:
         run: |
           node --check truck-routing.js
           node --check api/route.mjs
+          node --check api/chubu-ic-source.mjs
+          node --check api/chubu-ic-catalog.mjs
           node --check tests/truck-route-long-distance.test.mjs
           node --check tests/truck-route-overpass.test.mjs
           node --check tests/run-truck-route-gates.mjs
-          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs tests/truck-route-long-distance.test.mjs tests/truck-route-overpass.test.mjs
+          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs tests/truck-route-long-distance.test.mjs tests/truck-route-overpass.test.mjs tests/truck-route-local-catalog.test.mjs
           git diff --check
       - name: Install isolated browser test dependencies
         run: |

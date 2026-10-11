@@ -1,3 +1,5 @@
+// FINAL.54 regression segregation: historical synthetic routes use longitudes outside
+// the new Chubu static-catalog pilot; dedicated local-catalog tests cover western Aichi.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { POST, OPTIONS, timedJsonFetch } from '../api/route.mjs';
@@ -5,8 +7,8 @@ import routing from '../truck-routing.js';
 
 const origin='https://tenta0604.github.io';
 const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
-const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehicle};
-const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}],extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
+const input={origin:{lat:35.3,lng:138.8},destination:{lat:35.31,lng:138.81},vehicle};
+const feature={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.805,35.303],[138.81,35.31]]},properties:{summary:{distance:1800,duration:280},segments:[{steps:[{type:11,way_points:[0,1],instruction:'Depart'},{type:1,way_points:[1,2],instruction:'Turn right'}]}],extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,1,0],[1,2,1]]}}}};
 function withWaytype(feature,code=1){return {...feature,properties:{...feature.properties,extras:{...feature.properties.extras,waytype:{values:[[0,feature.geometry.coordinates.length-1,code]]}}}};}
 const request=(body=input,options={})=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json',...options.headers},body:JSON.stringify(body)});
 
@@ -30,12 +32,12 @@ test('time budget skips optional via-IC probes and still delivers an already fet
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch,realNow=Date.now;
   process.env.ORS_API_KEY='test-secret';
   let afterBaseline=false,viaCalls=0;
-  const far={origin:{lat:35.51,lng:136.11},destination:{lat:35.75,lng:136.49},vehicle:{...vehicle,avoidTolls:false}};
-  const base={geometry:{type:'LineString',coordinates:[[136.11,35.51],[136.29,35.62],[136.49,35.75]]},properties:{summary:{distance:48000,duration:3200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const far={origin:{lat:35.51,lng:138.11},destination:{lat:35.75,lng:138.49},vehicle:{...vehicle,avoidTolls:false}};
+  const base={geometry:{type:'LineString',coordinates:[[138.11,35.51],[138.29,35.62],[138.49,35.75]]},properties:{summary:{distance:48000,duration:3200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   globalThis.fetch=async(url,opts)=>{
     if(String(url).includes('overpass-api.de'))return Response.json({elements:[
-      {type:'node',id:99101,lat:35.54,lon:136.14,tags:{ref:'ENTRY'}},
-      {type:'node',id:99102,lat:35.72,lon:136.46,tags:{ref:'EXIT'}}
+      {type:'node',id:99101,lat:35.54,lon:138.14,tags:{ref:'ENTRY'}},
+      {type:'node',id:99102,lat:35.72,lon:138.46,tags:{ref:'EXIT'}}
     ]});
     const submitted=JSON.parse(opts.body);
     assert.equal(submitted.options.vehicle_type,'hgv');
@@ -74,7 +76,7 @@ test('origin/method/preflight/body gates reject before the upstream request',asy
   const previewOrigin='https://preview.example';
   const sameOriginPreflight=await OPTIONS(new Request(previewOrigin+'/api/route',{method:'OPTIONS',headers:{origin:previewOrigin}}));
   assert.equal(sameOriginPreflight.status,204);assert.equal(sameOriginPreflight.headers.get('access-control-allow-origin'),previewOrigin);
-  assert.equal((await POST(request({...input,origin:{lat:'35',lng:136.8}}))).status,400);
+  assert.equal((await POST(request({...input,origin:{lat:'35',lng:138.8}}))).status,400);
   assert.equal((await POST(request({...input,vehicle:{...vehicle,height:null}}))).status,400);
   assert.equal((await POST(request({...input,padding:'x'.repeat(5000)}))).status,413);
   assert.equal((await POST(new Request('http://localhost/api/route',{method:'POST',headers:{origin},body:'broken'}))).status,400);
@@ -91,7 +93,7 @@ test('HGV request uses the new endpoint, lng/lat ordering, exact dimensions and 
     const response=await POST(request({...input,vehicle:{...vehicle,axleload:2.5}}));assert.equal(response.status,200);
     const data=await response.json(),body=JSON.parse(sent.options.body);
     assert.equal(sent.url,'https://api.heigit.org/openrouteservice/v2/directions/driving-hgv/geojson');
-    assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
+    assert.deepEqual(body.coordinates,[[138.8,35.3],[138.81,35.31]]);
     assert.equal(body.options.vehicle_type,'hgv');assert.equal(body.instructions,true);assert.equal(body.preference,'recommended');
     assert.deepEqual(body.extra_info,['waycategory','tollways','waytype']);
     assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
@@ -110,7 +112,7 @@ test('optional reroute heading becomes an ORS start bearing without changing HGV
   try{
     const invalid=await POST(request({...input,heading:361}));assert.equal(invalid.status,400);
     const response=await POST(request({...input,heading:92,vehicle:{...vehicle,axleload:2.5}}));assert.equal(response.status,200);
-    const body=bodies.at(-1);assert.deepEqual(body.bearings,[[92,60],[]]);assert.equal(body.optimized,false);assert.deepEqual(body.coordinates,[[136.8,35.3],[136.81,35.31]]);
+    const body=bodies.at(-1);assert.deepEqual(body.bearings,[[92,60],[]]);assert.equal(body.optimized,false);assert.deepEqual(body.coordinates,[[138.8,35.3],[138.81,35.31]]);
     assert.equal(body.options.vehicle_type,'hgv');assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8,axleload:2.5});
     bodies.length=0;await POST(request({...input,vehicle:{...vehicle,axleload:2.5}}));assert.equal(bodies.at(-1).bearings,undefined);assert.equal(bodies.at(-1).optimized,undefined);
   }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=oldKey;}
@@ -123,7 +125,7 @@ test('provider failures and malformed geometry fail closed without car/straight-
       globalThis.fetch=async()=>Response.json({error:'test-secret'}, {status:upstream});
       const response=await POST(request());assert.equal(response.status,expected);assert.equal((await response.text()).includes('test-secret'),false);
     }
-    globalThis.fetch=async()=>Response.json({features:[{...feature,geometry:{type:'LineString',coordinates:[[136.8,35.3]]}}]});
+    globalThis.fetch=async()=>Response.json({features:[{...feature,geometry:{type:'LineString',coordinates:[[138.8,35.3]]}}]});
     assert.equal((await POST(request())).status,502);
     globalThis.fetch=async()=>Response.json({features:[{...feature,properties:{...feature.properties,extras:{waycategory:{values:[[0,99,1]]}}}}]});assert.equal((await POST(request())).status,502);
     globalThis.fetch=async()=>Response.json({features:[{...feature,properties:{...feature.properties,extras:{...feature.properties.extras,tollways:{values:[[0,2,2]]}}}}]});assert.equal((await POST(request())).status,502);
@@ -132,9 +134,9 @@ test('provider failures and malformed geometry fail closed without car/straight-
 });
 test('highway ON prefers more expressway use only among near-fast bounded candidates',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.304],[136.81,35.31]]},properties:{summary:{distance:1600,duration:180},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const shortHighway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.801,35.301],[136.806,35.306],[136.81,35.31]]},properties:{summary:{distance:2000,duration:190},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,1,1],[1,3,0]]}}}};
-  const longHighway={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.804,35.3],[136.808,35.3],[136.81,35.31]]},properties:{summary:{distance:2300,duration:215},extras:{waycategory:{values:[[0,2,1],[2,3,0]]},tollways:{values:[[0,2,1],[2,3,0]]}}}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.804,35.304],[138.81,35.31]]},properties:{summary:{distance:1600,duration:180},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const shortHighway={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.801,35.301],[138.806,35.306],[138.81,35.31]]},properties:{summary:{distance:2000,duration:190},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,1,1],[1,3,0]]}}}};
+  const longHighway={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.804,35.3],[138.808,35.3],[138.81,35.31]]},properties:{summary:{distance:2300,duration:215},extras:{waycategory:{values:[[0,2,1],[2,3,0]]},tollways:{values:[[0,2,1],[2,3,0]]}}}};
   globalThis.fetch=async()=>Response.json({features:[surface,shortHighway,longHighway]});
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
@@ -144,7 +146,7 @@ test('highway ON prefers more expressway use only among near-fast bounded candid
 });
 test('highway ON falls back cleanly when provider returns no highway candidate',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.305],[136.81,35.31]]},properties:{summary:{distance:1500,duration:170},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.805,35.305],[138.81,35.31]]},properties:{summary:{distance:1500,duration:170},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   globalThis.fetch=async()=>Response.json({features:[surface]});
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
@@ -156,8 +158,8 @@ test('highway ON falls back cleanly when provider returns no highway candidate',
 
 test('highway ON rejects an excessive expressway detour',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const surface={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.305],[136.81,35.31]]},properties:{summary:{distance:2000,duration:300},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const hugeDetour={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.84,35.3],[136.85,35.31],[136.81,35.31]]},properties:{summary:{distance:30000,duration:1000},extras:{waycategory:{values:[[0,2,1],[2,3,0]]},tollways:{values:[[0,2,1],[2,3,0]]}}}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.805,35.305],[138.81,35.31]]},properties:{summary:{distance:2000,duration:300},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const hugeDetour={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.84,35.3],[138.85,35.31],[138.81,35.31]]},properties:{summary:{distance:30000,duration:1000},extras:{waycategory:{values:[[0,2,1],[2,3,0]]},tollways:{values:[[0,2,1],[2,3,0]]}}}};
   globalThis.fetch=async()=>Response.json({features:[surface,hugeDetour]});
   try{
     const response=await POST(request({...input,vehicle:{...vehicle,avoidTolls:false}}));assert.equal(response.status,200);
@@ -170,15 +172,15 @@ test('highway ON rejects an excessive expressway detour',async()=>{
 
 test('highway ON actively searches motorway junctions and adopts a bounded HGV via-IC candidate',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const farInput={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
-  const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const modestHighway={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.75,35.24],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32500,duration:2320},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
-  const viaHighway={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.73,35.22],[136.86,35.33],[136.92,35.38],[136.95,35.40]]},properties:{summary:{distance:34000,duration:2750},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+  const farInput={origin:{lat:35.20,lng:138.70},destination:{lat:35.40,lng:138.95},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.70,35.20],[138.82,35.30],[138.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const modestHighway={geometry:{type:'LineString',coordinates:[[138.70,35.20],[138.75,35.24],[138.82,35.30],[138.95,35.40]]},properties:{summary:{distance:32500,duration:2320},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
+  const viaHighway={geometry:{type:'LineString',coordinates:[[138.70,35.20],[138.73,35.22],[138.86,35.33],[138.92,35.38],[138.95,35.40]]},properties:{summary:{distance:34000,duration:2750},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
   const junctions={elements:[
-    {type:'node',id:101,lat:35.22,lon:136.73,tags:{highway:'motorway_junction',ref:'A'}},
-    {type:'node',id:102,lat:35.38,lon:136.92,tags:{highway:'motorway_junction',ref:'B'}},
-    {type:'node',id:103,lat:35.225,lon:136.735,tags:{highway:'motorway_junction',ref:'A2'}},
-    {type:'node',id:104,lat:35.375,lon:136.915,tags:{highway:'motorway_junction',ref:'B2'}}
+    {type:'node',id:101,lat:35.22,lon:138.73,tags:{highway:'motorway_junction',ref:'A'}},
+    {type:'node',id:102,lat:35.38,lon:138.92,tags:{highway:'motorway_junction',ref:'B'}},
+    {type:'node',id:103,lat:35.225,lon:138.735,tags:{highway:'motorway_junction',ref:'A2'}},
+    {type:'node',id:104,lat:35.375,lon:138.915,tags:{highway:'motorway_junction',ref:'B2'}}
   ]};
   const routeBodies=[];
   globalThis.fetch=async(url,options)=>{
@@ -195,8 +197,8 @@ test('highway ON actively searches motorway junctions and adopts a bounded HGV v
 });
 test('active highway IC discovery fails open to the safe baseline HGV route',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const farInput={origin:{lat:35.05,lng:136.50},destination:{lat:35.28,lng:136.78},vehicle:{...vehicle,avoidTolls:false}};
-  const surface={geometry:{type:'LineString',coordinates:[[136.50,35.05],[136.64,35.16],[136.78,35.28]]},properties:{summary:{distance:34000,duration:2500},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const farInput={origin:{lat:35.05,lng:138.50},destination:{lat:35.28,lng:138.78},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.50,35.05],[138.64,35.16],[138.78,35.28]]},properties:{summary:{distance:34000,duration:2500},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
   globalThis.fetch=async(url)=>{
     if(String(url).includes('overpass'))throw new Error('overpass unavailable');
     return Response.json({features:[surface]});
@@ -210,15 +212,15 @@ test('active highway IC discovery fails open to the safe baseline HGV route',asy
 
 test('long-distance highway ON still searches farther IC access and does not stop after only 18km of motorway',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const farInput={origin:{lat:35.00,lng:136.00},destination:{lat:35.80,lng:137.00},vehicle:{...vehicle,avoidTolls:false}};
-  const surface={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.50,35.40],[137.00,35.80]]},properties:{summary:{distance:120000,duration:7200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const modestHighway={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.20,35.15],[136.50,35.40],[137.00,35.80]]},properties:{summary:{distance:121000,duration:7000},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
-  const viaHighway={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.08,35.08],[136.50,35.40],[136.92,35.72],[137.00,35.80]]},properties:{summary:{distance:125000,duration:7600},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+  const farInput={origin:{lat:35.00,lng:138.00},destination:{lat:35.80,lng:139.00},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.50,35.40],[139.00,35.80]]},properties:{summary:{distance:120000,duration:7200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const modestHighway={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.20,35.15],[138.50,35.40],[139.00,35.80]]},properties:{summary:{distance:121000,duration:7000},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
+  const viaHighway={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.08,35.08],[138.50,35.40],[138.92,35.72],[139.00,35.80]]},properties:{summary:{distance:125000,duration:7600},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
   const junctions={elements:[
-    {type:'node',id:501,lat:35.08,lon:136.08,tags:{highway:'motorway_junction',ref:'LONG-A'}},
-    {type:'node',id:502,lat:35.72,lon:136.92,tags:{highway:'motorway_junction',ref:'LONG-B'}},
-    {type:'node',id:503,lat:35.085,lon:136.085,tags:{highway:'motorway_junction',ref:'LONG-A2'}},
-    {type:'node',id:504,lat:35.715,lon:136.915,tags:{highway:'motorway_junction',ref:'LONG-B2'}}
+    {type:'node',id:501,lat:35.08,lon:138.08,tags:{highway:'motorway_junction',ref:'LONG-A'}},
+    {type:'node',id:502,lat:35.72,lon:138.92,tags:{highway:'motorway_junction',ref:'LONG-B'}},
+    {type:'node',id:503,lat:35.085,lon:138.085,tags:{highway:'motorway_junction',ref:'LONG-A2'}},
+    {type:'node',id:504,lat:35.715,lon:138.915,tags:{highway:'motorway_junction',ref:'LONG-B2'}}
   ]};
   const routeBodies=[];let overpassBody='';
   globalThis.fetch=async(url,options)=>{
@@ -239,18 +241,18 @@ test('long-distance highway ON still searches farther IC access and does not sto
 
 test('highway ON uses one of the two bounded via-IC probes for a geographically distinct motorway corridor',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const farInput={origin:{lat:35.00,lng:136.00},destination:{lat:35.00,lng:137.00},vehicle:{...vehicle,avoidTolls:false}};
-  const surface={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.50,35.00],[137.00,35.00]]},properties:{summary:{distance:120000,duration:7200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const modestHighway={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.30,35.00],[136.50,35.00],[137.00,35.00]]},properties:{summary:{distance:121000,duration:7100},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
-  const shortVia={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.02,35.00],[136.35,35.00],[136.98,35.00],[137.00,35.00]]},properties:{summary:{distance:124000,duration:7450},extras:{waycategory:{values:[[0,1,0],[1,2,1],[2,4,0]]},tollways:{values:[[0,4,0]]}}}};
-  const longVia={geometry:{type:'LineString',coordinates:[[136.00,35.00],[136.00,35.08],[136.20,35.07],[136.80,34.93],[137.00,34.92],[137.00,35.00]]},properties:{summary:{distance:128000,duration:7550},extras:{waycategory:{values:[[0,1,0],[1,4,1],[4,5,0]]},tollways:{values:[[0,1,0],[1,4,1],[4,5,0]]}}}};
+  const farInput={origin:{lat:35.00,lng:138.00},destination:{lat:35.00,lng:139.00},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.50,35.00],[139.00,35.00]]},properties:{summary:{distance:120000,duration:7200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const modestHighway={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.30,35.00],[138.50,35.00],[139.00,35.00]]},properties:{summary:{distance:121000,duration:7100},extras:{waycategory:{values:[[0,1,1],[1,3,0]]},tollways:{values:[[0,3,0]]}}}};
+  const shortVia={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.02,35.00],[138.35,35.00],[138.98,35.00],[139.00,35.00]]},properties:{summary:{distance:124000,duration:7450},extras:{waycategory:{values:[[0,1,0],[1,2,1],[2,4,0]]},tollways:{values:[[0,4,0]]}}}};
+  const longVia={geometry:{type:'LineString',coordinates:[[138.00,35.00],[138.00,35.08],[138.20,35.07],[138.80,34.93],[139.00,34.92],[139.00,35.00]]},properties:{summary:{distance:128000,duration:7550},extras:{waycategory:{values:[[0,1,0],[1,4,1],[4,5,0]]},tollways:{values:[[0,1,0],[1,4,1],[4,5,0]]}}}};
   const junctions={elements:[
-    {type:'node',id:701,lat:35.00,lon:136.02,tags:{highway:'motorway_junction',ref:'NEAR-A'}},
-    {type:'node',id:702,lat:35.002,lon:136.022,tags:{highway:'motorway_junction',ref:'NEAR-A2'}},
-    {type:'node',id:703,lat:35.00,lon:136.98,tags:{highway:'motorway_junction',ref:'NEAR-B'}},
-    {type:'node',id:704,lat:35.002,lon:136.978,tags:{highway:'motorway_junction',ref:'NEAR-B2'}},
-    {type:'node',id:705,lat:35.08,lon:136.00,tags:{highway:'motorway_junction',ref:'ALT-A'}},
-    {type:'node',id:706,lat:34.92,lon:137.00,tags:{highway:'motorway_junction',ref:'ALT-B'}}
+    {type:'node',id:701,lat:35.00,lon:138.02,tags:{highway:'motorway_junction',ref:'NEAR-A'}},
+    {type:'node',id:702,lat:35.002,lon:138.022,tags:{highway:'motorway_junction',ref:'NEAR-A2'}},
+    {type:'node',id:703,lat:35.00,lon:138.98,tags:{highway:'motorway_junction',ref:'NEAR-B'}},
+    {type:'node',id:704,lat:35.002,lon:138.978,tags:{highway:'motorway_junction',ref:'NEAR-B2'}},
+    {type:'node',id:705,lat:35.08,lon:138.00,tags:{highway:'motorway_junction',ref:'ALT-A'}},
+    {type:'node',id:706,lat:34.92,lon:139.00,tags:{highway:'motorway_junction',ref:'ALT-B'}}
   ]};
   const routeBodies=[];
   globalThis.fetch=async(url,options)=>{
@@ -272,9 +274,9 @@ test('highway ON uses one of the two bounded via-IC probes for a geographically 
 
 test('highway diagnostics separate rejected ORS via-IC probes without increasing calls',async()=>{
   const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
-  const requestBody={origin:{lat:35.20,lng:136.70},destination:{lat:35.40,lng:136.95},vehicle:{...vehicle,avoidTolls:false}};
-  const surface={geometry:{type:'LineString',coordinates:[[136.70,35.20],[136.82,35.30],[136.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
-  const junctions={elements:[{type:'node',id:19801,lat:35.22,lon:136.73,tags:{ref:'A'}},{type:'node',id:19802,lat:35.38,lon:136.92,tags:{ref:'B'}},{type:'node',id:19803,lat:35.225,lon:136.735,tags:{ref:'C'}},{type:'node',id:19804,lat:35.375,lon:136.915,tags:{ref:'D'}}]};
+  const requestBody={origin:{lat:35.20,lng:138.70},destination:{lat:35.40,lng:138.95},vehicle:{...vehicle,avoidTolls:false}};
+  const surface={geometry:{type:'LineString',coordinates:[[138.70,35.20],[138.82,35.30],[138.95,35.40]]},properties:{summary:{distance:32000,duration:2400},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+  const junctions={elements:[{type:'node',id:19801,lat:35.22,lon:138.73,tags:{ref:'A'}},{type:'node',id:19802,lat:35.38,lon:138.92,tags:{ref:'B'}},{type:'node',id:19803,lat:35.225,lon:138.735,tags:{ref:'C'}},{type:'node',id:19804,lat:35.375,lon:138.915,tags:{ref:'D'}}]};
   let routeRequests=0;
   globalThis.fetch=async(url,options)=>{
     if(String(url).includes('overpass-api.de'))return Response.json(junctions);
