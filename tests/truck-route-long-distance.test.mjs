@@ -1,11 +1,13 @@
+// FINAL.54 regression segregation: historical synthetic routes use longitudes outside
+// the new Chubu static-catalog pilot; dedicated local-catalog tests cover western Aichi.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { POST } from '../api/route.mjs';
 
 const origin='https://tenta0604.github.io';
 const vehicle={height:2.85,width:1.89,length:5.2,weight:4.8,avoidTolls:true};
-const input={origin:{lat:35.3,lng:136.8},destination:{lat:35.31,lng:136.81},vehicle};
-const feature={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.303],[136.81,35.31]]},properties:{summary:{distance:1800,duration:280},segments:[{steps:[{type:11,way_points:[0,1]},{type:1,way_points:[1,2]}]}],extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+const input={origin:{lat:35.3,lng:138.8},destination:{lat:35.31,lng:138.81},vehicle};
+const feature={geometry:{type:'LineString',coordinates:[[138.8,35.3],[138.805,35.303],[138.81,35.31]]},properties:{summary:{distance:1800,duration:280},segments:[{steps:[{type:11,way_points:[0,1]},{type:1,way_points:[1,2]}]}],extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
 function withWaytype(feature,code=1){return {...feature,properties:{...feature.properties,extras:{...feature.properties.extras,waytype:{values:[[0,feature.geometry.coordinates.length-1,code]]}}}};}
 const request=(body=input)=>new Request('http://localhost/api/route',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify(body)});
 
@@ -22,8 +24,8 @@ test('if ORS rejects optional alternatives, retry one plain HGV baseline within 
 
 test('long HGV highway ON takes simple fast route, enforces exact truck profile and verified ferry-free waytype',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const bodies=[];
- const body={origin:{lat:35.0,lng:136.0},destination:{lat:36.0,lng:137.1},vehicle:{...vehicle,avoidTolls:false}};
- const longRoute={geometry:{type:'LineString',coordinates:[[136,35],[136.5,35.5],[137.1,36]]},properties:{summary:{distance:180000,duration:9000},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
+ const body={origin:{lat:35.0,lng:138.0},destination:{lat:36.0,lng:139.1},vehicle:{...vehicle,avoidTolls:false}};
+ const longRoute={geometry:{type:'LineString',coordinates:[[138,35],[138.5,35.5],[139.1,36]]},properties:{summary:{distance:180000,duration:9000},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
  let waytype=1;
  globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});bodies.push(JSON.parse(opts.body));return Response.json({features:[waytype===null?longRoute:withWaytype(longRoute,waytype)]});};
  try{
@@ -47,8 +49,8 @@ test('highway OFF always preserves explicit ferry and highway avoidance',async()
 
 test('highway use near sixty percent of an otherwise valid baseline still probes for later exit',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const calls=[];
- const body={origin:{lat:35.0,lng:136.0},destination:{lat:35.30,lng:136.4},vehicle:{...vehicle,avoidTolls:false}};
- const baseline={geometry:{type:'LineString',coordinates:[[136,35],[136.26,35.18],[136.4,35.3]]},properties:{summary:{distance:50000,duration:3300},extras:{waycategory:{values:[[0,1,1],[1,2,0]]},tollways:{values:[[0,1,1],[1,2,0]]}}}};
+ const body={origin:{lat:35.0,lng:138.0},destination:{lat:35.30,lng:138.4},vehicle:{...vehicle,avoidTolls:false}};
+ const baseline={geometry:{type:'LineString',coordinates:[[138,35],[138.26,35.18],[138.4,35.3]]},properties:{summary:{distance:50000,duration:3300},extras:{waycategory:{values:[[0,1,1],[1,2,0]]},tollways:{values:[[0,1,1],[1,2,0]]}}}};
  globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});calls.push(JSON.parse(opts.body));return Response.json({features:[baseline]});};
  try{
   const response=await POST(request(body));assert.equal(response.status,200);const data=await response.json();
@@ -62,8 +64,8 @@ test('highway use near sixty percent of an otherwise valid baseline still probes
 
 test('medium mountain detour hitting ORS dynamic distance cap retries without ferry avoid, still rejects ferry',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';const sent=[];
- const body={origin:{lat:35.0,lng:136.0},destination:{lat:35.45,lng:136.40},vehicle:{...vehicle,avoidTolls:false}};
- const hgv={geometry:{type:'LineString',coordinates:[[136,35],[136.25,35.25],[136.4,35.45]]},properties:{summary:{distance:98000,duration:5400},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
+ const body={origin:{lat:35.0,lng:138.0},destination:{lat:35.45,lng:138.40},vehicle:{...vehicle,avoidTolls:false}};
+ const hgv={geometry:{type:'LineString',coordinates:[[138,35],[138.25,35.25],[138.4,35.45]]},properties:{summary:{distance:98000,duration:5400},extras:{waycategory:{values:[[0,2,1]]},tollways:{values:[[0,2,1]]}}}};
  let ferry=false;
  globalThis.fetch=async(url,opts)=>{if(String(url).includes('overpass'))return Response.json({elements:[]});const req=JSON.parse(opts.body);sent.push(req);if(req.options.avoid_features)return Response.json({error:{code:2004,message:'By dynamic weighting maximum 100000m'}},{status:400});return Response.json({features:[withWaytype(hgv,ferry?9:1)]});};
  try{
@@ -78,14 +80,14 @@ test('medium mountain detour hitting ORS dynamic distance cap retries without fe
 test('FINAL.51: medium 2t HGV trip around 42km skips costly alternatives and evaluates a bounded IC route',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
  // Approximate corridor only, not real-provider evidence or actual shop/customer coordinates.
- const trip={origin:{lat:35.30,lng:136.72},destination:{lat:35.07,lng:136.82},vehicle:{...vehicle,avoidTolls:false}};
- const base={geometry:{type:'LineString',coordinates:[[136.72,35.30],[136.765,35.18],[136.82,35.07]]},properties:{summary:{distance:42000,duration:2800},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
- const via={geometry:{type:'LineString',coordinates:[[136.72,35.30],[136.74,35.28],[136.765,35.22],[136.79,35.14],[136.82,35.07]]},properties:{summary:{distance:46000,duration:3010},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+ const trip={origin:{lat:35.30,lng:138.72},destination:{lat:35.07,lng:138.82},vehicle:{...vehicle,avoidTolls:false}};
+ const base={geometry:{type:'LineString',coordinates:[[138.72,35.30],[138.765,35.18],[138.82,35.07]]},properties:{summary:{distance:42000,duration:2800},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+ const via={geometry:{type:'LineString',coordinates:[[138.72,35.30],[138.74,35.28],[138.765,35.22],[138.79,35.14],[138.82,35.07]]},properties:{summary:{distance:46000,duration:3010},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
  const bodies=[];
  globalThis.fetch=async(url,opts)=>{
   if(String(url).includes('overpass-api.de'))return Response.json({elements:[
-   {type:'node',id:91001,lat:35.28,lon:136.74,tags:{ref:'ENTRY'}},
-   {type:'node',id:91002,lat:35.09,lon:136.815,tags:{ref:'EXIT'}}]});
+   {type:'node',id:91001,lat:35.28,lon:138.74,tags:{ref:'ENTRY'}},
+   {type:'node',id:91002,lat:35.09,lon:138.815,tags:{ref:'EXIT'}}]});
   const body=JSON.parse(opts.body);bodies.push(body);
   assert.equal(body.options.vehicle_type,'hgv');
   assert.deepEqual(body.options.profile_params.restrictions,{height:2.85,width:1.89,length:5.2,weight:4.8});
@@ -110,14 +112,14 @@ test('FINAL.51: medium 2t HGV trip around 42km skips costly alternatives and eva
 
 test('FINAL.51: quick fallback after alternative timeout can still discover safe IC candidate within budget',async()=>{
  const oldKey=process.env.ORS_API_KEY,oldFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
- const trip={origin:{lat:35.30,lng:136.80},destination:{lat:35.42,lng:136.89},vehicle:{...vehicle,avoidTolls:false}};
- const base={geometry:{type:'LineString',coordinates:[[136.80,35.30],[136.845,35.36],[136.89,35.42]]},properties:{summary:{distance:19000,duration:1900},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
- const via={geometry:{type:'LineString',coordinates:[[136.80,35.30],[136.81,35.315],[136.84,35.35],[136.88,35.405],[136.89,35.42]]},properties:{summary:{distance:22000,duration:2150},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
+ const trip={origin:{lat:35.30,lng:138.80},destination:{lat:35.42,lng:138.89},vehicle:{...vehicle,avoidTolls:false}};
+ const base={geometry:{type:'LineString',coordinates:[[138.80,35.30],[138.845,35.36],[138.89,35.42]]},properties:{summary:{distance:19000,duration:1900},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+ const via={geometry:{type:'LineString',coordinates:[[138.80,35.30],[138.81,35.315],[138.84,35.35],[138.88,35.405],[138.89,35.42]]},properties:{summary:{distance:22000,duration:2150},extras:{waycategory:{values:[[0,1,0],[1,3,1],[3,4,0]]},tollways:{values:[[0,1,0],[1,3,1],[3,4,0]]}}}};
  const bodies=[];
  globalThis.fetch=async(url,opts)=>{
   if(String(url).includes('overpass-api.de'))return Response.json({elements:[
-   {type:'node',id:92001,lat:35.315,lon:136.81,tags:{ref:'E'}},
-   {type:'node',id:92002,lat:35.405,lon:136.88,tags:{ref:'X'}}]});
+   {type:'node',id:92001,lat:35.315,lon:138.81,tags:{ref:'E'}},
+   {type:'node',id:92002,lat:35.405,lon:138.88,tags:{ref:'X'}}]});
   const body=JSON.parse(opts.body);bodies.push(body);
   if(body.alternative_routes){const error=new Error('simulated alternative timeout');error.name='AbortError';throw error;}
   return Response.json({features:[withWaytype(body.coordinates.length===2?base:via)]});

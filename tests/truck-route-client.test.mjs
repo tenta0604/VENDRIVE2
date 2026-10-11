@@ -79,8 +79,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.53 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.11-FINAL.53');
+test('routing asset version matches FINAL.54 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.11-FINAL.54');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -99,6 +99,12 @@ test('highway diagnostic report has actionable IC/ORS status without location or
   assert.match(noPairs,/IC組合せ0件/);
   const overpassError=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctions:0}},{avoidTolls:false});
   assert.match(overpassError,/IC取得元が応答できず/);
+  const local=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'local-catalog',junctionProvider:'local',junctionAttempts:0,junctionCatalogDate:'2026-10-09'}},{avoidTolls:false});
+  assert.match(local,/保存済みOSM/);
+  assert.match(local,/ICデータ基準日：2026-10-09/);
+  assert.match(local,/IC取得試行数：0/);
+  const stale=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'catalog-stale',junctionProvider:'local',junctions:0}},{avoidTolls:false});
+  assert.match(stale,/更新期限/);
   const accessRejected=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctionFirstFailure:'http-406'}},{avoidTolls:false});
   assert.match(accessRejected,/接続を拒否/);
   const throttled=routing.highwayDiagnosticReport({...sample,highwaySearch:{...sample.highwaySearch,junctionQueryStatus:'provider-error',junctionFirstFailure:'http-429'}},{avoidTolls:false});
