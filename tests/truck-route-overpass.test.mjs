@@ -65,6 +65,24 @@ test('FINAL.52: two failed Overpass providers never fabricate ICs or trigger ext
 
 
 
+test('FINAL.53: concurrent identical IC lookups share one request and preserve HGV baseline',async()=>{
+ const previousKey=process.env.ORS_API_KEY,previousFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
+ const trip={origin:{lat:35.29,lng:136.64},destination:{lat:35.41,lng:136.88},vehicle:{...vehicle,avoidTolls:false}};
+ const base={geometry:{type:'LineString',coordinates:[[136.64,35.29],[136.75,35.35],[136.88,35.41]]},properties:{summary:{distance:32000,duration:2200},extras:{waycategory:{values:[[0,2,0]]},tollways:{values:[[0,2,0]]}}}};
+ let overpassCalls=0;
+ globalThis.fetch=async(url)=>{
+   if(String(url).includes('overpass')){overpassCalls++;await new Promise(resolve=>setTimeout(resolve,20));return Response.json({elements:[]});}
+   return Response.json({features:[base]});
+ };
+ try{
+   const responses=await Promise.all([POST(request(trip)),POST(request(trip))]);
+   assert.ok(responses.every(r=>r.status===200));
+   const data=await Promise.all(responses.map(r=>r.json()));
+   assert.ok(data.every(d=>d.highwaySearch.junctionQueryStatus==='no-junctions'));
+   assert.equal(overpassCalls,1,'coalesce identical concurrent public IC queries');
+ }finally{globalThis.fetch=previousFetch;if(previousKey===undefined)delete process.env.ORS_API_KEY;else process.env.ORS_API_KEY=previousKey;}
+});
+
 test('FINAL.53: 406 is an access refusal, not a reason to switch Overpass providers',async()=>{
  const previousKey=process.env.ORS_API_KEY,previousFetch=globalThis.fetch;process.env.ORS_API_KEY='test-secret';
  const trip={origin:{lat:35.155,lng:136.655},destination:{lat:35.365,lng:136.905},vehicle:{...vehicle,avoidTolls:false}};
