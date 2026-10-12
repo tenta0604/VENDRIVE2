@@ -796,3 +796,9 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - Expose only location-free client GPS/HTTP/body/parse stages and server restricted-HGV-baseline/optional-IC stages with bounded elapsed times, enumerated failure kind and HTTP status, on both success/failure where appropriate. Server logs may contain the same sanitized enums/times but never GPS, address, vehicle details, API key, raw exception or request data.
 - A failed lookup must offer a newly generated copyable diagnosis rather than stale previous highway telemetry. No passive user tracking, analytics database recording or privacy-sensitive request correlator.
 - Preserve original registered truck restrictions, free provider guards (30/min, maximum two extra ORS via-IC candidates), ferry verification, unchanged selection caps and 14.5s/20s deadlines. AN15 remains intentionally paused. PR #241, immutable annotated pre-edit safety tag Issue #240 at main 7821291; **release not yet confirmed**.
+
+## 2026-10-12 — FINAL.56 release confirmed, do not conflate telemetry with correction
+
+- Owner-approved PR #241 diagnostic-only product merged `c219ec657cc8fd98672682ad51ecc8f14f78658a` with final real Edge/Node gate `38213221433` and Browser `38213221479` PASS; both public version endpoints returned FINAL.56 and Vercel dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU READY for merged SHA.
+- Diagnostic may identify failing stage/time and coarse server error; it does not itself reduce ORS latency or guarantee a successful real route. Await privacy-safe fresh report from owner only when safe and convenient.
+- Previous real FINAL.54 highway IC report remains analyzed. Do not silently adjust 2t dimensions, route policy, source quotas, ferry rules, extra IC calls, free tier, DB/schema or AN15.
