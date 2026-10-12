@@ -789,3 +789,10 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - Owner-approved time/distance/both gate telemetry is LIVE in production, PR #238 `f16ee87e6b4dbd1dc0fd416162ef5cff5adef095`, all Node/API/real Edge/browser/main Pages/Vercel and version gates PASS.
 - No HGV route is forced or accepted outside pre-existing min(8min,20%) time and min(10km,30%) extra distance limits; 2t legal constraints, ferry verification, ORS 30/min and 2 extra IC HGV provider calls, OSM sources and ODbL refresh policy, AN15 pause remain.
 - Real FINAL.54 report already supplied and shows two source-grounded HGV motorway candidates both ineligible; only NEW FINAL.55 report can explain the time vs distance rejection dimension and actual overage. Do not generalize mocked values to the user's actual corridor.
+
+## 2026-10-12 — FINAL.56 failure-stage telemetry decision (owner-approved)
+
+- When routes time out often and a fresh real-device report is unavailable, prioritize a limited diagnostic feature, not automatic rerouting or increased ORS/API traffic.
+- Expose only location-free client GPS/HTTP/body/parse stages and server restricted-HGV-baseline/optional-IC stages with bounded elapsed times, enumerated failure kind and HTTP status, on both success/failure where appropriate. Server logs may contain the same sanitized enums/times but never GPS, address, vehicle details, API key, raw exception or request data.
+- A failed lookup must offer a newly generated copyable diagnosis rather than stale previous highway telemetry. No passive user tracking, analytics database recording or privacy-sensitive request correlator.
+- Preserve original registered truck restrictions, free provider guards (30/min, maximum two extra ORS via-IC candidates), ferry verification, unchanged selection caps and 14.5s/20s deadlines. AN15 remains intentionally paused. PR #241, immutable annotated pre-edit safety tag Issue #240 at main 7821291; **release not yet confirmed**.
