@@ -6,13 +6,13 @@ const route={geometry:{type:'LineString',coordinates:[[136.8,35.3],[136.805,35.3
 const target={id:'T1',name:'Test',lat:35.31,lng:136.81};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function harness(initial=vehicle){
-  let profile=initial,drawn=null,drawProgress=null,calls=0,saveOK=true,current=true,fetchImpl=async()=>Response.json({ok:true,route}),arrivals=[],fits=[],position={lat:35.3,lng:136.8,accuracy:8,updatedAt:Date.now()},geoCalls=0;
+  let profile=initial,drawn=null,drawProgress=null,calls=0,saveOK=true,current=true,fetchImpl=async()=>Response.json({ok:true,route}),arrivals=[],fits=[],position={lat:35.3,lng:136.8,accuracy:8,updatedAt:Date.now()},geoCalls=0,diagnostics=[];
   const nodes=new Map(),node=id=>{if(!nodes.has(id))nodes.set(id,{value:'',textContent:'',checked:false,disabled:false,classList:{hidden:true,add(){this.hidden=true;},remove(){this.hidden=false;}}});return nodes.get(id);};
   const getNode=node;const domNode=id=>{const result=getNode(id);if(!result.nativeValue){let value=String(result.value);Object.defineProperty(result,'value',{get(){return value;},set(next){value=String(next);},configurable:true});result.nativeValue=true;}return result;};
   const modals=new Set();
   const geolocation={getCurrentPosition(success){geoCalls++;success({coords:{latitude:position.lat,longitude:position.lng,accuracy:position.accuracy}});}};
-  const client=routing.createClient({document:{getElementById:domNode},endpoint:'https://relay.test/api/route',geolocation:geolocation,getPosition:()=>position,getVehicle:()=>profile,saveVehicle:value=>{if(!saveOK)return false;profile=value;return true;},openModal:id=>modals.add(id),closeModal:id=>modals.delete(id),toast(){},showMap:()=>true,draw:(value,target,progress)=>{drawn=value;drawProgress=progress;},fit:(value,target,progress)=>fits.push({value,target,progress}),external(){},onArrival:(target,position)=>arrivals.push({target,position}),isDestinationCurrent:()=>current,fetch:async(...args)=>{calls++;return fetchImpl(...args);}});
-  client.init();return {client,node:domNode,modals,get profile(){return profile;},get drawn(){return drawn;},get drawProgress(){return drawProgress;},get calls(){return calls;},get arrivals(){return arrivals;},get fits(){return fits;},get geoCalls(){return geoCalls;},setFetch(fn){fetchImpl=fn;},setSave(value){saveOK=value;},setCurrent(value){current=value;},setPosition(value){position=value;}};
+  const client=routing.createClient({document:{getElementById:domNode},endpoint:'https://relay.test/api/route',geolocation:geolocation,getPosition:()=>position,getVehicle:()=>profile,saveVehicle:value=>{if(!saveOK)return false;profile=value;return true;},openModal:id=>modals.add(id),closeModal:id=>modals.delete(id),toast(){},showMap:()=>true,draw:(value,target,progress)=>{drawn=value;drawProgress=progress;},fit:(value,target,progress)=>fits.push({value,target,progress}),external(){},diagnostics:report=>diagnostics.push(report),onArrival:(target,position)=>arrivals.push({target,position}),isDestinationCurrent:()=>current,fetch:async(...args)=>{calls++;return fetchImpl(...args);}});
+  client.init();return {client,node:domNode,modals,get profile(){return profile;},get drawn(){return drawn;},get drawProgress(){return drawProgress;},get calls(){return calls;},get arrivals(){return arrivals;},get fits(){return fits;},get geoCalls(){return geoCalls;},get diagnostics(){return diagnostics;},setFetch(fn){fetchImpl=fn;},setSave(value){saveOK=value;},setCurrent(value){current=value;},setPosition(value){position=value;}};
 }
 test('unknown profile opens blank fields and blocks route calls; validation uses explicit converted units',async()=>{
   const h=harness(null);h.client.start(target);assert.ok(h.modals.has('truckVehicleModal'));assert.equal(h.node('truckVehicle_weight').value,'');assert.equal(h.calls,0);
@@ -79,8 +79,8 @@ test('route sections highlight both motorway and toll-only spans',()=>{
   ]);
 });
 
-test('routing asset version matches FINAL.55 release',()=>{
-  assert.equal(routing.assetVersion,'2026.10.11-FINAL.55');
+test('routing asset version matches FINAL.56 release',()=>{
+  assert.equal(routing.assetVersion,'2026.10.12-FINAL.56');
 });
 
 test('highway diagnostic report has actionable IC/ORS status without location or vehicle secrets',()=>{
@@ -214,4 +214,32 @@ test('all recognized direction cues have large-arrow symbols, including motorway
 test('waytype ferry classification is validated for HGV route transport',()=>{
  const v={...route,waytype:[[0,1,1],[1,2,9]]};assert.deepEqual(routing.route(v).waytype,v.waytype);
  assert.throws(()=>routing.route({...v,waytype:[[0,2,99]]}),/道路種別補足/);
+});
+
+
+test('FINAL.56 client failure report classifies server and transport stage without copying private payloads',async()=>{
+  const h=harness({...vehicle,avoidTolls:false});
+  h.setFetch(async()=>Response.json({ok:false,message:'経路取得失敗',routeDiagnostic:{version:'2026.10.12-FINAL.56',phase:'baseline-hgv',kind:'upstream-timeout',elapsedMs:12000,baselineMs:12000,optionalIcMs:0,origin:{lat:35.3,lng:136.8},token:'DO_NOT_COPY'}},{status:502}));
+  h.client.start(target);await tick();
+  assert.match(h.node('truckRouteSummary').textContent,/経路取得失敗/);
+  const diagnosis=h.diagnostics.at(-1);
+  assert.match(diagnosis,/VENDRIVE 経路タイムアウト診断/);
+  assert.match(diagnosis,/失敗段階（端末）：response-body/);
+  assert.match(diagnosis,/失敗分類（端末）：api-rejected/);
+  assert.match(diagnosis,/HTTP状態：502/);
+  assert.match(diagnosis,/サーバー段階：baseline-hgv/);
+  assert.match(diagnosis,/サーバー結果：upstream-timeout/);
+  assert.match(diagnosis,/基本HGV取得：12.0秒/);
+  for(const secret of ['DO_NOT_COPY','35.3','136.8','2.85','4.8'])assert.ok(!diagnosis.includes(secret));
+});
+
+test('FINAL.56 failed fetch provides sanitized request-stage report even without backend response',async()=>{
+  const h=harness();
+  h.setFetch(async()=>{throw new TypeError('Failed to fetch');});
+  h.client.start(target);await tick();
+  const report=h.diagnostics.at(-1);
+  assert.match(report,/失敗段階（端末）：request/);
+  assert.match(report,/失敗分類（端末）：network-failed/);
+  assert.match(report,/サーバー診断：未取得/);
+  assert.match(h.node('truckRouteSummary').textContent,/通信できません/);
 });

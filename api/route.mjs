@@ -16,6 +16,8 @@ const MAX_ACTIVE_HIGHWAY_ROUTES = 2;
 const JUNCTION_CACHE_TTL_MS = 15*60*1000;
 const ROUTE_SERVER_BUDGET_MS = 14500;
 const ROUTE_RESPONSE_RESERVE_MS = 700;
+const ROUTE_DIAGNOSTIC_VERSION = '2026.10.12-FINAL.56';
+function elapsedMs(since){return Math.max(0,Math.min(60000,Math.round((Date.now()-since)/100)*100));}
 // Keep expensive ORS alternatives to short local trips; medium HGV trips need time for IC search.
 // ORS also rejects alternative-route requests beyond its 100 km public-provider cap.
 const ALTERNATIVES_DIRECT_LIMIT_METERS=25000;
@@ -163,8 +165,17 @@ function activeHighwayPairs(junctions,origin,destination,baselineDistance){
   return result;
 }
 async function handle(request) {
-  const routeDeadline=Date.now()+ROUTE_SERVER_BUDGET_MS;
+  const routeStartedAt=Date.now();
+  const routeDeadline=routeStartedAt+ROUTE_SERVER_BUDGET_MS;
   const origin = request.headers.get('origin') || '',allowed=originAllowed(request,origin);
+  let routePhase='preflight',baselineMs=null,optionalIcMs=0;
+  function safeDiagnostic(kind){return {version:ROUTE_DIAGNOSTIC_VERSION,phase:routePhase,kind,elapsedMs:elapsedMs(routeStartedAt),baselineMs,optionalIcMs};}
+  function routeFailure(status,message,kind){
+    const routeDiagnostic=safeDiagnostic(kind);
+    // The diagnostic has no coordinates, names, vehicle dimensions, tokens, or request IDs.
+    console.warn('VENDRIVE_ROUTE_FAILURE',JSON.stringify(routeDiagnostic));
+    return json(status,{ok:false,message,routeDiagnostic},origin,allowed);
+  }
   if (!allowed) return json(403,{ok:false,message:'許可されていない接続元です'},origin,false);
   if (request.method==='OPTIONS') return new Response(null,{status:204,headers:headers(origin,allowed)});
   if (request.method!=='POST') return json(405,{ok:false,message:'POSTで送信してください'},origin,allowed);
@@ -182,7 +193,7 @@ async function handle(request) {
   let vehicle;
   try { vehicle=routing.vehicle(body.vehicle); } catch(error) { return json(400,{ok:false,message:error.message},origin,allowed); }
   const key=process.env.ORS_API_KEY?.trim();
-  if (!key) return json(503,{ok:false,message:'経路サービスの準備がまだ完了していません。外部ナビを利用できます'},origin,allowed);
+  if (!key) return routeFailure(503,'経路サービスの準備がまだ完了していません。外部ナビを利用できます','configuration-missing');
   const restrictions={height:vehicle.height,width:vehicle.width,length:vehicle.length,weight:vehicle.weight};
   if (vehicle.axleload!==undefined)restrictions.axleload=vehicle.axleload;
   const directMeters=routing.distanceMeters(body.origin,body.destination),junctionRadius=Math.round(Math.max(8000,Math.min(25000,directMeters*0.35+4000)));
@@ -199,17 +210,18 @@ async function handle(request) {
     let verifyFerries=!vehicle.avoidTolls&&directMeters>=LONG_ROUTE_FERRY_VERIFY_METERS;
     const requestAlternatives=!vehicle.avoidTolls&&startHeading===null&&directMeters<ALTERNATIVES_DIRECT_LIMIT_METERS;
     let baselineRetried=false,baselineRetryCause='none',response;
+    const baselineStartedAt=Date.now();routePhase=requestAlternatives?'baseline-alternatives':'baseline-hgv';
     try{
       response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:requestAlternatives,timeoutMs:requestAlternatives?ALTERNATIVE_FIRST_ATTEMPT_MS:12000,startHeading,verifyFerries});
     }catch(error){
       if(error?.name!=='AbortError'||!requestAlternatives)throw error;
-      baselineRetried=true;baselineRetryCause='alternative-timeout';
+      baselineRetried=true;baselineRetryCause='alternative-timeout';routePhase='baseline-retry';
       const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       if(remaining<1200)throw error;
       response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(7000,remaining),startHeading,verifyFerries});
     }
     if(!response.ok&&requestAlternatives&&response.status===400){
-      baselineRetried=true;baselineRetryCause='alternative-rejected';
+      baselineRetried=true;baselineRetryCause='alternative-rejected';routePhase='baseline-retry';
       const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       if(remaining>=1200)response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(7000,remaining),startHeading,verifyFerries});
     }
@@ -219,16 +231,18 @@ async function handle(request) {
     if(!response.ok&&!baselineRetried&&!requestAlternatives&&!vehicle.avoidTolls&&!verifyFerries&&response.status===400&&response.errorCode===2004){
       const remaining=routeDeadline-Date.now()-ROUTE_RESPONSE_RESERVE_MS;
       if(remaining>=2000){
-        verifyFerries=true;baselineRetried=true;baselineRetryCause='dynamic-distance-limit';
+        verifyFerries=true;baselineRetried=true;baselineRetryCause='dynamic-distance-limit';routePhase='baseline-retry';
         response=await requestOrsRoute(originDestination,vehicle,restrictions,key,{alternatives:false,timeoutMs:Math.min(9000,remaining),startHeading,verifyFerries:true});
       }
     }
+    baselineMs=elapsedMs(baselineStartedAt);
     if (!response.ok) {
-      if(response.status===429)return json(429,{ok:false,message:'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください'},origin,allowed);
-      if(response.status===401||response.status===403)return json(503,{ok:false,message:'経路サービスの認証を確認する必要があります'},origin,allowed);
-      if(response.status===400||response.status===404)return json(422,{ok:false,message:directMeters>=70000?'経路提供元の長距離・車両制限に達しました。安全なHGV経路を作れないためトラック対応外部ナビをご利用ください':'車両条件に合う経路が見つかりません。位置と車両設定を確認してください'},origin,allowed);
-      return json(502,{ok:false,message:'経路サービスに接続できません。時間をおいて再計算してください'},origin,allowed);
+      if(response.status===429)return routeFailure(429,'無料枠の取得上限です。時間をおいて再計算するか外部ナビを利用してください','upstream-rate-limit');
+      if(response.status===401||response.status===403)return routeFailure(503,'経路サービスの認証を確認する必要があります','upstream-authorization');
+      if(response.status===400||response.status===404)return routeFailure(422,directMeters>=70000?'経路提供元の長距離・車両制限に達しました。安全なHGV経路を作れないためトラック対応外部ナビをご利用ください':'車両条件に合う経路が見つかりません。位置と車両設定を確認してください','upstream-route-rejected');
+      return routeFailure(502,'経路サービスに接続できません。時間をおいて再計算してください','upstream-response-error');
     }
+    routePhase='baseline-parse';
     const data=response.data,features=Array.isArray(data?.features)?data.features:[];
     if(!features.length)throw new Error('missing route');
     function sanitizeFeature(feature){
@@ -239,7 +253,7 @@ async function handle(request) {
     }
     const primary=sanitizeFeature(features[0]),candidates=[primary];
     function safeRoute(candidate){if(!verifyFerries)return true;return Array.isArray(candidate.waytype)&&candidate.waytype.length>0&&candidate.waytype[0][0]===0&&candidate.waytype.at(-1)[1]===candidate.geometry.coordinates.length-1&&!candidate.waytype.some(span=>span[2]===9);}
-    if(!safeRoute(primary))return json(502,{ok:false,message:'長距離経路のフェリー不使用を確認できません。トラック対応外部ナビで安全なルートを確認してください'},origin,allowed);
+    if(!safeRoute(primary))return routeFailure(502,'長距離経路のフェリー不使用を確認できません。トラック対応外部ナビで安全なルートを確認してください','ferry-verification-failed');
     for(let i=1;i<features.length;i++){try{const result=sanitizeFeature(features[i]);if(safeRoute(result))candidates.push(result);}catch{}}
     function candidate(route){const usage=routing.routeUsage(route);return {route,usage};}
     const primaryItem=candidate(primary),existingItems=candidates.map(candidate),bestExistingMotorway=Math.max(0,...existingItems.map(item=>item.usage.motorwayMeters));
@@ -248,6 +262,7 @@ async function handle(request) {
     // returned quickly enough; the existing remaining-time guard below still prevents late probes.
     // Dynamic-distance retries continue to prioritize the verified ferry-safe baseline only.
     const icAfterFallbackAllowed=!baselineRetried||baselineRetryCause==='alternative-timeout'||baselineRetryCause==='alternative-rejected';
+    const optionalStartedAt=Date.now();routePhase='optional-ic';
     if(!vehicle.avoidTolls&&icAfterFallbackAllowed&&primary.summary.distance>=6000&&bestExistingMotorway<motorwayTarget){
       highwaySearch.attempted=true;
       const junctionResult=await junctionPromise,junctions=junctionResult.items;highwaySearch.junctions=junctions.length;highwaySearch.junctionQueryStatus=junctionResult.status;highwaySearch.junctionProvider=junctionResult.provider||'none';highwaySearch.junctionAttempts=junctionResult.attempts||0;highwaySearch.junctionFirstFailure=junctionResult.firstFailure||'none';highwaySearch.junctionLastFailure=junctionResult.lastFailure||'none';highwaySearch.junctionCatalogDate=junctionResult.catalogDate||'none';
@@ -270,6 +285,7 @@ async function handle(request) {
       if(viaBudget<6500&&pairs.length)highwaySearch.timeBudgetLimited=true;
       if(highwaySearch.status!=='time-budget-skip')highwaySearch.status=highwaySearch.accepted?'via-ic-candidates-added':highwaySearch.timeBudgetLimited&&pairs.length?'time-budget-exhausted':junctions.length?'no-valid-via-route':'junction-search-unavailable';
     }
+    optionalIcMs=elapsedMs(optionalStartedAt);routePhase='selection';
     const maxDuration=primary.summary.duration+Math.min(480,primary.summary.duration*0.20),maxDistance=primary.summary.distance+Math.min(10000,primary.summary.distance*0.30);
     // Diagnostic only: inspect the EXACT existing eligibility thresholds without
     // changing the decision, ORS requests, selected route, or vehicle restrictions.
@@ -304,9 +320,11 @@ async function handle(request) {
       } else selection=highwaySearch.attempted?'active-highway-unavailable':'highway-unavailable';
     }else selection='highway-avoided';
     highwaySearch.selectedMotorwayMeters=Math.round(usage.motorwayMeters);highwaySearch.availableCandidateCount=candidates.length;
-    return json(200,{ok:true,profile:'driving-hgv',route,selection,usage,highwaySearch,attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
+    routePhase='complete';
+    return json(200,{ok:true,profile:'driving-hgv',route,selection,usage,highwaySearch,routeDiagnostic:safeDiagnostic('ok'),attribution:'© openrouteservice | © OpenStreetMap contributors'},origin,allowed);
   } catch(error) {
-    return json(502,{ok:false,message:error?.name==='AbortError'?'基本のHGV経路取得がタイムアウトしました。時間をおいて再検索してください':'経路を取得できませんでした'},origin,allowed);
+    if(baselineMs===null&&routePhase.startsWith('baseline'))baselineMs=elapsedMs(routeStartedAt);
+    return routeFailure(502,error?.name==='AbortError'?'基本のHGV経路取得がタイムアウトしました。時間をおいて再検索してください':'経路を取得できませんでした',error?.name==='AbortError'?'upstream-timeout':'route-unexpected-failure');
   }
 }
 export async function POST(request) { return handle(request); }

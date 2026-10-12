@@ -1,43 +1,43 @@
 {
-  "evidenceVersion": 85,
-  "runType": "final55_eligibility_gate_diag_production_release_closeout_20261012",
-  "phase": "FINAL55_IC_HGV_TIME_DISTANCE_DIAGNOSTICS_PRODUCTION",
-  "status": "COMPLETE",
+  "evidenceVersion": 86,
+  "runType": "final56_timeout_stage_diagnostics_pr_20261012",
+  "phase": "FINAL56_ROUTE_TIMEOUT_STAGE_DIAGNOSTICS",
+  "status": "PR_FINAL_GATES_PENDING",
   "base": {
-    "productionMainBefore": "b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47",
-    "productMergedMain": "f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
+    "productionMainBefore": "78212913465a4fde241cec2b183002920620f7a0",
     "productionCodeChanged": true,
-    "safetyTag": "PASS annotated backup-pre-FINAL55-IC-ELIGIBILITY-DIAGNOSTICS-20261011 -> b63615489ff6df8bf3d3e3a9ce845a87d8aa1f47"
+    "safetyTag": "PASS immutable annotated backup-pre-FINAL56-ROUTE-TIMEOUT-OBSERVABILITY-20261012-20261012 via Issue #240"
   },
   "versions": {
-    "app": "2026.10.11-FINAL.55",
-    "frontend": "2026.10.11-FINAL.55",
-    "apiTarget": "2026.10.11-FINAL.55",
+    "app": "2026.10.12-FINAL.56",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "FINAL.55 shipped: two real HGV via motorway candidates which fail unchanged time and/or distance policy can now be explained with aggregate counts and two anonymous upward-rounded positive minute/km overages. No change to chosen route, 2t HGV, quotas, ferries or selection caps.",
-    "productStatus": "PRODUCTION_VERIFIED_OWNER_DIAGNOSTIC_PENDING",
-    "productCodeChanged": true,
-    "ownerIntent": "Disambiguate duration vs distance gate in real FINAL.54 case before any further highway routing policy revision"
+    "summary": "PR #241 adds coarse client/server timeout stages and copyable failure diagnostics, without storing any GPS/vehicle/secrets. Existing HGV route safety unchanged.",
+    "productCodeChanged": true
   },
   "gates": {
-    "immutableSafetyTag": "PASS workflow 38156923713",
-    "codePRTruckNodeRealEdge": "PASS 38157339554",
-    "codePRBrowser": "PASS 38157339616",
-    "finalPRTruckNodeRealEdge": "PASS 38157458757",
-    "finalPRBrowser": "PASS 38157458791",
-    "merge": "PASS PR #238 f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
-    "mainBrowser": "PASS 38157565052",
-    "githubPages": "PASS 38157558531",
-    "vercelProduction": "PASS READY dpl_GTqKaCX8ozsSGhbztfWK4rnQpRNk exact product main",
-    "bothPublicVersions": "PASS fresh Pages and Vercel version.json 2026.10.11-FINAL.55",
-    "dbMigration": "NOT_REQUIRED DB/schema4 unchanged",
-    "ownerFieldReport": "HUMAN_REQUIRED fresh FINAL.55 copied safe highway diagnosis"
+    "sourcePreEditTag": "PASS issue #240",
+    "nodeApiPrivacy": "PENDING final PR",
+    "realEdge": "PENDING final PR",
+    "browser": "PENDING final PR",
+    "mainMerge": "PENDING",
+    "githubPages": "PENDING",
+    "vercelProduction": "PENDING",
+    "publicVersions": "PENDING"
   },
   "changedFiles": [
+    "api/route.mjs",
+    "truck-routing.js",
+    "index.html",
+    "version.json",
+    "tests/truck-route-client.test.mjs",
+    "tests/truck-route-diagnostics.test.mjs",
+    "tests/run-truck-route-gates.mjs",
+    ".github/workflows/truck-route-gates.yml",
+    "tests/truck-route-api.test.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -45,21 +45,9 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [
-    "Human sends NEW privacy-safe FINAL.55 report same origin destination after safely stopped passenger retest",
-    "Interpret actual time/distance/both overages, do not relax 8min/10km caps until user sees evidence",
-    "Maintain dated OSM source refresh and paused AN15"
+    "Node/real Edge & browser gate evidence needed before production release",
+    "Actual owner route timeout cause cannot be inferred without a fresh sanitized failure report",
+    "AN15 intentionally paused"
   ],
-  "nextAction": "HUMAN_REQUIRED owner same-corridor new FINAL.55 highway diagnosis.",
-  "unresolved": [
-    "No real per-candidate rejection data until user field test; highway0km may persist",
-    "AN15 remains paused"
-  ],
-  "continuityCheckpoint": {
-    "status": "FINAL55_PRODUCTION_VERIFIED",
-    "createdFor": "FINAL.55 exact HGV via-IC acceptance gate diagnostics",
-    "sourceProductMerge": "f16ee87e6b4dbd1dc0fd416162ef5cff5adef095",
-    "productCodeChanged": false,
-    "appVersion": "2026.10.11-FINAL.55",
-    "intent": "Wait for new real operator diagnostic"
-  }
+  "nextAction": "Complete PR #241 tests, merge only on PASS, deploy both outputs, verify live FINAL.56, update canonical closeout. Human field retest after release."
 }

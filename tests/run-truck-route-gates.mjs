@@ -110,7 +110,7 @@ for(const width of [320,390]){
     assert.equal(count,3);assert.ok(await paths()>=2);assert.deepEqual(await stored(),afterSave);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'horizontal overflow');
     await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,4);
-    mode='error';await page.locator('#truckRouteRecalculate').click();await waitText('無料枠');assert.equal(await paths(),0);assert.equal(await page.locator('#truckRouteDiagnostics').isVisible(),false,'failed route request must not retain stale diagnostics');
+    mode='error';await page.locator('#truckRouteRecalculate').click();await waitText('無料枠');assert.equal(await paths(),0);assert.equal(await page.locator('#truckRouteDiagnostics').isVisible(),true,'failed route request must surface new failure diagnostics');assert.match(await page.locator('#truckRouteDiagnosticsText').textContent(),/経路タイムアウト診断/);assert.match(await page.locator('#truckRouteDiagnosticsText').textContent(),/失敗分類（端末）：api-rejected/);
     mode='bad';await page.locator('#truckRouteRecalculate').click();await waitText('経路データ');assert.equal(await paths(),0);
     mode='success';await page.locator('#truckRouteRecalculate').click();await waitText('1.8km');
     await page.locator('#truckRouteVehicleSettings').click();await page.locator('#truckVehicleModal.open').waitFor();assert.equal(await page.locator('#truckVehicle_weight').inputValue(),'4800');
