@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.10.11-FINAL.55';
+  var ASSET_VERSION='2026.10.12-FINAL.56';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -157,6 +157,24 @@
     });
     return result;
   }
+  function safeRouteTimingLines(info){
+    if(!info||typeof info!=='object')return ['サーバー診断：未取得'];
+    var phases=['preflight','baseline-alternatives','baseline-hgv','baseline-retry','baseline-parse','optional-ic','selection','complete'],kinds=['ok','configuration-missing','upstream-rate-limit','upstream-authorization','upstream-route-rejected','upstream-response-error','ferry-verification-failed','upstream-timeout','route-unexpected-failure'];
+    var phase=phases.includes(info.phase)?info.phase:'unknown',kind=kinds.includes(info.kind)?info.kind:'unknown';
+    function time(v){return Number.isInteger(v)&&v>=0&&v<=60000?(v/1000).toFixed(1)+'秒':'未取得';}
+    return ['サーバー段階：'+phase,'サーバー結果：'+kind,'サーバー経過：'+time(info.elapsedMs),'基本HGV取得：'+time(info.baselineMs),'追加IC処理：'+time(info.optionalIcMs)];
+  }
+  function routeFailureDiagnosticReport(info){
+    var phases=['position','request','response-body','route-validation'],codes=['client-deadline','position-failed','network-failed','api-rejected','invalid-response'];
+    var phase=phases.includes(info.phase)?info.phase:'unknown',kind=codes.includes(info.kind)?info.kind:'unknown';
+    var total=Number.isInteger(info.elapsedMs)&&info.elapsedMs>=0?Math.min(info.elapsedMs,60000):0;
+    var http=Number.isInteger(info.httpStatus)&&info.httpStatus>=100&&info.httpStatus<=599?String(info.httpStatus):'未取得';
+    return ['VENDRIVE 経路タイムアウト診断 '+ASSET_VERSION,
+      '失敗段階（端末）：'+phase,'失敗分類（端末）：'+kind,'端末経過：'+(total/1000).toFixed(1)+'秒','HTTP状態：'+http]
+      .concat(safeRouteTimingLines(info.server)).concat([
+      '※この診断だけでは原因を確定できない場合があります。',
+      '※座標・住所・車両番号・寸法・APIキーは含みません。']).join('\n');
+  }
   function highwayDiagnosticReport(data,v){
     if(!data||!data.highwaySearch)return null;
     var h=data.highwaySearch,usage=data.usage||{},highwayOn=!!v&&v.avoidTolls===false;
@@ -219,7 +237,7 @@
       '判定の手掛かり：'+reason,
       '※原因候補を切り分けるための情報です。確定診断ではありません。',
       '※座標・住所・車両番号・寸法・APIキーは含みません。'
-    ].join('\n');
+    ].concat(safeRouteTimingLines(data.routeDiagnostic)).join('\n');
   }
   function createClient(app){
     var destination=null,active=null,progress=null,sequence=0,controller=null,busy=false,settingsDestination=null,offRouteHits=0,offRouteSamples=[],lastAutoRerouteAt=0;
@@ -294,15 +312,18 @@
       var auto=options.auto===true,previousActive=active,previousProgress=progress;
       cancel();busy=true;if(app.diagnostics)app.diagnostics(null);if(!auto){active=null;progress=null;draw();}controller=new AbortController();var signal=controller.signal,token=sequence;
       panel(auto?'ルートを再検索中…':'現在地を取得中…');
-      var timer=null;
+      var timer=null,startedAt=Date.now(),diagnosticStage='position',response=null,data=null;
       try{
         var origin=point(options.origin)?options.origin:await getPosition(signal);if(token!==sequence)return;
         if(!auto)panel('車両条件に合う経路を取得中…');
+        diagnosticStage='request';
         timer=setTimeout(function(){if(token===sequence)controller.abort();},ROUTE_REQUEST_TIMEOUT_MS);
         var requestBody={origin:{lat:origin.lat,lng:origin.lng},destination:{lat:destination.lat,lng:destination.lng},vehicle:v},rerouteHeading=auto?normalizeHeading(options.heading):null;if(rerouteHeading!==null)requestBody.heading=rerouteHeading;
-        var response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(requestBody),signal:signal});
-        var data=await response.json();clearTimeout(timer);timer=null;if(token!==sequence)return;
+        response=await app.fetch(app.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(requestBody),signal:signal});
+        diagnosticStage='response-body';
+        data=await response.json();clearTimeout(timer);timer=null;if(token!==sequence)return;
         if(!response.ok||!data.ok)throw new Error(data&&typeof data.message==='string'?data.message:'経路を取得できませんでした');
+        diagnosticStage='route-validation';
         var nextRoute=route(data.route);if(app.diagnostics)app.diagnostics(highwayDiagnosticReport(data,v));
         if(auto&&previousActive){
           var baseline=remainingMeters(previousActive,previousProgress)+(previousProgress&&point(previousProgress.point)?distanceMeters(origin,previousProgress.point):0),detourLimit=baseline+Math.max(3000,baseline*0.5);
@@ -312,6 +333,8 @@
         panel(routeSummary(v));
       }catch(e){
         if(token!==sequence)return;
+        var diagnosticKind=signal.aborted?'client-deadline':diagnosticStage==='position'?'position-failed':response&&(!response.ok||(data&&data.ok===false))?'api-rejected':diagnosticStage==='request'?'network-failed':'invalid-response';
+        if(app.diagnostics)app.diagnostics(routeFailureDiagnosticReport({phase:diagnosticStage,kind:diagnosticKind,elapsedMs:Math.min(60000,Math.max(0,Math.round((Date.now()-startedAt)/100)*100)),httpStatus:response&&response.status,server:data&&data.routeDiagnostic}));
         if(auto){active=previousActive;progress=previousProgress;draw();navigationView();panel('ルート再検索に失敗しました。現在の経路を表示しています');}
         else{active=null;progress=null;draw();panel(signal.aborted?'経路の取得がタイムアウトしました。再計算してください':e.message==='Failed to fetch'?'通信できません。接続を確認して再計算してください':e.message||'経路を取得できませんでした');}
       }finally{clearTimeout(timer);if(token===sequence){busy=false;controller=null;el('truckRouteRecalculate').disabled=false;}}
