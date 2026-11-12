@@ -1112,11 +1112,12 @@ function todayPendingWork(){
   return {machines:machines,orders:orders,taskAssignments:taskAssignments,taskCount:Object.keys(taskIds).length}
 }
 function finishDay(){
-  var pending=todayPendingWork(),message='';
-  if(pending.orders.length||pending.taskAssignments.length){
-    var lines=['本日回る自販機に未達があります。',''];
+  var pending=todayPendingWork(),deliveryPending=(state.deliveryRequests||[]).filter(function(r){return r.status==='pending'&&r.scheduledDate<=today}),message='';
+  if(pending.orders.length||pending.taskAssignments.length||deliveryPending.length){
+    var lines=['本日の未完了作業があります。',''];
     if(pending.orders.length){lines.push('未達オーダー：'+pending.orders.length+'台');pending.orders.slice(0,3).forEach(function(machine){lines.push('・'+(machine.name||machine.id))});if(pending.orders.length>3)lines.push('・ほか'+(pending.orders.length-3)+'台')}
     if(pending.taskAssignments.length){if(pending.orders.length)lines.push('');lines.push('未達タスク：'+pending.taskCount+'件 / '+pending.taskAssignments.length+'台分');pending.taskAssignments.slice(0,4).forEach(function(item){lines.push('・'+(item.machine.name||item.machine.id)+'：'+(item.task.text||'未完了タスク'))});if(pending.taskAssignments.length>4)lines.push('・ほか'+(pending.taskAssignments.length-4)+'件')}
+    if(deliveryPending.length){lines.push('');lines.push('未完了の納品：'+deliveryPending.length+'件');deliveryPending.slice(0,3).forEach(function(r){var site=(state.deliverySites||[]).find(function(s){return s.id===r.siteId});lines.push('・'+(site?site.name:r.siteName||'納品先不明'))})}
     lines.push('','このまま本日の業務を終了しますか？');message=lines.join('\n')
   }else message='本日の業務を終了しますか？';
   if(!confirm(message))return;
