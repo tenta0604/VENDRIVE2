@@ -176,6 +176,42 @@ for(const width of [320,390]){
     await page.locator('#truckRouteEnd').click();await page.waitForFunction(()=>!document.getElementById('truckRoutePanel').offsetParent);
     const beforeOfficePinRoute=count,officePin=page.locator('.vendrive-office-pin').first();await officePin.waitFor({state:'visible'});await officePin.evaluate(el=>el.click());await waitText('1.8km');await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);assert.equal(count,beforeOfficePinRoute+1);assert.deepEqual(routePayloads.at(-1).destination,{lat:35.33,lng:136.83});
     await page.evaluate(()=>window.__gpsSuccess({coords:{latitude:35.33,longitude:136.83,accuracy:8,heading:45,speed:8}}));await page.waitForTimeout(180);assert.equal(await page.locator('#truckRoutePanel').isVisible(),false);assert.equal(await page.locator('#arrivalVisitModal.open').count(),0,'office arrival must not open machine visit actions');
+    // FINAL.58: delivery locations are independent from machines; pin-picked addresses use the registered HGV route without completing vending work.
+    await page.locator('.tabs button[data-page="deliveryPage"]').click();
+    await page.locator('#deliveryAddSite').click();
+    await page.locator('#deliverySiteName').fill('Route test delivery');
+    await page.locator('#deliverySiteCode').fill('DELIVERY-01');
+    await page.locator('#deliverySitePickPin').click();
+    await page.locator('#mapPositionConfirm').waitFor({state:'visible'});
+    await page.locator('#mapPositionConfirm').click();
+    await page.locator('#deliverySiteEditor.open').waitFor();
+    assert.match(await page.locator('#deliverySitePinText').innerText(),/設定済み/);
+    await page.locator('#deliverySiteSave').click();
+    const deliverySaved=await stored(),deliveryLocation=deliverySaved.deliverySites.find(s=>s.code==='DELIVERY-01');
+    assert.ok(deliveryLocation&&Number.isFinite(deliveryLocation.lat)&&Number.isFinite(deliveryLocation.lng),'pin picker must save delivery coordinates');
+    assert.equal(deliverySaved.machines.length,(await stored()).machines.length,'delivery site cannot alter registered machine count');
+    await page.locator('.tabs button[data-page="deliveryPage"]').click();
+    await page.locator('#deliverySitesList [data-action="new"]').click();
+    await page.locator('#deliveryRequestItems [data-field="name"]').first().fill('Test cartons');
+    await page.locator('#deliveryRequestItems [data-field="quantity"]').first().fill('2');
+    await page.locator('#deliveryRequestItems [data-field="sellPrice"]').first().fill('150円／本');
+    await page.locator('#deliveryRequestSave').click();
+    await page.locator('.tabs button[data-page="mapPage"]').click();
+    const deliveryPin=page.locator('.vendrive-delivery-pin').first();
+    await deliveryPin.waitFor({state:'visible'});
+    await deliveryPin.evaluate(el=>el.click());
+    await page.locator('#deliverySiteDetail.open').waitFor({state:'visible'});
+    assert.match(await page.locator('#deliveryDetailName').innerText(),/Route test delivery/);
+    const beforeDeliveryRoute=count;
+    await page.locator('#deliveryDetailRoute').click();
+    await waitText('1.8km');
+    await page.waitForFunction(()=>!document.getElementById('truckRouteRecalculate').disabled);
+    assert.equal(count,beforeDeliveryRoute+1);
+    assert.deepEqual(routePayloads.at(-1).destination,{lat:deliveryLocation.lat,lng:deliveryLocation.lng});
+    await page.evaluate(pos=>window.__gpsSuccess({coords:{latitude:pos.lat,longitude:pos.lng,accuracy:8,heading:45,speed:8}}),deliveryLocation);
+    await page.waitForTimeout(180);
+    assert.equal(await page.locator('#arrivalVisitModal.open').count(),0,'delivery arrival must not trigger machine visit completion');
+    assert.equal(await page.locator('#truckRoutePanel').isVisible(),false,'delivery arrival ends route safely');
     // Standard Today cards also support right swipe to skip.
     await page.locator('.tabs button[data-page="todayPage"]').click();const todaySkipRow=page.locator('#todayList .swipeRow[data-machine-id="T4"]');await todaySkipRow.waitFor({state:'visible'});await swipeRow(todaySkipRow,'right');const afterTodaySkip=await stored();assert.ok(afterTodaySkip.machines.find(m=>m.id==='T4').skip);
     // The existing explicit external-navigation path remains separate.
