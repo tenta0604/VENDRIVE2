@@ -5,25 +5,25 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.12-FINAL.57",
+  "appVersion": "2026.11.12-FINAL.58",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL57_PRODUCTION_VERIFIED_FOUR_WEEK_MONTHLY_CADENCE",
+  "status": "FINAL58_DELIVERY_WORKFLOW_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.57 live: 1ヶ月に1回 displays the same, visits now due every 28 days",
-    "releaseStatus": "Product PR #244 merged ef048757437ede27300740f38fcccba5c5d0bd0b; final PR Browser including 28-day regression 43164397997 PASS, Truck/Node/API/real Edge 43164397939 PASS. Vercel production dpl_BGnmBAVcwoVQUvVWfQLJkeaeDDWw READY exact merged SHA; public GitHub Pages and Vercel /version.json both 2026.11.12-FINAL.57. Existing records/visit history unchanged; all monthly entries automatically use 28-day cadence, not the calendar month.",
-    "scope": "Single constant from 30 to 28 days for existing `1ヶ月に1回` stored/visible value. Applies to normal/temporary monthly scheduling, Today/Tomorrow/next-visit. Weekday filter, manual override, rest days, visit history, other cycles, IndexedDB, route APIs unchanged.",
+    "title": "FINAL.58 live: independent on-demand delivery sites, products, sale-price notes and history",
+    "releaseStatus": "Product PR #247 merged fb7672f3647fef7d625856cb488a9b2b88d6f954. Final exact-head Browser regression including dedicated delivery end-to-end gate 43182652023 PASS and Truck Node/API/real Microsoft Edge 43182651954 PASS (including map pin picker, delivery marker, restricted 2t HGV route, no machine arrival). Vercel production dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY exact product merge. Both public GitHub Pages and Vercel /version.json returned 2026.11.12-FINAL.58; public Pages delivery.js asset verified reachable.",
+    "releaseScope": "Distinct 納品 tab, deliverySites registry (unique code, name, optional address/memo, geolocated map pin) and deliveryRequests (dated one-off pending/done, item name, quantity, cases/bottles/boxes/etc unit, free-text sale-price note, optional memo). Last completed request explicitly copyable into new editable request; previous completed items/prices never auto-overwritten. Delivery pending today/overdue, tomorrow preview, all route/map and day-specific markers; completion history; same existing HGV safety and route limits, no automatic recurrence. Day-end warning includes pending delivery. Existing vending machines and 28-day 月1 unchanged.",
     "validationEvidence": {
-      "preEditImmutableTag": "PASS Issue #243 [SAFETY-TAG], exact main fb4e0a0d939f6e572148b6b4f492398274a1f401",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/244",
-      "browser": "PASS run 43164050934",
-      "truckNodeRealEdge": "PASS run 43164050974",
-      "mainMerge": "PASS PR #244 ef048757437ede27300740f38fcccba5c5d0bd0b",
-      "githubPages": "PASS public version 2026.11.12-FINAL.57",
-      "vercel": "PASS production dpl_BGnmBAVcwoVQUvVWfQLJkeaeDDWw READY exact merge SHA and public version 2026.11.12-FINAL.57"
+      "preEditImmutableTag": "PASS Issue #246 [SAFETY-TAG] at exact pre-edit main 9743369b35cc5dd11869cd5333315bb2f411bf66",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/247",
+      "finalBrowser": "PASS run 43182652023",
+      "finalTruckNodeRealEdge": "PASS run 43182651954",
+      "productMerge": "PASS fb7672f3647fef7d625856cb488a9b2b88d6f954",
+      "githubPages": "PASS public 2026.11.12-FINAL.58 and delivery.js asset accessible",
+      "vercel": "PASS READY dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo exact merge and public 2026.11.12-FINAL.58"
     },
-    "nextOwnerAction": "No change to existing settings required. Future monthly schedules calculate automatically at 28-day intervals, respecting saved weekday and manual override. This feature is published."
+    "nextOwnerAction": "Use 納品 > ＋納品先 to register name/management code and map pin; when asked, tap ＋依頼, enter date, item quantities, free-text sale-price notes, and save. Once delivered tap 完了; next request may explicitly copy previous completed delivery. No additional developer action pending."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -43,10 +43,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 latest main + seven canonicals. FINAL.57 product PR #244 merged ef048757437ede27300740f38fcccba5c5d0bd0b, Browser 43164397997 PASS (including four-week gate), Truck/Node/API/real Edge 43164397939 PASS, Vercel dpl_BGnmBAVcwoVQUvVWfQLJkeaeDDWw READY exact merge, public Pages and Vercel /version.json both 2026.11.12-FINAL.57. Locked owner rule: displayed/stored 1ヶ月に1回 remains identical but internal cycle is 28 days/4 weeks, not 30 days; existing machine settings/history untouched, normal and temporary cycle, Today/Tomorrow and next date apply automatically. No additional API calls or route change; AN15 paused. If user asks about timeouts, prior FINAL.56 diagnostics remain and real cause unknown.",
+    "shortResumePrompt": "VENDRIVE2 latest main & seven canonicals. FINAL.58 delivery product PR #247 merged fb7672f3647fef7d625856cb488a9b2b88d6f954, Browser 43182652023 PASS including full delivered UI lifecycle, Truck/Node/API/real Edge 43182651954 PASS including center-pin picker, map delivery marker and safe registered 2t HGV delivery route; Vercel dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY exact merge, both public version endpoints 2026.11.12-FINAL.58, Pages delivery.js accessible. New deliverySites & deliveryRequests in local legacy state/backups, separate from vending; delivery site management code/name/optional location/pin, nonrecurring dated pending request multi-products, quantity+unit, salePrice free-text memo (NO sums), explicitly copy last completed request, immutable historical items/prices, Today/next-workday Tomorrow/dedicated map pins/completion history and end-of-day warning. No schema migration, engine AN14B3B5 and DB/schema4 unchanged; `1ヶ月に1回` remains 28-day internal, AN15 paused; previous HGV failure diagnostic remains unresolved without real user evidence.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.57 monthly four-week behavior fully released & verified; no work pending for schedule setting. AN15 remains paused; timeout field evidence remains separate.",
-    "latestContinuityCheckpoint": "2026-11-12 FINAL.57 monthly label retained with 28-day cadence; PR #244 merged; Pages/Vercel both live FINAL.57",
+    "handoffBoundary": "FINAL.58 independent on-demand deliveries implemented and public/CI verified; no remaining developer work or owner input required for release. New human device UX feedback only when convenient; prior route timeout diagnosis separately pending.",
+    "latestContinuityCheckpoint": "2026-11-12 FINAL.58 delivery workflow delivered on main with CI real Edge & browser PASS, Pages+Vercel public FINAL.58",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -58,15 +58,15 @@
     }
   },
   "nextActions": [
-    "This FINAL.57 monthly cadence scope is complete. No owner action is required.",
-    "If route timeout recurs, diagnose separately using existing privacy-safe FINAL.56/57 HGV report; do not change HGV rules or AN15 without new owner instruction.",
-    "Preserve the locked 1ヶ月に1回 visible label and internal 28-day semantics in all future changes."
+    "FINAL.58 owner-requested delivery workflow scope is COMPLETE; owner may try the live UI when convenient.",
+    "Treat any future delivery usability issues as new limited maintenance with preserved local data; no automatic live-user migrations.",
+    "Retain original FINAL.57 monthly display 1ヶ月に1回 -> 28 days, paused AN15 and all registered 2t HGV safety. Original FINAL.56 timeout root cause remains unknown."
   ],
   "fieldEvidenceIntake": {
     "status": "FINAL56_PUBLIC_RELEASE_VERIFIED_AWAITING_OWNER_TIMEOUT_REPORT_IF_ERROR_RECURS",
-    "nextInput": "Existing FINAL.56/FINAL.57 client route timeout diagnostics only if issue recurs later. No device work needed for monthly cadence update; four-week behavior verified by browser.",
+    "nextInput": "HGV route timeout diagnostic report only if the owner encounters a future failure; this is separate from delivery UI and not a blocker for FINAL.58.",
     "criticalBoundary": "Diagnostic-only release; no evidence that frequent timeout is resolved. Never infer backend root cause from green CI alone.",
     "firstAction": "User independently retests later when safely stopped or passenger; no repeated tests requested now.",
-    "productionBoundary": "Both public front/API FINAL.56 verified; server deployment READY matching product merge. No HGV/ORS quotas/route policy changed."
+    "productionBoundary": "Both public frontend and backend FINAL.58; Vercel deployment dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY matching product merge; ORS/HGV safety, provider quotas and selection unchanged."
   }
 }
