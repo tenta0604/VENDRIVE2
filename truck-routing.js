@@ -3,7 +3,7 @@
   else root.VENDRIVETruckRouting=factory();
 })(typeof window!=='undefined'?window:globalThis,function(){
   'use strict';
-  var ASSET_VERSION='2026.11.12-FINAL.57';
+  var ASSET_VERSION='2026.11.12-FINAL.58';
   var ROUTE_REQUEST_TIMEOUT_MS=20000;
   var fields={height:['全高',0.5,6],width:['全幅',0.5,4],length:['全長',1,30],weight:['車両総重量',0.5,60]};
   function point(value){return !!value&&typeof value.lat==='number'&&Number.isFinite(value.lat)&&Math.abs(value.lat)<=90&&typeof value.lng==='number'&&Number.isFinite(value.lng)&&Math.abs(value.lng)<=180;}
@@ -358,7 +358,7 @@
     }
     function start(target){
       if(!point(target)){app.toast('目的地の位置を先に登録してください');return;}
-      var copy={lat:target.lat,lng:target.lng,name:target.name,id:target.id,kind:target.kind==='office'?'office':'machine'};
+      var copy={lat:target.lat,lng:target.lng,name:target.name,id:target.id,kind:target.kind==='office'?'office':target.kind==='delivery'?'delivery':'machine'};
       try{profile();}catch(e){openSettings(copy);return;}
       if(!app.showMap()){app.toast('地図を読み込めませんでした');return;}
       end();destination=copy;calculate();
