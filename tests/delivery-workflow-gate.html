@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Independent delivery workflow gate</title><style>body{margin:0}iframe{width:430px;max-width:100%;height:932px;border:0}</style></head>
+<body><pre id="out">RUNNING</pre><iframe title="delivery workflow test" id="app"></iframe>
+<script>
+(async function(){
+ const out=document.getElementById('out');
+ const assert=(v,msg)=>{if(!v)throw new Error(msg)};
+ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ const now=new Date(),today=iso(now),tomorrow=new Date(now);tomorrow.setDate(tomorrow.getDate()+1);
+ const days=['日','月','火','水','木','金','土'];
+ const originalMachine={id:'VM-SAFE',name:'既存自販機',maker:'TEST',makerGroup:'TEST',code:'VM-1',address:'',lat:null,lng:null,days:[days[now.getDay()]],cycle:'1ヶ月に1回',last:null,visited:false,skip:null,force:null,order:null,timeCondition:{type:'none',start:'',end:''},temporaryVisitCycles:[],memo:'',sales:'',taskDone:{}};
+ const fixture={machines:[originalMachine],offices:[],history:[],tasks:[],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:['TEST'],makerColors:{},makerSettings:[]};
+ localStorage.setItem('vendrive2_v7_data',JSON.stringify(fixture));
+ localStorage.setItem('vendrive2_last_day',today);
+ const iframe=document.getElementById('app');iframe.src='../index.html?deliveryGate='+Date.now();
+ let d,w;
+ for(let i=0;i<150;i++){await sleep(100);d=iframe.contentDocument;w=iframe.contentWindow;if(w&&w.VENDRIVE2Delivery&&d&&d.getElementById('deliveryNav')&&d.getElementById('heroTotal').textContent==='1')break}
+ assert(w&&w.VENDRIVE2Delivery&&d&&d.getElementById('deliveryNav'),'independent delivery module did not initialize');
+ w.confirm=()=>true;
+ const click=id=>{const n=d.getElementById(id);assert(n,'missing #'+id);n.click()};
+ const fill=(id,value)=>{const n=d.getElementById(id);assert(n,'missing #'+id);n.value=value;n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}))};
+ const saved=()=>JSON.parse(localStorage.getItem('vendrive2_v7_data'));
+ let initial=saved();
+ assert(initial.machines.length===1&&initial.machines[0].cycle==='1ヶ月に1回','legacy monthly machine changed');
+ assert(initial.deliverySites?.length===0&&initial.deliveryRequests?.length===0,'legacy data was not safely upgraded');
+ click('deliveryNav');assert(!d.getElementById('deliveryPage').classList.contains('hidden'),'delivery tab should open separately');
+ click('deliveryAddSite');
+ fill('deliverySiteName','テスト納品先');fill('deliverySiteCode','DL-100');fill('deliverySiteAddress','テスト住所');fill('deliverySiteMemo','裏口で受け渡し');
+ w.VENDRIVE2Delivery.pinSelected(35.3,136.8);
+ assert(d.getElementById('deliverySitePinText').textContent.includes('設定済み'),'delivery map pin was not staged');
+ click('deliverySiteSave');
+ let data=saved();
+ assert(data.deliverySites.length===1&&data.deliverySites[0].code==='DL-100','delivery location and management code not saved');
+ assert(data.deliverySites[0].lat===35.3&&data.deliverySites[0].lng===136.8,'delivery map pin not persisted');
+ assert(data.machines.length===1&&data.machines[0].code==='VM-1','vending machine data mutated by delivery creation');
+ // Duplicate delivery management code is rejected without touching existing rows.
+ click('deliveryAddSite');fill('deliverySiteName','重複先');fill('deliverySiteCode','dl-100');click('deliverySiteSave');
+ assert(saved().deliverySites.length===1,'duplicate management code must be rejected');
+ click('deliverySiteEditorCancel');
+ // Request 1: multiple products, case counts, free-text per-bottle prices; no total.
+ d.querySelector('#deliverySitesList [data-action="new"]').click();
+ assert(d.getElementById('deliveryRequestDate').value===today,'new request should default to today');
+ let row=d.querySelector('#deliveryRequestItems .deliveryProductRow');
+ row.querySelector('[data-field="name"]').value='コーラ500ml';row.querySelector('[data-field="quantity"]').value='2';
+ row.querySelector('[data-field="sellPrice"]').value='150円／本';
+ click('deliveryAddProduct');
+ const rows=d.querySelectorAll('#deliveryRequestItems .deliveryProductRow');
+ assert(rows.length===2,'multiple product rows unavailable');
+ rows[1].querySelector('[data-field="name"]').value='お茶600ml';
+ rows[1].querySelector('[data-field="quantity"]').value='3';
+ rows[1].querySelector('[data-field="unit"]').value='本';
+ rows[1].querySelector('[data-field="sellPrice"]').value='120円／本';
+ fill('deliveryRequestMemo','明細の合計計算は不要');
+ click('deliveryRequestSave');
+ data=saved();
+ assert(data.deliveryRequests.length===1&&data.deliveryRequests[0].items.length===2,'request products not saved independently');
+ assert(data.deliveryRequests[0].items[0].sellPrice==='150円／本','sale-price note was not kept verbatim');
+ assert(!d.getElementById('deliveryPage').textContent.includes('小計'),'UI must not calculate a subtotal');
+ assert(!d.getElementById('deliveryPage').textContent.includes('合計金額'),'UI must not calculate total money');
+ assert(d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml'),'today delivery not displayed');
+ assert(d.getElementById('heroTotal').textContent==='1','existing vending visit count must remain separate');
+ // Complete via Today, then ensure completed record is immutable and no recurring schedule exists.
+ d.querySelector('#todayDeliveryList [data-action="complete"]').click();
+ data=saved();const first=data.deliveryRequests[0];const immutable=JSON.stringify(first);
+ assert(first.status==='done'&&typeof first.completedAt==='number','completion must create durable history');
+ assert(!d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml'),'completed delivery should leave Today');
+ assert(d.getElementById('deliveryHistoryList').textContent.includes('150円／本'),'completed price note missing from history');
+ assert(data.deliveryRequests.length===1,'completing delivery must not create a recurring request');
+ // New request stays empty until explicit copy; then contents and prices can be edited.
+ d.querySelector('#deliverySitesList [data-action="new"]').click();
+ let input=d.querySelector('#deliveryRequestItems [data-field="name"]');
+ assert(input.value==='','a new request must not silently reuse last completed items');
+ assert(!d.getElementById('deliveryCopyPrevious').disabled,'previous completion copy should be offered');
+ click('deliveryCopyPrevious');
+ let copyRows=d.querySelectorAll('#deliveryRequestItems .deliveryProductRow');
+ assert(copyRows.length===2&&copyRows[0].querySelector('[data-field="name"]').value==='コーラ500ml','previous products not copied');
+ assert(copyRows[0].querySelector('[data-field="sellPrice"]').value==='150円／本','previous sale price not copied');
+ copyRows[0].querySelector('[data-field="name"]').value='水550ml';
+ copyRows[0].querySelector('[data-field="quantity"]').value='4';
+ copyRows[0].querySelector('[data-field="sellPrice"]').value='100円／本';
+ fill('deliveryRequestDate',iso(tomorrow));click('deliveryRequestSave');
+ data=saved();
+ assert(data.deliveryRequests.length===2,'second request not created');
+ assert(JSON.stringify(data.deliveryRequests.find(r=>r.id===first.id))===immutable,'editing copied request mutated completed history');
+ assert(!d.getElementById('todayDeliveryList').textContent.includes('水550ml'),'future delivery must not appear today');
+ w.VENDRIVE2Delivery.renderTomorrow();
+ assert(d.getElementById('tomorrowDeliveryList').textContent.includes('水550ml'),'tomorrow delivery preview missing');
+ // Edits to pending request remain possible and persist; no product default overwrites.
+ const pending=data.deliveryRequests.find(r=>r.status==='pending');
+ d.querySelector('#deliveryPendingList [data-action="edit"]').click();
+ fill('deliveryRequestMemo','時間指定はまだ未確定');click('deliveryRequestSave');
+ assert(saved().deliveryRequests.find(r=>r.id===pending.id).memo==='時間指定はまだ未確定','pending delivery cannot be edited');
+ assert(saved().machines[0].cycle==='1ヶ月に1回','legacy four-week machine cycle changed');
+ // Restore/reload: completion history, product prices, tomorrow and pinned location survive.
+ iframe.contentWindow.location.reload();
+ for(let i=0;i<150;i++){await sleep(100);if(iframe.contentWindow?.VENDRIVE2Delivery&&iframe.contentDocument?.getElementById('deliveryPendingList')?.textContent.includes('水550ml'))break}
+ const after=JSON.parse(localStorage.getItem('vendrive2_v7_data'));
+ assert(after.deliverySites.length===1&&after.deliverySites[0].lat===35.3,'delivery location did not survive reload');
+ assert(after.deliveryRequests.length===2&&after.deliveryRequests.find(r=>r.status==='done').items[0].sellPrice==='150円／本','delivery history did not survive reload');
+ assert(after.deliveryRequests.find(r=>r.status==='pending').items[0].sellPrice==='100円／本','future request edit did not survive reload');
+ out.textContent='PASS\nsite name, management code and map pin: PASS\nindependent multi-item delivery requests: PASS\nfree-text per-unit sale price without totals: PASS\nToday + Tomorrow: PASS\ncomplete and immutable history: PASS\nexplicit previous copy then independent edit: PASS\nlegacy machine + reload persistence: PASS';
+})().catch(error=>{document.getElementById('out').textContent='FAIL: '+(error&&error.stack||error);console.error(error)});
+</script>
+</body></html>

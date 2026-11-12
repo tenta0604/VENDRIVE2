@@ -24,8 +24,9 @@
   function openTab(page){click(d.querySelector('.tabs button[data-page="'+page+'"]'))}
   async function waitFor(fn,label){for(let i=0;i<80;i++){if(fn())return;await sleep(50)}throw new Error(label||'wait timeout')}
 
+  await waitFor(()=>!!d.getElementById('deliveryNav'),'delivery navigation did not initialize');
   const nav=d.querySelector('.tabs'),buttons=[...nav.querySelectorAll('button')],navRect=nav.getBoundingClientRect(),first=buttons[0].getBoundingClientRect(),last=buttons[buttons.length-1].getBoundingClientRect();
-  assert(buttons.length===5,'expected five tabs');
+  assert(d.querySelectorAll('.tabs button').length===6,'expected original five tabs plus delivery');
   assert(first.left-navRect.left<=10.5,'left tab padding too large');
   assert(navRect.right-last.right<=10.5,'right side still has an empty tab-sized gap');
 
