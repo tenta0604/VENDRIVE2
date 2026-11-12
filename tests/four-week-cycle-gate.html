@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FINAL.57: 1ヶ月に1回 means four weeks without relabeling</title>
+<style>html,body{margin:0;width:430px;max-width:100%}iframe{width:430px;max-width:100%;height:932px;border:0}</style></head>
+<body><pre id="out">RUNNING</pre><iframe id="app" title="VENDRIVE monthly-four-week gate"></iframe>
+<script>
+(async function(){
+  const out=document.getElementById('out'),assert=(condition,message)=>{if(!condition)throw new Error(message)};
+  const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const week=['日','月','火','水','木','金','土'];
+  const todayDate=new Date();todayDate.setHours(0,0,0,0);
+  const tomorrowDate=new Date(todayDate);tomorrowDate.setDate(tomorrowDate.getDate()+1);
+  const ago=(date,n)=>{const x=new Date(date);x.setDate(x.getDate()-n);return iso(x)};
+  const today=iso(todayDate),tomorrow=iso(tomorrowDate),todayDay=week[todayDate.getDay()],tomorrowDay=week[tomorrowDate.getDay()];
+  const machine=(id,days,cycle,last)=>({id,name:id,maker:'TEST',makerGroup:'TEST',code:id,address:'',lat:null,lng:null,
+    days,cycle,weeklyCount:null,last,visited:false,skip:null,force:null,order:null,
+    timeCondition:{type:'none',start:'',end:''},temporaryVisitCycles:[],memo:'',sales:'',taskDone:{}});
+  const due=machine('M-28-DUE',[todayDay],'1ヶ月に1回',ago(todayDate,28));
+  const early=machine('M-27-EARLY',[todayDay],'1ヶ月に1回',ago(todayDate,27));
+  const tomorrowDue=machine('M-TOMORROW',[tomorrowDay],'1ヶ月に1回',ago(tomorrowDate,28));
+  const weekly=machine('M-WEEKLY',[todayDay],'1週間に1回',ago(todayDate,7));
+  const manual=machine('M-MANUAL',[todayDay],'1ヶ月に1回',ago(todayDate,1));manual.force=today;
+  const unknown=machine('M-NO-HISTORY',[todayDay],'1ヶ月に1回',null);
+  const temporary=machine('M-TEMPORARY',[todayDay],'1週間に1回',ago(todayDate,28));
+  temporary.temporaryVisitCycles=[{periodId:'FULL',cycle:'1ヶ月に1回',days:[todayDay]}];
+  const state={machines:[due,early,tomorrowDue,weekly,manual,unknown,temporary],offices:[],history:[],
+    tomorrowPlan:null,tasks:[],taskHistory:[],temporaryVisitPeriods:[{id:'FULL',name:'通年',start:'01-01',end:'12-31'}],
+    restDays:[],makers:['TEST'],makerColors:{},makerSettings:[]};
+  localStorage.setItem('vendrive2_v7_data',JSON.stringify(state));
+  localStorage.setItem('vendrive2_last_day',today);
+  const frame=document.getElementById('app');frame.src='../index.html?fourWeekGate='+Date.now();
+  let snapshot=null;
+  for(let i=0;i<100;i++){
+    await sleep(100);
+    if(frame.contentWindow?.VENDRIVE2ReadBridge?.getPlanningSnapshot){
+      snapshot=frame.contentWindow.VENDRIVE2ReadBridge.getPlanningSnapshot();
+      if(snapshot?.machines?.length===7)break;
+    }
+  }
+  assert(snapshot&&snapshot.machines?.length===7,'The application did not load all existing machines');
+  assert(snapshot.today===today&&snapshot.tomorrow.date===tomorrow,'Test calendar dates must agree with application');
+  const todayIds=new Set(snapshot.todayIds),tomorrowIds=new Set(snapshot.tomorrow.ids);
+  assert(todayIds.has('M-28-DUE'),'28-day/monthly visit must become due at exactly 4 weeks');
+  assert(!todayIds.has('M-27-EARLY'),'27-day/monthly visit must not become due early');
+  assert(todayIds.has('M-TEMPORARY'),'temporary monthly override must use the 28-day interval');
+  assert(todayIds.has('M-WEEKLY'),'regular weekly visit must remain due');
+  assert(todayIds.has('M-MANUAL'),'manually forced visit must continue to override cycle');
+  assert(todayIds.has('M-NO-HISTORY'),'unvisited machine should retain prior first-visit behavior');
+  assert(!todayIds.has('M-TOMORROW'),'tomorrow machine must not be due one weekday early');
+  assert(tomorrowIds.has('M-TOMORROW'),'tomorrow visit list must apply the new interval');
+  assert(!tomorrowIds.has('M-27-EARLY'),'next-workday must not accidentally add a monthly visit on wrong day');
+  const next=Object.fromEntries(snapshot.machines.map(m=>[m.id,m.nextScheduledVisitDate]));
+  assert(next['M-28-DUE']===today,'due machine detail next date must be today');
+  assert(next['M-TOMORROW']===tomorrow,'tomorrow machine detail next date must be tomorrow');
+  const nextWeek=new Date(todayDate);nextWeek.setDate(nextWeek.getDate()+7);
+  assert(next['M-27-EARLY']===iso(nextWeek),'early machine must wait until its next selected weekday');
+  const doc=frame.contentDocument;
+  for(const id of ['mCycle','newCycle','temporaryCycleCycle']){
+    const select=doc.getElementById(id);
+    assert(select&&Array.from(select.options).some(o=>o.value==='1ヶ月に1回'&&o.textContent==='1ヶ月に1回'),id+' monthly text/value changed');
+    assert(!Array.from(select.options).some(o=>o.textContent.includes('4週間')),id+' should not relabel the visible monthly option');
+  }
+  const stored=JSON.parse(localStorage.getItem('vendrive2_v7_data'));
+  assert(stored.machines.find(m=>m.id==='M-28-DUE')?.last===ago(todayDate,28),'visit date/history must not be rewritten');
+  assert(stored.machines.find(m=>m.id==='M-28-DUE')?.cycle==='1ヶ月に1回','stored monthly label must remain backward-compatible');
+  assert(stored.machines.find(m=>m.id==='M-MANUAL')?.force===today,'manual overrides must be retained');
+  assert(stored.machines.find(m=>m.id==='M-TEMPORARY')?.temporaryVisitCycles?.[0]?.cycle==='1ヶ月に1回','temporary cycle label must not change');
+  out.textContent='PASS\nmonthly label preserved: PASS\n28-day due, 27-day not-due: PASS\nToday + Tomorrow + detail next date: PASS\ntemporary and manual overrides: PASS\nexisting history and weekly cycles unchanged: PASS';
+})().catch(error=>{document.getElementById('out').textContent='FAIL: '+(error?.stack||error);console.error(error)});
+</script></body></html>
