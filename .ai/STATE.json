@@ -5,28 +5,25 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.10.12-FINAL.56",
+  "appVersion": "2026.11.12-FINAL.57",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL56_PRODUCTION_VERIFIED_AWAITING_OWNER_TIMEOUT_DIAGNOSTIC",
+  "status": "FINAL57_FOUR_WEEK_MONTHLY_VERIFIED_PR_RELEASE_PENDING",
   "currentWork": {
-    "title": "FINAL.56 released: privacy-safe route timeout diagnostics available, await real failure report only if needed",
-    "releaseStatus": "PR #241 merged c219ec657cc8fd98672682ad51ecc8f14f78658a. Final PR Truck/Node/API/real Edge 38213221433 PASS, final PR Browser regression 38213221479 PASS. Latest Vercel production dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU READY on exact product SHA, fresh public Pages and Vercel version.json both 2026.10.12-FINAL.56. Main push-run ID not available from connected GitHub list; do not fabricate it. The diagnostics are released, but actual owner-specific timeout cause is unproven until a fresh field report.",
-    "releaseScope": [
-      "Record only safe stages/time for client GPS, fetch, JSON body and route parse, with copyable failure diagnostics even when baseline never returns.",
-      "API stage, bounded elapsed time, no coordinates/addresses/vehicle dimensions/credentials in logs or response diagnostics.",
-      "Preserve 2t ORS driving-hgv, warm 30/min, max two optional HGV IC probes, no new requests, existing 14.5/20s server/client budgets, ferry/detour/IC constraints.",
-      "No engine DB or schema changes; AN15 remains paused."
-    ],
+    "title": "FINAL.57: preserve monthly label, calculate a four-week (28-day) visit cadence",
+    "releaseStatus": "Product PR #244 verified in Browser regression 43164050934 PASS (including new four-week gate) and Truck route/Node/API/real Edge 43164050974 PASS. Product main merge and public deployment still pending at this checkpoint.",
+    "scope": "Single constant from 30 to 28 days for existing `1ヶ月に1回` stored/visible value. Applies to normal/temporary monthly scheduling, Today/Tomorrow/next-visit. Weekday filter, manual override, rest days, visit history, other cycles, IndexedDB, route APIs unchanged.",
     "validationEvidence": {
-      "preEditTag": "PASS issue #240 immutable annotated backup-pre-FINAL56-ROUTE-TIMEOUT-OBSERVABILITY-20261012-20261012 -> 78212913465a4fde241cec2b183002920620f7a0",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/241",
-      "finalNodeRealEdge": "PASS workflow 38213221433",
-      "finalBrowser": "PASS workflow 38213221479",
-      "deployment": "PASS production Vercel READY dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU exact merged main c219ec657cc8fd98672682ad51ecc8f14f78658a; public Pages and Vercel version.json both FINAL.56"
+      "preEditImmutableTag": "PASS Issue #243 [SAFETY-TAG], exact main fb4e0a0d939f6e572148b6b4f492398274a1f401",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/244",
+      "browser": "PASS run 43164050934",
+      "truckNodeRealEdge": "PASS run 43164050974",
+      "mainMerge": "PENDING",
+      "githubPages": "PENDING",
+      "vercel": "PENDING"
     },
-    "nextOwnerAction": "After full public FINAL.56 release, safely retry affected HGV route and copy location-free 経路・高速診断 only if an error persists."
+    "nextOwnerAction": "None for deployment. Once live verified, existing monthly sites automatically use four-week cadence without changing their saved option; any manually forced/skipped Today/Tomorrow items stay as set."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -46,10 +43,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 latest main + seven canonical. FINAL.56 route timeout diagnostic PR #241 merged c219ec657cc8fd98672682ad51ecc8f14f78658a, PR Node/API/real Edge run 38213221433 and Browser run 38213221479 PASS, Vercel dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU READY exact product merge, both public versions 2026.10.12-FINAL.56. No route policy or provider traffic changes; current server stage logs and copied user-side failure report omit private location/vehicle/keys. HUMAN_REQUIRED only after safe owner retest of still-timing-out route. Older FINAL.54 highway report already analyzed. AN15 paused.",
+    "shortResumePrompt": "VENDRIVE2 latest main and 7 canonical. Owner-approved FINAL.57 PR #244 changes stored/visible `1ヶ月に1回` from 30-day computation to 28-day (4-week) computation only; no relabel or data rewrite. Browser CI 43164050934 PASS including new calendar gate, Truck/Node/API/real Edge 43164050974 PASS. Pre-edit immutable safety tag via Issue #243 on fb4e0a. Product merge/deploy/live verification PENDING at this checkpoint. Preserve existing manual plans, same weekdays, no route policy changes, 4/4 DB/schema, AN15 paused, prior FINAL56 timeout telemetry.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.55 fully shipped and verified. Real FINAL.54 report 244 ICs, 2 HGV via candidates, 0 eligible already received; next HUMAN_REQUIRED NEW FINAL.55 report explaining time/distance rejection. No more speculative code.",
-    "latestContinuityCheckpoint": "2026-10-12 FINAL.55 HGV IC rejection diagnostics product PR #238 merged, main Browser Pages Vercel and both live versions verified, awaiting safe owner report",
+    "handoffBoundary": "FINAL.57 monthly cadence change in PR #244; all PR CI passes; merge and public version check pending. Existing FINAL.56 HGV diagnostic work remains deployed but field report unresolved.",
+    "latestContinuityCheckpoint": "2026-11-12 FINAL.57 four-week monthly cadence PR #244 verified premerge, production pending",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -61,13 +58,13 @@
     }
   },
   "nextActions": [
-    "HUMAN_REQUIRED only when safe: if the 2t route still times out, try once with FINAL.56 and copy the new location-free 経路・高速診断.",
-    "Use client phase, HTTP status and sanitized server baseline/optional-IC timings to narrow failure; no new route/provider changes without evidence.",
-    "Existing FINAL.54 motorway report is already received; analyze timeout separately. Preserve ORS free quota, 2t HGV vehicle rules, ferry/detour safety, AN15 pause and scheduled OSM data refresh."
+    "Merge FINAL.57 product PR #244 after checking exact HEAD/CI.",
+    "Verify Pages and Vercel latest production deployment READY, both public version.json FINAL.57, and public main html/monthly constant 28.",
+    "Finalize release evidence and preserve paused AN15, existing FINAL.56 timeout telemetry and route-usage safety."
   ],
   "fieldEvidenceIntake": {
     "status": "FINAL56_PUBLIC_RELEASE_VERIFIED_AWAITING_OWNER_TIMEOUT_REPORT_IF_ERROR_RECURS",
-    "nextInput": "VENDRIVE 経路タイムアウト診断 2026.10.12-FINAL.56 or updated 高速診断 after a safe failed/successful routing attempt; user currently unable to test",
+    "nextInput": "Existing FINAL.56/FINAL.57 client route timeout diagnostics only if issue recurs later. No device work needed for monthly cadence update; four-week behavior verified by browser.",
     "criticalBoundary": "Diagnostic-only release; no evidence that frequent timeout is resolved. Never infer backend root cause from green CI alone.",
     "firstAction": "User independently retests later when safely stopped or passenger; no repeated tests requested now.",
     "productionBoundary": "Both public front/API FINAL.56 verified; server deployment READY matching product merge. No HGV/ORS quotas/route policy changed."
