@@ -1,12 +1,13 @@
 {
   "evidenceVersion": 87,
-  "runType": "final57_four_week_monthly_visit_cadence_20261112",
+  "runType": "final57_monthly_four_week_production_closeout_20261112",
   "phase": "FINAL57_MONTHLY_LABEL_FOUR_WEEK_CADENCE",
-  "status": "PR_VERIFIED_RELEASE_PENDING",
+  "status": "COMPLETE",
   "base": {
     "mainHeadBefore": "fb4e0a0d939f6e572148b6b4f492398274a1f401",
     "safetyTag": "PASS Issue #243 immutable annotated safety tag at exact main; existing tag never moved",
-    "branch": "chatgpt/final57-monthly-four-weeks-20261112"
+    "branch": "chatgpt/final57-monthly-four-weeks-20261112",
+    "productMergedMain": "ef048757437ede27300740f38fcccba5c5d0bd0b"
   },
   "versions": {
     "app": "2026.11.12-FINAL.57",
@@ -15,18 +16,20 @@
     "schema": 4
   },
   "work": {
-    "summary": "Keep 1ヶ月に1回 UI and stored value while mapping cycle to 28 days instead of 30; Today/Tomorrow/detail next date all use shared calculation. No data migration, user history, route or analytics edits.",
+    "summary": "FINAL.57 published: `1ヶ月に1回` still appears and persists identically, while scheduling is 28 days rather than 30; Today/Tomorrow, machine next date and temporary cycles updated through the common cycle table. No history rewrite, no policy changes or new API calls.",
     "productCodeChanged": true,
-    "behaviorChange": "A four-week recurrence may result in 13 visits per 364 days rather than 12 calendar-month visits."
+    "behaviorChange": "A four-week recurrence may result in 13 visits per 364 days rather than 12 calendar-month visits.",
+    "productStatus": "PRODUCTION_VERIFIED"
   },
   "gates": {
     "immutableSafetyTag": "PASS Issue #243",
-    "browserRegressionIncludingFourWeek": "PASS GitHub Actions 43164050934",
-    "truckNodeAPIRealEdgeAndExistingBrowser": "PASS GitHub Actions 43164050974",
-    "mainMerge": "PENDING",
-    "pagesProduction": "PENDING",
-    "vercelProduction": "PENDING",
-    "publicVersion": "PENDING"
+    "browserRegressionIncludingFourWeek": "PASS final PR Head 43164397997",
+    "truckNodeAPIRealEdgeAndExistingBrowser": "PASS final PR Head 43164397939",
+    "mainMerge": "PASS #244 ef048757437ede27300740f38fcccba5c5d0bd0b",
+    "pagesProduction": "PASS public 2026.11.12-FINAL.57",
+    "vercelProduction": "PASS READY dpl_BGnmBAVcwoVQUvVWfQLJkeaeDDWw exact merge ef048757437ede27300740f38fcccba5c5d0bd0b",
+    "publicVersion": "PASS GitHub Pages and Vercel both 2026.11.12-FINAL.57",
+    "dbMigration": "NOT_REQUIRED (data values unchanged)"
   },
   "changedFiles": [
     "index.html",
@@ -46,5 +49,14 @@
     "Existing motorway preference issue awaits evidence; original ORS/HGV constraints immutable",
     "AN15 intentionally paused"
   ],
-  "nextAction": "Merge verified PR #244, verify public Pages and Vercel version FINAL.57 and 28-day behavior, then close out evidence. Owner input not required."
+  "nextAction": "COMPLETE for this owner change. No device action needed. New instructions only if owner requests further functionality; AN15 paused and previous route-timeout evidence remains awaiting separate real test.",
+  "continuityCheckpoint": {
+    "status": "FINAL57_MONTHLY_FOUR_WEEK_PUBLIC_VERIFIED",
+    "appVersion": "2026.11.12-FINAL.57",
+    "productMerge": "ef048757437ede27300740f38fcccba5c5d0bd0b",
+    "productCodeChanged": false,
+    "lockedLabel": "1ヶ月に1回",
+    "actualDays": 28,
+    "preserved": "existing machine settings, last visits, manual force/skip, weekday filters, other cycles, all HGV/API restrictions, engine AN14B3B5 and DB/schema 4, AN15 pause"
+  }
 }

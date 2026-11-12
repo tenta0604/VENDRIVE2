@@ -438,3 +438,7 @@ PR #241 merged `c219ec657cc8fd98672682ad51ecc8f14f78658a`, Node/API/real Edge `3
 ## 2026-11-12 — FINAL.57 maintenance: monthly display with 28-day schedule
 
 Approved product maintenance unrelated to intentionally paused AN15: existing visible/stored `1ヶ月に1回` keeps its name; actual visits recur after 28 days (4 weeks) since last visit, respecting selected weekdays. Shared scheduling automatically applies to Today/Tomorrow/detail and temporary cycle. No visit-data migration, no other cycle/route/provider/engine/DB changes. Version `2026.11.12-FINAL.57`. PR #244 new real browser gate + full Node/real Edge gates PASS `43164050934`, `43164050974`; immutable safety checkpoint Issue #243. **Product merge and live release pending at this checkpoint.**
+
+## 2026-11-12 — FINAL.57 four-week monthly maintenance deployed
+
+Previous pre-release checkpoint is superseded. PR #244 merged `ef048757437ede27300740f38fcccba5c5d0bd0b`, final Browser `43164397997` and Truck/Node/API/real Edge `43164397939` PASS, Vercel READY `dpl_BGnmBAVcwoVQUvVWfQLJkeaeDDWw` at exact merge, GitHub Pages + Vercel public versions both `2026.11.12-FINAL.57`. Display and stored `1ヶ月に1回` unchanged; internal 28-day rule live for pre-existing machines, selected weekdays and manual plans maintained. No DB/analytics/routing edits; AN15 still intentionally paused.
