@@ -51,6 +51,7 @@
   assert(addSaved&&addSaved.force===today&&addSaved.skip===null,'manual addition was not materialized as today force');
   assert(excludeSaved&&excludeSaved.skip===today&&excludeSaved.force===null,'manual exclusion was not materialized as today skip');
   assert(saved.tomorrowPlan&&saved.tomorrowPlan.appliedDate===today,'manual plan was not marked applied for today');
+  for(let i=0;i<60&&!d.getElementById('deliveryNav');i++)await sleep(50);
   assert(d.querySelectorAll('.tabs button').length===6,'navigation should contain original five tabs plus independent deliveries');
   out.textContent='PASS\nsimplified UI: PASS\nmanual plan carryover: PASS\norder safety: PASS';
 })().catch(e=>{document.getElementById('out').textContent='FAIL: '+(e&&e.stack||e);console.error(e)});
