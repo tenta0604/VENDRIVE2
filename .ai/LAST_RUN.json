@@ -1,47 +1,40 @@
 {
-  "evidenceVersion": 86,
-  "runType": "final56_timeout_diagnostics_production_release_closeout_20261012",
-  "phase": "FINAL56_ROUTE_TIMEOUT_STAGE_DIAGNOSTICS",
-  "status": "COMPLETE",
+  "evidenceVersion": 87,
+  "runType": "final57_four_week_monthly_visit_cadence_20261112",
+  "phase": "FINAL57_MONTHLY_LABEL_FOUR_WEEK_CADENCE",
+  "status": "PR_VERIFIED_RELEASE_PENDING",
   "base": {
-    "productionMainBefore": "78212913465a4fde241cec2b183002920620f7a0",
-    "productionCodeChanged": true,
-    "safetyTag": "PASS immutable annotated backup-pre-FINAL56-ROUTE-TIMEOUT-OBSERVABILITY-20261012-20261012 via Issue #240",
-    "productMergedMain": "c219ec657cc8fd98672682ad51ecc8f14f78658a"
+    "mainHeadBefore": "fb4e0a0d939f6e572148b6b4f492398274a1f401",
+    "safetyTag": "PASS Issue #243 immutable annotated safety tag at exact main; existing tag never moved",
+    "branch": "chatgpt/final57-monthly-four-weeks-20261112"
   },
   "versions": {
-    "app": "2026.10.12-FINAL.56",
+    "app": "2026.11.12-FINAL.57",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Privacy-safe FINAL.56 route request baseline/client timing and errors shipped. Green Node/API/real Edge & browser PR gates, production Vercel READY and both public version endpoints. No claim actual driver timeout fixed.",
+    "summary": "Keep 1ヶ月に1回 UI and stored value while mapping cycle to 28 days instead of 30; Today/Tomorrow/detail next date all use shared calculation. No data migration, user history, route or analytics edits.",
     "productCodeChanged": true,
-    "productStatus": "PRODUCTION_VERIFIED_OWNER_REAL_TIMEOUT_EVIDENCE_PENDING"
+    "behaviorChange": "A four-week recurrence may result in 13 visits per 364 days rather than 12 calendar-month visits."
   },
   "gates": {
-    "preEditSafetyTag": "PASS issue #240, immutable annotated tag at 7821291",
-    "finalPRNodeAPIPrivacyRealEdge": "PASS 38213221433",
-    "finalPRBrowser": "PASS 38213221479",
-    "merge": "PASS PR #241 -> c219ec657cc8fd98672682ad51ecc8f14f78658a",
-    "postmergeMainBrowser": "NOT_OBSERVED; connector does not list push-triggered runs, final PR browser passed",
-    "githubPages": "PASS publicly fetched FINAL.56 after merge",
-    "vercelProduction": "PASS READY dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU exact merged main",
-    "bothPublicVersions": "PASS Pages and Vercel version.json 2026.10.12-FINAL.56",
-    "dbSchemaMigration": "NOT_REQUIRED unchanged 4/4",
-    "ownerFieldReport": "HUMAN_REQUIRED if timeout recurs"
+    "immutableSafetyTag": "PASS Issue #243",
+    "browserRegressionIncludingFourWeek": "PASS GitHub Actions 43164050934",
+    "truckNodeAPIRealEdgeAndExistingBrowser": "PASS GitHub Actions 43164050974",
+    "mainMerge": "PENDING",
+    "pagesProduction": "PENDING",
+    "vercelProduction": "PENDING",
+    "publicVersion": "PENDING"
   },
   "changedFiles": [
-    "api/route.mjs",
-    "truck-routing.js",
     "index.html",
     "version.json",
+    "truck-routing.js",
     "tests/truck-route-client.test.mjs",
-    "tests/truck-route-diagnostics.test.mjs",
-    "tests/run-truck-route-gates.mjs",
-    ".github/workflows/truck-route-gates.yml",
-    "tests/truck-route-api.test.mjs",
+    "tests/four-week-cycle-gate.html",
+    "tests/run-browser-gates.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -53,13 +46,5 @@
     "Existing motorway preference issue awaits evidence; original ORS/HGV constraints immutable",
     "AN15 intentionally paused"
   ],
-  "nextAction": "HUMAN_REQUIRED on later safe operator retest: if timeout persists, copy the latest location-free route failure diagnosis; analyze phase/HTTP/elapsed and avoid guessing. No speculative provider changes.",
-  "continuityCheckpoint": {
-    "status": "FINAL56_PRODUCTION_VERIFIED",
-    "appVersion": "2026.10.12-FINAL.56",
-    "sourceProductMerge": "c219ec657cc8fd98672682ad51ecc8f14f78658a",
-    "productCodeChanged": false,
-    "ownerNext": "Only user safely retried route diagnostic if error persists",
-    "preserved": "HGV-only 2t, warm ORS 30/min, max two extra via pairs, no car fallback, ferry/detour 14.5/20s budgets, no paid services, AN15 pause."
-  }
+  "nextAction": "Merge verified PR #244, verify public Pages and Vercel version FINAL.57 and 28-day behavior, then close out evidence. Owner input not required."
 }
