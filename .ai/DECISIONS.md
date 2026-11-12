@@ -809,3 +809,8 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - The common `CYCLES` constant governs due checks; its monthly value is 28. Honor existing selected weekdays, manual force/skip and rest-day behavior. Do not rewrite previous visit dates or change other cycle lengths. Monthly temporary periods use the same 28-day rule.
 - A 28-day cadence can produce roughly 13 visits per 364 days. This is intentional and user-approved.
 - Version/cache-busting must remain coherent for truck-routing asset even when release only changes scheduling; keep existing HGV routing policies unchanged, no new API traffic. PR #244, pre-edit safety tag Issue #243 at fb4e0a0; full CI passes. Deploy not yet independently confirmed at this checkpoint.
+
+## 2026-11-12 — FINAL.57 four-week cycle live confirmation
+
+- PR #244 merged `ef048757437ede27300740f38fcccba5c5d0bd0b`; final Browser 43164397997, Truck/Node/API/real Edge 43164397939 PASS. Vercel production READY `dpl_BGnmBAVcwoVQUvVWfQLJkeaeDDWw` exact merge, public front/API version `2026.11.12-FINAL.57` confirmed.
+- Preserve the legacy label/value `1ヶ月に1回` for all user-facing UI, backups, read bridge and saved records; internal interval is 28 calendar days (4 weeks), not 30 days and not 1 calendar month. Existing records automatically receive new due-date behavior with no migration; existing last dates, weekday filter, manual override and temporary periods preserved. Other cycles untouched.
