@@ -434,3 +434,7 @@ Owner authorized a narrow diagnostic implementation instead of speculative API r
 ## 2026-10-12 FINAL.56 production release — timeout diagnostic live, root cause still unknown
 
 PR #241 merged `c219ec657cc8fd98672682ad51ecc8f14f78658a`, Node/API/real Edge `38213221433` PASS, Browser `38213221479` PASS, Vercel READY `dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU` exact merge, public Pages/backend version both `2026.10.12-FINAL.56`. Failed route reports now show sanitized GPS/request/body/validation stage, HTTP if known, server restricted HGV stage and bounded durations; success route report includes safe timing. No route-selection or ORS provider call changes. No real specific timeout measured; human-safe retest is the only remaining next evidence. AN15 remains paused.
+
+## 2026-11-12 — FINAL.57 maintenance: monthly display with 28-day schedule
+
+Approved product maintenance unrelated to intentionally paused AN15: existing visible/stored `1ヶ月に1回` keeps its name; actual visits recur after 28 days (4 weeks) since last visit, respecting selected weekdays. Shared scheduling automatically applies to Today/Tomorrow/detail and temporary cycle. No visit-data migration, no other cycle/route/provider/engine/DB changes. Version `2026.11.12-FINAL.57`. PR #244 new real browser gate + full Node/real Edge gates PASS `43164050934`, `43164050974`; immutable safety checkpoint Issue #243. **Product merge and live release pending at this checkpoint.**
