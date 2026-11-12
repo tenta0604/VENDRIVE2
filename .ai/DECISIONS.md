@@ -802,3 +802,10 @@ Owner confirms their privacy-safe highway diagnostic has already been COPIED but
 - Owner-approved PR #241 diagnostic-only product merged `c219ec657cc8fd98672682ad51ecc8f14f78658a` with final real Edge/Node gate `38213221433` and Browser `38213221479` PASS; both public version endpoints returned FINAL.56 and Vercel dpl_FrMDiuEYrxM6MTrX2e7ynajkqvJU READY for merged SHA.
 - Diagnostic may identify failing stage/time and coarse server error; it does not itself reduce ORS latency or guarantee a successful real route. Await privacy-safe fresh report from owner only when safe and convenient.
 - Previous real FINAL.54 highway IC report remains analyzed. Do not silently adjust 2t dimensions, route policy, source quotas, ferry rules, extra IC calls, free tier, DB/schema or AN15.
+
+## 2026-11-12 — owner-approved meaning of monthly visit cycle
+
+- Keep `1ヶ月に1回` EXACT in UI dropdowns, summary, backups, read bridge and persisted records. It is the legacy name for a visit **every four weeks (28 days)**, NOT 30 days nor same calendar date each month.
+- The common `CYCLES` constant governs due checks; its monthly value is 28. Honor existing selected weekdays, manual force/skip and rest-day behavior. Do not rewrite previous visit dates or change other cycle lengths. Monthly temporary periods use the same 28-day rule.
+- A 28-day cadence can produce roughly 13 visits per 364 days. This is intentional and user-approved.
+- Version/cache-busting must remain coherent for truck-routing asset even when release only changes scheduling; keep existing HGV routing policies unchanged, no new API traffic. PR #244, pre-edit safety tag Issue #243 at fb4e0a0; full CI passes. Deploy not yet independently confirmed at this checkpoint.
