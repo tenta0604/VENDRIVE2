@@ -1,47 +1,43 @@
 {
-  "evidenceVersion": 88,
-  "runType": "final58_independent_delivery_release_closeout_20261112",
-  "phase": "FINAL58_ON_DEMAND_DELIVERY_LOCATIONS_REQUESTS_AND_HISTORY",
+  "evidenceVersion": 89,
+  "runType": "final59_today_delivery_count_release_closeout_20261113",
+  "phase": "FINAL59_INCLUDE_DELIVERIES_IN_TODAY_COUNTS",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "9743369b35cc5dd11869cd5333315bb2f411bf66",
-    "preEditImmutableSafetyTag": "PASS Issue #246 safety tag",
-    "productPR": 247,
-    "productMerge": "fb7672f3647fef7d625856cb488a9b2b88d6f954"
+    "mainBefore": "2622104e34260197213fcd7d32abbc6f78a156b6",
+    "immutableSafetyTag": "PASS Issue #249",
+    "productPR": 250,
+    "productMerge": "503fbb373e3738999308bae4fab9596987302785"
   },
   "versions": {
-    "app": "2026.11.12-FINAL.58",
+    "app": "2026.11.13-FINAL.59",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Built and shipped separate one-off delivery locations/requests registry, multi-item name/quantity+unit/sellPrice text metadata, prior completed delivery explicit copy, immutable history, Today/Tomorrow, map pins with picker and 2t HGV route, overdue carry and end-day warnings; no amount arithmetic.",
-    "dataSafety": "No in-place migration of existing machines or visit dates; new delivery arrays use legacy vendrive2_v7_data snapshot/backup and recovery, fail closed on corrupted delivery arrays/records, old backups with no delivery fields initialize empty. Existing 28-day monthly logic unchanged.",
-    "routeBoundary": "No extra provider calls or route safety changes; only allow delivery as a legitimate geolocated destination using existing HGV restrictions. Delivery arrival never starts machine visit workflow."
+    "summary": "Added independent delivery due/overdue and completed-today requests to work progress, headline totals, pending/completed KPI and stats drilldown; label changed from 台 to 件. Completed Today deliveries remain visible, and finishing one moves from pending to done without total changing.",
+    "rules": "1 vending planned target = 1; each delivery request is one, irrespective of product number/quantity. Pending due/overdue count until completed; completedAt on local Today counts as done. Future pending and completed on earlier day not counted. Existing vending order semantics preserved.",
+    "nonGoals": "No delivery item/price accounting, no route or inventory changes, no db migration, no change to 1ヶ月に1回=28 days, AN15 pause."
   },
   "gates": {
-    "preEditSafety": "PASS Issue #246",
-    "browserUIEndToEnd": "PASS final PR Head 43182652023",
-    "truckAPIRealEdge": "PASS final PR Head 43182651954",
-    "productMerge": "PASS PR #247 fb7672f3647fef7d625856cb488a9b2b88d6f954",
-    "vercel": "PASS dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY exact product merge",
-    "pages": "PASS public 2026.11.12-FINAL.58 and delivery.js reachable",
-    "backend": "PASS public 2026.11.12-FINAL.58",
-    "dbMigration": "NOT_REQUIRED, existing local state adds arrays with backward compatibility",
-    "deploymentSideEffects": "NOT_REQUIRED no paid API calls or production data migration"
+    "preEditImmutableSafetyTag": "PASS Issue #249 exact baseline",
+    "browserRegression": "PASS run 43345443648 with Today delivery lifecycle",
+    "truckNodeApiRealEdge": "PASS run 43345443656",
+    "merge": "PASS PR #250 503fbb373e3738999308bae4fab9596987302785",
+    "vercel": "PASS READY dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc exact product merge",
+    "pages": "PASS public 2026.11.13-FINAL.59",
+    "backend": "PASS public 2026.11.13-FINAL.59",
+    "dataMigration": "NOT_REQUIRED",
+    "routePolicyUnchanged": "PASS no HGV selection/provider or API logic edits"
   },
   "changedFiles": [
-    "delivery.js",
     "index.html",
-    "truck-routing.js",
-    "version.json",
+    "delivery.js",
     "tests/delivery-workflow-gate.html",
-    "tests/run-browser-gates.mjs",
-    "tests/run-truck-route-gates.mjs",
-    "tests/simplified-ui-tomorrow-plan-gate.html",
-    "tests/task-target-threshold-ui-gate.html",
+    "truck-routing.js",
     "tests/truck-route-client.test.mjs",
+    "version.json",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -53,12 +49,13 @@
     "Existing motorway preference issue awaits evidence; original ORS/HGV constraints immutable",
     "AN15 intentionally paused"
   ],
-  "nextAction": "COMPLETE. Offer owner live UI testing when convenient. Further delivery usability fixes are new scope; no autonomous extra modules. AN15 paused and HGV timeout investigation evidence pending separately.",
+  "nextAction": "COMPLETE. User may use Today as one mixed-work tally. Existing route-timeout diagnostics and AN15 pause are separate.",
   "continuityCheckpoint": {
-    "status": "FINAL58_DELIVERY_PUBLIC_VERIFIED",
-    "appVersion": "2026.11.12-FINAL.58",
-    "productMerge": "fb7672f3647fef7d625856cb488a9b2b88d6f954",
-    "legacyMonthlyRule": "1ヶ月に1回 means 28 days",
-    "deliveryPolicy": "No recurrence, all sale-price fields are free-text per item without totals, copy only explicitly from last completed, immutable historic item prices"
+    "status": "FINAL59_TODAY_COUNT_PUBLIC_VERIFIED",
+    "appVersion": "2026.11.13-FINAL.59",
+    "productMerge": "503fbb373e3738999308bae4fab9596987302785",
+    "deliveryRule": "pending scheduled<=today plus completed on local today, each request 1",
+    "display": "Today total and KPI in 件, not 台",
+    "legacyMonthlyRule": "1ヶ月に1回 means 28 days"
   }
 }
