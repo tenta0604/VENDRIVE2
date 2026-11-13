@@ -1,19 +1,19 @@
-name: Truck route readiness gates
+name: External navigation and MAP readiness gates
 on:
   pull_request:
     paths:
       - 'index.html'
-      - 'truck-routing.js'
-      - 'api/route.mjs'
-      - 'api/chubu-ic-*.mjs'
-      - 'data/chubu-ic-catalog-meta.json'
-      - 'tests/*truck-route*'
+      - 'delivery.js'
+      - 'version.json'
+      - 'tests/run-external-navigation-gates.mjs'
+      - 'tests/run-browser-gates.mjs'
+      - 'tests/*-gate.html'
       - '.github/workflows/truck-route-gates.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  truck-route:
+  external-navigation:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -21,17 +21,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Route syntax and logic checks
+      - name: Static external-navigation safety checks
         run: |
-          node --check truck-routing.js
-          node --check api/route.mjs
-          node --check api/chubu-ic-source.mjs
-          node --check api/chubu-ic-catalog.mjs
-          node --check tests/truck-route-long-distance.test.mjs
-          node --check tests/truck-route-diagnostics.test.mjs
-          node --check tests/truck-route-overpass.test.mjs
-          node --check tests/run-truck-route-gates.mjs
-          node --test tests/truck-route-api.test.mjs tests/truck-route-client.test.mjs tests/truck-route-long-distance.test.mjs tests/truck-route-overpass.test.mjs tests/truck-route-local-catalog.test.mjs tests/truck-route-diagnostics.test.mjs
+          node --check tests/run-external-navigation-gates.mjs
+          node --check delivery.js
+          if grep -q 'truck-routing.js' index.html; then echo "Retired in-app routing asset still loaded"; exit 1; fi
+          if grep -q '/api/route' index.html; then echo "Retired route API still called"; exit 1; fi
           git diff --check
       - name: Install isolated browser test dependencies
         run: |
@@ -48,7 +43,7 @@ jobs:
           done
           cat /tmp/vendrive-http.log
           exit 1
-      - name: Real Edge route UI and existing regression
+      - name: Real Edge external navigation, map, delivery and legacy browser regression
         env:
           VENDRIVE_EDGE_PATH: /opt/microsoft/msedge/msedge
           VENDRIVE_TEST_BASE_URL: http://127.0.0.1:8000
@@ -56,6 +51,5 @@ jobs:
           VENDRIVE_TEST_LEAFLET_CSS: /tmp/leaflet.css
           VENDRIVE_TEST_BROWSER_CHANNEL: msedge
         run: |
-          node tests/run-truck-route-gates.mjs
+          node tests/run-external-navigation-gates.mjs
           node tests/run-browser-gates.mjs
-
