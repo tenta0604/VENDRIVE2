@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.13-FINAL.63",
+  "appVersion": "2026.11.13-FINAL.64",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL63_UNIFIED_TODAY_DELIVERY_SWIPE_PRODUCTION_VERIFIED",
+  "status": "FINAL64_TODAY_PENDING_DELIVERY_PRIORITY_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.63 live: unified Today vending+delivery card list with left-swipe delivery completion",
-    "scope": "Owner chose to remove separate 本日の納品 block and make all due/overdue/just-completed deliveries ordinary cards inside the SAME #todayList as vending sites, with 📦 marker, management code, items+quantity and free-form sale-price notes, shared status badge and same one-tap external Google Maps. Tap delivery card itself to open delivery-site details. Swipe LEFT on pending delivery to mark complete immediately without extra confirm; swipe RIGHT does nothing (must never delete/skip/cancel). Existing vending left-complete/right-skip stays unchanged. Completed-today delivery remains in normal list as done and counts once in Today total+completion; other date completed excluded. The separate 納品 tab retains editing, explicit-confirm complete, previous completed copy and immutable history. No schema/data migration, in-app HGV routing remains retired, temporary cycle override remains retired, and 1ヶ月に1回=28 days. Shared pointer handler reused for both work types, with delivery completion immediate; external-nav tap excluded from swipe tracking. Central Today renderer refreshes integrated deliveries reliably, and version.json synchronized to avoid background forced reload.",
-    "releaseStatus": "Product PR #264 merged 8ea2ce01165001357a136d18cd2d66d43c3621b7; exact-head Browser regression run 43371125976 PASS including full delivery create, overdue/complete by left swipe, right swipe no-op, no separate section, tap details, preserved history/price, mixed progress, monthly/other regression. Real Microsoft Edge external navigation/MAP run 43371126154 PASS at 320/390px including unified list, one-tap nav and delivery gesture completion. Vercel dpl_5VeTfEMQPjhJysJF1Ws6KYSonnUK READY at exact product SHA. Public GitHub Pages and Vercel /version.json both 2026.11.13-FINAL.63 verified.",
+    "title": "FINAL.64 live: pending delivery correctly appears above finished vending stops in unified Today",
+    "scope": "Owner reported pending deliveries were stuck at the bottom after all scheduled vending machines were finished. FIX: delivery.js inserts due/overdue pending deliveries immediately before first completed machine in the existing #todayList. Existing nearest-pending/machine ordering remains stable; completed deliveries stay visible as done. No separate Today deliveries box. Normal delivery left swipe completes/right swipe no-op; machine swipe semantics, navigation, mixed Today counters, prices/history and all data remain intact. APP_VERSION and version.json both 2026.11.13-FINAL.64.",
+    "releaseStatus": "Product PR #267 merged a69ca95b1e57039893f518d7f5a8258ce496f1ac; exact-head Browser gates 43382359592 PASS incl new last-machine-done delivery-priority regression; real Edge/navigation 43382359623 PASS. Production Vercel deployment dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt READY at exact product merge; public GitHub Pages /version.json and Vercel /version.json both 2026.11.13-FINAL.64. No schema/data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #263 at exact main 3c72ef62c20a8d50252cd3ef3fe84566babca937",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/264",
-      "browser": "PASS run 43371125976",
-      "realMicrosoftEdge": "PASS run 43371126154",
-      "merge": "PASS 8ea2ce01165001357a136d18cd2d66d43c3621b7",
-      "vercel": "PASS READY deployment dpl_5VeTfEMQPjhJysJF1Ws6KYSonnUK exact product commit",
-      "pages": "PASS public 2026.11.13-FINAL.63",
-      "backend": "PASS public 2026.11.13-FINAL.63"
+      "preEditImmutableSafetyTag": "PASS Issue #266 annotated backup-pre-FINAL64-TODAY-DELIVERY-ORDER-20261113-20261113 -> 3e265a072b96778a00f637519f9a747d4ce314ac",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/267",
+      "browser": "PASS run 43382359592",
+      "realMicrosoftEdge": "PASS run 43382359623",
+      "merge": "PASS a69ca95b1e57039893f518d7f5a8258ce496f1ac",
+      "vercel": "PASS READY dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt at exact product merge",
+      "pages": "PASS public 2026.11.13-FINAL.64",
+      "backend": "PASS public 2026.11.13-FINAL.64"
     },
-    "nextOwnerAction": "Open 本日: deliveries now appear directly among ordinary vending cards. Swipe a pending delivery LEFT to complete. Use the button 外部ナビ to navigate, or tap card for details. Right swipe does nothing for deliveries."
+    "nextOwnerAction": "Open 本日 and verify unfinished 📦 delivery now sits above every completed vending card after the last visit; swipe left to complete as usual."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 latest main + canonical docs. FINAL.63 owner requested delivery records appear as ordinary cards INSIDE #todayList alongside vending (no separate 本日の納品 section); left swipe pending delivery marks completed immediately with no confirm and durable history, right swipe no-op (not skip/delete). Card tap opens delivery-site detail; one-tap external nav button still present; completed today remains in list + counts once in mixed Today progress. Vending left-complete/right-skip unchanged. Product PR #264 merged 8ea2ce01165001357a136d18cd2d66d43c3621b7, Browser 43371125976 PASS and Edge 43371126154 PASS, Vercel dpl_5VeTfEMQPjhJysJF1Ws6KYSonnUK READY exact product SHA, public Pages/backend version 2026.11.13-FINAL.63. Internal render synchronizes deliveries on every Today redraw, legacy external-only Google Maps and data untouched. FINAL.62 seasonal overrides retired but archival state preserved, FINAL.57 1ヶ月に1回=28 days, AN14B3B5 DB/schema4, AN15 paused. Version manifest matches app to prevent inadvertent reload.",
+    "shortResumePrompt": "VENDRIVE2 FINAL.64 production verified on 2026-11-13. Source of truth latest main + AGENTS and canonical docs. FINAL.63 unified Today vending/delivery cards and delivery left-swipe completion. Owner found bug: when all vending completed, pending delivery appended at bottom. FINAL.64 delivery.js now inserts pending deliveries before first completed machine row in same #todayList while preserving vending nearest/unvisited order, delivery history/price, counts, gesture/navigation. Product PR #267 merged a69ca95b1e57039893f518d7f5a8258ce496f1ac; immutable pre-edit annotated tag backup-pre-FINAL64-TODAY-DELIVERY-ORDER-20261113-20261113 at 3e265a072b96778a00f637519f9a747d4ce314ac; browser 43382359592 PASS including regression, real Edge 43382359623 PASS, Vercel dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt READY at exact product SHA and both Pages/backend versions 2026.11.13-FINAL.64. Engine AN14B3B5 DB/schema4 unchanged; AN15 intentionally paused. No follow-up change unless owner feedback.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.63 unified Today delivery + left swipe feature shipped and verified. No further work needed until owner feedback; do not restore separate Today delivery section.",
-    "latestContinuityCheckpoint": "2026-11-13 FINAL.63 unified Today vending/delivery swipe: PR #264 merged, browser+Edge PASS, public Pages/Vercel verified",
+    "handoffBoundary": "FINAL.64 Today pending delivery ordering FIX released and verified. No separate delivery section; keep pending deliveries above completed machines.",
+    "latestContinuityCheckpoint": "2026-11-13 FINAL.64 merged product PR #267, Browser+Edge PASS, public Pages+Vercel version verified",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.63 single-list delivery card and swipe completion release COMPLETE. No further developer work required.",
-    "Keep delivery right swipe a no-op, vending swipe left/right unchanged, no separate Today delivery block and Today counters/history consistent.",
-    "Preserve independent delivery tab, case/bottle free-text prices, 28-day monthly cycle, retired seasonal and in-app routing, DB/schema4, engine AN14B3B5, AN15 paused."
+    "FINAL.64 Today pending delivery sort fix COMPLETE, production verified.",
+    "Preserve unified Today list and machine ordering; pending delivery before any done vending rows; done delivery visible until end of day.",
+    "Retain delivery left-swipe/right-no-op and machine left-complete/right-skip; preserve monthly=28d, archival cycle data, external-only navigation, DB/schema4 and paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
