@@ -26,7 +26,9 @@
   assert(row&&row.querySelector('.swipeCard'),'delivery swipe requires ordinary Today card');
   const card=row.querySelector('.swipeCard'),pointerId=214,origin=200,end=direction==='left'?90:310;
   const send=(type,x)=>card.dispatchEvent(new w.PointerEvent(type,{bubbles:true,pointerId,pointerType:'touch',isPrimary:true,clientX:x,clientY:200}));
-  send('pointerdown',origin);send('pointermove',end);send('pointerup',end);
+  send('pointerdown',origin);send('pointermove',end);
+  if(direction==='left')assert(row.classList.contains('revealComplete'),'left gesture was not armed: '+row.className+' / '+card.style.transform);
+  send('pointerup',end);
   await sleep(300);
  }
  let initial=saved();
@@ -92,7 +94,7 @@
  assert(!d.querySelector('#todayList .deliverySwipeCard [data-action="complete"]'),'Today completion is a swipe, not a separate action button');
  await swipeDelivery(deliveryRows()[0],'left');
  data=saved();const first=data.deliveryRequests[0];const immutable=JSON.stringify(first);
- assert(first.status==='done'&&typeof first.completedAt==='number','completion must create durable history');
+ assert(first.status==='done'&&typeof first.completedAt==='number','completion must create durable history: '+JSON.stringify({request:first,status:deliveryRows().map(row=>({css:row.className,card:row.querySelector('.swipeCard')?.style.transform})),today:d.getElementById('heroDone').textContent}));
  assert(deliveryRows().length===1&&deliveryRows()[0].textContent.includes('コーラ500ml')&&deliveryRows()[0].textContent.includes('納品完了'),'completed Today delivery must remain in unified list');
  assert(d.querySelectorAll('#todayList .deliverySwipeCard .deliveryQuickNav').length===1,'completed Today delivery must retain external navigation shortcut');
  assert(d.querySelectorAll('#deliveryHistoryList .deliveryQuickNav').length===0,'completed history must not get unrelated quick actions');
