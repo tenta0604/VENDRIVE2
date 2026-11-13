@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.13-FINAL.64",
+  "appVersion": "2026.11.13-FINAL.65",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL64_TODAY_PENDING_DELIVERY_PRIORITY_PRODUCTION_VERIFIED",
+  "status": "FINAL65_WEATHER_FETCH_RESILIENCE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.64 live: pending delivery correctly appears above finished vending stops in unified Today",
-    "scope": "Owner reported pending deliveries were stuck at the bottom after all scheduled vending machines were finished. FIX: delivery.js inserts due/overdue pending deliveries immediately before first completed machine in the existing #todayList. Existing nearest-pending/machine ordering remains stable; completed deliveries stay visible as done. No separate Today deliveries box. Normal delivery left swipe completes/right swipe no-op; machine swipe semantics, navigation, mixed Today counters, prices/history and all data remain intact. APP_VERSION and version.json both 2026.11.13-FINAL.64.",
-    "releaseStatus": "Product PR #267 merged a69ca95b1e57039893f518d7f5a8258ce496f1ac; exact-head Browser gates 43382359592 PASS incl new last-machine-done delivery-priority regression; real Edge/navigation 43382359623 PASS. Production Vercel deployment dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt READY at exact product merge; public GitHub Pages /version.json and Vercel /version.json both 2026.11.13-FINAL.64. No schema/data migration.",
+    "title": "FINAL.65 live: fast weather fetch with bounded failure, shared requests and explicit retry",
+    "scope": "Owner reported Today weather retrieval was slow and often unavailable in FINAL.64. Verified client defects: Promise.allSettled waited for two JMA+Best Match Open-Meteo responses, no timeout, failure results cached for 30min, Today/Tomorrow duplicate in-flight requests and stale point subscriptions. FINAL.65 uses one Open-Meteo Best Match forecast call for current+daily+rain probability, 7s AbortController timeout, shared per-point in-flight promise across Today/Tomorrow, 30min successful cache/15s failure cooldown, on-card manual retry after errors, and explicit no-location message when GPS and saved pins are unavailable. It does not guess a location. Local JSON, visits, deliveries, route, schedules, data schema and AN15 unchanged.",
+    "releaseStatus": "Product PR #270 merged 301227afbe7444fa1cfa1dbdc4f3e5febb87784e. Exact-head Browser regression 43387290975 PASS, including new weather one-fetch/cache, HTTP503 retry, hung request 7s timeout and recovery, missing-location safety; real Edge/MAP/external navigation run 43387290909 PASS. Pre-edit annotated safety tag Issue #269 verified at b55b6edec7ab95932f7324c09b5203534e18452a. Generic Open-Meteo external test returned HTTP200 with valid current/daily forecast; both endpoint samples currently reachable, exact user-device root cause not independently captured. Vercel dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh READY at product merge. Public GitHub Pages/Vercel /version.json both 2026.11.13-FINAL.65.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #266 annotated backup-pre-FINAL64-TODAY-DELIVERY-ORDER-20261113-20261113 -> 3e265a072b96778a00f637519f9a747d4ce314ac",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/267",
-      "browser": "PASS run 43382359592",
-      "realMicrosoftEdge": "PASS run 43382359623",
-      "merge": "PASS a69ca95b1e57039893f518d7f5a8258ce496f1ac",
-      "vercel": "PASS READY dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt at exact product merge",
-      "pages": "PASS public 2026.11.13-FINAL.64",
-      "backend": "PASS public 2026.11.13-FINAL.64"
+      "preEditImmutableSafetyTag": "PASS Issue #269: backup-pre-FINAL65-WEATHER-RESILIENCE-20261113-20261113 -> b55b6edec7ab95932f7324c09b5203534e18452a",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/270",
+      "browser": "PASS exact-head 43387290975, weather scenarios + legacy gates",
+      "realMicrosoftEdge": "PASS exact-head 43387290909, external map/gesture/legacy suites",
+      "merge": "PASS 301227afbe7444fa1cfa1dbdc4f3e5febb87784e",
+      "vercel": "PASS READY production dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh exact product merge",
+      "pages": "PASS public 2026.11.13-FINAL.65",
+      "backend": "PASS public 2026.11.13-FINAL.65"
     },
-    "nextOwnerAction": "Open 本日 and verify unfinished 📦 delivery now sits above every completed vending card after the last visit; swipe left to complete as usual."
+    "nextOwnerAction": "Open 本日 on normal phone usage; weather should load once at available route/office/current pin. If offline/API failure, tap ↻ 再取得. With no registered pin and no location permission, app shows 天気地点なし; register a pin or enable geolocation."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 FINAL.64 production verified on 2026-11-13. Source of truth latest main + AGENTS and canonical docs. FINAL.63 unified Today vending/delivery cards and delivery left-swipe completion. Owner found bug: when all vending completed, pending delivery appended at bottom. FINAL.64 delivery.js now inserts pending deliveries before first completed machine row in same #todayList while preserving vending nearest/unvisited order, delivery history/price, counts, gesture/navigation. Product PR #267 merged a69ca95b1e57039893f518d7f5a8258ce496f1ac; immutable pre-edit annotated tag backup-pre-FINAL64-TODAY-DELIVERY-ORDER-20261113-20261113 at 3e265a072b96778a00f637519f9a747d4ce314ac; browser 43382359592 PASS including regression, real Edge 43382359623 PASS, Vercel dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt READY at exact product SHA and both Pages/backend versions 2026.11.13-FINAL.64. Engine AN14B3B5 DB/schema4 unchanged; AN15 intentionally paused. No follow-up change unless owner feedback.",
+    "shortResumePrompt": "VENDRIVE2 FINAL.65 weather retrieval hotfix production verified 2026-11-13. Always read latest main and canonical files. Owner reported slow/missing Today weather. Fixed doubled Open-Meteo JMA+BestMatch Promise.allSettled wait, no timeout, 30min negative cache. Now one Best Match request provides all required fields, 7s timeout, shared per-location in-flight request, success cache 30min/failure 15s, UI retry and explicit no-pin/geolocation message. PR #270 merged 301227afbe7444fa1cfa1dbdc4f3e5febb87784e; annotated pre-edit tag Issue #269 at b55b6edec7ab95932f7324c09b5203534e18452a; browser 43387290975 incl one-call/error/timeout/missing-location PASS and Edge 43387290909 PASS; production Vercel dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh READY exact merge, Pages and Vercel version 2026.11.13-FINAL.65. FINAL.64 pending delivery priority retained. Engine AN14B3B5, DB/schema4 unchanged, in-app routing retired, 28d monthly, AN15 paused. Do not claim field iPhone network cause known without privacy-safe trace.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.64 Today pending delivery ordering FIX released and verified. No separate delivery section; keep pending deliveries above completed machines.",
-    "latestContinuityCheckpoint": "2026-11-13 FINAL.64 merged product PR #267, Browser+Edge PASS, public Pages+Vercel version verified",
+    "handoffBoundary": "FINAL.65 weather retrieval hotfix verified on live Pages and Vercel. No further automatic development until owner field feedback; preserve FINAL.64 Today delivery priority.",
+    "latestContinuityCheckpoint": "2026-11-13 FINAL.65 weather single-fetch/timeout/retry production verified PR #270, Browser+Edge PASS, Pages+Vercel version verified",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.64 Today pending delivery sort fix COMPLETE, production verified.",
-    "Preserve unified Today list and machine ordering; pending delivery before any done vending rows; done delivery visible until end of day.",
-    "Retain delivery left-swipe/right-no-op and machine left-complete/right-skip; preserve monthly=28d, archival cycle data, external-only navigation, DB/schema4 and paused AN15."
+    "FINAL.65 weather fetch resilience release COMPLETE. Owner may observe normal phone weather behavior; no forced additional diagnostics.",
+    "If missing weather persists on user's device, distinguish no-point (GPS denied and no office/machine map pin) vs HTTP/network error using visible UI and optional privacy-safe diagnostics; do not invent underlying field cause.",
+    "Preserve FINAL.64 pending deliveries above completed vending, FINAL.63 delivery swipe, monthly=28d, archived overrides, external-only navigation, AN14B3B5/DBschema4 and intentionally paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
