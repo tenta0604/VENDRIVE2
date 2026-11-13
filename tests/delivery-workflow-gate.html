@@ -25,6 +25,10 @@
  assert(initial.machines.length===1&&initial.machines[0].cycle==='1ヶ月に1回','legacy monthly machine changed');
  assert(initial.deliverySites?.length===0&&initial.deliveryRequests?.length===0,'legacy data was not safely upgraded');
  assert(d.getElementById('heroTotal').textContent==='1'&&d.getElementById('heroDone').textContent==='0','without deliveries existing machine counts remain');
+ assert(d.querySelectorAll('#todayList .todayExternalNav').length===1,'Today machine needs direct external navigation');
+ d.querySelector('#todayList .todayExternalNav').click();
+ assert(d.getElementById('toast').textContent.includes('位置か住所を登録してください'),'missing machine coordinates/address should show feedback');
+ assert(!d.getElementById('machineModal').classList.contains('open'),'machine shortcut must not open detail on missing location');
  assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='0','without deliveries KPI must stay consistent');
  click('deliveryNav');assert(!d.getElementById('deliveryPage').classList.contains('hidden'),'delivery tab should open separately');
  click('deliveryAddSite');
@@ -61,6 +65,8 @@
  assert(!d.getElementById('deliveryPage').textContent.includes('小計'),'UI must not calculate a subtotal');
  assert(!d.getElementById('deliveryPage').textContent.includes('合計金額'),'UI must not calculate total money');
  assert(d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml'),'today delivery not displayed');
+ assert(d.querySelectorAll('#todayDeliveryList .deliveryQuickNav').length===1,'pending Today delivery needs direct external navigation');
+ assert(d.querySelectorAll('#deliveryPendingList .deliveryQuickNav').length===0,'delivery management views must remain unchanged');
  assert(d.getElementById('heroTotal').textContent==='2','one vending visit plus one due delivery must total two');
  assert(d.getElementById('heroDone').textContent==='0'&&d.getElementById('todayTodo').textContent==='2'&&d.getElementById('todayVisited').textContent==='0','pending delivery must increment remaining work');
  assert(d.querySelector('.heroTitle').textContent.includes('件'),'mixed work must be expressed in 件');
@@ -73,6 +79,8 @@
  data=saved();const first=data.deliveryRequests[0];const immutable=JSON.stringify(first);
  assert(first.status==='done'&&typeof first.completedAt==='number','completion must create durable history');
  assert(d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml')&&d.getElementById('todayDeliveryList').textContent.includes('納品完了'),'completed-today delivery must stay visible in Today');
+ assert(d.querySelectorAll('#todayDeliveryList .deliveryQuickNav').length===1,'completed Today delivery must retain external navigation shortcut');
+ assert(d.querySelectorAll('#deliveryHistoryList .deliveryQuickNav').length===0,'completed history must not get unrelated quick actions');
  assert(d.getElementById('todayDeliveryCount').textContent.includes('完了 1件'),'Today delivery section must reflect completed delivery');
  assert(d.getElementById('heroTotal').textContent==='2'&&d.getElementById('heroDone').textContent==='1','completed delivery stays in total and increments done');
  assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='1','mixed KPIs must be accurate');
@@ -102,6 +110,7 @@
  assert(d.getElementById('heroTotal').textContent==='2'&&d.getElementById('heroDone').textContent==='1','future pending must not inflate today');
  w.VENDRIVE2Delivery.renderTomorrow();
  assert(d.getElementById('tomorrowDeliveryList').textContent.includes('水550ml'),'tomorrow delivery preview missing');
+ assert(d.querySelectorAll('#tomorrowDeliveryList .deliveryQuickNav').length===0,'tomorrow view must not inherit Today-only navigation shortcut');
  // Edits to pending request remain possible and persist; no product default overwrites.
  const pending=data.deliveryRequests.find(r=>r.status==='pending');
  d.querySelector('#deliveryPendingList [data-action="edit"]').click();

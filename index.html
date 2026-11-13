@@ -19,7 +19,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .pill,.secondary,.primary{border:1px solid #ddd;background:#fff;border-radius:11px;padding:9px 11px;font-size:11px;font-weight:850}.primary{background:#111;color:#fff;border-color:#111}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.card,.kpi,.item{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}.kpi{border-radius:15px;padding:11px;cursor:pointer}.kpi span{font-size:9px;color:#888}.kpi b{display:block;font-size:21px;margin-top:2px}
 .section{margin-top:17px}.sectionhead{display:flex;justify-content:space-between;align-items:center}.sectionhead b{font-size:14px}.muted{font-size:10px;color:var(--muted)}
-.item{margin-top:7px;border-radius:15px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.item.done{opacity:.43}.item.order{border-color:#d6c8ed}.item.urgent{border-left:4px solid var(--red)}
+.item{margin-top:7px;border-radius:15px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.item.done{opacity:.43}.item.order{border-color:#d6c8ed}.item.urgent{border-left:4px solid var(--red)}.todayCardActions{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0}.todayExternalNav{font-size:10px;padding:9px 10px;min-height:36px;white-space:nowrap}.todayNavHint{margin:7px 1px 9px;line-height:1.5}
 .meta{font-size:10px;color:#888;margin-top:3px;line-height:1.4}.badge{font-size:9px;font-weight:900;padding:5px 7px;border-radius:99px;white-space:nowrap}.b-red{background:#fee2e2;color:#b91c1c}.b-purple{background:#ede9fe;color:#6d28d9}.b-gray{background:#eff0f1;color:#73777d}.b-orange{background:#fef3c7;color:#a16207}.b-green{background:#dcfce7;color:#166534}
 .hero{background:#111;color:#fff;border-radius:20px;padding:17px;margin-top:11px;box-shadow:0 14px 32px rgba(0,0,0,.14)}.hero .ey{color:#a8abb0}.heroTitle{font-size:28px;font-weight:900;margin-top:3px}.heroSub{font-size:10px;color:#c5c7ca;margin-top:5px}
 .progress{height:7px;border-radius:99px;background:#343434;margin-top:14px;overflow:hidden}.progress>i{display:block;height:100%;background:#fff;border-radius:99px;width:0}
@@ -136,7 +136,7 @@ body.mapFullscreen.mapSoftRotated #map .maptag{display:none}
 <div class="todayTop"><div class="todayHeading"><div class="ey">TODAY</div><div class="title">本日の作業</div><div class="subtitle" id="todaySub"></div></div><div class="todayWeatherCard" id="todayWeatherCard" aria-live="polite">天気地点を取得中…</div></div><div class="currentLocationSummary" id="currentLocationSummary">📍 現在地を取得中…</div>
 <div class="hero"><div class="ey">WORK PROGRESS</div><div class="heroTitle"><span id="heroDone">0</span> / <span id="heroTotal">0</span> 件</div><div class="heroSub" id="heroText">本日の訪問を開始しましょう</div><div class="progress"><i id="progressBar"></i></div></div>
 <div class="stats"><div class="kpi"><span>未完了</span><b id="todayTodo">0</b></div><div class="kpi"><span>完了</span><b id="todayVisited">0</b></div><div class="kpi"><span>オーダー</span><b id="todayOrders">0</b></div></div>
-<div class="section"><div class="sectionhead"><b>本日の訪問先</b><span class="swipeHint">左：訪問完了 / 右：訪問スキップ</span><span class="muted" id="todayRoute"></span></div><div id="todayList"></div></div>
+<div class="section"><div class="sectionhead"><b>本日の訪問先</b><span class="swipeHint">左：訪問完了 / 右：訪問スキップ</span><span class="muted" id="todayRoute"></span></div><div class="muted todayNavHint" id="todayNavSafety">外部ナビに2tトラックの車高・車幅・重量条件は引き継がれません。</div><div id="todayList"></div></div>
 <div class="section"><button class="bigComplete" id="finishDay">本日の業務終了</button></div>
 </section>
 
@@ -322,7 +322,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.13-FINAL.60',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.13-FINAL.61',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -566,12 +566,13 @@ function card(m,context){
   var cls='item '+(m.visited&&!order?'done ':'')+(order?'order ':'')+(order?'urgent':'');
   var detail=order?(order.type+(order.sub?' ＞ '+order.sub:'')+' ・ '+timeLeft(order.createdAt)):cycleCardSummary(m)+' ・ '+timeConditionSummary(m),memo=memoPreview(m.memo),code=String(m.code||'').trim();
   var e=document.createElement('div');e.className=cls;
-  var right=context==='machines'?('<button class="pill machineDeleteBtn" type="button" title="この自販機を削除">削除</button>'):('<span class="badge '+badge+'">'+status+'</span>');
+  var right=context==='machines'?('<button class="pill machineDeleteBtn" type="button" title="この自販機を削除">削除</button>'):context==='today'?('<div class="todayCardActions"><span class="badge '+badge+'">'+status+'</span><button class="primary pill todayExternalNav" type="button" aria-label="'+esc(m.name)+'の外部ナビを開く">外部ナビ</button></div>'):('<span class="badge '+badge+'">'+status+'</span>');
   e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="makerChip" style="'+makerTagStyle(m.maker)+'">'+esc(m.maker||'メーカー未設定')+'</div>'+(code?'<div class="meta">管理番号：'+esc(code)+'</div>':'')+'<div class="meta">'+esc(detail)+'</div>'+(memo?'<div class="meta">メモ：'+esc(memo)+'</div>':'')+'</div>'+right;
   e.onclick=function(){openMachine(m.id,order?'order':'normal')};
   if(context==='machines'){
     e.querySelector('.machineDeleteBtn').onclick=function(ev){ev.stopPropagation();confirmDeleteMachine(m.id)};
   }
+  if(context==='today')e.querySelector('.todayExternalNav').onclick=function(ev){ev.stopPropagation();navigateToMachine(m)};
   return e;
 }function timeLeft(ts){
   var left=86400000-(Date.now()-ts), h=Math.ceil(left/3600000);
@@ -1260,7 +1261,7 @@ function renderTasks(){var active=(state.tasks||[]).filter(function(task){return
  var card=wrapper.querySelector('.swipeCard'),sx=0,sy=0,dx=0,tracking=false,pointerId=null;
  function reset(){card.classList.remove('swiping');wrapper.classList.remove('revealComplete','revealSkip');card.style.transform='translateX(0)';dx=0;tracking=false;pointerId=null}
  function finish(){if(!tracking)return;card.classList.remove('swiping');var complete=dx<=-70,skip=dx>=70;if(complete||skip){wrapper.classList.toggle('revealComplete',complete);wrapper.classList.toggle('revealSkip',skip);card.style.transform='translateX('+(complete?-92:92)+'px)';tracking=false;setTimeout(function(){selectedMachine=m;if(complete){if(completeVisit()===false)reset()}else skipVisit()},140)}else reset()}
- card.addEventListener('pointerdown',function(e){if(e.pointerType==='mouse'&&e.button!==0)return;sx=e.clientX;sy=e.clientY;tracking=true;pointerId=e.pointerId;card.classList.add('swiping');if(card.setPointerCapture)try{card.setPointerCapture(pointerId)}catch(error){}});
+ card.addEventListener('pointerdown',function(e){if(e.target&&e.target.closest&&e.target.closest('.todayExternalNav'))return;if(e.pointerType==='mouse'&&e.button!==0)return;sx=e.clientX;sy=e.clientY;tracking=true;pointerId=e.pointerId;card.classList.add('swiping');if(card.setPointerCapture)try{card.setPointerCapture(pointerId)}catch(error){}});
  card.addEventListener('pointermove',function(e){if(!tracking||e.pointerId!==pointerId)return;var mx=e.clientX-sx,my=e.clientY-sy,rotated=!!(wrapper.closest&&wrapper.closest('#arrivalVisitModal')&&mapSoftRotationActive()),primary=rotated?my:mx,cross=rotated?mx:my;if(Math.abs(cross)>Math.abs(primary)+8){reset();return}dx=Math.max(-105,Math.min(105,primary));card.style.transform='translateX('+dx+'px)';wrapper.classList.toggle('revealComplete',dx<=-12);wrapper.classList.toggle('revealSkip',dx>=12)});
  card.addEventListener('pointerup',function(e){if(e.pointerId!==pointerId)return;finish()});
  card.addEventListener('pointercancel',reset);
@@ -1270,7 +1271,7 @@ function ensureVisitTaskConfirmModal(){var m=$id('visitTaskConfirmModal');if(m)r
 function continueVisitAfterTaskCheck(machine){selectedMachine=machine;if(machine.order){$id('orderVisitConfirmDetail').textContent=machine.order.type+(machine.order.sub?' ＞ '+machine.order.sub:'');closeModal('machineModal');openModal('orderVisitConfirm');return true}finishVisitCore();return true}
 function openVisitTaskConfirm(machine){ensureVisitTaskConfirmModal();var box=$id('visitTaskConfirmList'),tasks=activeTasksForMachine(machine);box.innerHTML='';tasks.forEach(function(task){var row=document.createElement('label');row.style.cssText='display:flex;gap:10px;align-items:flex-start;padding:12px 2px;border-bottom:1px solid #eee';row.innerHTML='<input type="checkbox" data-task-id="'+esc(task.id)+'" style="width:20px;height:20px"><span><b>'+esc(task.text||'タスク')+'</b></span>';box.appendChild(row)});$id('visitTaskConfirmApply').onclick=function(){var chosen={};box.querySelectorAll('input:checked').forEach(function(i){chosen[i.dataset.taskId]=1});tasks.forEach(function(t){if(!chosen[t.id])return;if(!machine.taskDone||typeof machine.taskDone!=='object')machine.taskDone={};machine.taskDone[t.id]={completedAt:Date.now()};completeParentTaskIfDone(t)});persist();closeModal('visitTaskConfirmModal');renderAll();continueVisitAfterTaskCheck(machine)};openModal('visitTaskConfirmModal')}
 function completeVisit(){if(!selectedMachine)return false;var tasks=activeTasksForMachine(selectedMachine);if(tasks.length){openVisitTaskConfirm(selectedMachine);return false}return continueVisitAfterTaskCheck(selectedMachine)}
-function appendTodayTasks(){var list=$id('todayList');if(!list)return;var wrappers=Array.prototype.slice.call(list.querySelectorAll('.swipeRow'));wrappers.forEach(function(wrapper){var machineId=wrapper.dataset.machineId,machine=state.machines.find(function(item){return item&&String(item.id)===machineId}),card=wrapper.querySelector('.swipeCard');if(!machine||!card)return;var prior=card.querySelector('.todayMachineTasks');if(prior)prior.remove();var tasks=activeTasksForMachine(machine);if(!tasks.length)return;var wrap=document.createElement('div');wrap.className='todayMachineTasks';wrap.style.cssText='margin-top:7px;padding-top:7px;border-top:1px solid #eceef0';var head=document.createElement('div');head.style.cssText='font-size:8px;font-weight:900;color:#b42318;margin-bottom:2px';head.textContent='TASK';wrap.appendChild(head);tasks.forEach(function(task){var row=document.createElement('div');row.style.cssText='padding:2px 0;font-size:9px;font-weight:800;line-height:1.35;white-space:normal;overflow-wrap:anywhere';row.textContent='・'+(task.text||'タスク');wrap.appendChild(row)});card.appendChild(wrap)})}
+function appendTodayTasks(){var list=$id('todayList');if(!list)return;var wrappers=Array.prototype.slice.call(list.querySelectorAll('.swipeRow'));wrappers.forEach(function(wrapper){var machineId=wrapper.dataset.machineId,machine=state.machines.find(function(item){return item&&String(item.id)===machineId}),card=wrapper.querySelector('.swipeCard');if(!machine||!card)return;var prior=card.querySelector('.todayMachineTasks');if(prior)prior.remove();var tasks=activeTasksForMachine(machine);if(!tasks.length)return;var wrap=document.createElement('div');wrap.className='todayMachineTasks';wrap.style.cssText='margin-top:7px;padding-top:7px;border-top:1px solid #eceef0';var head=document.createElement('div');head.style.cssText='font-size:8px;font-weight:900;color:#b42318;margin-bottom:2px';head.textContent='TASK';wrap.appendChild(head);tasks.forEach(function(task){var row=document.createElement('div');row.style.cssText='padding:2px 0;font-size:9px;font-weight:800;line-height:1.35;white-space:normal;overflow-wrap:anywhere';row.textContent='・'+(task.text||'タスク');wrap.appendChild(row)});card.firstElementChild.appendChild(wrap)})}
 function renderTodayWithTasks(){renderToday();var old=$id('todayTaskBlock');if(old)old.remove();appendTodayTasks();requestAnimationFrame(appendTodayTasks);setTimeout(appendTodayTasks,120)}
 
 function initDays(){
@@ -1387,6 +1388,6 @@ try{window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:
 <script src="sales-review.js"></script>
 <script src="input-recovery-review.js"></script>\n<script src="ocr-review-compact.js?v=2026.09.18-FINAL.20"></script>
 <script src="ops10a-stocktake.js?v=2026.09.16-FINAL.10-ops10a-ui2"></script>
-<script src="delivery.js?v=2026.11.13-FINAL.60"></script>
+<script src="delivery.js?v=2026.11.13-FINAL.61"></script>
 </body>
 </html>

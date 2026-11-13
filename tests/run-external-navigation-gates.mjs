@@ -52,6 +52,32 @@ for(const width of [320,390]){
   assert.equal(network.routeScript,0,'legacy route module must not load');
   assert.equal(await page.locator('#todayDeliveryList .item').count(),1,'delivery Today remains active');
   assert.equal(await page.locator('#heroTotal').innerText(),'2','one machine plus one delivery must remain');
+  const quickMachine=page.locator('#todayList .todayExternalNav').first();
+  const quickDelivery=page.locator('#todayDeliveryList .deliveryQuickNav').first();
+  assert.equal(await quickMachine.count(),1,'Today vending card needs one-tap external navigation');
+  assert.equal(await quickDelivery.count(),1,'Today delivery card needs one-tap external navigation');
+  assert.match(await page.locator('#todayNavSafety').innerText(),/車高・車幅・重量条件/,'Today shortcut must warn about missing truck constraints');
+  // Touch starting on the navigation button must not trigger the card's swipe gesture.
+  await quickMachine.evaluate(el=>{
+   const p=(type,x)=>new PointerEvent(type,{bubbles:true,pointerId:77,pointerType:'touch',clientX:x,clientY:220,isPrimary:true});
+   el.dispatchEvent(p('pointerdown',180));el.dispatchEvent(p('pointermove',50));el.dispatchEvent(p('pointerup',50));
+  });
+  assert.equal(await page.locator('#todayList .swipeRow.revealComplete').count(),0,'nav touch must not reveal swipe completion');
+  assert.equal((await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')))).machines[0].visited,false,'nav touch must not complete machine');
+  await quickMachine.click();await external('destination=35.31,136.81');
+  await open();
+  assert.equal(await page.locator('#machineModal.open').count(),0,'Today shortcut must skip machine details');
+  await page.locator('#todayList .swipeCard .makerChip').first().click();
+  await page.locator('#machineModal.open').waitFor({state:'visible'});
+  await page.locator('#closeMachine').click();
+  assert.equal(await page.locator('#todayDeliveryList [data-action="edit"]').count(),1,'delivery edit action must remain');
+  assert.equal(await page.locator('#todayDeliveryList [data-action="complete"]').count(),1,'delivery completion action must remain');
+  await page.locator('#todayDeliveryList .deliveryQuickNav').first().click();await external('destination=35.32,136.82');
+  await open();
+  const afterShortcuts=await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
+  assert.equal(afterShortcuts.machines[0].visited,false,'navigation must not mark machine visited');
+  assert.equal(afterShortcuts.deliveryRequests[0].status,'pending','navigation must not complete delivery');
+  assert.equal(await page.locator('#heroTotal').innerText(),'2','shortcuts must not modify Today count');
   await page.locator('.tabs button[data-page="machinesPage"]').click();
   await page.locator('#machineSearch').fill('M-EXT');
   await page.locator('#machineResults .result').first().click();
@@ -91,7 +117,7 @@ for(const width of [320,390]){
   assert.equal(network.routeCalls,0,'NO backend route requests anywhere in user flow');
   assert.equal(network.routeScript,0,'NO retired in-app route module download');
   assert.equal(errors.length,0,errors.join('\n'));
-  evidence.push({width,status:'PASS',gates:['no route client loaded','no route API','no vehicle/highway/route controls','machine Google Maps destination','office Google Maps destination','delivery Google Maps destination','2t external nav caution','Today mixed tally','delivery+machine map pins','fullscreen map without route','delivery pin editor survives','data preservation','no page errors']});
+  evidence.push({width,status:'PASS',gates:['direct Today machine+delivery nav','no accidental detail/swipe/complete','Today truck constraint warning','no route client loaded','no route API','no vehicle/highway/route controls','machine Google Maps destination','office Google Maps destination','delivery Google Maps destination','2t external nav caution','Today mixed tally','delivery+machine map pins','fullscreen map without route','delivery pin editor survives','data preservation','no page errors']});
   console.log('PASS external-navigation-only real Edge '+width+'px');
  }finally{await context.close();await rm(profile,{recursive:true,force:true})}
 }
