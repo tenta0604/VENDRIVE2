@@ -5,25 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.12-FINAL.58",
+  "appVersion": "2026.11.13-FINAL.59",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL58_DELIVERY_WORKFLOW_PRODUCTION_VERIFIED",
+  "status": "FINAL59_TODAY_DELIVERY_COUNT_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.58 live: independent on-demand delivery sites, products, sale-price notes and history",
-    "releaseStatus": "Product PR #247 merged fb7672f3647fef7d625856cb488a9b2b88d6f954. Final exact-head Browser regression including dedicated delivery end-to-end gate 43182652023 PASS and Truck Node/API/real Microsoft Edge 43182651954 PASS (including map pin picker, delivery marker, restricted 2t HGV route, no machine arrival). Vercel production dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY exact product merge. Both public GitHub Pages and Vercel /version.json returned 2026.11.12-FINAL.58; public Pages delivery.js asset verified reachable.",
-    "releaseScope": "Distinct 納品 tab, deliverySites registry (unique code, name, optional address/memo, geolocated map pin) and deliveryRequests (dated one-off pending/done, item name, quantity, cases/bottles/boxes/etc unit, free-text sale-price note, optional memo). Last completed request explicitly copyable into new editable request; previous completed items/prices never auto-overwritten. Delivery pending today/overdue, tomorrow preview, all route/map and day-specific markers; completion history; same existing HGV safety and route limits, no automatic recurrence. Day-end warning includes pending delivery. Existing vending machines and 28-day 月1 unchanged.",
+    "title": "FINAL.59 live: delivery requests included in Today total, done and pending counts",
+    "scope": "Today dashboard counts each due/overdue pending delivery request once and each delivery completed TODAY once in the completed count; 1 vending machine = 1 item, 1 delivery request = 1 item, never product/case quantities. Mixed total uses 件, remaining/completed KPIs and clickthrough modal list both machine and delivery, completed today remains displayed in Today delivery section; future pending and earlier-day completions excluded. No change to machine history, monthly cycle, deliveries pricing, ORS/HGV safety, AN15 or schema.",
+    "releaseStatus": "PR #250 merged 503fbb373e3738999308bae4fab9596987302785. Exact PR head Browser (incl expanded delivery counts/overdue/completion/reload gate) 43345443648 PASS; Truck/Node/API/real Edge 43345443656 PASS. Vercel deployment dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc READY matching product merge; public Pages + Vercel /version.json 2026.11.13-FINAL.59 verified.",
     "validationEvidence": {
-      "preEditImmutableTag": "PASS Issue #246 [SAFETY-TAG] at exact pre-edit main 9743369b35cc5dd11869cd5333315bb2f411bf66",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/247",
-      "finalBrowser": "PASS run 43182652023",
-      "finalTruckNodeRealEdge": "PASS run 43182651954",
-      "productMerge": "PASS fb7672f3647fef7d625856cb488a9b2b88d6f954",
-      "githubPages": "PASS public 2026.11.12-FINAL.58 and delivery.js asset accessible",
-      "vercel": "PASS READY dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo exact merge and public 2026.11.12-FINAL.58"
+      "preEditImmutableTag": "PASS Issue #249 at exact 2622104e34260197213fcd7d32abbc6f78a156b6",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/250",
+      "browser": "PASS run 43345443648",
+      "truckNodeRealEdge": "PASS run 43345443656",
+      "mainMerge": "PASS 503fbb373e3738999308bae4fab9596987302785",
+      "vercel": "PASS deployment dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc READY",
+      "pages": "PASS live 2026.11.13-FINAL.59",
+      "backend": "PASS live 2026.11.13-FINAL.59"
     },
-    "nextOwnerAction": "Use 納品 > ＋納品先 to register name/management code and map pin; when asked, tap ＋依頼, enter date, item quantities, free-text sale-price notes, and save. Once delivered tap 完了; next request may explicitly copy previous completed delivery. No additional developer action pending."
+    "nextOwnerAction": "None for publishing. The existing Today screen now counts due delivery orders and today's completed deliveries alongside vending work. Future UI feedback may be handled separately."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -43,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 latest main & seven canonicals. FINAL.58 delivery product PR #247 merged fb7672f3647fef7d625856cb488a9b2b88d6f954, Browser 43182652023 PASS including full delivered UI lifecycle, Truck/Node/API/real Edge 43182651954 PASS including center-pin picker, map delivery marker and safe registered 2t HGV delivery route; Vercel dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY exact merge, both public version endpoints 2026.11.12-FINAL.58, Pages delivery.js accessible. New deliverySites & deliveryRequests in local legacy state/backups, separate from vending; delivery site management code/name/optional location/pin, nonrecurring dated pending request multi-products, quantity+unit, salePrice free-text memo (NO sums), explicitly copy last completed request, immutable historical items/prices, Today/next-workday Tomorrow/dedicated map pins/completion history and end-of-day warning. No schema migration, engine AN14B3B5 and DB/schema4 unchanged; `1ヶ月に1回` remains 28-day internal, AN15 paused; previous HGV failure diagnostic remains unresolved without real user evidence.",
+    "shortResumePrompt": "VENDRIVE2 authoritative latest main + canonical files. FINAL.59 Today totals feature PR #250 merged 503fbb373e3738999308bae4fab9596987302785, Browser 43345443648 and Truck/Node/API/real Edge 43345443656 PASS; Vercel dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc READY exact product merge, Pages + Vercel public 2026.11.13-FINAL.59. Today now displays mixed 工作 progress: 1 vending planned machine = 1 count; 1 delivery request pending scheduled today or earlier =1; a delivery completed on TODAY local date remains in Today list & total, counted done exactly once; prior-day completed and future pending excluded. KPI labels 未完了/完了, tap details include vending & deliveries, progress bar and count show 件, not 台. Prior FINAL.58 independent delivery registration, free-text sale price, previous-completed copy and permanent history unchanged. Prior FINAL.57 1ヶ月に1回 => 28 days unchanged, 2t HGV routing and 30/min quota unmodified, engine AN14B3B5, analytics DB/schema4 unchanged, AN15 paused. Past FINAL.56 route timeout root cause still unproven; field report separate.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.58 independent on-demand deliveries implemented and public/CI verified; no remaining developer work or owner input required for release. New human device UX feedback only when convenient; prior route timeout diagnosis separately pending.",
-    "latestContinuityCheckpoint": "2026-11-12 FINAL.58 delivery workflow delivered on main with CI real Edge & browser PASS, Pages+Vercel public FINAL.58",
+    "handoffBoundary": "FINAL.59 Today delivery counts released and verified. No further assistant-side work in this scope. Existing separate HGV timeout evidence pending only if real failure recurs.",
+    "latestContinuityCheckpoint": "2026-11-13 FINAL.59 Today mixed work counts production PASS + Pages/Vercel verified",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -58,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.58 owner-requested delivery workflow scope is COMPLETE; owner may try the live UI when convenient.",
-    "Treat any future delivery usability issues as new limited maintenance with preserved local data; no automatic live-user migrations.",
-    "Retain original FINAL.57 monthly display 1ヶ月に1回 -> 28 days, paused AN15 and all registered 2t HGV safety. Original FINAL.56 timeout root cause remains unknown."
+    "This user-requested FINAL.59 Today delivery counting change is COMPLETE; no immediate user action required.",
+    "Keep delivery count per request, not per product/quantity. Count overdue open requests and completions on the current local day, without counting future pending or earlier completions.",
+    "Preserve registered 2t truck HGV safety, 28-day internal monthly schedule with unchanged 1ヶ月に1回 label, data and AN15 pause."
   ],
   "fieldEvidenceIntake": {
     "status": "FINAL56_PUBLIC_RELEASE_VERIFIED_AWAITING_OWNER_TIMEOUT_REPORT_IF_ERROR_RECURS",
