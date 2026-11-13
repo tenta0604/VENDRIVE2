@@ -71,7 +71,7 @@ function ensureMarkup(){
    '<div class="section"><b>この納品先の依頼</b><div id="deliveryDetailRequests"></div></div>'+
    '<div class="section"><b>前回の納品</b><div class="meta" id="deliveryDetailLast"></div></div>'+
    '<div class="actions"><button type="button" class="primary" id="deliveryDetailNewRequest">＋依頼登録</button><button type="button" class="secondary" id="deliveryDetailEdit">納品先を編集</button></div>'+
-   '<div class="actions"><button type="button" class="secondary" id="deliveryDetailRoute">2t経路案内</button><button type="button" class="secondary" id="deliveryDetailExternal">外部地図</button></div>'+
+   '<div class="actions"><button type="button" class="secondary" id="deliveryDetailExternal">外部ナビ</button></div>'+
  '</div></div>'+
  '<div class="modal" id="deliveryRequestEditor"><div class="sheet">'+
    '<div class="modalTop"><div><div class="ey">DELIVERY REQUEST</div><div class="title" id="deliveryRequestEditorTitle">納品依頼</div></div><button type="button" class="pill" id="deliveryRequestClose">閉じる</button></div>'+
@@ -106,8 +106,7 @@ function ensureMarkup(){
  byId('deliveryDetailClose').onclick=function(){hideModal('deliverySiteDetail')};
  byId('deliveryDetailEdit').onclick=function(){var id=currentDetailId;hideModal('deliverySiteDetail');openSiteEditor(id)};
  byId('deliveryDetailNewRequest').onclick=function(){var id=currentDetailId;hideModal('deliverySiteDetail');openRequestEditor(id,null)};
- byId('deliveryDetailRoute').onclick=function(){startRoute(currentDetailId)};
- byId('deliveryDetailExternal').onclick=function(){externalMap(currentDetailId)};
+  byId('deliveryDetailExternal').onclick=function(){externalMap(currentDetailId)};
  byId('deliveryRequestClose').onclick=closeRequestEditor;
  byId('deliveryRequestCancel').onclick=closeRequestEditor;
  byId('deliveryRequestSave').onclick=saveRequest;
@@ -158,7 +157,7 @@ function openSiteDetail(id){
  pending.forEach(function(r){var e=document.createElement('div');e.className='item';e.innerHTML='<div class="deliveryCardMain"><b>納品予定 '+esc(r.scheduledDate)+'</b>'+previewItems(r.items)+'</div><button class="pill" type="button">確認</button>';e.querySelector('button').onclick=function(){hideModal('deliverySiteDetail');openRequestEditor(id,r.id)};box.appendChild(e)});
  var prev=lastCompleted(id);
  byId('deliveryDetailLast').innerHTML=prev?'<b>完了 '+esc(new Date(prev.completedAt).toLocaleDateString('ja-JP'))+'</b>'+previewItems(prev.items):'完了した納品履歴はまだありません。';
- byId('deliveryDetailRoute').disabled=!hasPin(s);byId('deliveryDetailExternal').disabled=!hasPin(s)&&!s.address;
+ byId('deliveryDetailExternal').disabled=!hasPin(s)&&!s.address;
  displayModal('deliverySiteDetail');
 }
 function blankItem(){return {name:'',quantity:'',unit:'ケース',sellPrice:''}}
@@ -223,11 +222,6 @@ function deletePending(id){
  if(!confirm('この未完了の納品依頼を削除しますか？'))return;
  state().deliveryRequests=requests().filter(function(x){return x.id!==id});
  store();notify('未完了の依頼を削除しました');
-}
-function startRoute(siteId){
- var s=sites().find(function(x){return x.id===siteId});if(!hasPin(s)){notify('納品先のMAPピンを設定してください');return}
- hideModal('deliverySiteDetail');
- host.startRoute({id:s.id,name:s.name,lat:s.lat,lng:s.lng,kind:'delivery'});
 }
 function externalMap(siteId){
  var s=sites().find(function(x){return x.id===siteId});if(!s)return;
