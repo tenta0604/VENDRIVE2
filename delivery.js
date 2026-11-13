@@ -276,10 +276,12 @@ function renderHistory(){
  });
 }
 function renderToday(){
- var box=byId('todayDeliveryList');if(!box)return;var due=dueRequestsOn(today());
- byId('todayDeliveryCount').textContent='対応待ち '+due.length+'件';box.innerHTML='';
- if(!due.length){box.innerHTML='<div class="meta" style="padding:9px 2px">本日の納品依頼はありません。</div>';return}
+ var box=byId('todayDeliveryList');if(!box)return;
+ var progress=host.todayDeliveryProgress(),due=progress.pending,done=progress.done;
+ byId('todayDeliveryCount').textContent='対応待ち '+due.length+'件 ・ 完了 '+done.length+'件';box.innerHTML='';
+ if(!due.length&&!done.length){box.innerHTML='<div class="meta" style="padding:9px 2px">本日の納品依頼はありません。</div>';return}
  due.forEach(function(r){box.appendChild(requestCard(r,true))});
+ done.forEach(function(r){box.appendChild(requestCard(r,true))});
 }
 function renderTomorrow(){
  var box=byId('tomorrowDeliveryList');if(!box)return;
