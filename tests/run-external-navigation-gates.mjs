@@ -55,7 +55,20 @@ for(const width of [320,390]){
   await open();await checkRetired();
   assert.equal(network.routeCalls,0,'browser must not request HGV route on app open');
   assert.equal(network.routeScript,0,'legacy route module must not load');
-  await page.locator('#todayList .swipeRow[data-delivery-id]').waitFor({state:'attached',timeout:8000});
+  try {
+   await page.locator('#todayList .swipeRow[data-delivery-id]').waitFor({state:'attached',timeout:5000});
+  } catch(error) {
+   const debug=await page.evaluate(()=>({
+    hero:document.getElementById('heroTotal')?.textContent,
+    list:document.getElementById('todayList')?.innerHTML.slice(0,1600),
+    deliveryModule:!!window.VENDRIVE2Delivery,
+    bridgeAttach:typeof window.VENDRIVE2DeliveryBridge?.attachTodayDeliverySwipe,
+    requestCount:JSON.parse(localStorage.getItem('vendrive2_v7_data')||'{}').deliveryRequests?.length,
+    todayCards:document.querySelectorAll('#todayList .swipeRow').length,
+    deliveryHistory:document.getElementById('deliveryPendingList')?.textContent.slice(0,300)
+   }));
+   throw new Error('Delivery did not render in unified Today: '+JSON.stringify(debug)+'; page errors: '+errors.join('; '));
+  }
   assert.equal(await page.locator('#todayDeliverySection').count(),0,'separate Today delivery section must be removed');
   assert.equal(await page.locator('#todayList .swipeRow[data-delivery-id]').count(),1,'delivery card must appear in same Today list');
   assert.equal(await page.locator('#todayList .swipeRow').count(),2,'one machine plus one delivery share a list');
