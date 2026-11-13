@@ -1,42 +1,41 @@
 {
-  "evidenceVersion": 93,
-  "runType": "final63_unified_today_delivery_swipe_production_closeout_20261113",
-  "phase": "FINAL63_UNIFY_TODAY_DELIVERIES_WITH_VENDING_CARDS_AND_SWIPE",
+  "evidenceVersion": 94,
+  "runType": "final64_today_pending_delivery_priority_production_closeout_20261113",
+  "phase": "FINAL64_PENDING_DELIVERY_BEFORE_COMPLETED_VENDING",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "3c72ef62c20a8d50252cd3ef3fe84566babca937",
-    "preEditImmutableSafetyTag": "PASS Issue #263",
-    "productPR": 264,
-    "productMerge": "8ea2ce01165001357a136d18cd2d66d43c3621b7"
+    "mainBefore": "3e265a072b96778a00f637519f9a747d4ce314ac",
+    "preEditImmutableSafetyTag": "PASS Issue #266; annotated backup-pre-FINAL64-TODAY-DELIVERY-ORDER-20261113-20261113",
+    "productPR": 267,
+    "productMerge": "a69ca95b1e57039893f518d7f5a8258ce496f1ac"
   },
   "versions": {
-    "app": "2026.11.13-FINAL.63",
+    "app": "2026.11.13-FINAL.64",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Merged Today delivery items into main Today machine list with matching card style and status/external navigation; no separate Today delivery section. Pending delivery left swipe marks complete; right swipe no-op; delivery card tap site details; completed today stays visible and counted.",
-    "integrity": "Existing vending machine left-complete/right-skip unchanged. Delivery explicit completion and editing remain in delivery tab; historical item quantities/free-text sale-price notes immutable. Same Today mixed counters and overdue carry. Synchronize manifest to prevent auto-version reload; no data migration.",
-    "boundaries": "Retired in-app HGV route engine stays retired, external Google Maps does not inherit 2t dimensions, seasonal/temporary cycle override remains retired with archive kept, monthly 28d unchanged, schema/engine unchanged."
+    "summary": "Fixed FINAL.63 Today unified list order: due/overdue pending delivery cards now precede completed vending rows when vending work ends, while preserving original vending nearest/unfinished priority and completed delivery inclusion.",
+    "dataSafety": "NO migration/overwrite/delete. Delivery historical price notes and completion, current machine order and existing swipe/navigation semantics unchanged.",
+    "boundaries": "Only delivery.js insertion order plus version and browser regression. No database, analytics, route, scheduling or AN15 change."
   },
   "gates": {
-    "preEditImmutableSafetyTag": "PASS Issue #263",
-    "browserRegression": "PASS run 43371125976 incl unified delivery left/right swipe, history, full existing browser tests",
-    "realMicrosoftEdgeExternalNavigation": "PASS run 43371126154 incl merged Today, 320/390px gesture and external nav",
-    "merge": "PASS PR #264 8ea2ce01165001357a136d18cd2d66d43c3621b7",
-    "vercel": "PASS dpl_5VeTfEMQPjhJysJF1Ws6KYSonnUK READY exact product merge",
-    "pages": "PASS public 2026.11.13-FINAL.63",
-    "backend": "PASS public 2026.11.13-FINAL.63",
-    "userDataMigration": "NOT_REQUIRED",
-    "analyticsEngine": "UNMODIFIED AN14B3B5 and DB/schema4"
+    "preEditImmutableTag": "PASS verified annotated tag dereferences exact pre-edit main (Issue #266)",
+    "staticSyntax": "PASS delivery.js, index inline scripts, browser gate and JSON manifest",
+    "exactHeadBrowserRegression": "PASS run 43382359592 (PR head aca6a85f0304180e5107145707333baefd6bbf57)",
+    "exactHeadRealEdgeNavigation": "PASS run 43382359623 (PR head aca6a85f0304180e5107145707333baefd6bbf57)",
+    "merge": "PASS PR #267, a69ca95b1e57039893f518d7f5a8258ce496f1ac",
+    "vercel": "PASS READY dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt at product merge",
+    "pages": "PASS public /version.json 2026.11.13-FINAL.64",
+    "backend": "PASS public /version.json 2026.11.13-FINAL.64",
+    "schemaAndMigration": "NOT_REQUIRED no schema or data changes"
   },
   "changedFiles": [
-    "index.html",
     "delivery.js",
+    "index.html",
     "version.json",
     "tests/delivery-workflow-gate.html",
-    "tests/run-external-navigation-gates.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -44,14 +43,14 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. User can swipe delivery card left in 本日 to finish and use external nav; no other user action or data repair.",
+  "nextAction": "COMPLETE. Wait for owner's normal field feedback; do not resume unrelated routing/AN15 development automatically.",
   "continuityCheckpoint": {
-    "status": "FINAL63_UNIFIED_TODAY_DELIVERY_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.13-FINAL.63",
-    "productMerge": "8ea2ce01165001357a136d18cd2d66d43c3621b7",
-    "deliveryGesture": "left swipe completes and records immutable history, right swipe no-op",
-    "combinedList": "same #todayList as vending, no separate delivery block",
+    "status": "FINAL64_TODAY_PENDING_DELIVERY_PRIORITY_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.13-FINAL.64",
+    "productMerge": "a69ca95b1e57039893f518d7f5a8258ce496f1ac",
+    "deliveryOrdering": "pending delivery before first completed vending machine row",
+    "gestures": "delivery left-complete/right-no-op; vending left-complete/right-skip unchanged",
     "monthly": "1ヶ月に1回=28 days",
-    "legacy": "manual force and orders, external nav, DB/schema, AN15 pause retained"
+    "legacy": "AN14B3B5 DB/schema4, AN15 paused, internal routing retired"
   }
 }
