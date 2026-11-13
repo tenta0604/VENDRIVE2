@@ -1,41 +1,41 @@
 {
-  "evidenceVersion": 94,
-  "runType": "final64_today_pending_delivery_priority_production_closeout_20261113",
-  "phase": "FINAL64_PENDING_DELIVERY_BEFORE_COMPLETED_VENDING",
+  "evidenceVersion": 95,
+  "runType": "final65_weather_fetch_resilience_production_closeout_20261113",
+  "phase": "FINAL65_WEATHER_FETCH_RESILIENCE",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "3e265a072b96778a00f637519f9a747d4ce314ac",
-    "preEditImmutableSafetyTag": "PASS Issue #266; annotated backup-pre-FINAL64-TODAY-DELIVERY-ORDER-20261113-20261113",
-    "productPR": 267,
-    "productMerge": "a69ca95b1e57039893f518d7f5a8258ce496f1ac"
+    "mainBefore": "b55b6edec7ab95932f7324c09b5203534e18452a",
+    "preEditImmutableSafetyTag": "PASS Issue #269, annotated backup-pre-FINAL65-WEATHER-RESILIENCE-20261113-20261113",
+    "productPR": 270,
+    "productMerge": "301227afbe7444fa1cfa1dbdc4f3e5febb87784e"
   },
   "versions": {
-    "app": "2026.11.13-FINAL.64",
+    "app": "2026.11.13-FINAL.65",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Fixed FINAL.63 Today unified list order: due/overdue pending delivery cards now precede completed vending rows when vending work ends, while preserving original vending nearest/unfinished priority and completed delivery inclusion.",
-    "dataSafety": "NO migration/overwrite/delete. Delivery historical price notes and completion, current machine order and existing swipe/navigation semantics unchanged.",
-    "boundaries": "Only delivery.js insertion order plus version and browser regression. No database, analytics, route, scheduling or AN15 change."
+    "summary": "Eliminated double weather API wait in FINAL.64. Generic Best Match request carries current/daily/rain probability in one call; 7s timeout prevents infinite loading; shared in-flight per coordinates, 15s negative cache, inline manual retry. Explicit missing-point UI rather than conflating no GPS with network failure.",
+    "safety": "No location guess, production user-data access/migration/write, API credentials, schema or route changes. No revenue/analytics promotion; AN15 paused.",
+    "limits": "User-specific iPhone weather network trace not observed. Both Open-Meteo generic and optional JMA test endpoints returned HTTP 200 externally on 2026-11-13. Regression reproduces network timeout and 503 recovery using controlled browser fixtures."
   },
   "gates": {
-    "preEditImmutableTag": "PASS verified annotated tag dereferences exact pre-edit main (Issue #266)",
-    "staticSyntax": "PASS delivery.js, index inline scripts, browser gate and JSON manifest",
-    "exactHeadBrowserRegression": "PASS run 43382359592 (PR head aca6a85f0304180e5107145707333baefd6bbf57)",
-    "exactHeadRealEdgeNavigation": "PASS run 43382359623 (PR head aca6a85f0304180e5107145707333baefd6bbf57)",
-    "merge": "PASS PR #267, a69ca95b1e57039893f518d7f5a8258ce496f1ac",
-    "vercel": "PASS READY dpl_CPRe69uh6JfWUwvYbc1X2oBmDiQt at product merge",
-    "pages": "PASS public /version.json 2026.11.13-FINAL.64",
-    "backend": "PASS public /version.json 2026.11.13-FINAL.64",
-    "schemaAndMigration": "NOT_REQUIRED no schema or data changes"
+    "preEditImmutableTag": "PASS annotated tag verified target main b55b6edec7ab95932f7324c09b5203534e18452a",
+    "staticSyntax": "PASS index.html inline JavaScript and tests compiled before PR",
+    "exactHeadBrowserRegression": "PASS run 43387290975, includes tests/weather-fetch-gate.mjs one query/cache/503 retry/7s hung request/missing-point",
+    "exactHeadRealMicrosoftEdge": "PASS run 43387290909 existing navigation/map/delivery/gesture",
+    "productMerge": "PASS PR #270 301227afbe7444fa1cfa1dbdc4f3e5febb87784e",
+    "vercel": "PASS READY dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh exact product merge",
+    "pages": "PASS public /version.json 2026.11.13-FINAL.65",
+    "backend": "PASS public /version.json 2026.11.13-FINAL.65",
+    "dataMigration": "NOT_REQUIRED; runtime browser cache only; no persistent data/schema changes"
   },
   "changedFiles": [
-    "delivery.js",
     "index.html",
     "version.json",
-    "tests/delivery-workflow-gate.html",
+    "tests/weather-fetch-gate.mjs",
+    "tests/run-browser-gates.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -43,14 +43,15 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Wait for owner's normal field feedback; do not resume unrelated routing/AN15 development automatically.",
+  "nextAction": "COMPLETE; owner uses live FINAL.65 and may tap weather retry if network fails. Exact field-network cause requires evidence if it persists.",
   "continuityCheckpoint": {
-    "status": "FINAL64_TODAY_PENDING_DELIVERY_PRIORITY_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.13-FINAL.64",
-    "productMerge": "a69ca95b1e57039893f518d7f5a8258ce496f1ac",
-    "deliveryOrdering": "pending delivery before first completed vending machine row",
-    "gestures": "delivery left-complete/right-no-op; vending left-complete/right-skip unchanged",
-    "monthly": "1ヶ月に1回=28 days",
-    "legacy": "AN14B3B5 DB/schema4, AN15 paused, internal routing retired"
+    "status": "FINAL65_WEATHER_FETCH_RESILIENCE_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.13-FINAL.65",
+    "productMerge": "301227afbe7444fa1cfa1dbdc4f3e5febb87784e",
+    "requests": "one Best Match per point with shared inflight",
+    "timeout": "7s",
+    "errorCache": "15s",
+    "retry": "manual inline",
+    "legacy": "FINAL.64 delivery order, 28d monthly, AN14B3B5 DB/schema4, AN15 paused unchanged"
   }
 }
