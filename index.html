@@ -133,9 +133,9 @@ body.mapFullscreen.mapSoftRotated #map .maptag{display:none}
 
 <main class="main">
 <section id="todayPage" class="page">
-<div class="todayTop"><div class="todayHeading"><div class="ey">TODAY</div><div class="title">本日の訪問</div><div class="subtitle" id="todaySub"></div></div><div class="todayWeatherCard" id="todayWeatherCard" aria-live="polite">天気地点を取得中…</div></div><div class="currentLocationSummary" id="currentLocationSummary">📍 現在地を取得中…</div>
-<div class="hero"><div class="ey">WORK PROGRESS</div><div class="heroTitle"><span id="heroDone">0</span> / <span id="heroTotal">0</span> 台</div><div class="heroSub" id="heroText">本日の訪問を開始しましょう</div><div class="progress"><i id="progressBar"></i></div></div>
-<div class="stats"><div class="kpi"><span>未訪問</span><b id="todayTodo">0</b></div><div class="kpi"><span>訪問済</span><b id="todayVisited">0</b></div><div class="kpi"><span>オーダー</span><b id="todayOrders">0</b></div></div>
+<div class="todayTop"><div class="todayHeading"><div class="ey">TODAY</div><div class="title">本日の作業</div><div class="subtitle" id="todaySub"></div></div><div class="todayWeatherCard" id="todayWeatherCard" aria-live="polite">天気地点を取得中…</div></div><div class="currentLocationSummary" id="currentLocationSummary">📍 現在地を取得中…</div>
+<div class="hero"><div class="ey">WORK PROGRESS</div><div class="heroTitle"><span id="heroDone">0</span> / <span id="heroTotal">0</span> 件</div><div class="heroSub" id="heroText">本日の訪問を開始しましょう</div><div class="progress"><i id="progressBar"></i></div></div>
+<div class="stats"><div class="kpi"><span>未完了</span><b id="todayTodo">0</b></div><div class="kpi"><span>完了</span><b id="todayVisited">0</b></div><div class="kpi"><span>オーダー</span><b id="todayOrders">0</b></div></div>
 <div class="section"><div class="sectionhead"><b>本日の訪問先</b><span class="swipeHint">左：訪問完了 / 右：訪問スキップ</span><span class="muted" id="todayRoute"></span></div><div id="todayList"></div></div>
 <div class="section"><button class="bigComplete" id="finishDay">本日の業務終了</button></div>
 </section>
@@ -298,7 +298,7 @@ body.mapFullscreen.mapSoftRotated #map .maptag{display:none}
 <div class="toast" id="toast"></div><div class="undoToast hidden" id="undoToast" role="status"><span id="undoMessage"></span><button id="undoAction" type="button">元に戻す</button></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="truck-routing.js?v=2026.11.12-FINAL.58"></script>
+<script src="truck-routing.js?v=2026.11.13-FINAL.59"></script>
 <script>
 (function(){
 "use strict";
@@ -345,7 +345,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.12-FINAL.58',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.13-FINAL.59',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -619,18 +619,39 @@ function card(m,context){
   if(h<=0)return'期限超過';if(h<24)return'残り'+h+'時間';return'期限内';
 }
 function renderHeader(){$id('headerDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日（'+todayDay+'）';$id('appVersion').textContent='Ver. '+APP_VERSION}
+function todayDeliveryProgress(){
+ var pending=[],done=[];
+ (state.deliveryRequests||[]).forEach(function(r){
+   if(!r)return;
+   if(r.status==='pending'&&typeof r.scheduledDate==='string'&&r.scheduledDate<=today)pending.push(r);
+   else if(r.status==='done'&&Number.isFinite(r.completedAt)&&iso(new Date(r.completedAt))===today)done.push(r);
+ });
+ return {pending:pending,done:done};
+}
 function showTodayStat(kind){
-var list=targets(todayDay,false),arr=kind==='todo'?list.filter(function(m){return !m.visited||!!m.order}):kind==='done'?list.filter(function(m){return m.visited&&!m.order}):state.machines.filter(function(m){return !!m.order});
-$id('statsModalTitle').textContent=kind==='todo'?'未訪問':kind==='done'?'訪問済':'オーダー';
-var box=$id('statsList');box.innerHTML='';
-if(!arr.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">該当する自販機はありません。</div>';
-arr.forEach(function(m){
-var e=document.createElement('div');e.className='item';
-e.innerHTML='<div><b>'+esc(m.name)+'</b></div><button class="primary pill statNav" type="button">⤴︎</button>';
-e.querySelector('.statNav').onclick=function(ev){ev.stopPropagation();navigateToMachine(m)};
-e.onclick=function(){openMachine(m.id,'normal')};box.appendChild(e)
-});
-openModal('statsModal')
+ var list=targets(todayDay,false),delivery=todayDeliveryProgress();
+ var arr=kind==='todo'?list.filter(function(m){return !m.visited||!!m.order}):kind==='done'?list.filter(function(m){return m.visited&&!m.order}):state.machines.filter(function(m){return !!m.order});
+ var deliveryRows=kind==='todo'?delivery.pending:kind==='done'?delivery.done:[];
+ $id('statsModalTitle').textContent=kind==='todo'?'未完了':kind==='done'?'完了':'オーダー';
+ var box=$id('statsList');box.innerHTML='';
+ if(!arr.length&&!deliveryRows.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">該当する作業はありません。</div>';
+ arr.forEach(function(m){
+ var e=document.createElement('div');e.className='item';
+ e.innerHTML='<div><b>'+esc(m.name)+'</b><div class="meta">自販機</div></div><button class="primary pill statNav" type="button">⤴︎</button>';
+ e.querySelector('.statNav').onclick=function(ev){ev.stopPropagation();navigateToMachine(m)};
+ e.onclick=function(){openMachine(m.id,'normal')};box.appendChild(e)
+ });
+ deliveryRows.forEach(function(r){
+ var site=(state.deliverySites||[]).find(function(s){return s.id===r.siteId}),siteName=site?site.name:(r.siteName||'納品先不明');
+ var e=document.createElement('div');e.className='item';
+ e.innerHTML='<div><b>📦 '+esc(siteName)+'</b><div class="meta">納品 ・ '+esc(r.scheduledDate)+(kind==='done'?' ・ 完了':' ・ 未完了')+'</div></div><button class="pill statDeliveryDetail" type="button">詳細</button>';
+ e.querySelector('.statDeliveryDetail').onclick=function(){
+   closeModal('statsModal');
+   if(window.VENDRIVE2Delivery)window.VENDRIVE2Delivery.openSiteDetail(r.siteId);
+ };
+ box.appendChild(e);
+ });
+ openModal('statsModal')
 }
 function navigateToMachine(m){
 var dest=typeof m.lat==='number'&&typeof m.lng==='number'?m.lat+','+m.lng:encodeURIComponent(m.address||m.name);
@@ -644,11 +665,11 @@ function nearbyMachineWarningMessage(candidates){var lines=candidates.slice(0,3)
 function confirmNearbyMachineLocation(lat,lng,excludeMachineId){var candidates=nearbyMachineCandidates(lat,lng,excludeMachineId);return!candidates.length||confirm(nearbyMachineWarningMessage(candidates))}
 function sortedTodayMachines(machines){return machines.map(function(machine,index){var distance=null,near=false;if(!machine.visited&&runtimeCurrentPosition&&typeof machine.lat==='number'&&typeof machine.lng==='number'){distance=distanceMeters(runtimeCurrentPosition,{lat:machine.lat,lng:machine.lng});near=distance<=100}return {machine:machine,index:index,distance:distance,group:machine.visited?2:near?0:1}}).sort(function(a,b){return a.group-b.group||(a.group===0?(a.distance-b.distance||a.index-b.index):a.index-b.index)}).map(function(entry){return entry.machine})}
 function renderToday(){
-  var t=targets(todayDay,false),progressTargets=todayProgressTargets(),done=progressTargets.filter(function(m){return m.visited&&!m.order}).length,orders=state.machines.filter(function(m){return m.order}).length;
-  $id('todaySub').textContent=todayDay+'曜日の訪問予定';renderCurrentLocationSummary();renderTodayWeather();
-  $id('heroDone').textContent=done;$id('heroTotal').textContent=progressTargets.length;$id('heroText').textContent=progressTargets.length?(done===progressTargets.length?'本日の訪問がすべて完了しています':'本日の訪問を進めましょう'):'本日の訪問予定はありません';
-  $id('progressBar').style.width=(progressTargets.length?Math.round(done/progressTargets.length*100):0)+'%';
-  $id('todayTodo').textContent=t.filter(function(m){return !m.visited}).length;$id('todayVisited').textContent=done;$id('todayOrders').textContent=orders;$id('todayRoute').textContent=todayDay+'曜ルート';
+  var t=targets(todayDay,false),progressTargets=todayProgressTargets(),delivery=todayDeliveryProgress(),machineDone=progressTargets.filter(function(m){return m.visited&&!m.order}).length,done=machineDone+delivery.done.length,total=progressTargets.length+delivery.pending.length+delivery.done.length,orders=state.machines.filter(function(m){return m.order}).length;
+  $id('todaySub').textContent=todayDay+'曜日の訪問・納品予定';renderCurrentLocationSummary();renderTodayWeather();
+  $id('heroDone').textContent=done;$id('heroTotal').textContent=total;$id('heroText').textContent=total?(done===total?'本日の作業がすべて完了しています':'本日の作業を進めましょう'):'本日の作業予定はありません';
+  $id('progressBar').style.width=(total?Math.round(done/total*100):0)+'%';
+  $id('todayTodo').textContent=total-done;$id('todayVisited').textContent=done;$id('todayOrders').textContent=orders;$id('todayRoute').textContent=todayDay+'曜ルート';
   var box=$id('todayList');box.innerHTML='';sortedTodayMachines(t).forEach(function(m){var w=document.createElement('div');w.className='swipeRow';w.dataset.machineId=String(m.id);w.innerHTML='<div class="swipeAction skip">訪問スキップ</div><div class="swipeAction complete">訪問完了</div>';var c=card(m,'today');c.classList.add('swipeCard');w.appendChild(c);box.appendChild(w);if(!m.visited)makeSwipeComplete(w,m)});
   if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">本日の訪問予定はありません。</div>';
 }
@@ -1379,6 +1400,7 @@ window.VENDRIVE2DeliveryBridge=Object.freeze({
  getState:function(){return state},
  persist:persist,renderAll:renderAll,toast:toast,openModal:openModal,closeModal:closeModal,
  today:function(){return today},
+ todayDeliveryProgress:todayDeliveryProgress,
  tomorrowDateIso:function(){var d=tomorrowDate();return d?iso(d):today},
  showPage:function(id){abortActiveMachineSortDrag();document.querySelectorAll('.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.page===id)});document.querySelectorAll('.page').forEach(function(p){p.classList.toggle('hidden',p.id!==id)});syncOrientationForPage(id);if(id==='mapPage'){ensureMap();renderMap()}},
  mapContext:function(){var mode=currentMapMode(),date=mode==='tomorrow'?(tomorrowDate()?iso(tomorrowDate()):today):mode==='weekday'?iso(dateForWeekday(selectedMapDay)):today;return {mode:mode,date:date}},
@@ -1398,6 +1420,6 @@ try{window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:
 <script src="sales-review.js"></script>
 <script src="input-recovery-review.js"></script>\n<script src="ocr-review-compact.js?v=2026.09.18-FINAL.20"></script>
 <script src="ops10a-stocktake.js?v=2026.09.16-FINAL.10-ops10a-ui2"></script>
-<script src="delivery.js?v=2026.11.12-FINAL.58"></script>
+<script src="delivery.js?v=2026.11.13-FINAL.59"></script>
 </body>
 </html>
