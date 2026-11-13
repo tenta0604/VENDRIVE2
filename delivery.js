@@ -89,7 +89,7 @@ function ensureMarkup(){
   '#deliveryPage .item,#deliverySiteDetail .item,#todayDeliverySection .item{align-items:flex-start}'+
   '.deliveryItemMeta{color:#69727e;font-size:10px;line-height:1.5;margin-top:4px;overflow-wrap:anywhere}'+
   '.deliveryCardMain{flex:1;min-width:0;overflow-wrap:anywhere}.deliveryActions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;align-items:center}'+
-  '.deliveryActions button{padding:7px 9px}.deliveryProductRow{border:1px solid #e3e4e6;background:#fff;padding:10px;border-radius:13px;margin-top:9px}'+
+  '.deliveryActions button{padding:7px 9px}.deliveryTodayActions{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0}.deliveryTodayActions>.deliveryQuickNav{min-height:36px;font-size:10px;padding:9px 10px;white-space:nowrap}.deliveryProductRow{border:1px solid #e3e4e6;background:#fff;padding:10px;border-radius:13px;margin-top:9px}'+
   '.deliveryProductRow label{display:block;color:#6b7280;font-size:10px;margin-bottom:5px}.deliveryProductRow input,.deliveryProductRow select{border:1px solid #ddd;border-radius:9px;background:white;min-width:0;width:100%;padding:10px;font-size:12px}'+
   '.deliveryProductGrid{display:grid;grid-template-columns:1fr 110px;gap:7px;margin-top:9px}.deliveryProductRow button{font-size:11px}'+
   '.vendrive-delivery-pin{background:transparent!important;border:0!important}.deliveryMapPin{background:#0891b2;border:3px solid white;box-shadow:0 2px 10px #0006;border-radius:9px;width:32px;height:32px;color:#fff;display:grid;place-items:center;font-size:16px;font-weight:900;position:relative}'+
@@ -227,18 +227,19 @@ function externalMap(siteId){
  var s=sites().find(function(x){return x.id===siteId});if(!s)return;
  host.externalNavigation(s);
 }
-function requestCard(r,compact){
+function requestCard(r,compact,quickNav){
  var isLate=r.scheduledDate<today()&&r.status==='pending';
  var e=document.createElement('div');e.className='item';e.dataset.requestId=r.id;
  e.innerHTML='<div class="deliveryCardMain"><b>📦 '+esc(siteName(r))+'</b>'+
   '<div class="meta">管理番号：'+esc(siteCode(r))+' ・ '+esc(r.scheduledDate)+(isLate?' ・ <b style="color:#b91c1c">予定日超過</b>':'')+'</div>'+
   previewItems(r.items)+(r.memo?'<div class="meta">メモ：'+esc(r.memo)+'</div>':'')+'</div>'+
-  (r.status==='done'?'<span class="badge b-green">納品完了</span>':'<div class="deliveryActions"><button type="button" class="pill" data-action="edit">編集</button><button type="button" class="primary pill" data-action="complete">完了</button>'+(compact?'':'<button type="button" class="pill" data-action="delete">削除</button>')+'</div>');
+  (quickNav?'<div class="deliveryTodayActions">':'')+(r.status==='done'?'<span class="badge b-green">納品完了</span>':'<div class="deliveryActions"><button type="button" class="pill" data-action="edit">編集</button><button type="button" class="primary pill" data-action="complete">完了</button>'+(compact?'':'<button type="button" class="pill" data-action="delete">削除</button>')+'</div>')+(quickNav?'<button type="button" class="primary pill deliveryQuickNav">外部ナビ</button></div>':'');
  if(r.status==='pending')e.querySelectorAll('button[data-action]').forEach(function(btn){btn.onclick=function(){
   if(btn.dataset.action==='complete')completeRequest(r.id);
   else if(btn.dataset.action==='edit')openRequestEditor(r.siteId,r.id);
   else deletePending(r.id);
  }});
+ if(quickNav)e.querySelector('.deliveryQuickNav').onclick=function(ev){ev.stopPropagation();externalMap(r.siteId)};
  return e;
 }
 function renderSites(){
@@ -274,8 +275,8 @@ function renderToday(){
  var progress=host.todayDeliveryProgress(),due=progress.pending,done=progress.done;
  byId('todayDeliveryCount').textContent='対応待ち '+due.length+'件 ・ 完了 '+done.length+'件';box.innerHTML='';
  if(!due.length&&!done.length){box.innerHTML='<div class="meta" style="padding:9px 2px">本日の納品依頼はありません。</div>';return}
- due.forEach(function(r){box.appendChild(requestCard(r,true))});
- done.forEach(function(r){box.appendChild(requestCard(r,true))});
+ due.forEach(function(r){box.appendChild(requestCard(r,true,true))});
+ done.forEach(function(r){box.appendChild(requestCard(r,true,true))});
 }
 function renderTomorrow(){
  var box=byId('tomorrowDeliveryList');if(!box)return;
