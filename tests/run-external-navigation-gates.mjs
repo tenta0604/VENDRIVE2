@@ -14,12 +14,12 @@ for(const width of [320,390]){
   const page=await context.newPage(),errors=[],network={routeCalls:0,routeScript:0,external:[]};
   page.on('pageerror',e=>errors.push(String(e)));
   await page.addInitScript(()=>{
-   const d=new Date(),today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-   const machine={id:'E1',name:'External navigation machine',maker:'サントリー',code:'M-EXT',address:'愛知県一宮市',lat:35.31,lng:136.81,days:['日','月','火','水','木','金','土'],cycle:'毎日',last:null,visited:false,skip:null,force:null,order:null,memo:'',sales:'',taskDone:{}};
+   const d=new Date(),today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),prior=new Date(d);prior.setDate(prior.getDate()-1);const yesterday=prior.getFullYear()+'-'+String(prior.getMonth()+1).padStart(2,'0')+'-'+String(prior.getDate()).padStart(2,'0');
+   const machine={id:'E1',name:'External navigation machine',maker:'サントリー',code:'M-EXT',address:'愛知県一宮市',lat:35.31,lng:136.81,days:['日','月','火','水','木','金','土'],cycle:'毎日',last:yesterday,temporaryVisitCycles:[{periodId:'FULL',cycle:'1ヶ月に1回',days:['日','月','火','水','木','金','土']}],visited:false,skip:null,force:null,order:null,memo:'',sales:'',taskDone:{}};
    const office={id:'OFF-E',name:'External navigation office',address:'愛知県一宮市',lat:35.33,lng:136.83};
    const site={id:'DL-E',name:'External navigation delivery',code:'D-001',address:'愛知県一宮市',lat:35.32,lng:136.82,memo:'',createdAt:Date.now()};
    const request={id:'REQ-E',siteId:'DL-E',siteName:site.name,siteCode:site.code,status:'pending',createdAt:Date.now(),completedAt:null,scheduledDate:today,items:[{name:'お茶',quantity:'2',unit:'ケース',sellPrice:'130円／本'}],memo:''};
-   if(!localStorage.getItem('externalGateSeeded')){localStorage.setItem('vendrive2_v7_data',JSON.stringify({machines:[machine],offices:[office],deliverySites:[site],deliveryRequests:[request],history:[],tasks:[],taskHistory:[],makers:['サントリー'],restDays:[]}));localStorage.setItem('vendrive2_last_day',today);localStorage.setItem('externalGateSeeded','yes')}
+   if(!localStorage.getItem('externalGateSeeded')){localStorage.setItem('vendrive2_v7_data',JSON.stringify({machines:[machine],offices:[office],deliverySites:[site],deliveryRequests:[request],temporaryVisitPeriods:[{id:'FULL',name:'通年',start:'01-01',end:'12-31'}],history:[],tasks:[],taskHistory:[],makers:['サントリー'],restDays:[]}));localStorage.setItem('vendrive2_last_day',today);localStorage.setItem('externalGateSeeded','yes')}
    const position={coords:{latitude:35.3,longitude:136.8,accuracy:8,heading:90}};
    Object.defineProperty(navigator,'geolocation',{value:{watchPosition(fn){window.__gps=fn;setTimeout(()=>fn(position),0);return 1},clearWatch(){},getCurrentPosition(fn){setTimeout(()=>fn(position),0)}}});
   });
@@ -42,6 +42,11 @@ for(const width of [320,390]){
    const result=await page.evaluate(()=>({oldScript:!!document.querySelector('script[src*="truck-routing.js"]'),oldGlobal:!!window.VENDRIVETruckRouting,routePanel:!!document.getElementById('truckRoutePanel'),vehicle:!!document.getElementById('truckVehicleModal'),truckSettings:!!document.getElementById('truckVehicleSettings'),highway:!!document.getElementById('mapHighwayToggle'),machineRoute:!!document.getElementById('machineRoute'),deliveryRoute:!!document.getElementById('deliveryDetailRoute'),machineNav:!!document.getElementById('machineExternalNav'),siteNav:!!document.getElementById('deliveryDetailExternal'),today:document.getElementById('heroTotal').textContent}));
    for(const k of ['oldScript','oldGlobal','routePanel','vehicle','truckSettings','highway','machineRoute','deliveryRoute'])assert.equal(result[k],false,k+' must be retired');
    assert.equal(result.machineNav,true);assert.equal(result.siteNav,true);assert.equal(result.today,'2');
+    for(const id of ['manageVisitPeriods','visitPeriodsModal','addTemporaryCycle','temporaryCycleList','addNewTemporaryCycle','newTemporaryCycleList','temporaryCycleModal','temporaryPeriodSelectModal'])assert.equal(await page.locator('#'+id).count(),0,'retired temporary-cycle UI must be removed: '+id);
+    const archive=await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
+    assert.equal(archive.temporaryVisitPeriods.length,1,'archived season/period must remain on local state');
+    assert.equal(archive.machines[0].temporaryVisitCycles[0].cycle,'1ヶ月に1回','historical monthly override must not be deleted');
+    assert.equal(await page.locator('#todayList .swipeRow[data-machine-id="E1"]').count(),1,'daily normal visit must win against archived monthly override');
   };
   const external=async fragment=>{
    await page.waitForURL(/google\.com\/maps\/dir\/\?/,{timeout:10000});
