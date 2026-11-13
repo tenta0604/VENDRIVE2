@@ -157,7 +157,6 @@
  assert(saved().deliveryRequests.find(r=>r.items[0].name==='未納の追加商品').status==='pending','right swipe must not skip or cancel delivery');
  assert(d.getElementById('todayTodo').textContent==='2','right swipe must not change Today pending');
  await swipeDelivery(deliveryRows().find(row=>row.textContent.includes('未納の追加商品')),'left');
- assert(overdueRow,'overdue row missing');overdueRow.querySelector('[data-action="complete"]').click();
  assert(d.getElementById('heroTotal').textContent==='3'&&d.getElementById('heroDone').textContent==='2','overdue completion retains total and increases done');
  assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='2','overdue completion updates KPIs');
  assert(d.getElementById('todayList').textContent.includes('未納の追加商品'),'completed overdue delivery must remain visible today');
