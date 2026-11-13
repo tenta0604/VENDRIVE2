@@ -1,61 +1,43 @@
 {
-  "evidenceVersion": 89,
-  "runType": "final59_today_delivery_count_release_closeout_20261113",
-  "phase": "FINAL59_INCLUDE_DELIVERIES_IN_TODAY_COUNTS",
+  "evidenceVersion": 90,
+  "runType": "final60_external_navigation_only_production_closeout_20261113",
+  "phase": "FINAL60_RETIRE_IN_APP_ROUTE_FOR_EXTERNAL_ONLY",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "2622104e34260197213fcd7d32abbc6f78a156b6",
-    "immutableSafetyTag": "PASS Issue #249",
-    "productPR": 250,
-    "productMerge": "503fbb373e3738999308bae4fab9596987302785"
+    "preEditMain": "009447270741ba3596ca4831722df4ae56038841",
+    "immutableAnnotatedSafetyTag": "PASS Issue #253",
+    "productPR": 254,
+    "productMerge": "ac23b7a6d9e09ce6aa312735716577d2aee49fae"
   },
   "versions": {
-    "app": "2026.11.13-FINAL.59",
-    "engine": "AN14B3B5",
+    "app": "2026.11.13-FINAL.60",
+    "engine": "AN14B3B5 (legacy value; inactive client)",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Added independent delivery due/overdue and completed-today requests to work progress, headline totals, pending/completed KPI and stats drilldown; label changed from 台 to 件. Completed Today deliveries remain visible, and finishing one moves from pending to done without total changing.",
-    "rules": "1 vending planned target = 1; each delivery request is one, irrespective of product number/quantity. Pending due/overdue count until completed; completedAt on local Today counts as done. Future pending and completed on earlier day not counted. Existing vending order semantics preserved.",
-    "nonGoals": "No delivery item/price accounting, no route or inventory changes, no db migration, no change to 1ヶ月に1回=28 days, AN15 pause."
+    "summary": "Removed in-app route planner engine, route overlays and GPS turn instructions, truck vehicle settings/highway toggles and route UI. Kept MAP map tiles, maker/delivery pin layers, GPS marker/follow and pin picker. Machine, delivery, office all open external Google Maps navigation by coordinates with address fallback. Added truck-safety note.",
+    "dataSafety": "No migration or rewriting of saved user state, routeVehicle remains untouched. Existing monthly 28d, delivery history and combined Today totals preserved.",
+    "deprecated": "Standalone truck-routing.js and deployed /api/route server endpoint remain dormant and are not loaded or called by frontend. No backend API deletion or claims of truck-safe external navigation.",
+    "externalSafety": "Google Maps external navigation does NOT inherit 2t vehicle geometry/weight, driver must follow road signs."
   },
   "gates": {
-    "preEditImmutableSafetyTag": "PASS Issue #249 exact baseline",
-    "browserRegression": "PASS run 43345443648 with Today delivery lifecycle",
-    "truckNodeApiRealEdge": "PASS run 43345443656",
-    "merge": "PASS PR #250 503fbb373e3738999308bae4fab9596987302785",
-    "vercel": "PASS READY dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc exact product merge",
-    "pages": "PASS public 2026.11.13-FINAL.59",
-    "backend": "PASS public 2026.11.13-FINAL.59",
-    "dataMigration": "NOT_REQUIRED",
-    "routePolicyUnchanged": "PASS no HGV selection/provider or API logic edits"
+    "immutableTag": "PASS Issue #253",
+    "browserRegression": "PASS final exact-head 43357633388",
+    "realEdgeExternalNavigation": "PASS final exact-head 43357633483 (320px and 390px, no client route requests/script)",
+    "productMerge": "PASS PR #254 ac23b7a6d9e09ce6aa312735716577d2aee49fae",
+    "vercel": "PASS dpl_CJAfXg4gmLdr682cqrobY1vvhzra READY exact merge",
+    "publicPages": "PASS 2026.11.13-FINAL.60",
+    "publicVercel": "PASS 2026.11.13-FINAL.60",
+    "dbMigration": "NOT_REQUIRED"
   },
-  "changedFiles": [
-    "index.html",
-    "delivery.js",
-    "tests/delivery-workflow-gate.html",
-    "truck-routing.js",
-    "tests/truck-route-client.test.mjs",
-    "version.json",
-    ".ai/STATE.json",
-    ".ai/LAST_RUN.json",
-    ".ai/HANDOFF.md",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
-  ],
-  "openItems": [
-    "Owner actual-device experience of deliveries not yet independently observed; test fixtures all PASS; this is not a claim of no future UX bugs.",
-    "Existing motorway preference issue awaits evidence; original ORS/HGV constraints immutable",
-    "AN15 intentionally paused"
-  ],
-  "nextAction": "COMPLETE. User may use Today as one mixed-work tally. Existing route-timeout diagnostics and AN15 pause are separate.",
+  "openItems": [],
+  "nextAction": "COMPLETE. Owner may open external navigation from registered machine/delivery/office. New UX request only if needed; no active route timeout diagnosis.",
   "continuityCheckpoint": {
-    "status": "FINAL59_TODAY_COUNT_PUBLIC_VERIFIED",
-    "appVersion": "2026.11.13-FINAL.59",
-    "productMerge": "503fbb373e3738999308bae4fab9596987302785",
-    "deliveryRule": "pending scheduled<=today plus completed on local today, each request 1",
-    "display": "Today total and KPI in 件, not 台",
-    "legacyMonthlyRule": "1ヶ月に1回 means 28 days"
+    "status": "FINAL60_EXTERNAL_ONLY_PUBLIC_VERIFIED",
+    "appVersion": "2026.11.13-FINAL.60",
+    "productMerge": "ac23b7a6d9e09ce6aa312735716577d2aee49fae",
+    "preserved": "28-day monthly rule, machine/delivery records, mixed Today counts, map pins, local backups, AN15 pause",
+    "deprecated": "In-app route client is gone; dormant standalone server source retained"
   }
 }
