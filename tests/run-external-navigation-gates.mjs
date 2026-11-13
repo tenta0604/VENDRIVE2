@@ -55,6 +55,7 @@ for(const width of [320,390]){
   await open();await checkRetired();
   assert.equal(network.routeCalls,0,'browser must not request HGV route on app open');
   assert.equal(network.routeScript,0,'legacy route module must not load');
+  await page.locator('#todayList .swipeRow[data-delivery-id]').waitFor({state:'attached',timeout:8000});
   assert.equal(await page.locator('#todayDeliverySection').count(),0,'separate Today delivery section must be removed');
   assert.equal(await page.locator('#todayList .swipeRow[data-delivery-id]').count(),1,'delivery card must appear in same Today list');
   assert.equal(await page.locator('#todayList .swipeRow').count(),2,'one machine plus one delivery share a list');
