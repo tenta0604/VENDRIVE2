@@ -1,42 +1,42 @@
 {
-  "evidenceVersion": 91,
-  "runType": "final61_today_card_external_navigation_release_closeout_20261113",
-  "phase": "FINAL61_TODAY_VENDING_DELIVERY_DIRECT_EXTERNAL_NAV",
+  "evidenceVersion": 92,
+  "runType": "final62_retire_temporary_visit_cycle_release_closeout_20261113",
+  "phase": "FINAL62_REMOVE_SEASONAL_TEMPORARY_VISIT_CYCLE_FEATURE",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "45b2ca3a7d73cb8a5e123c39a61a6cb50b0735c6",
-    "immutableSafetyTag": "PASS Issue #257",
-    "productPR": 258,
-    "productMerge": "96c3d89d967011e616926877223fad8cccced09a"
+    "mainBefore": "48aef7e5fde3dba4cbc2737c157c9c051449596e",
+    "immutableSafetyTag": "PASS Issue #260",
+    "productPR": 261,
+    "productMerge": "1b46fc5fa3fff6be13bee19449269971a9a7fe7a"
   },
   "versions": {
-    "app": "2026.11.13-FINAL.61",
+    "app": "2026.11.13-FINAL.62",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Added one-tap 外部ナビ to Today vending card (right status/action column) and Today on-demand delivery cards (pending or completed today). Direct navigation bypasses details but preserves card click, machine left/right swipe, delivery edit/complete and persistent work history.",
-    "safety": "Map launch unchanged, coordinates then address; missing location toasts, no accidental visit/delivery completion, 2t truck constraints are not transferred to Google Maps and Today warning displayed.",
-    "nonGoals": "No internal HGV routing/endpoint use, no user data migration, no cloud sync or pricing calculation; no modifications to FINAL.59 Today counts, 28-day monthly cadence or AN15 pause."
+    "summary": "Retired seasonal/temporary override setup and auto-scheduling, leaving only ordinary machine cycles and weekdays in Today, Tomorrow, MAP weekday and next-visit-date. Manual one-time force and 24h order retained.",
+    "dataSafety": "No destructive migration. Saved temporaryVisitPeriods + machine.temporaryVisitCycles kept as inactive legacy data and preserved across normal edit, restore and backup; existing local structure remains.",
+    "boundary": "Do not remove the distinct one-time 臨時訪問 or separate 24h オーダー. Preserve 1ヶ月に1回 28d internal semantics, current delivery workflows and external-only navigation."
   },
   "gates": {
-    "preEditImmutableSafetyTag": "PASS Issue #257 exact baseline",
-    "browserRegression": "PASS run 43360425724 incl delivery workflow",
-    "realMicrosoftEdgeExternalNav": "PASS run 43360425745 incl Today direct nav, pointer guard, no in-app route calls",
-    "productMerge": "PASS PR #258 96c3d89d967011e616926877223fad8cccced09a",
-    "vercel": "PASS dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact merge",
-    "pages": "PASS public 2026.11.13-FINAL.61",
-    "backend": "PASS public 2026.11.13-FINAL.61",
-    "dataMigration": "NOT_REQUIRED",
-    "serverRoute": "NOT_REQUIRED legacy route engine retired FINAL.60"
+    "preEditImmutableSafetyTag": "PASS Issue #260",
+    "browserRegression": "PASS run 43366680462 with legacy override UI/logic/archive and 28-day gate",
+    "realMicrosoftEdgeExternalNav": "PASS run 43366680516 with conflicting archived monthly cycle and external nav/map",
+    "productMerge": "PASS PR #261 1b46fc5fa3fff6be13bee19449269971a9a7fe7a",
+    "vercel": "PASS dpl_5zGCtPp5XWF4LGXHygwKoH9PxUpn READY exact merged SHA",
+    "pages": "PASS public 2026.11.13-FINAL.62",
+    "backend": "PASS public 2026.11.13-FINAL.62",
+    "dataMigration": "NOT_REQUIRED; archives remain unchanged",
+    "schema": "NOT_CHANGED DB/schema 4",
+    "internalRoute": "NOT_REQUIRED retired FINAL.60"
   },
   "changedFiles": [
     "index.html",
-    "delivery.js",
     "version.json",
+    "tests/four-week-cycle-gate.html",
     "tests/run-external-navigation-gates.mjs",
-    "tests/delivery-workflow-gate.html",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -44,13 +44,13 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Owner can tap 外部ナビ from Today machine/delivery rows. Any new UI feedback is a new scoped change.",
+  "nextAction": "COMPLETE. Owner may use normal cycle controls. Old temporary periods and per-machine overrides intentionally remain archived but inactive.",
   "continuityCheckpoint": {
-    "status": "FINAL61_TODAY_ONE_TAP_NAV_PUBLIC_VERIFIED",
-    "appVersion": "2026.11.13-FINAL.61",
-    "productMerge": "96c3d89d967011e616926877223fad8cccced09a",
-    "externalOnly": "no internal routing/API; external Google Maps links only",
-    "safety": "2t vehicle restrictions do not carry over",
-    "existing": "FINAL.59 mixed Today, FINAL.57 monthly 28d and delivery history unchanged"
+    "status": "FINAL62_TEMPORARY_CYCLE_RETIRED_PUBLIC_VERIFIED",
+    "appVersion": "2026.11.13-FINAL.62",
+    "productMerge": "1b46fc5fa3fff6be13bee19449269971a9a7fe7a",
+    "normalCycle": "1ヶ月に1回=28 days",
+    "archival": "temporaryVisitPeriods and machine.temporaryVisitCycles stored but never scheduled",
+    "exceptions": "manual one-time force and 24h orders preserved"
   }
 }
