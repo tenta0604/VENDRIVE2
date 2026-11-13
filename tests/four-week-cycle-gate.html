@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FINAL.57: 1ヶ月に1回 means four weeks without relabeling</title>
+<title>FINAL.62: monthly four-week and retired temporary-cycle regression</title>
 <style>html,body{margin:0;width:430px;max-width:100%}iframe{width:430px;max-width:100%;height:932px;border:0}</style></head>
 <body><pre id="out">RUNNING</pre><iframe id="app" title="VENDRIVE monthly-four-week gate"></iframe>
 <script>
@@ -22,9 +22,11 @@
   const weekly=machine('M-WEEKLY',[todayDay],'1週間に1回',ago(todayDate,7));
   const manual=machine('M-MANUAL',[todayDay],'1ヶ月に1回',ago(todayDate,1));manual.force=today;
   const unknown=machine('M-NO-HISTORY',[todayDay],'1ヶ月に1回',null);
-  const temporary=machine('M-TEMPORARY',[todayDay],'1週間に1回',ago(todayDate,28));
+  const temporary=machine('M-TEMPORARY',[todayDay],'1週間に1回',ago(todayDate,27));
   temporary.temporaryVisitCycles=[{periodId:'FULL',cycle:'1ヶ月に1回',days:[todayDay]}];
-  const state={machines:[due,early,tomorrowDue,weekly,manual,unknown,temporary],offices:[],history:[],
+  const archivedOffDay=machine('M-ARCHIVED-OFFDAY',[tomorrowDay],'1週間に1回',ago(tomorrowDate,7));
+  archivedOffDay.temporaryVisitCycles=[{periodId:'FULL',cycle:'毎日',days:[]}];
+  const state={machines:[due,early,tomorrowDue,weekly,manual,unknown,temporary,archivedOffDay],offices:[],history:[],
     tomorrowPlan:null,tasks:[],taskHistory:[],temporaryVisitPeriods:[{id:'FULL',name:'通年',start:'01-01',end:'12-31'}],
     restDays:[],makers:['TEST'],makerColors:{},makerSettings:[]};
   localStorage.setItem('vendrive2_v7_data',JSON.stringify(state));
@@ -35,15 +37,17 @@
     await sleep(100);
     if(frame.contentWindow?.VENDRIVE2ReadBridge?.getPlanningSnapshot){
       snapshot=frame.contentWindow.VENDRIVE2ReadBridge.getPlanningSnapshot();
-      if(snapshot?.machines?.length===7)break;
+      if(snapshot?.machines?.length===8)break;
     }
   }
-  assert(snapshot&&snapshot.machines?.length===7,'The application did not load all existing machines');
+  assert(snapshot&&snapshot.machines?.length===8,'The application did not load all existing machines');
   assert(snapshot.today===today&&snapshot.tomorrow.date===tomorrow,'Test calendar dates must agree with application');
   const todayIds=new Set(snapshot.todayIds),tomorrowIds=new Set(snapshot.tomorrow.ids);
   assert(todayIds.has('M-28-DUE'),'28-day/monthly visit must become due at exactly 4 weeks');
   assert(!todayIds.has('M-27-EARLY'),'27-day/monthly visit must not become due early');
-  assert(todayIds.has('M-TEMPORARY'),'temporary monthly override must use the 28-day interval');
+  assert(todayIds.has('M-TEMPORARY'),'retired monthly override must be ignored: regular weekly cycle is due at 27 days');
+  assert(!todayIds.has('M-ARCHIVED-OFFDAY'),'archived daily override must never insert a machine outside its normal weekday');
+  assert(tomorrowIds.has('M-ARCHIVED-OFFDAY'),'archived daily override must not prevent normal scheduled visit tomorrow');
   assert(todayIds.has('M-WEEKLY'),'regular weekly visit must remain due');
   assert(todayIds.has('M-MANUAL'),'manually forced visit must continue to override cycle');
   assert(todayIds.has('M-NO-HISTORY'),'unvisited machine should retain prior first-visit behavior');
@@ -56,16 +60,30 @@
   const nextWeek=new Date(todayDate);nextWeek.setDate(nextWeek.getDate()+7);
   assert(next['M-27-EARLY']===iso(nextWeek),'early machine must wait until its next selected weekday');
   const doc=frame.contentDocument;
-  for(const id of ['mCycle','newCycle','temporaryCycleCycle']){
+  for(const id of ['mCycle','newCycle']){
     const select=doc.getElementById(id);
     assert(select&&Array.from(select.options).some(o=>o.value==='1ヶ月に1回'&&o.textContent==='1ヶ月に1回'),id+' monthly text/value changed');
     assert(!Array.from(select.options).some(o=>o.textContent.includes('4週間')),id+' should not relabel the visible monthly option');
   }
+  for(const id of ['manageVisitPeriods','visitPeriodsModal','addTemporaryCycle','temporaryCycleList','addNewTemporaryCycle','newTemporaryCycleList','temporaryCycleModal','temporaryPeriodSelectModal']){
+    assert(!doc.getElementById(id),'retired temporary-cycle control should be absent: '+id);
+  }
+  assert(!doc.querySelector('#todayList').textContent.includes('臨時:'),'Today card must show only normal schedule');
+  // Editing an existing machine must leave previously saved temporary-cycle archive untouched.
+  const oldTemporary=JSON.stringify(temporary.temporaryVisitCycles);
+  const card=doc.querySelector('#todayList .swipeRow[data-machine-id="M-TEMPORARY"] .swipeCard');
+  assert(card,'archived machine needs to remain visible for regular visits');
+  card.click();
+  assert(doc.getElementById('machineModal').classList.contains('open'),'normal machine detail must still open');
+  doc.getElementById('saveMachine').click();
+  assert(!doc.getElementById('machineModal').classList.contains('open'),'normal machine editor must save without former temporary-cycle fields');
   const stored=JSON.parse(localStorage.getItem('vendrive2_v7_data'));
+  assert(JSON.stringify(stored.machines.find(m=>m.id==='M-TEMPORARY').temporaryVisitCycles)===oldTemporary,'saving a normal machine must not delete archived temporary cycles');
+  assert(stored.temporaryVisitPeriods.length===1&&stored.temporaryVisitPeriods[0].name==='通年','legacy temporary periods must be kept in backup');
   assert(stored.machines.find(m=>m.id==='M-28-DUE')?.last===ago(todayDate,28),'visit date/history must not be rewritten');
   assert(stored.machines.find(m=>m.id==='M-28-DUE')?.cycle==='1ヶ月に1回','stored monthly label must remain backward-compatible');
   assert(stored.machines.find(m=>m.id==='M-MANUAL')?.force===today,'manual overrides must be retained');
   assert(stored.machines.find(m=>m.id==='M-TEMPORARY')?.temporaryVisitCycles?.[0]?.cycle==='1ヶ月に1回','temporary cycle label must not change');
-  out.textContent='PASS\nmonthly label preserved: PASS\n28-day due, 27-day not-due: PASS\nToday + Tomorrow + detail next date: PASS\ntemporary and manual overrides: PASS\nexisting history and weekly cycles unchanged: PASS';
+  out.textContent='PASS\nmonthly label preserved: PASS\n28-day due, 27-day not-due: PASS\nToday + Tomorrow + detail next date: PASS\nretired temporary overrides ignored: PASS\nmanual one-time overrides retained: PASS\narchived period/cycle preserved across normal edit: PASS\nlegacy visit history and weekly cycles unchanged: PASS';
 })().catch(error=>{document.getElementById('out').textContent='FAIL: '+(error?.stack||error);console.error(error)});
 </script></body></html>
