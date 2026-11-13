@@ -148,7 +148,7 @@ for(const width of [320,390]){
   assert.equal(network.routeCalls,0,'NO backend route requests anywhere in user flow');
   assert.equal(network.routeScript,0,'NO retired in-app route module download');
   assert.equal(errors.length,0,errors.join('\n'));
-  evidence.push({width,status:'PASS',gates:['unified Today machine+delivery cards','left delivery swipe completes and appears in history','right delivery swipe no-op','direct Today machine+delivery nav','normal tap opens delivery details'
+  evidence.push({width,status:'PASS',gates:['unified Today machine+delivery cards','left delivery swipe completes and appears in history','right delivery swipe no-op','direct Today machine+delivery nav','normal tap opens delivery details','no accidental detail/swipe/complete','Today truck constraint warning','no route client loaded','no route API','no vehicle/highway/route controls','machine Google Maps destination','office Google Maps destination','delivery Google Maps destination','2t external nav caution','Today mixed tally','delivery+machine map pins','fullscreen map without route','delivery pin editor survives','data preservation','no page errors']});
   console.log('PASS external-navigation-only real Edge '+width+'px');
  }finally{await context.close();await rm(profile,{recursive:true,force:true})}
 }
