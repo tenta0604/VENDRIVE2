@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { runWeatherGate } from './weather-fetch-gate.mjs';
 
 const baseUrl = process.env.VENDRIVE_TEST_BASE_URL || 'http://127.0.0.1:4173';
 const gates = [
@@ -41,6 +42,11 @@ try {
     } finally {
       await context.close();
     }
+  }
+  try {
+    await runWeatherGate(browser, baseUrl);
+  } catch (error) {
+    failures.push('tests/weather-fetch-gate.mjs: '+String(error?.stack || error));
   }
 } finally {
   await browser.close();
