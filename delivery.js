@@ -271,11 +271,17 @@ function renderToday(){
  var box=byId('todayList');if(!box)return;
  box.querySelectorAll('.swipeRow[data-delivery-id]').forEach(function(row){row.remove()});
  var progress=host.todayDeliveryProgress();
+ // Pending deliveries are actionable work: place them before completed vending cards.
+ // Preserve the vending order and keep completed deliveries with completed work.
+ var firstDoneCard=box.querySelector('.swipeRow[data-machine-id] > .swipeCard.done');
+ var firstDoneRow=firstDoneCard&&firstDoneCard.parentNode;
  progress.pending.concat(progress.done).forEach(function(r){
   var row=document.createElement('div');row.className='swipeRow';row.dataset.deliveryId=r.id;
   row.innerHTML='<div class="swipeAction complete">納品完了</div>';
   var card=requestCard(r,true,true);card.classList.add('swipeCard');
-  row.appendChild(card);box.appendChild(row);
+  row.appendChild(card);
+  if(r.status==='pending'&&firstDoneRow)box.insertBefore(row,firstDoneRow);
+  else box.appendChild(row);
   if(r.status==='pending')host.attachTodayDeliverySwipe(row,function(){return completeRequest(r.id,true)});
  });
 }
