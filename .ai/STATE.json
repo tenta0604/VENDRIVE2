@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.13-FINAL.59",
+  "appVersion": "2026.11.13-FINAL.60",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL59_TODAY_DELIVERY_COUNT_PRODUCTION_VERIFIED",
+  "status": "FINAL60_EXTERNAL_NAV_ONLY_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.59 live: delivery requests included in Today total, done and pending counts",
-    "scope": "Today dashboard counts each due/overdue pending delivery request once and each delivery completed TODAY once in the completed count; 1 vending machine = 1 item, 1 delivery request = 1 item, never product/case quantities. Mixed total uses 件, remaining/completed KPIs and clickthrough modal list both machine and delivery, completed today remains displayed in Today delivery section; future pending and earlier-day completions excluded. No change to machine history, monthly cycle, deliveries pricing, ORS/HGV safety, AN15 or schema.",
-    "releaseStatus": "PR #250 merged 503fbb373e3738999308bae4fab9596987302785. Exact PR head Browser (incl expanded delivery counts/overdue/completion/reload gate) 43345443648 PASS; Truck/Node/API/real Edge 43345443656 PASS. Vercel deployment dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc READY matching product merge; public Pages + Vercel /version.json 2026.11.13-FINAL.59 verified.",
+    "title": "FINAL.60 live: external navigation only for vending machines, delivery sites, and offices",
+    "scope": "Owner superseded internal 2t HGV route planner with Google Maps external navigation only. Retired in-app truck-routing.js load, backend route API calls from client, route overlays/turn arrows/IC search/highway settings/2t vehicle editor/recalculate and internal route buttons. Machine, delivery and office details/map pins direct to external navigator (coordinates first, address fallback). Map/GPS current location, maker pins, delivery pins, map position picker, TODAY mixed tally, 28-day monthly cycling, saved machine/delivery/work data unchanged. External nav DOES NOT receive vehicle restrictions: explicit safety note in MAP. Existing routeVehicle values, retired truck-routing.js file and backend /api/route code are preserved dormant, not used or called by client.",
+    "releaseStatus": "PR #254 merged ac23b7a6d9e09ce6aa312735716577d2aee49fae; Browser regression exact-head 43357633388 PASS; new external-navigation and MAP readiness real Edge 320/390 with no route API/network calls 43357633483 PASS. Vercel production dpl_CJAfXg4gmLdr682cqrobY1vvhzra READY exact product SHA; public GitHub Pages and Vercel /version.json 2026.11.13-FINAL.60 verified.",
     "validationEvidence": {
-      "preEditImmutableTag": "PASS Issue #249 at exact 2622104e34260197213fcd7d32abbc6f78a156b6",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/250",
-      "browser": "PASS run 43345443648",
-      "truckNodeRealEdge": "PASS run 43345443656",
-      "mainMerge": "PASS 503fbb373e3738999308bae4fab9596987302785",
-      "vercel": "PASS deployment dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc READY",
-      "pages": "PASS live 2026.11.13-FINAL.59",
-      "backend": "PASS live 2026.11.13-FINAL.59"
+      "immutablePreEditSafetyTag": "PASS Issue #253 at 009447270741ba3596ca4831722df4ae56038841",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/254",
+      "browser": "PASS 43357633388",
+      "realEdgeNoRoute": "PASS 43357633483",
+      "productMerge": "PASS ac23b7a6d9e09ce6aa312735716577d2aee49fae",
+      "vercel": "PASS READY dpl_CJAfXg4gmLdr682cqrobY1vvhzra",
+      "pages": "PASS live 2026.11.13-FINAL.60",
+      "backend": "PASS live 2026.11.13-FINAL.60"
     },
-    "nextOwnerAction": "None for publishing. The existing Today screen now counts due delivery orders and today's completed deliveries alongside vending work. Future UI feedback may be handled separately."
+    "nextOwnerAction": "None for release. On any registered machine, office, or delivery site, use 外部ナビ; map/position pins remain available. External Google Maps does not inherit truck dimensions or restrictions; always check local restrictions."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 authoritative latest main + canonical files. FINAL.59 Today totals feature PR #250 merged 503fbb373e3738999308bae4fab9596987302785, Browser 43345443648 and Truck/Node/API/real Edge 43345443656 PASS; Vercel dpl_6ueBSBQ8rD3oHg2ygfW6WSgUDSRc READY exact product merge, Pages + Vercel public 2026.11.13-FINAL.59. Today now displays mixed work progress: 1 vending planned machine = 1 count; 1 delivery request pending scheduled today or earlier =1; a delivery completed on TODAY local date remains in Today list & total, counted done exactly once; prior-day completed and future pending excluded. KPI labels 未完了/完了, tap details include vending & deliveries, progress bar and count show 件, not 台. Prior FINAL.58 independent delivery registration, free-text sale price, previous-completed copy and permanent history unchanged. Prior FINAL.57 1ヶ月に1回 => 28 days unchanged, 2t HGV routing and 30/min quota unmodified, engine AN14B3B5, analytics DB/schema4 unchanged, AN15 paused. Past FINAL.56 route timeout root cause still unproven; field report separate.",
+    "shortResumePrompt": "Read VENDRIVE2 latest main and seven canonicals. FINAL.60 external-nav-only PR #254 merged ac23b7a6d9e09ce6aa312735716577d2aee49fae; Browser regression 43357633388 PASS; real Microsoft Edge external nav map gate 43357633483 PASS at 320px/390px, checks no truck-routing.js loaded nor /api/route calls and machine/office/delivery Google Maps destinations. Vercel dpl_CJAfXg4gmLdr682cqrobY1vvhzra READY exact product merge, Pages + Vercel public 2026.11.13-FINAL.60. OWNER SUPERSEDING DECISION: remove in-app route calculation, HGV overlays, route UI, 2t vehicle/highway settings; use external navigation exclusively; external Google Maps does NOT inherit vehicle dimensions/limits; warn on map. Keep map/GPS/pins/picker. Do not delete user routeVehicle saved data, or alter machine/delivery/TODAY, monthly 28-day, DB/schema4. Retired standalone truck-routing.js and backend /api/route remain dormant/unloaded; no client network calls. AN15 remains paused. Latest route timeout troubleshooting no longer part of active product after route UI retirement.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.59 Today delivery counts released and verified. No further assistant-side work in this scope. Existing separate HGV timeout evidence pending only if real failure recurs.",
-    "latestContinuityCheckpoint": "2026-11-13 FINAL.59 Today mixed work counts production PASS + Pages/Vercel verified",
+    "handoffBoundary": "FINAL.60 external-nav-only released and publicly verified. No product work remains. AN15 pause unchanged.",
+    "latestContinuityCheckpoint": "2026-11-13 FINAL.60 owner explicitly replaces in-app HGV routing with external Google Maps; no route requests; both public endpoints verified",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,14 +59,14 @@
     }
   },
   "nextActions": [
-    "This user-requested FINAL.59 Today delivery counting change is COMPLETE; no immediate user action required.",
-    "Keep delivery count per request, not per product/quantity. Count overdue open requests and completions on the current local day, without counting future pending or earlier completions.",
-    "Preserve registered 2t truck HGV safety, 28-day internal monthly schedule with unchanged 1ヶ月に1回 label, data and AN15 pause."
+    "FINAL.60 external-navigation-only owner scope COMPLETE. Do not restore the old in-app HGV route UX without a new explicit user request.",
+    "Retain safe local device records, existing 28-day monthly label semantics, delivery request history and mixed Today counts.",
+    "AN15 intentionally paused. Dormant server route code may remain for audit but is not loaded/called by clients."
   ],
   "fieldEvidenceIntake": {
-    "status": "FINAL56_PUBLIC_RELEASE_VERIFIED_AWAITING_OWNER_TIMEOUT_REPORT_IF_ERROR_RECURS",
-    "nextInput": "HGV route timeout diagnostic report only if the owner encounters a future failure; this is separate from delivery UI and not a blocker for FINAL.58.",
-    "criticalBoundary": "Diagnostic-only release; no evidence that frequent timeout is resolved. Never infer backend root cause from green CI alone.",
+    "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
+    "nextInput": "None. Owner chose external navigation and retired in-app route planner. Do not request FINAL.56 route timeout diagnostics unless owner reopens internal routing.",
+    "criticalBoundary": "External Google Maps does not inherit 2t/HGV vehicle dimensions/weights or restrictions; device driver must follow road signs and rules.",
     "firstAction": "User independently retests later when safely stopped or passenger; no repeated tests requested now.",
     "productionBoundary": "Both public frontend and backend FINAL.58; Vercel deployment dpl_FKphC7fGkZb3GysfPj6iiLMRCtBo READY matching product merge; ORS/HGV safety, provider quotas and selection unchanged."
   }
