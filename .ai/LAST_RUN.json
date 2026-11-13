@@ -11,7 +11,7 @@
   },
   "versions": {
     "app": "2026.11.13-FINAL.60",
-    "engine": "AN14B3B5 (legacy value; inactive client)",
+    "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
