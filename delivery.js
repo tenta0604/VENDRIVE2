@@ -317,6 +317,6 @@ function render(){renderSites();renderPending();renderHistory();renderToday();if
 function pinSelected(lat,lng){sitePinDraft={lat:lat,lng:lng};showPinLabel();displayModal('deliverySiteEditor');notify('ピンの位置を選択しました。保存すると登録されます')}
 function pinCanceled(){displayModal('deliverySiteEditor')}
 function init(){ensureMarkup();render()}
-window.VENDRIVE2Delivery=Object.freeze({init:init,render:render,renderMap:renderMap,renderTomorrow:renderTomorrow,pinSelected:pinSelected,pinCanceled:pinCanceled,mapFitLocations:mapFitLocations,openSiteDetail:openSiteDetail,openRequestEditor:openRequestEditor});
+window.VENDRIVE2Delivery=Object.freeze({init:init,render:render,renderToday:renderToday,renderMap:renderMap,renderTomorrow:renderTomorrow,pinSelected:pinSelected,pinCanceled:pinCanceled,mapFitLocations:mapFitLocations,openSiteDetail:openSiteDetail,openRequestEditor:openRequestEditor});
 init();
 })();
