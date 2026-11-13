@@ -24,6 +24,8 @@
  let initial=saved();
  assert(initial.machines.length===1&&initial.machines[0].cycle==='1ヶ月に1回','legacy monthly machine changed');
  assert(initial.deliverySites?.length===0&&initial.deliveryRequests?.length===0,'legacy data was not safely upgraded');
+ assert(d.getElementById('heroTotal').textContent==='1'&&d.getElementById('heroDone').textContent==='0','without deliveries existing machine counts remain');
+ assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='0','without deliveries KPI must stay consistent');
  click('deliveryNav');assert(!d.getElementById('deliveryPage').classList.contains('hidden'),'delivery tab should open separately');
  click('deliveryAddSite');
  fill('deliverySiteName','テスト納品先');fill('deliverySiteCode','DL-100');fill('deliverySiteAddress','テスト住所');fill('deliverySiteMemo','裏口で受け渡し');
@@ -59,12 +61,25 @@
  assert(!d.getElementById('deliveryPage').textContent.includes('小計'),'UI must not calculate a subtotal');
  assert(!d.getElementById('deliveryPage').textContent.includes('合計金額'),'UI must not calculate total money');
  assert(d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml'),'today delivery not displayed');
- assert(d.getElementById('heroTotal').textContent==='1','existing vending visit count must remain separate');
+ assert(d.getElementById('heroTotal').textContent==='2','one vending visit plus one due delivery must total two');
+ assert(d.getElementById('heroDone').textContent==='0'&&d.getElementById('todayTodo').textContent==='2'&&d.getElementById('todayVisited').textContent==='0','pending delivery must increment remaining work');
+ assert(d.querySelector('.heroTitle').textContent.includes('件'),'mixed work must be expressed in 件');
+ d.getElementById('todayTodo').parentNode.click();
+ assert(d.getElementById('statsModalTitle').textContent==='未完了','pending KPI title must say 未完了');
+ assert(d.getElementById('statsList').textContent.includes('📦 テスト納品先'),'pending KPI details must show deliveries');
+ click('closeStats');
  // Complete via Today, then ensure completed record is immutable and no recurring schedule exists.
  d.querySelector('#todayDeliveryList [data-action="complete"]').click();
  data=saved();const first=data.deliveryRequests[0];const immutable=JSON.stringify(first);
  assert(first.status==='done'&&typeof first.completedAt==='number','completion must create durable history');
- assert(!d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml'),'completed delivery should leave Today');
+ assert(d.getElementById('todayDeliveryList').textContent.includes('コーラ500ml')&&d.getElementById('todayDeliveryList').textContent.includes('納品完了'),'completed-today delivery must stay visible in Today');
+ assert(d.getElementById('todayDeliveryCount').textContent.includes('完了 1件'),'Today delivery section must reflect completed delivery');
+ assert(d.getElementById('heroTotal').textContent==='2'&&d.getElementById('heroDone').textContent==='1','completed delivery stays in total and increments done');
+ assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='1','mixed KPIs must be accurate');
+ assert(d.getElementById('progressBar').style.width==='50%','progress bar must include completed delivery');
+ d.getElementById('todayVisited').parentNode.click();
+ assert(d.getElementById('statsModalTitle').textContent==='完了'&&d.getElementById('statsList').textContent.includes('📦 テスト納品先'),'completed KPI details must show delivered item');
+ click('closeStats');
  assert(d.getElementById('deliveryHistoryList').textContent.includes('150円／本'),'completed price note missing from history');
  assert(data.deliveryRequests.length===1,'completing delivery must not create a recurring request');
  // New request stays empty until explicit copy; then contents and prices can be edited.
@@ -84,6 +99,7 @@
  assert(data.deliveryRequests.length===2,'second request not created');
  assert(JSON.stringify(data.deliveryRequests.find(r=>r.id===first.id))===immutable,'editing copied request mutated completed history');
  assert(!d.getElementById('todayDeliveryList').textContent.includes('水550ml'),'future delivery must not appear today');
+ assert(d.getElementById('heroTotal').textContent==='2'&&d.getElementById('heroDone').textContent==='1','future pending must not inflate today');
  w.VENDRIVE2Delivery.renderTomorrow();
  assert(d.getElementById('tomorrowDeliveryList').textContent.includes('水550ml'),'tomorrow delivery preview missing');
  // Edits to pending request remain possible and persist; no product default overwrites.
@@ -99,7 +115,25 @@
  assert(after.deliverySites.length===1&&after.deliverySites[0].lat===35.3,'delivery location did not survive reload');
  assert(after.deliveryRequests.length===2&&after.deliveryRequests.find(r=>r.status==='done').items[0].sellPrice==='150円／本','delivery history did not survive reload');
  assert(after.deliveryRequests.find(r=>r.status==='pending').items[0].sellPrice==='100円／本','future request edit did not survive reload');
- out.textContent='PASS\nsite name, management code and map pin: PASS\nindependent multi-item delivery requests: PASS\nfree-text per-unit sale price without totals: PASS\nToday + Tomorrow: PASS\ncomplete and immutable history: PASS\nexplicit previous copy then independent edit: PASS\nlegacy machine + reload persistence: PASS';
+ d=iframe.contentDocument;w=iframe.contentWindow;w.confirm=()=>true;
+ assert(d.getElementById('heroTotal').textContent==='2'&&d.getElementById('heroDone').textContent==='1','reload must preserve Today delivery progress');
+ // Past-due request is counted exactly once as pending; completing it today moves the same one item to done.
+ const yesterday=new Date(now);yesterday.setDate(yesterday.getDate()-1);
+ d.querySelector('#deliverySitesList [data-action="new"]').click();
+ const overdueItem=d.querySelector('#deliveryRequestItems .deliveryProductRow');
+ overdueItem.querySelector('[data-field="name"]').value='未納の追加商品';
+ overdueItem.querySelector('[data-field="quantity"]').value='1';
+ fill('deliveryRequestDate',iso(yesterday));click('deliveryRequestSave');
+ assert(d.getElementById('heroTotal').textContent==='3'&&d.getElementById('heroDone').textContent==='1','overdue delivery must count in Today total');
+ assert(d.getElementById('todayTodo').textContent==='2'&&d.getElementById('todayVisited').textContent==='1','overdue delivery must be pending once');
+ assert(d.getElementById('todayDeliveryList').textContent.includes('予定日超過'),'overdue delivery must be visible');
+ const overdueRow=[...d.querySelectorAll('#todayDeliveryList .item')].find(row=>row.textContent.includes('未納の追加商品'));
+ assert(overdueRow,'overdue row missing');overdueRow.querySelector('[data-action="complete"]').click();
+ assert(d.getElementById('heroTotal').textContent==='3'&&d.getElementById('heroDone').textContent==='2','overdue completion retains total and increases done');
+ assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='2','overdue completion updates KPIs');
+ assert(d.getElementById('todayDeliveryList').textContent.includes('未納の追加商品'),'completed overdue delivery must remain visible today');
+ assert(saved().machines[0].cycle==='1ヶ月に1回','delivery counting must not modify legacy monthly');
+ out.textContent='PASS\nsite name, management code and map pin: PASS\nindependent multi-item delivery requests: PASS\nfree-text per-unit sale price without totals: PASS\nToday + Tomorrow: PASS\ncomplete and immutable history: PASS\nexplicit previous copy then independent edit: PASS\nlegacy machine + reload persistence: PASS\nmixed Today progress, KPIs, stats, overdue and completion: PASS';
 })().catch(error=>{document.getElementById('out').textContent='FAIL: '+(error&&error.stack||error);console.error(error)});
 </script>
 </body></html>
