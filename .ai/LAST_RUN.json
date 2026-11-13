@@ -1,41 +1,41 @@
 {
-  "evidenceVersion": 92,
-  "runType": "final62_retire_temporary_visit_cycle_release_closeout_20261113",
-  "phase": "FINAL62_REMOVE_SEASONAL_TEMPORARY_VISIT_CYCLE_FEATURE",
+  "evidenceVersion": 93,
+  "runType": "final63_unified_today_delivery_swipe_production_closeout_20261113",
+  "phase": "FINAL63_UNIFY_TODAY_DELIVERIES_WITH_VENDING_CARDS_AND_SWIPE",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "48aef7e5fde3dba4cbc2737c157c9c051449596e",
-    "immutableSafetyTag": "PASS Issue #260",
-    "productPR": 261,
-    "productMerge": "1b46fc5fa3fff6be13bee19449269971a9a7fe7a"
+    "mainBefore": "3c72ef62c20a8d50252cd3ef3fe84566babca937",
+    "preEditImmutableSafetyTag": "PASS Issue #263",
+    "productPR": 264,
+    "productMerge": "8ea2ce01165001357a136d18cd2d66d43c3621b7"
   },
   "versions": {
-    "app": "2026.11.13-FINAL.62",
+    "app": "2026.11.13-FINAL.63",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Retired seasonal/temporary override setup and auto-scheduling, leaving only ordinary machine cycles and weekdays in Today, Tomorrow, MAP weekday and next-visit-date. Manual one-time force and 24h order retained.",
-    "dataSafety": "No destructive migration. Saved temporaryVisitPeriods + machine.temporaryVisitCycles kept as inactive legacy data and preserved across normal edit, restore and backup; existing local structure remains.",
-    "boundary": "Do not remove the distinct one-time 臨時訪問 or separate 24h オーダー. Preserve 1ヶ月に1回 28d internal semantics, current delivery workflows and external-only navigation."
+    "summary": "Merged Today delivery items into main Today machine list with matching card style and status/external navigation; no separate Today delivery section. Pending delivery left swipe marks complete; right swipe no-op; delivery card tap site details; completed today stays visible and counted.",
+    "integrity": "Existing vending machine left-complete/right-skip unchanged. Delivery explicit completion and editing remain in delivery tab; historical item quantities/free-text sale-price notes immutable. Same Today mixed counters and overdue carry. Synchronize manifest to prevent auto-version reload; no data migration.",
+    "boundaries": "Retired in-app HGV route engine stays retired, external Google Maps does not inherit 2t dimensions, seasonal/temporary cycle override remains retired with archive kept, monthly 28d unchanged, schema/engine unchanged."
   },
   "gates": {
-    "preEditImmutableSafetyTag": "PASS Issue #260",
-    "browserRegression": "PASS run 43366680462 with legacy override UI/logic/archive and 28-day gate",
-    "realMicrosoftEdgeExternalNav": "PASS run 43366680516 with conflicting archived monthly cycle and external nav/map",
-    "productMerge": "PASS PR #261 1b46fc5fa3fff6be13bee19449269971a9a7fe7a",
-    "vercel": "PASS dpl_5zGCtPp5XWF4LGXHygwKoH9PxUpn READY exact merged SHA",
-    "pages": "PASS public 2026.11.13-FINAL.62",
-    "backend": "PASS public 2026.11.13-FINAL.62",
-    "dataMigration": "NOT_REQUIRED; archives remain unchanged",
-    "schema": "NOT_CHANGED DB/schema 4",
-    "internalRoute": "NOT_REQUIRED retired FINAL.60"
+    "preEditImmutableSafetyTag": "PASS Issue #263",
+    "browserRegression": "PASS run 43371125976 incl unified delivery left/right swipe, history, full existing browser tests",
+    "realMicrosoftEdgeExternalNavigation": "PASS run 43371126154 incl merged Today, 320/390px gesture and external nav",
+    "merge": "PASS PR #264 8ea2ce01165001357a136d18cd2d66d43c3621b7",
+    "vercel": "PASS dpl_5VeTfEMQPjhJysJF1Ws6KYSonnUK READY exact product merge",
+    "pages": "PASS public 2026.11.13-FINAL.63",
+    "backend": "PASS public 2026.11.13-FINAL.63",
+    "userDataMigration": "NOT_REQUIRED",
+    "analyticsEngine": "UNMODIFIED AN14B3B5 and DB/schema4"
   },
   "changedFiles": [
     "index.html",
+    "delivery.js",
     "version.json",
-    "tests/four-week-cycle-gate.html",
+    "tests/delivery-workflow-gate.html",
     "tests/run-external-navigation-gates.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
@@ -44,13 +44,14 @@
     ".ai/DECISIONS.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Owner may use normal cycle controls. Old temporary periods and per-machine overrides intentionally remain archived but inactive.",
+  "nextAction": "COMPLETE. User can swipe delivery card left in 本日 to finish and use external nav; no other user action or data repair.",
   "continuityCheckpoint": {
-    "status": "FINAL62_TEMPORARY_CYCLE_RETIRED_PUBLIC_VERIFIED",
-    "appVersion": "2026.11.13-FINAL.62",
-    "productMerge": "1b46fc5fa3fff6be13bee19449269971a9a7fe7a",
-    "normalCycle": "1ヶ月に1回=28 days",
-    "archival": "temporaryVisitPeriods and machine.temporaryVisitCycles stored but never scheduled",
-    "exceptions": "manual one-time force and 24h orders preserved"
+    "status": "FINAL63_UNIFIED_TODAY_DELIVERY_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.13-FINAL.63",
+    "productMerge": "8ea2ce01165001357a136d18cd2d66d43c3621b7",
+    "deliveryGesture": "left swipe completes and records immutable history, right swipe no-op",
+    "combinedList": "same #todayList as vending, no separate delivery block",
+    "monthly": "1ヶ月に1回=28 days",
+    "legacy": "manual force and orders, external nav, DB/schema, AN15 pause retained"
   }
 }
