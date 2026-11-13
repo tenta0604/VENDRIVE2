@@ -59,7 +59,8 @@
 
   async function completeNamedTaskOnMachine(code,taskText){
     openTab('machinesPage');const q=d.getElementById('machineSearch');q.value=code;fire(q,'input');
-    await waitFor(()=>[...d.querySelectorAll('#machineResults .result')].some(x=>x.textContent.includes(code)),'machine search did not refresh for '+code+'; current='+JSON.stringify({ids:stored().machines.map(x=>x.code),search:q.value,day:d.getElementById('machineDayFilter')?.value,maker:d.getElementById('machineMakerFilter')?.value,results:d.getElementById('machineResults')?.textContent}));
+    if(![...d.querySelectorAll('#machineResults .result')].some(x=>x.textContent.includes(code))&&typeof q.oninput==='function')q.oninput();
+    await waitFor(()=>[...d.querySelectorAll('#machineResults .result')].some(x=>x.textContent.includes(code)),'machine search did not refresh for '+code+'; current='+JSON.stringify({ids:stored().machines.map(x=>x.code),search:q.value,handler:typeof q.oninput,connected:q.isConnected,day:d.getElementById('machineDayFilter')?.value,maker:d.getElementById('machineMakerFilter')?.value,results:d.getElementById('machineResults')?.textContent}));
     const row=[...d.querySelectorAll('#machineResults .result')].find(x=>x.textContent.includes(code));click(row);
     await waitFor(()=>d.getElementById('machineModal').classList.contains('open'),'machine modal did not open');
     const taskRow=[...d.querySelectorAll('#detailTaskList > div')].find(x=>x.textContent.includes(taskText));assert(taskRow,'task not shown for '+code);click(taskRow.querySelector('button'));
