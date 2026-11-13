@@ -55,10 +55,13 @@ for(const width of [320,390]){
   await open();await checkRetired();
   assert.equal(network.routeCalls,0,'browser must not request HGV route on app open');
   assert.equal(network.routeScript,0,'legacy route module must not load');
-  assert.equal(await page.locator('#todayDeliveryList .item').count(),1,'delivery Today remains active');
+  assert.equal(await page.locator('#todayDeliverySection').count(),0,'separate Today delivery section must be removed');
+  assert.equal(await page.locator('#todayList .swipeRow[data-delivery-id]').count(),1,'delivery card must appear in same Today list');
+  assert.equal(await page.locator('#todayList .swipeRow').count(),2,'one machine plus one delivery share a list');
+  assert.equal(await page.locator('#todayList .deliverySwipeCard .todayCardActions').count(),1,'delivery card uses machine layout');
   assert.equal(await page.locator('#heroTotal').innerText(),'2','one machine plus one delivery must remain');
   const quickMachine=page.locator('#todayList .todayExternalNav').first();
-  const quickDelivery=page.locator('#todayDeliveryList .deliveryQuickNav').first();
+  const quickDelivery=page.locator('#todayList .deliverySwipeCard .deliveryQuickNav').first();
   assert.equal(await quickMachine.count(),1,'Today vending card needs one-tap external navigation');
   assert.equal(await quickDelivery.count(),1,'Today delivery card needs one-tap external navigation');
   assert.match(await page.locator('#todayNavSafety').innerText(),/車高・車幅・重量条件/,'Today shortcut must warn about missing truck constraints');
@@ -75,9 +78,14 @@ for(const width of [320,390]){
   await page.locator('#todayList .swipeCard .makerChip').first().click();
   await page.locator('#machineModal.open').waitFor({state:'visible'});
   await page.locator('#closeMachine').click();
-  assert.equal(await page.locator('#todayDeliveryList [data-action="edit"]').count(),1,'delivery edit action must remain');
-  assert.equal(await page.locator('#todayDeliveryList [data-action="complete"]').count(),1,'delivery completion action must remain');
-  await page.locator('#todayDeliveryList .deliveryQuickNav').first().click();await external('destination=35.32,136.82');
+  await page.locator('#todayList .deliverySwipeCard .deliveryCardMain').click();
+  await page.locator('#deliverySiteDetail.open').waitFor({state:'visible'});
+  await page.locator('#deliveryDetailClose').click();
+  assert.equal(await page.locator('#todayList .deliverySwipeCard [data-action="edit"]').count(),0,'Today delivery uses single swipe card, no edit button');
+  assert.equal(await page.locator('#deliveryPendingList [data-action="edit"]').count(),1,'delivery tab edit action must remain');
+  assert.equal(await page.locator('#todayList .deliverySwipeCard [data-action="complete"]').count(),0,'Today delivery completes by swipe');
+  assert.equal(await page.locator('#deliveryPendingList [data-action="complete"]').count(),1,'delivery management explicit completion remains');
+  await page.locator('#todayList .deliverySwipeCard .deliveryQuickNav').first().click();await external('destination=35.32,136.82');
   await open();
   const afterShortcuts=await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
   assert.equal(afterShortcuts.machines[0].visited,false,'navigation must not mark machine visited');
@@ -119,10 +127,28 @@ for(const width of [320,390]){
   const data=await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
   assert.equal(data.machines.length,1);assert.equal(data.offices.length,1);assert.equal(data.deliverySites.length,1);assert.equal(data.deliveryRequests.length,1);
   assert.equal(data.deliveryRequests[0].items[0].sellPrice,'130円／本','price-as-memo history unchanged');
+  await page.locator('.tabs button[data-page="todayPage"]').click();
+  const deliveryRow=page.locator('#todayList .swipeRow[data-delivery-id]').first();
+  const swipe=async dir=>{
+   await deliveryRow.locator('.swipeCard').evaluate((el,direction)=>{
+    const start=200,end=direction==='left'?90:310,pid=430;
+    const send=(type,x)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerId:pid,pointerType:'touch',clientX:x,clientY:200,isPrimary:true}));
+    send('pointerdown',start);send('pointermove',end);send('pointerup',end);
+   },dir);
+  };
+  await swipe('right');
+  assert.equal(await page.locator('#todayList .swipeRow[data-delivery-id].revealSkip').count(),0,'right swipe cannot skip delivery');
+  assert.equal((await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')))).deliveryRequests[0].status,'pending','right swipe must not change delivery');
+  await swipe('left');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')).deliveryRequests[0].status==='done');
+  assert.equal(await page.locator('#heroDone').innerText(),'1','delivery swipe increments progress exactly once');
+  assert.equal(await page.locator('#heroTotal').innerText(),'2','delivery swipe retains combined total');
+  assert.equal(await page.locator('#todayList .swipeRow[data-delivery-id] .swipeCard.done').count(),1,'completed delivery stays in unified Today list');
+  assert.equal(await page.locator('#deliveryHistoryList').innerText().then(t=>t.includes('130円／本')),true,'swiped completion preserves history and price');
   assert.equal(network.routeCalls,0,'NO backend route requests anywhere in user flow');
   assert.equal(network.routeScript,0,'NO retired in-app route module download');
   assert.equal(errors.length,0,errors.join('\n'));
-  evidence.push({width,status:'PASS',gates:['direct Today machine+delivery nav','no accidental detail/swipe/complete','Today truck constraint warning','no route client loaded','no route API','no vehicle/highway/route controls','machine Google Maps destination','office Google Maps destination','delivery Google Maps destination','2t external nav caution','Today mixed tally','delivery+machine map pins','fullscreen map without route','delivery pin editor survives','data preservation','no page errors']});
+  evidence.push({width,status:'PASS',gates:['unified Today machine+delivery cards','left delivery swipe completes and appears in history','right delivery swipe no-op','direct Today machine+delivery nav','normal tap opens delivery details'
   console.log('PASS external-navigation-only real Edge '+width+'px');
  }finally{await context.close();await rm(profile,{recursive:true,force:true})}
 }
