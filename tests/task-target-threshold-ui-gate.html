@@ -59,6 +59,7 @@
 
   async function completeNamedTaskOnMachine(code,taskText){
     openTab('machinesPage');const q=d.getElementById('machineSearch');q.value=code;fire(q,'input');
+    await waitFor(()=>[...d.querySelectorAll('#machineResults .result')].some(x=>x.textContent.includes(code)),'machine search did not refresh for '+code);
     const row=[...d.querySelectorAll('#machineResults .result')].find(x=>x.textContent.includes(code));click(row);
     await waitFor(()=>d.getElementById('machineModal').classList.contains('open'),'machine modal did not open');
     const taskRow=[...d.querySelectorAll('#detailTaskList > div')].find(x=>x.textContent.includes(taskText));assert(taskRow,'task not shown for '+code);click(taskRow.querySelector('button'));
