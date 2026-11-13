@@ -163,7 +163,25 @@
  assert(d.getElementById('todayTodo').textContent==='1'&&d.getElementById('todayVisited').textContent==='2','overdue completion updates KPIs');
  assert(d.getElementById('todayList').textContent.includes('未納の追加商品'),'completed overdue delivery must remain visible today');
  assert(saved().machines[0].cycle==='1ヶ月に1回','delivery counting must not modify legacy monthly');
- out.textContent='PASS\nsite name, management code and map pin: PASS\nindependent multi-item delivery requests: PASS\nfree-text per-unit sale price without totals: PASS\nmerged Today cards, tap and external quick nav: PASS\nleft swipe complete/right swipe no-op: PASS\nToday + Tomorrow: PASS\ncomplete and immutable history: PASS\nexplicit previous copy then independent edit: PASS\nlegacy machine + reload persistence: PASS\nmixed Today progress, KPIs, stats, overdue and completion: PASS';
+ // FINAL.64: an unfinished delivery must move above all finished vending stops.
+ d.querySelector('#deliverySitesList [data-action="new"]').click();
+ const remainingItem=d.querySelector('#deliveryRequestItems .deliveryProductRow');
+ remainingItem.querySelector('[data-field="name"]').value='残りの納品';
+ remainingItem.querySelector('[data-field="quantity"]').value='1';
+ fill('deliveryRequestDate',today);click('deliveryRequestSave');
+ assert(d.querySelector('#todayList .swipeRow[data-machine-id] .swipeCard:not(.done)'),'machine must be pending before final visit');
+ await swipeDelivery(d.querySelector('#todayList .swipeRow[data-machine-id]'),'left');
+ assert(saved().machines[0].visited===true,'last vending machine must be complete');
+ const orderedRows=[...d.querySelectorAll('#todayList .swipeRow')];
+ assert(orderedRows[0].dataset.deliveryId&&orderedRows[0].textContent.includes('残りの納品'),'pending delivery must appear above completed vending');
+ assert(orderedRows[1].dataset.machineId==='VM-SAFE'&&orderedRows[1].querySelector('.swipeCard.done'),'done machine must stay below pending delivery');
+ assert(d.getElementById('todayTodo').textContent==='1','only the delivery should remain pending');
+ w.VENDRIVE2Delivery.renderToday();
+ assert(d.querySelector('#todayList .swipeRow:first-child').textContent.includes('残りの納品'),'Today rerender must preserve pending delivery priority');
+ await swipeDelivery(deliveryRows().find(row=>row.textContent.includes('残りの納品')),'left');
+ assert(saved().deliveryRequests.filter(r=>r.status==='pending'&&r.scheduledDate<=today).length===0,'pending delivery left swipe must still complete');
+ assert(d.getElementById('todayTodo').textContent==='0'&&d.getElementById('heroDone').textContent===d.getElementById('heroTotal').textContent,'all Today work should be complete');
+ out.textContent='PASS\nsite name, management code and map pin: PASS\nindependent multi-item delivery requests: PASS\nfree-text per-unit sale price without totals: PASS\nmerged Today cards, tap and external quick nav: PASS\nleft swipe complete/right swipe no-op: PASS\nToday + Tomorrow: PASS\ncomplete and immutable history: PASS\nexplicit previous copy then independent edit: PASS\nlegacy machine + reload persistence: PASS\nmixed Today progress, KPIs, stats, overdue and completion: PASS\npending delivery above completed vending cards: PASS';
 })().catch(error=>{document.getElementById('out').textContent='FAIL: '+(error&&error.stack||error);console.error(error)});
 </script>
 </body></html>
