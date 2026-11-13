@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.13-FINAL.61",
+  "appVersion": "2026.11.13-FINAL.62",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL61_TODAY_CARD_EXTERNAL_NAV_PRODUCTION_VERIFIED",
+  "status": "FINAL62_TEMPORARY_VISIT_CYCLES_RETIRED_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.61 live: one-tap external navigation on Today vending and delivery cards",
-    "scope": "Owner-requested fast 外部ナビ directly on each Today vending-machine and Today delivery-request card. Machine card tap still opens details; left/right swipe visit complete/skip still works because quick-nav button stops click propagation and is excluded from pointer gesture tracking. Delivery Today pending & completed both have direct nav; existing edit/complete, history and Tomorrow controls remain unchanged. Uses existing coordinates-first/address-fallback Google Maps external destination navigation only, with missing-location toast. Today warning repeats that external Maps cannot inherit 2t truck height/width/weight restrictions. No internal route/client/API reactivation; existing local visits, delivery prices/history, four-week monthly, analytics engine and schema untouched.",
-    "releaseStatus": "Product PR #258 merged 96c3d89d967011e616926877223fad8cccced09a. Exact-head Browser regression 43360425724 PASS including delivery workflow and missing-location handling. Real Microsoft Edge external-nav + MAP readiness 43360425745 PASS including direct Today machine/delivery navigation, no accidental swipe/completion and zero route API calls. Vercel production dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact merge; public GitHub Pages and Vercel /version.json both 2026.11.13-FINAL.61.",
+    "title": "FINAL.62 live: temporary/seasonal visit-cycle feature retired without deleting data",
+    "scope": "Owner explicitly requested removal of 臨時周期. The old seasonal 臨時期間設定 and per-machine/new-machine 臨時訪問周期 UI, modals, handlers and auto-scheduling override code are removed from active VENDRIVE. Today, Tomorrow, next visit date and weekday MAP use ONLY machine's regular cycle/weekdays; 1ヶ月に1回 remains a 28-day interval. Existing saved temporaryVisitPeriods and machine.temporaryVisitCycles remain inert LEGACY ARCHIVE in local state/JSON backups/recovery; normal machine edits preserve them exactly, and no migration deletes them. Distinct manual one-day 臨時訪問 force, separate 24-hour オーダー, delivery requests and external Google Maps shortcuts remain unchanged. Future calendar MAP ignores stale pre-release automatic tomorrowPlan records but preserves user manually saved plan.",
+    "releaseStatus": "Product PR #261 merged 1b46fc5fa3fff6be13bee19449269971a9a7fe7a; exact-head Browser regression 43366680462 PASS incl enhanced four-week and disabled legacy temporary override/archive UI/save fixture; real Microsoft Edge external nav and MAP readiness 43366680516 PASS incl expired override conflict, preserved legacy archive, no routing API and existing Today deliveries. Vercel dpl_5zGCtPp5XWF4LGXHygwKoH9PxUpn READY exact product merge; public GitHub Pages + Vercel /version.json 2026.11.13-FINAL.62.",
     "validationEvidence": {
-      "preEditImmutableTag": "PASS Issue #257 at 45b2ca3a7d73cb8a5e123c39a61a6cb50b0735c6",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/258",
-      "browser": "PASS run 43360425724",
-      "realEdge": "PASS run 43360425745",
-      "productMerge": "PASS 96c3d89d967011e616926877223fad8cccced09a",
-      "vercel": "PASS dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact product SHA",
-      "pages": "PASS 2026.11.13-FINAL.61",
-      "backend": "PASS 2026.11.13-FINAL.61"
+      "preEditImmutableTag": "PASS Issue #260 at 48aef7e5fde3dba4cbc2737c157c9c051449596e",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/261",
+      "browser": "PASS run 43366680462",
+      "realEdge": "PASS run 43366680516",
+      "productMerge": "PASS 1b46fc5fa3fff6be13bee19449269971a9a7fe7a",
+      "vercel": "PASS dpl_5zGCtPp5XWF4LGXHygwKoH9PxUpn READY exact product SHA",
+      "pages": "PASS public 2026.11.13-FINAL.62",
+      "backend": "PASS public 2026.11.13-FINAL.62"
     },
-    "nextOwnerAction": "On 本日 tab, tap 外部ナビ directly on an eligible machine or delivery card. No re-registration, migration or settings update required."
+    "nextOwnerAction": "None. Regular machine visit cycle remains editable as before; seasonal settings are no longer shown or scheduled. Stored legacy temporary-cycle data is retained and inactive."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 latest main and canonical files. FINAL.61 one-tap external-nav-from-Today product PR #258 merged 96c3d89d967011e616926877223fad8cccced09a, Browser 43360425724 PASS and Real Microsoft Edge external navigation + MAP 43360425745 PASS, Vercel dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact merge, Pages/Vercel both 2026.11.13-FINAL.61. TODAY vending card now has 外部ナビ button inside right status column; button stops card tap and is excluded from horizontal swipe pointerdown; normal card tap opens detail and swipe left/right still completes/skips visit. TODAY delivery pending and completed cards have a direct external-nav button alongside edit/complete or completion label; other delivery views unchanged. Both use existing Google Maps coordinate-first, address-fallback navigation. No location => toast without navigating. Today has visible reminder that external navigation does NOT inherit 2t vehicle limits. FINAL.60 in-app HGV routing stays retired (no /api/route, no truck-routing.js load), existing map/location retained, FINAL.59 combined Today totals unchanged; FINAL.57 1ヶ月に1回=28 days, DB/schema4, engine AN14B3B5, AN15 pause unchanged.",
+    "shortResumePrompt": "VENDRIVE2 latest main + seven canonical docs. FINAL.62 owner-requested removal of temporary/seasonal visit-cycle UI and scheduling override PR #261 merged 1b46fc5fa3fff6be13bee19449269971a9a7fe7a. Browser 43366680462 PASS incl four-week/archived conflict and normal save; real Edge 43366680516 PASS incl legacy daily vs archived monthly, external navigation and delivery; Vercel dpl_5zGCtPp5XWF4LGXHygwKoH9PxUpn READY exact merged product and public Pages/Backend 2026.11.13-FINAL.62. Removed 臨時期間設定 section, 臨時訪問周期 add/edit from machine/new machine and editor modals. No old temporary override affects Today/Tomorrow/MAP/next scheduled date; all operate on normal machine cycle and weekdays (1ヶ月に1回 internal 28 days). Archived state.temporaryVisitPeriods and machine.temporaryVisitCycles are retained in local storage/backups and preserved when editing machines, but remain inactive. Distinct manual one-time 臨時訪問 force, 24hr オーダー, deliveries, Today mixed counts and external Google Maps shortcuts remain. FINAL.60 internal truck routing retired, no /api/route. Analytics engine AN14B3B5 and DB/schema4 unchanged; AN15 paused.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.61 one-tap Today external navigation deployed and verified. No outstanding developer action; owner may use direct buttons. External app does not inherit 2t safety constraints.",
-    "latestContinuityCheckpoint": "2026-11-13 FINAL.61 Today direct machine+delivery external nav, PR #258 + Edge/browser PASS, Pages/Vercel live",
+    "handoffBoundary": "FINAL.62 seasonal/temporary cycle retirement verified complete; no manual cleanup, conversion or re-registration required. Future request to purge archived data needs explicit owner approval.",
+    "latestContinuityCheckpoint": "2026-11-13 FINAL.62 temporary-cycle feature retired safely; product PR #261, Edge/browser PASS and public version verified",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.61 direct Today-card navigation request is COMPLETE; no additional development needed for this scope.",
-    "Keep external navigation-only policy, same coordinates/address destination builder and visible 2t restriction warning; preserve machine card tap/swipe and delivery edit/complete controls.",
-    "Preserve FINAL.59 combined Today totals, FINAL.57 1ヶ月に1回=28 days, engine AN14B3B5, DB/schema4 and AN15 pause."
+    "FINAL.62 removal of temporary/seasonal cycles COMPLETE; no user action or data migration required.",
+    "Use machine's regular cycle + registered weekdays only. Preserve annual archived overrides as unused metadata; do not re-enable or delete without explicit instruction.",
+    "Continue to preserve manual 臨時訪問, 24h オーダー, FINAL.61 Today quick external navigation, FINAL.59 delivery counters, 1ヶ月に1回=28-day rule, DB/schema4/AN14B3B5 and AN15 pause."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
