@@ -789,10 +789,7 @@ function saveOffice(){
  state.offices.push({id:'office-'+Date.now(),name:name,address:($id('officeAddress').value||'').trim(),lat:officePoint.lat,lng:officePoint.lng});
  persist();officePoint=null;closeModal('officeModal');renderAll();if(leafletMap)setTimeout(function(){leafletMap.invalidateSize({pan:false});renderMap()},50);toast('営業所を登録しました')
 }
-function startOfficeRoute(office){
- if(!office||typeof office.lat!=='number'||typeof office.lng!=='number'){toast('営業所の位置を確認してください');return}
- navigateToMachine(office)
-}
+function openOfficeExternalNav(office){if(!office||(!(typeof office.lat==='number'&&typeof office.lng==='number')&&!office.address)){toast('営業所の住所かMAPピンを登録してください');return}navigateToMachine(office)}
 function renderOffices(){
  var box=$id('officeList');if(!box)return;box.innerHTML='';
  var offices=state.offices||[];
@@ -800,8 +797,8 @@ function renderOffices(){
  offices.forEach(function(o){
    var e=document.createElement('div');e.className='item';
    e.innerHTML='<div><b>⌂ '+esc(o.name||'営業所')+'</b><div class="meta">'+esc(o.address||'住所未登録')+'</div></div><button class="badge b-gray">外部ナビ</button>';
-   e.onclick=function(){startOfficeRoute(o)};
-   e.querySelector('button').onclick=function(ev){ev.stopPropagation();startOfficeRoute(o)};
+   e.onclick=function(){openOfficeExternalNav(o)};
+   e.querySelector('button').onclick=function(ev){ev.stopPropagation();openOfficeExternalNav(o)};
    box.appendChild(e);
  });
 }
@@ -846,7 +843,7 @@ function renderMap(){
   $id('mapCount').textContent=t.length+'台';
   display.forEach(function(entry){var m=entry.machine;if(typeof m.lat!=='number'||typeof m.lng!=='number')return;var allRouteDay=mode==='all'?((m.days&&m.days.length)?m.days[0]:todayDay):null,color=mode==='all'?dayRouteColor(allRouteDay):makerPinColor(m.maker),zIndexOffset=mode==='today'?(entry.outOfPlan?100:m.visited?300:1000):0;var html=machinePinHtml(m,mode,color,entry.outOfPlan,allRouteDay),icon=L.divIcon({className:'vendrive-machine-pin',html:html,iconSize:[36,43],iconAnchor:[18,42]}),mk=L.marker([m.lat,m.lng],{icon:icon,title:m.name,zIndexOffset:zIndexOffset});mk.on('click',function(){if(mapPositionMode)return;openMachine(m.id,m.order?'order':'normal')});mk.addTo(machineLayer);machineMapMarkers.push({machineId:m.id,marker:mk,lat:m.lat,lng:m.lng,zIndexOffset:zIndexOffset})});
   scheduleMachinePinFan();
-  (state.offices||[]).forEach(function(o){if(typeof o.lat!=='number'||typeof o.lng!=='number')return;var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]}),mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);mk.bindTooltip(esc(o.name||'営業所'),{direction:'top',offset:[0,-12]});mk.on('click',function(){if(mapPositionMode)return;startOfficeRoute(o)})});
+  (state.offices||[]).forEach(function(o){if(typeof o.lat!=='number'||typeof o.lng!=='number')return;var icon=L.divIcon({className:'vendrive-office-pin',html:officePinHtml(),iconSize:[31,31],iconAnchor:[15.5,15.5]}),mk=L.marker([o.lat,o.lng],{icon:icon}).addTo(machineLayer);mk.bindTooltip(esc(o.name||'営業所'),{direction:'top',offset:[0,-12]});mk.on('click',function(){if(mapPositionMode)return;openOfficeExternalNav(o)})});
   var box=$id('mapList');box.innerHTML='';t.forEach(function(m){box.appendChild(card(m,'map'))});if(!t.length)box.innerHTML='<div class="card" style="padding:14px;margin-top:7px;color:#777;font-size:11px">このルートの表示対象はありません。</div>';
 if(window.VENDRIVE2Delivery)window.VENDRIVE2Delivery.renderMap();
 }function machineSearchQuery(){return String($id('machineSearch')&&$id('machineSearch').value||'').trim().toLowerCase()}
@@ -1390,6 +1387,6 @@ try{window.VENDRIVE2ReadBridge=Object.freeze({version:1,normalizeManagementCode:
 <script src="sales-review.js"></script>
 <script src="input-recovery-review.js"></script>\n<script src="ocr-review-compact.js?v=2026.09.18-FINAL.20"></script>
 <script src="ops10a-stocktake.js?v=2026.09.16-FINAL.10-ops10a-ui2"></script>
-<script src="delivery.js?v=2026.11.13-FINAL.59"></script>
+<script src="delivery.js?v=2026.11.13-FINAL.60"></script>
 </body>
 </html>
