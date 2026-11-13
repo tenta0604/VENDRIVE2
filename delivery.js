@@ -45,9 +45,6 @@ function ensureMarkup(){
    '<div class="section"><div class="sectionhead"><b>対応待ちの納品依頼</b><span class="muted" id="deliveryPendingCount"></span></div><div id="deliveryPendingList"></div></div>'+
    '<div class="section"><div class="sectionhead"><b>完了した納品履歴</b><span class="muted" id="deliveryHistoryCount"></span></div><div id="deliveryHistoryList"></div></div>'+
  '</section>');
- var finish=byId('finishDay').closest('.section');
- finish.insertAdjacentHTML('beforebegin',
- '<section class="section" id="todayDeliverySection"><div class="sectionhead"><b>本日の納品</b><span class="muted" id="todayDeliveryCount"></span></div><div id="todayDeliveryList"></div></section>');
  var tomorrow=byId('tomorrowList');
  if(tomorrow)tomorrow.insertAdjacentHTML('afterend',
  '<div class="section" id="tomorrowDeliverySection"><div class="sectionhead"><b>翌出勤日の納品</b><span class="muted" id="tomorrowDeliveryCount"></span></div><div id="tomorrowDeliveryList"></div></div>');
@@ -86,7 +83,7 @@ function ensureMarkup(){
    '<div class="actions"><button type="button" class="secondary" id="deliveryRequestCancel">キャンセル</button><button type="button" class="primary" id="deliveryRequestSave">依頼を保存</button></div>'+
  '</div></div>');
  var style=document.createElement('style');style.textContent=
-  '#deliveryPage .item,#deliverySiteDetail .item,#todayDeliverySection .item{align-items:flex-start}'+
+  '#deliveryPage .item,#deliverySiteDetail .item,#todayList .deliverySwipeCard{align-items:flex-start}'+
   '.deliveryItemMeta{color:#69727e;font-size:10px;line-height:1.5;margin-top:4px;overflow-wrap:anywhere}'+
   '.deliveryCardMain{flex:1;min-width:0;overflow-wrap:anywhere}.deliveryActions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;align-items:center}'+
   '.deliveryActions button{padding:7px 9px}.deliveryTodayActions{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0}.deliveryTodayActions>.deliveryQuickNav{min-height:36px;font-size:10px;padding:9px 10px;white-space:nowrap}.deliveryProductRow{border:1px solid #e3e4e6;background:#fff;padding:10px;border-radius:13px;margin-top:9px}'+
@@ -211,11 +208,11 @@ function saveRequest(){
  r.scheduledDate=date;r.items=items;r.memo=safeText(byId('deliveryRequestMemo').value,1500);r.updatedAt=Date.now();
  closeRequestEditor();store();notify('納品依頼を保存しました');
 }
-function completeRequest(id){
- var r=requests().find(function(x){return x.id===id&&x.status==='pending'});if(!r)return;
- if(!confirm('「'+siteName(r)+'」の納品を完了にしますか？'))return;
+function completeRequest(id,fromSwipe){
+ var r=requests().find(function(x){return x.id===id&&x.status==='pending'});if(!r)return false;
+ if(!fromSwipe&&!confirm('「'+siteName(r)+'」の納品を完了にしますか？'))return false;
  r.status='done';r.completedAt=Date.now();
- store();notify('納品完了。履歴に保存しました');
+ store();notify('納品完了。履歴に保存しました');return true;
 }
 function deletePending(id){
  var r=requests().find(function(x){return x.id===id&&x.status==='pending'});if(!r)return;
@@ -229,17 +226,17 @@ function externalMap(siteId){
 }
 function requestCard(r,compact,quickNav){
  var isLate=r.scheduledDate<today()&&r.status==='pending';
- var e=document.createElement('div');e.className='item';e.dataset.requestId=r.id;
+ var e=document.createElement('div');e.className='item'+(quickNav?' deliverySwipeCard':'')+(quickNav&&r.status==='done'?' done':'');e.dataset.requestId=r.id;
  e.innerHTML='<div class="deliveryCardMain"><b>📦 '+esc(siteName(r))+'</b>'+
   '<div class="meta">管理番号：'+esc(siteCode(r))+' ・ '+esc(r.scheduledDate)+(isLate?' ・ <b style="color:#b91c1c">予定日超過</b>':'')+'</div>'+
   previewItems(r.items)+(r.memo?'<div class="meta">メモ：'+esc(r.memo)+'</div>':'')+'</div>'+
-  (quickNav?'<div class="deliveryTodayActions">':'')+(r.status==='done'?'<span class="badge b-green">納品完了</span>':'<div class="deliveryActions"><button type="button" class="pill" data-action="edit">編集</button><button type="button" class="primary pill" data-action="complete">完了</button>'+(compact?'':'<button type="button" class="pill" data-action="delete">削除</button>')+'</div>')+(quickNav?'<button type="button" class="primary pill deliveryQuickNav">外部ナビ</button></div>':'');
+  (quickNav?'<div class="todayCardActions"><span class="badge '+(r.status==='done'?'b-gray':'b-red')+'">'+(r.status==='done'?'納品完了':'未完了')+'</span><button type="button" class="primary pill todayExternalNav deliveryQuickNav">外部ナビ</button></div>':r.status==='done'?'<span class="badge b-green">納品完了</span>':'<div class="deliveryActions"><button type="button" class="pill" data-action="edit">編集</button><button type="button" class="primary pill" data-action="complete">完了</button>'+(compact?'':'<button type="button" class="pill" data-action="delete">削除</button>')+'</div>');
  if(r.status==='pending')e.querySelectorAll('button[data-action]').forEach(function(btn){btn.onclick=function(){
   if(btn.dataset.action==='complete')completeRequest(r.id);
   else if(btn.dataset.action==='edit')openRequestEditor(r.siteId,r.id);
   else deletePending(r.id);
  }});
- if(quickNav)e.querySelector('.deliveryQuickNav').onclick=function(ev){ev.stopPropagation();externalMap(r.siteId)};
+ if(quickNav){e.onclick=function(){openSiteDetail(r.siteId)};e.querySelector('.deliveryQuickNav').onclick=function(ev){ev.stopPropagation();externalMap(r.siteId)}};
  return e;
 }
 function renderSites(){
@@ -271,12 +268,16 @@ function renderHistory(){
  });
 }
 function renderToday(){
- var box=byId('todayDeliveryList');if(!box)return;
- var progress=host.todayDeliveryProgress(),due=progress.pending,done=progress.done;
- byId('todayDeliveryCount').textContent='対応待ち '+due.length+'件 ・ 完了 '+done.length+'件';box.innerHTML='';
- if(!due.length&&!done.length){box.innerHTML='<div class="meta" style="padding:9px 2px">本日の納品依頼はありません。</div>';return}
- due.forEach(function(r){box.appendChild(requestCard(r,true,true))});
- done.forEach(function(r){box.appendChild(requestCard(r,true,true))});
+ var box=byId('todayList');if(!box)return;
+ box.querySelectorAll('.swipeRow[data-delivery-id]').forEach(function(row){row.remove()});
+ var progress=host.todayDeliveryProgress();
+ progress.pending.concat(progress.done).forEach(function(r){
+  var row=document.createElement('div');row.className='swipeRow';row.dataset.deliveryId=r.id;
+  row.innerHTML='<div class="swipeAction complete">納品完了</div>';
+  var card=requestCard(r,true,true);card.classList.add('swipeCard');
+  row.appendChild(card);box.appendChild(row);
+  if(r.status==='pending')host.attachTodayDeliverySwipe(row,function(){return completeRequest(r.id,true)});
+ });
 }
 function renderTomorrow(){
  var box=byId('tomorrowDeliveryList');if(!box)return;
@@ -316,6 +317,6 @@ function render(){renderSites();renderPending();renderHistory();renderToday();if
 function pinSelected(lat,lng){sitePinDraft={lat:lat,lng:lng};showPinLabel();displayModal('deliverySiteEditor');notify('ピンの位置を選択しました。保存すると登録されます')}
 function pinCanceled(){displayModal('deliverySiteEditor')}
 function init(){ensureMarkup();render()}
-window.VENDRIVE2Delivery=Object.freeze({init:init,render:render,renderMap:renderMap,renderTomorrow:renderTomorrow,pinSelected:pinSelected,pinCanceled:pinCanceled,mapFitLocations:mapFitLocations,openSiteDetail:openSiteDetail,openRequestEditor:openRequestEditor});
+window.VENDRIVE2Delivery=Object.freeze({init:init,render:render,renderToday:renderToday,renderMap:renderMap,renderTomorrow:renderTomorrow,pinSelected:pinSelected,pinCanceled:pinCanceled,mapFitLocations:mapFitLocations,openSiteDetail:openSiteDetail,openRequestEditor:openRequestEditor});
 init();
 })();
