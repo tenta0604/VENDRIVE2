@@ -16,7 +16,7 @@
     "schema": 4
   },
   "work": {
-    "summary": "Fixed FINAl.63 Today unified list order: due/overdue pending delivery cards now precede completed vending rows when vending work ends, while preserving original vending nearest/unfinished priority and completed delivery inclusion.",
+    "summary": "Fixed FINAL.63 Today unified list order: due/overdue pending delivery cards now precede completed vending rows when vending work ends, while preserving original vending nearest/unfinished priority and completed delivery inclusion.",
     "dataSafety": "NO migration/overwrite/delete. Delivery historical price notes and completion, current machine order and existing swipe/navigation semantics unchanged.",
     "boundaries": "Only delivery.js insertion order plus version and browser regression. No database, analytics, route, scheduling or AN15 change."
   },
