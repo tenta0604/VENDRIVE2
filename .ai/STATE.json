@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.13-FINAL.60",
+  "appVersion": "2026.11.13-FINAL.61",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL60_EXTERNAL_NAV_ONLY_PRODUCTION_VERIFIED",
+  "status": "FINAL61_TODAY_CARD_EXTERNAL_NAV_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.60 live: external navigation only for vending machines, delivery sites, and offices",
-    "scope": "Owner superseded internal 2t HGV route planner with Google Maps external navigation only. Retired in-app truck-routing.js load, backend route API calls from client, route overlays/turn arrows/IC search/highway settings/2t vehicle editor/recalculate and internal route buttons. Machine, delivery and office details/map pins direct to external navigator (coordinates first, address fallback). Map/GPS current location, maker pins, delivery pins, map position picker, TODAY mixed tally, 28-day monthly cycling, saved machine/delivery/work data unchanged. External nav DOES NOT receive vehicle restrictions: explicit safety note in MAP. Existing routeVehicle values, retired truck-routing.js file and backend /api/route code are preserved dormant, not used or called by client.",
-    "releaseStatus": "PR #254 merged ac23b7a6d9e09ce6aa312735716577d2aee49fae; Browser regression exact-head 43357633388 PASS; new external-navigation and MAP readiness real Edge 320/390 with no route API/network calls 43357633483 PASS. Vercel production dpl_CJAfXg4gmLdr682cqrobY1vvhzra READY exact product SHA; public GitHub Pages and Vercel /version.json 2026.11.13-FINAL.60 verified.",
+    "title": "FINAL.61 live: one-tap external navigation on Today vending and delivery cards",
+    "scope": "Owner-requested fast 外部ナビ directly on each Today vending-machine and Today delivery-request card. Machine card tap still opens details; left/right swipe visit complete/skip still works because quick-nav button stops click propagation and is excluded from pointer gesture tracking. Delivery Today pending & completed both have direct nav; existing edit/complete, history and Tomorrow controls remain unchanged. Uses existing coordinates-first/address-fallback Google Maps external destination navigation only, with missing-location toast. Today warning repeats that external Maps cannot inherit 2t truck height/width/weight restrictions. No internal route/client/API reactivation; existing local visits, delivery prices/history, four-week monthly, analytics engine and schema untouched.",
+    "releaseStatus": "Product PR #258 merged 96c3d89d967011e616926877223fad8cccced09a. Exact-head Browser regression 43360425724 PASS including delivery workflow and missing-location handling. Real Microsoft Edge external-nav + MAP readiness 43360425745 PASS including direct Today machine/delivery navigation, no accidental swipe/completion and zero route API calls. Vercel production dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact merge; public GitHub Pages and Vercel /version.json both 2026.11.13-FINAL.61.",
     "validationEvidence": {
-      "immutablePreEditSafetyTag": "PASS Issue #253 at 009447270741ba3596ca4831722df4ae56038841",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/254",
-      "browser": "PASS 43357633388",
-      "realEdgeNoRoute": "PASS 43357633483",
-      "productMerge": "PASS ac23b7a6d9e09ce6aa312735716577d2aee49fae",
-      "vercel": "PASS READY dpl_CJAfXg4gmLdr682cqrobY1vvhzra",
-      "pages": "PASS live 2026.11.13-FINAL.60",
-      "backend": "PASS live 2026.11.13-FINAL.60"
+      "preEditImmutableTag": "PASS Issue #257 at 45b2ca3a7d73cb8a5e123c39a61a6cb50b0735c6",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/258",
+      "browser": "PASS run 43360425724",
+      "realEdge": "PASS run 43360425745",
+      "productMerge": "PASS 96c3d89d967011e616926877223fad8cccced09a",
+      "vercel": "PASS dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact product SHA",
+      "pages": "PASS 2026.11.13-FINAL.61",
+      "backend": "PASS 2026.11.13-FINAL.61"
     },
-    "nextOwnerAction": "None for release. On any registered machine, office, or delivery site, use 外部ナビ; map/position pins remain available. External Google Maps does not inherit truck dimensions or restrictions; always check local restrictions."
+    "nextOwnerAction": "On 本日 tab, tap 外部ナビ directly on an eligible machine or delivery card. No re-registration, migration or settings update required."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "Read VENDRIVE2 latest main and seven canonicals. FINAL.60 external-nav-only PR #254 merged ac23b7a6d9e09ce6aa312735716577d2aee49fae; Browser regression 43357633388 PASS; real Microsoft Edge external nav map gate 43357633483 PASS at 320px/390px, checks no truck-routing.js loaded nor /api/route calls and machine/office/delivery Google Maps destinations. Vercel dpl_CJAfXg4gmLdr682cqrobY1vvhzra READY exact product merge, Pages + Vercel public 2026.11.13-FINAL.60. OWNER SUPERSEDING DECISION: remove in-app route calculation, HGV overlays, route UI, 2t vehicle/highway settings; use external navigation exclusively; external Google Maps does NOT inherit vehicle dimensions/limits; warn on map. Keep map/GPS/pins/picker. Do not delete user routeVehicle saved data, or alter machine/delivery/TODAY, monthly 28-day, DB/schema4. Retired standalone truck-routing.js and backend /api/route remain dormant/unloaded; no client network calls. AN15 remains paused. Latest route timeout troubleshooting no longer part of active product after route UI retirement.",
+    "shortResumePrompt": "VENDRIVE2 latest main and canonical files. FINAL.61 one-tap external-nav-from-Today product PR #258 merged 96c3d89d967011e616926877223fad8cccced09a, Browser 43360425724 PASS and Real Microsoft Edge external navigation + MAP 43360425745 PASS, Vercel dpl_EZRQkdenMuZWQUGwVkeYegm4b5w6 READY exact merge, Pages/Vercel both 2026.11.13-FINAL.61. TODAY vending card now has 外部ナビ button inside right status column; button stops card tap and is excluded from horizontal swipe pointerdown; normal card tap opens detail and swipe left/right still completes/skips visit. TODAY delivery pending and completed cards have a direct external-nav button alongside edit/complete or completion label; other delivery views unchanged. Both use existing Google Maps coordinate-first, address-fallback navigation. No location => toast without navigating. Today has visible reminder that external navigation does NOT inherit 2t vehicle limits. FINAL.60 in-app HGV routing stays retired (no /api/route, no truck-routing.js load), existing map/location retained, FINAL.59 combined Today totals unchanged; FINAL.57 1ヶ月に1回=28 days, DB/schema4, engine AN14B3B5, AN15 pause unchanged.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.60 external-nav-only released and publicly verified. No product work remains. AN15 pause unchanged.",
-    "latestContinuityCheckpoint": "2026-11-13 FINAL.60 owner explicitly replaces in-app HGV routing with external Google Maps; no route requests; both public endpoints verified",
+    "handoffBoundary": "FINAL.61 one-tap Today external navigation deployed and verified. No outstanding developer action; owner may use direct buttons. External app does not inherit 2t safety constraints.",
+    "latestContinuityCheckpoint": "2026-11-13 FINAL.61 Today direct machine+delivery external nav, PR #258 + Edge/browser PASS, Pages/Vercel live",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.60 external-navigation-only owner scope COMPLETE. Do not restore the old in-app HGV route UX without a new explicit user request.",
-    "Retain safe local device records, existing 28-day monthly label semantics, delivery request history and mixed Today counts.",
-    "AN15 intentionally paused. Dormant server route code may remain for audit but is not loaded/called by clients."
+    "FINAL.61 direct Today-card navigation request is COMPLETE; no additional development needed for this scope.",
+    "Keep external navigation-only policy, same coordinates/address destination builder and visible 2t restriction warning; preserve machine card tap/swipe and delivery edit/complete controls.",
+    "Preserve FINAL.59 combined Today totals, FINAL.57 1ヶ月に1回=28 days, engine AN14B3B5, DB/schema4 and AN15 pause."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
