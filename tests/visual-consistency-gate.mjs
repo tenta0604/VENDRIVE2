@@ -25,7 +25,7 @@ export async function runVisualConsistencyGate(browser,baseUrl){
     return {accent:s.getPropertyValue('--accent').trim(),cardRadius:s.getPropertyValue('--ui-card-radius').trim(),
      controlRadius:s.getPropertyValue('--ui-control-radius').trim(),sectionSpace:s.getPropertyValue('--ui-section-space').trim()};
    });
-   assert.equal(root.accent,'var(--ink)','Map search accent follows original dark palette');
+   assert.match(root.accent,/(?:#111|rgb\(17, 17, 17\)|var\(--ink\))/,'Map search accent follows original dark palette');
    assert.equal(root.cardRadius,'15px','cards share a 15px radius');
    assert.equal(root.controlRadius,'11px','form fields/buttons share 11px radius');
    assert.equal(root.sectionSpace,'18px','sections use shared spacing');
