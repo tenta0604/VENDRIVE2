@@ -78,7 +78,11 @@ for(const width of [320,390]){
   const quickDelivery=page.locator('#todayList .deliverySwipeCard .deliveryQuickNav').first();
   assert.equal(await quickMachine.count(),1,'Today vending card needs one-tap external navigation');
   assert.equal(await quickDelivery.count(),1,'Today delivery card needs one-tap external navigation');
-  assert.match(await page.locator('#todayNavSafety').innerText(),/車高・車幅・重量条件/,'Today shortcut must warn about missing truck constraints');
+  assert.match(await page.locator('#todayNavSafety summary').innerText(),/車両制限非対応/,'Today shows a concise vehicle warning');
+  assert.equal(await page.locator('#todayNavSafety .navSafetyDetail').isVisible(),false,'full Today disclaimer starts collapsed');
+  await page.locator('#todayNavSafety summary').click();
+  assert.match(await page.locator('#todayNavSafety .navSafetyDetail').innerText(),/車高・車幅・重量条件/,'Today full safety detail remains on tap');
+  await page.locator('#todayNavSafety summary').click();
   // Touch starting on the navigation button must not trigger the card's swipe gesture.
   await quickMachine.evaluate(el=>{
    const p=(type,x)=>new PointerEvent(type,{bubbles:true,pointerId:77,pointerType:'touch',clientX:x,clientY:220,isPrimary:true});
@@ -114,7 +118,12 @@ for(const width of [320,390]){
   await open();
   await page.locator('.tabs button[data-page="mapPage"]').click();
   assert.equal(await page.locator('#externalNavSafety').count(),1,'warn external navigation does not inherit 2t vehicle limits');
-  assert.match(await page.locator('#externalNavSafety').innerText(),/車高|車幅|重量/);
+  assert.match(await page.locator('#externalNavSafety summary').innerText(),/車両制限非対応/,'Map shows a concise vehicle warning');
+  assert.equal(await page.locator('#externalNavSafety .navSafetyDetail').isVisible(),false,'full Map disclaimer starts collapsed');
+  await page.locator('#externalNavSafety summary').click();
+  assert.match(await page.locator('#externalNavSafety .navSafetyDetail').innerText(),/車高|車幅|重量/,'Map full truck restriction detail remains on tap');
+  assert.match(await page.locator('#externalNavSafety .navSafetyDetail').innerText(),/道路標識を確認/,'Map road sign warning remains');
+  await page.locator('#externalNavSafety summary').click();
   await page.locator('#officeList button').first().click();await external('destination=35.33,136.83');
   await open();
   await page.locator('.tabs button[data-page="deliveryPage"]').click();
