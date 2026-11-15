@@ -39,8 +39,7 @@ function ensureMarkup(){
  document.querySelector('.tabs').insertAdjacentHTML('beforeend','<button type="button" data-page="deliveryPage" id="deliveryNav">納品</button>');
  document.querySelector('main.main').insertAdjacentHTML('beforeend',
  '<section id="deliveryPage" class="page hidden">'+
-   '<div class="row"><div><div class="ey">DELIVERIES</div><div class="title">納品</div><div class="subtitle">納品先を登録し、依頼が来たときだけ予定を追加</div></div><button type="button" class="primary pill" id="deliveryAddSite">＋納品先</button></div>'+
-   '<div class="notice">納品は不定期です。依頼が届いたときだけ商品・数量・売値メモ・納品予定日を登録します。自販機の訪問周期には影響しません。</div>'+
+   '<div class="row"><div><div class="ey">DELIVERIES</div><div class="title">納品</div></div><button type="button" class="primary pill" id="deliveryAddSite">＋納品先</button></div>'+
    '<div class="section"><div class="sectionhead"><b>納品先</b><span class="muted" id="deliverySiteCount"></span></div><div class="search"><span class="searchIcon">⌕</span><input id="deliverySiteSearch" aria-label="納品先を検索" placeholder="納品先名・住所・管理番号を検索"></div><div id="deliverySitesList"></div></div>'+
    '<div class="section"><div class="sectionhead"><b>対応待ちの納品依頼</b><span class="muted" id="deliveryPendingCount"></span></div><div id="deliveryPendingList"></div></div>'+
    '<div class="section"><div class="sectionhead"><b>完了した納品履歴</b><span class="muted" id="deliveryHistoryCount"></span></div><div id="deliveryHistoryList"></div></div>'+
