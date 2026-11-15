@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.15-FINAL.66",
+  "appVersion": "2026.11.15-FINAL.67",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL66_UI_COPY_CLEANUP_AND_COMPACT_SAFETY_PRODUCTION_VERIFIED",
+  "status": "FINAL67_VISUAL_FOUNDATION_CONSISTENCY_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.66 live: remove redundant explanatory UI copy and compact external navigation caution",
-    "scope": "Owner-approved UI-only polish based on five screenshots. Removed Task explanatory subtitle and hero text, Map explanatory subtitle, Order repetitive notice, Delivery explanatory subtitle and long notice. Replaced permanently visible Today and Map truck warning paragraphs with compact clickable native <details> labels '⚠️ 車両制限非対応'; full 2t truck height/width/weight plus road-sign caution retained on tap. OpenStreetMap attribution, current tab actions, history, weather, Today list, swipe, order, tasks and delivery behavior untouched. App VERSION/manifest both 2026.11.15-FINAL.66. Existing engine, DB/schema4 and paused AN15 untouched.",
-    "releaseStatus": "Product PR #273 merged cd8424fb52fe7625213c1289e2be9386d2271094. Immutable annotated tag Issue #272 PASS at e3660fcc7f71871eb00c176773824e10ba13f281. Exact-head Browser regression 43668389796 PASS (320/390/430px compact warnings and tab controls, legacy and weather suites), real Edge external navigation/MAP 43668389777 PASS with updated disclosure assertions. CI runners pinned Ubuntu 24.04 to support existing Playwright 1.55 after ubuntu-latest shifted 26.04; first installer failure was environment-only. Production Vercel dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc READY exact product merge, public Vercel and GitHub Pages /version.json both 2026.11.15-FINAL.66. No data migration.",
+    "title": "FINAL.67 live: unify shared VENDRIVE visual foundation without changing app workflows",
+    "scope": "Owner accepted FINAL.66 removal of redundant explanation copy and directed next previously agreed polish phase. Scoped FIRST design-system consistency pass, not full redesign. Existing black/white/purple palette, six-tab structure and page content retained. In index.html late isolated stylesheet consolidates 15px card radius, 11px button/field/search radius, 18px section spacing, consistent white input backgrounds and borders, compact heading/action alignment, keyboard/text-field focus visibility, and repairs undefined --accent CSS so Map search button is black with white text. No user data, scheduling, swipe, delivery, weather, navigation, ANALYTICS or AN15 change. APP_VERSION + manifest aligned at 2026.11.15-FINAL.67.",
+    "releaseStatus": "Product PR #276 merged f56147c69ae47fda4329b093db87b51669039882. Pre-edit annotated safety tag Issue #275 -> 946442a29a947ca26a56ca6198541f41f05b6d43 verified. Exact-head Browser regression 43671569040 PASS incl 7 legacy, weather, FINAL.66 copy, new 320/390/430px design consistency tests; real Edge external navigation/MAP run 43671569114 PASS. Prior test-only version assertion was hardcoded FINAL.66; it now compares to version.json dynamically (harness-only). Production Vercel dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq READY exact product merge, public Vercel and GitHub Pages /version.json both 2026.11.15-FINAL.67 verified. No data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #272 annotated backup-pre-FINAL66-UI-COPY-CLEANUP-20261115-20261115 -> e3660fcc7f71871eb00c176773824e10ba13f281",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/273",
-      "browser": "PASS 43668389796 exact product head, new UI gate 320/390/430px + old suites",
-      "realMicrosoftEdge": "PASS 43668389777 exact product head, external nav/map/gesture + disclosure warning",
-      "merge": "PASS cd8424fb52fe7625213c1289e2be9386d2271094",
-      "vercel": "PASS READY dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc exact product merge",
-      "pages": "PASS public 2026.11.15-FINAL.66 Firecrawl no-cache",
-      "backend": "PASS 200 2026.11.15-FINAL.66"
+      "preEditImmutableSafetyTag": "PASS Issue #275 backup-pre-FINAL67-VISUAL-CONSISTENCY-20261115-20261115 -> 946442a29a947ca26a56ca6198541f41f05b6d43",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/276",
+      "browser": "PASS 43671569040 exact-head, visual 320/390/430 + legacy/weather/copy",
+      "realMicrosoftEdge": "PASS 43671569114 exact-head external navigation/MAP/gesture and regressions",
+      "merge": "PASS f56147c69ae47fda4329b093db87b51669039882",
+      "vercel": "PASS READY dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq exact product merge",
+      "pages": "PASS public 2026.11.15-FINAL.67 (fresh independent fetch)",
+      "backend": "PASS HTTP 200 2026.11.15-FINAL.67"
     },
-    "nextOwnerAction": "Open latest VENDRIVE; explanatory paragraphs removed and compact '⚠️ 車両制限非対応' in Today/Map expands full safety details when tapped. Retain field feedback for further UI polish."
+    "nextOwnerAction": "Open latest VENDRIVE and check all-tab visual consistency and black high-contrast Map search button; this is the first visual-system polish pass. Next possible stage is concentrated Today-card readability only after owner feedback."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.66 UI copy cleanup production verified 2026-11-15. Latest main + canonical docs authoritative. Owner approved removing repetitive explanatory text from Task, Map, Order and Delivery, and replacing large Today/Map external navigation truck safety notices with compact '⚠️ 車両制限非対応' native <details> retaining full truck restrictions and road-sign caution on tap. Product PR #273 merged cd8424fb52fe7625213c1289e2be9386d2271094 after immutable pre-edit annotated tag Issue #272 at e3660fcc7f71871eb00c176773824e10ba13f281. Exact-head Browser run 43668389796 PASS incl new mobile 320/390/430px tests, real Edge run 43668389777 PASS. CI browser runners pinned Ubuntu 24.04 to avoid Playwright 1.55 unsupported Ubuntu 26.04 from ubuntu-latest. Vercel dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc READY at product SHA; Pages/Vercel versions 2026.11.15-FINAL.66. FINAL.65 weather resilience, FINAL.64 delivery priority, FINAL.63 unified Today delivery and swipe preserved. Engine AN14B3B5, DB/schema4, 28d monthly, retired in-app route, AN15 paused.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.67 FINAL.67 first visual-system consistency pass production verified 2026-11-15. Latest main and canonical docs authoritative. Owner accepted FINAL.66 copy removal and directed next planned UI polish (global consistency). Kept existing monochrome palette and page layouts, standardized card radius15/control radius11/section spacing18, white search/form borders/background, headings/actions, visible focus, fixed undefined --accent so Map search button black-on-white text. Product PR #276 merged f56147c69ae47fda4329b093db87b51669039882; immutable annotated tag Issue #275 at 946442a29a947ca26a56ca6198541f41f05b6d43 PASS. Exact-head Browser regression 43671569040 incl 320/390/430px new visual tests PASS; real Edge navigation/MAP 43671569114 PASS. Vercel dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq READY matching product SHA and public Pages/backend version 2026.11.15-FINAL.67 confirmed. FINAL.66 text and truck warnings, FINAL.65 weather, FINAL.64 delivery priority, FINAL.63 delivery gestures unchanged. Engine AN14B3B5 DB/schema4, 28-day monthly and intentionally paused AN15 unchanged. No further UI step automatically; await owner.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.66 UI copy trimming and compact external navigation safety delivered and verified. Preserve all runtime behavior and on-demand full truck safety warning; wait for owner feedback before further UI changes.",
-    "latestContinuityCheckpoint": "2026-11-15 FINAL.66 PR #273 merged; Browser+Edge PASS, Vercel READY + Pages version verified; canonical docs closeout.",
+    "handoffBoundary": "FINAL.67 design foundation consistency verified: preserve original palette and functionality; no more UI refactor until owner's next direction. Old final66 test hardcoded version now dynamic.",
+    "latestContinuityCheckpoint": "2026-11-15 FINAL.67 product PR #276, Browser+Edge PASS, Vercel READY and Pages version verified; canonical closeout.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.66 UI cleanup and compact external-navigation caution COMPLETE; no additional automatic UI changes without new owner decision.",
-    "Keep full 2t truck restrictions accessible via compact warning on Today and Map; never imply external Google Maps honors vehicle dimensions.",
-    "Preserve FINAL.65 weather reliability, FINAL.64 delivery priority, FINAL.63 delivery swipe, 28-day monthly, archived legacy cycles, retired in-app navigation, AN14B3B5 DB/schema4 and AN15 paused."
+    "FINAL.67 initial visual-system unification COMPLETE. Await owner evaluation before further design changes.",
+    "If approved, next planned UI focus: 本日タブ readability, machine/delivery card hierarchy and spacing; keep visual updates separate from behavior changes.",
+    "Preserve FINAL.66 text removal + truck safety details, FINAL.65 weather, FINAL.64 delivery priority, 28-day monthly, external-only nav, AN14B3B5 DB/schema4 and paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
