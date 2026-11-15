@@ -1,42 +1,40 @@
 {
-  "evidenceVersion": 97,
-  "runType": "final67_visual_foundation_consistency_production_closeout_20261115",
-  "phase": "FINAL67_UI_VISUAL_FOUNDATION_CONSISTENCY",
+  "evidenceVersion": 98,
+  "runType": "final68_weather_recurrence_resilience_production_closeout_20261115",
+  "phase": "FINAL68_WEATHER_GPS_STABILITY_LAST_GOOD_CACHE_ERROR_HANDLING",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "946442a29a947ca26a56ca6198541f41f05b6d43",
-    "preEditImmutableSafetyTag": "PASS Issue #275 annotated backup-pre-FINAL67-VISUAL-CONSISTENCY-20261115-20261115",
-    "productPR": 276,
-    "productMerge": "f56147c69ae47fda4329b093db87b51669039882"
+    "mainBefore": "314891134ebbe43f8a56c1942d6b218670fbbc26",
+    "preEditImmutableSafetyTag": "PASS Issue #278 backup-pre-FINAL68-WEATHER-RECURRENCE-20261115-20261115",
+    "productPR": 279,
+    "productMerge": "8a2592fc9f5add97cdcef80af17f92c14ce75111"
   },
   "versions": {
-    "app": "2026.11.15-FINAL.67",
+    "app": "2026.11.15-FINAL.68",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Established small shared CSS visual tokens for existing white/black design: 15px cards, 11px controls and 18px sections, form/search white surfaces and consistent subtle borders, headings/actions, visible focus, fixed undefined Map search --accent leading to contrast issue. No page flow or content modifications.",
-    "safety": "No user data, routing, map tiles, location, planning, tasks, deliveries, weather, external nav, DB/schema or AN15 promotion changes.",
-    "testHarness": "Existing UI-copy gate incorrectly required FINAL.66 literal; replaced with dynamic comparison to version.json, then reran required finite exact-head suites to SUCCESS."
+    "summary": "Weather-only current GPS anchor stable for <2km location jitter, avoids repeated in-flight changing coordinates. Persist bounded last-good successful non-GPS office/route forecasts (max six, same calendar day, max six hours) in separate localStorage; serve stale immediately while refreshing, retain on failure with age, reason, retry. Full .catch handles invalid HTTP200 payload without seven-second hang or unhandled promise. Improved response validation and readable phone status.",
+    "safety": "Preserves user local data and scheduling; does not store live raw device coordinates, does not write to existing saved app state or migrate DB; no route, analytics, AN15, visual or server-side change.",
+    "limitation": "No live iPhone network trace; Open-Meteo request returned HTTP200 from external vantage during investigation. Behavior fixed for reproducible code flaws, not a demonstrated provider outage."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #275 target 946442a29a947ca26a56ca6198541f41f05b6d43",
-    "staticSyntax": "PASS index inline JS parse and browser/Edge syntax gates",
-    "exactHeadBrowserRegression": "PASS run 43671569040 (7 legacy HTML suites, weather, FINAL.66 copy, FINAL.67 320/390/430px)",
-    "exactHeadRealMicrosoftEdge": "PASS run 43671569114 (external nav, MAP, deliveries and browser regressions)",
-    "productMerge": "PASS PR #276 f56147c69ae47fda4329b093db87b51669039882",
-    "vercel": "PASS READY dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq exact product merge",
-    "pages": "PASS public 2026.11.15-FINAL.67",
-    "backend": "PASS 200 2026.11.15-FINAL.67",
-    "dataMigration": "NOT_REQUIRED - CSS, version and tests only"
+    "preEditImmutableTag": "PASS Issue #278 target 314891134ebbe43f8a56c1942d6b218670fbbc26",
+    "staticSyntax": "PASS inline app scripts parsed and Browser/Edge static checks",
+    "browser": "PASS run 43673461895 (7 legacy, weather malformed-200, GPS jitter, persisted last-good 503 recovery, timeout, copy+visual)",
+    "realEdge": "PASS run 43673461974 (external navigation, MAP, delivery, legacy browser)",
+    "productMerge": "PASS PR #279 8a2592fc9f5add97cdcef80af17f92c14ce75111",
+    "vercel": "PASS READY dpl_o9bujc1dikt7NYTjCNoxePqHGrpe exact product merge",
+    "pages": "PASS public 2026.11.15-FINAL.68",
+    "backend": "PASS 200 2026.11.15-FINAL.68",
+    "schemaMigration": "NOT_REQUIRED separate bounded weather-only cache, legacy data intact"
   },
   "changedFiles": [
     "index.html",
     "version.json",
-    "tests/run-browser-gates.mjs",
-    "tests/visual-consistency-gate.mjs",
-    "tests/ui-copy-cleanup-gate.mjs",
+    "tests/weather-fetch-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -44,12 +42,12 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE; await owner observation of design consistency. Do not resume AN15 or change operational workflow.",
+  "nextAction": "COMPLETE. Await device feedback; no need for personal GPS traces or re-opening AN15.",
   "continuityCheckpoint": {
-    "status": "FINAL67_VISUAL_FOUNDATION_CONSISTENCY_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.15-FINAL.67",
-    "productMerge": "f56147c69ae47fda4329b093db87b51669039882",
-    "tokens": "black-white-purple, card15/control11/section18, map search corrected",
-    "legacy": "FINAL.66 copy, FINAL.65 weather, FINAL.64 delivery; AN14B3B5 DB/schema4 paused AN15"
+    "status": "FINAL68_WEATHER_RECURRENCE_HARDENING_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.15-FINAL.68",
+    "productMerge": "8a2592fc9f5add97cdcef80af17f92c14ce75111",
+    "weather": "GPS stable2km, non-GPS last-good6h max6, 7s timeout, clear error reasons",
+    "legacy": "FINAL.67 visual, FINAL.66 copy, FINAL.64 delivery, 28d monthly, AN14B3B5 DB/schema4, paused AN15"
   }
 }
