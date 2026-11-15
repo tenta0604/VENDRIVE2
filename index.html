@@ -848,7 +848,7 @@ function fetchWeatherBundle(point){
   function finish(error,data){if(settled)return;settled=true;clearTimeout(timer);if(error){reject(error);return}resolve({core:data,pop:data,coreSource:'best-match'})}
   var timer=setTimeout(function(){if(controller)controller.abort();finish(new Error('weather request timeout'))},7000);
   var options=controller?{signal:controller.signal}:{};
-  fetch(weatherUrl(point),options).then(function(response){if(!response.ok)throw new Error('weather HTTP '+response.status);return response.json()}).then(function(data){if(!validWeatherPayload(data))throw new Error('invalid weather payload');finish(null,data)},function(error){finish(error)})
+  Promise.resolve().then(function(){return fetch(weatherUrl(point),options)}).then(function(response){if(!response.ok)throw new Error('weather HTTP '+response.status);return response.json()}).then(function(data){if(!validWeatherPayload(data))throw new Error('invalid weather payload');finish(null,data)}).catch(function(error){finish(error)})
  })
 }
 function weatherRequest(point){
