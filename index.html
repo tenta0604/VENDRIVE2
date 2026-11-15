@@ -352,7 +352,7 @@ var now=new Date(), today=iso(now), todayDay=WEEK[now.getDay()];
 var CYCLES={'毎日':1,'2日周期':2,'3日周期':3,'1週間に1回':7,'2週間に1回':14,'3週間に1回':21,'1ヶ月に1回':28};
 var key='vendrive2_v7_data';
 var state={machines:[],offices:[],deliverySites:[],deliveryRequests:[],history:[],tomorrowPlan:null,tasks:[],taskHistory:[],temporaryVisitPeriods:[],restDays:[],makers:['コカ・コーラ','サントリー','KIRIN','アサヒ','伊藤園','DyDo','ポッカサッポロ','大塚製薬'],makerColors:{},makerSettings:[]};
-var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null,  currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null,mapPositionMode=null,reverseGeocodeToken=0,machineMapMarkers=[],machinePinFanFrame=null,mapFollowCurrentPosition=false,addressSearchSequence=0,addressSearchInFlight=false,addressSearchActiveQuery="",addressSearchLastRequestAt=0,addressSearchAbortController=null,lockedPageScrollY=null,runtimeCurrentPosition=null,currentLocationMarker=null,currentLocationDisplayPosition=null,currentLocationDisplayHeading=null,currentLocationAnimationFrame=null,currentLocationAnimationToken=0,currentPositionWatchId=null,todayPositionRenderTimer=null,lastTodayPositionRenderAt=0,currentLocationAddress="",currentLocationStatus="loading",currentLocationReverseLat=null,currentLocationReverseLng=null,currentLocationReverseAt=0,currentLocationReverseSequence=0,weatherCache={},weatherPending={},weatherRequestSequence=0,weatherInFlightKey="",activeWeatherPointKey="",tomorrowWeatherRequestSequence=0,tomorrowWeatherActivePointKey="",tomorrowWeatherInFlightKey="",editingTask=null,editingTaskTargetIds=[],editingTaskResetIds={},selectedTaskCreateMachineIds=[],mapInitialCenterPending=true,mapInitialCenterConsumed=false,machineSortMode=false,machineSortDraft=[],machineSortDragSession=null;
+var selectedMachine=null, selectedMapDay=todayDay, mapTodayMode=true, mapTomorrowMode=false, allRoutes=false, selectedOrderMachine=null, selectedOrderType=null, selectedProductSub=null, addPoint=null, leafletMap=null, machineLayer=null,  currentLocationLayer=null, addingMachine=false,addingOffice=false, geoTimer=null,editingMakerId=null,latestUndoTransaction=null,undoTimer=null,mapPositionMode=null,reverseGeocodeToken=0,machineMapMarkers=[],machinePinFanFrame=null,mapFollowCurrentPosition=false,addressSearchSequence=0,addressSearchInFlight=false,addressSearchActiveQuery="",addressSearchLastRequestAt=0,addressSearchAbortController=null,lockedPageScrollY=null,runtimeCurrentPosition=null,currentLocationMarker=null,currentLocationDisplayPosition=null,currentLocationDisplayHeading=null,currentLocationAnimationFrame=null,currentLocationAnimationToken=0,currentPositionWatchId=null,todayPositionRenderTimer=null,lastTodayPositionRenderAt=0,currentLocationAddress="",currentLocationStatus="loading",currentLocationReverseLat=null,currentLocationReverseLng=null,currentLocationReverseAt=0,currentLocationReverseSequence=0,weatherCache={},weatherPending={},weatherCurrentAnchor=null,weatherRequestSequence=0,weatherInFlightKey="",activeWeatherPointKey="",tomorrowWeatherRequestSequence=0,tomorrowWeatherActivePointKey="",tomorrowWeatherInFlightKey="",editingTask=null,editingTaskTargetIds=[],editingTaskResetIds={},selectedTaskCreateMachineIds=[],mapInitialCenterPending=true,mapInitialCenterConsumed=false,machineSortMode=false,machineSortDraft=[],machineSortDragSession=null;
 
 var arrivalVisitQueue=[],arrivalVisitCurrentId=null,rotatedMapPanGesture=null,mapViewportRefreshGeneration=0,mapViewportEnvironmentTimer=null;
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -373,7 +373,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.15-FINAL.67',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.15-FINAL.68',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -757,28 +757,91 @@ function weatherCentroid(machines,source,label){var points=(machines||[]).map(va
 function todayWeatherMachines(){return todayActualTargets()}
 function tomorrowWeatherMachines(){var plan=state.tomorrowPlan,expectedDate=iso(tomorrowDate());if(!plan||!Array.isArray(plan.ids)||plan.date!==expectedDate)return[];return state.machines.filter(function(machine){return plan.ids.indexOf(machine.id)>=0})}
 function weatherOfficePoint(){var offices=(state.offices||[]).filter(function(office){return!!validWeatherPoint(office)}),selected=state.weatherOfficeId&&offices.find(function(office){return office.id===state.weatherOfficeId}),office=selected||offices[0],point=validWeatherPoint(office);return point?{lat:point.lat,lng:point.lng,source:'office',label:(office.name||'営業所')+'付近'}:null}
-function resolveWeatherPoint(mode){var isTomorrow=mode==='tomorrow',route=weatherCentroid(isTomorrow?tomorrowWeatherMachines():todayWeatherMachines(),isTomorrow?'tomorrow':'today',isTomorrow?'翌出勤日の巡回エリア':'本日の巡回エリア');if(route)return route;var office=weatherOfficePoint();if(office)return office;var current=validWeatherPoint(runtimeCurrentPosition);return current?{lat:current.lat,lng:current.lng,source:'current',label:'現在地付近'}:null}
+function stableCurrentWeatherPoint(){
+ var current=validWeatherPoint(runtimeCurrentPosition);
+ if(!current){weatherCurrentAnchor=null;return null}
+ // GPS can fluctuate hundreds of metres even while stationary. Weather is area-scale data:
+ // keep the same weather request point until the device has genuinely moved ~2 km.
+ if(!weatherCurrentAnchor||distanceMeters(weatherCurrentAnchor,current)>=2000)weatherCurrentAnchor=current;
+ return {lat:weatherCurrentAnchor.lat,lng:weatherCurrentAnchor.lng,source:'current',label:'現在地付近'}
+}
+function resolveWeatherPoint(mode){var isTomorrow=mode==='tomorrow',route=weatherCentroid(isTomorrow?tomorrowWeatherMachines():todayWeatherMachines(),isTomorrow?'tomorrow':'today',isTomorrow?'翌出勤日の巡回エリア':'本日の巡回エリア');if(route)return route;var office=weatherOfficePoint();if(office)return office;return stableCurrentWeatherPoint()}
 function weatherPointCacheKey(point){return point.lat.toFixed(3)+','+point.lng.toFixed(3)}
 function weatherCodeInfo(code){if(code===null||code===undefined||code===''||!isFinite(Number(code)))return {emoji:'🌡️',label:'天気情報なし'};code=Number(code);if(code===0)return {emoji:'☀️',label:'晴れ'};if(code===1||code===2)return {emoji:'🌤️',label:'晴れ/曇り'};if(code===3)return {emoji:'☁️',label:'曇り'};if(code===45||code===48)return {emoji:'🌫️',label:'霧'};if((code>=51&&code<=67)||code>=80&&code<=82)return {emoji:'🌧️',label:'雨'};if((code>=71&&code<=77)||code>=85&&code<=86)return {emoji:'🌨️',label:'雪'};if(code>=95)return {emoji:'⛈️',label:'雷雨'};return {emoji:'🌡️',label:'天気'}}
 function weatherNumber(value,digits){if(value===null||value===undefined||value==='')return '--';value=Number(value);return isFinite(value)?value.toFixed(digits||0):'--'}
-function renderTodayWeatherCard(point,data,error){
- var box=$id('todayWeatherCard');if(!box)return;
- if(!point){box.textContent='天気地点なし（位置情報か地図ピンを設定）';return}
- if(error){
-  box.innerHTML='<div class="todayWeatherMain">天気取得に失敗</div><button class="weatherRetryButton" type="button">↻ 再取得</button><div class="todayWeatherSource">'+esc(point.label)+'</div>';
-  box.querySelector('.weatherRetryButton').onclick=function(){requestTodayWeather(point,true)};
-  return
- }
- if(!data){box.innerHTML='<div class="todayWeatherMain">天気を取得中…</div><div class="todayWeatherSource">'+esc(point.label)+'</div>';return}
- var core=data.core||{},current=core.current||{},dailyCode=dailyValueForDate(core,'weather_code',today),info=weatherCodeInfo(dailyCode!==undefined?dailyCode:current.weather_code),max=weatherNumber(dailyValueForDate(core,'temperature_2m_max',today)),min=weatherNumber(dailyValueForDate(core,'temperature_2m_min',today)),pop=weatherNumber(dailyValueForDate(data.pop,'precipitation_probability_max',today));
- box.innerHTML='<div class="todayWeatherMain">'+info.emoji+' '+weatherNumber(current.temperature_2m)+'℃</div><div class="todayWeatherMeta">'+info.label+'　'+max+'° / '+min+'°</div><div class="todayWeatherMeta">降水 '+pop+'%</div><div class="todayWeatherSource">'+esc(point.label)+'</div>'
+
+var WEATHER_LAST_GOOD_KEY='vendrive2_weather_last_good_v1';
+function weatherFailureLabel(error){
+ var message=String(error&&error.message||error||'');
+ if(/timeout/i.test(message))return '通信タイムアウト';
+ if(/HTTP 429/.test(message))return '天気サービスが混雑中';
+ if(/HTTP 5[0-9][0-9]/.test(message))return '天気サービスが応答していません';
+ if(/invalid/.test(message))return '天気データを確認できません';
+ return '通信エラー'
 }
-// Open-Meteo Best Match already selects the appropriate local forecast model.
-// Fetch all shown fields together, avoiding a second JMA request blocking the display.
+function weatherCacheUsable(cached){
+ return !!(cached&&cached.data&&cached.day===today&&cached.at<=Date.now()&&Date.now()-cached.at<6*60*60000)
+}
+function weatherLoadSaved(point,key){
+ if(point.source==='current')return null; // never persist exact device GPS coordinates
+ try{
+  var stored=JSON.parse(localStorage.getItem(WEATHER_LAST_GOOD_KEY)||'{}'),entry=stored[key];
+  if(!entry||!weatherCacheUsable(entry)||!validWeatherPayload(entry.data.core))return null;
+  return {data:entry.data,at:entry.at,day:entry.day,error:false}
+ }catch(error){return null}
+}
+function weatherPersistSuccess(point,key,cached){
+ if(point.source==='current')return; // machine/office pins already belong to saved user records
+ try{
+  var stored=JSON.parse(localStorage.getItem(WEATHER_LAST_GOOD_KEY)||'{}');
+  if(!stored||typeof stored!=='object'||Array.isArray(stored))stored={};
+  stored[key]={data:cached.data,at:cached.at,day:today};
+  var limited=Object.keys(stored).filter(function(item){return weatherCacheUsable(stored[item])}).sort(function(a,b){return stored[b].at-stored[a].at}).slice(0,6);
+  var next={};limited.forEach(function(item){next[item]=stored[item]});
+  localStorage.setItem(WEATHER_LAST_GOOD_KEY,JSON.stringify(next))
+ }catch(error){/* weather display must work even if private storage is blocked */}
+}
+function weatherGetCached(point){
+ var key=weatherPointCacheKey(point),cached=weatherCache[key];
+ if(cached&&cached.data&&!weatherCacheUsable(cached)){delete weatherCache[key];cached=null}
+ if(cached)return cached;
+ var saved=weatherLoadSaved(point,key);
+ if(saved)weatherCache[key]=saved;
+ return saved
+}
+function weatherPreviousLabel(cached){
+ if(!weatherCacheUsable(cached))return '';
+ return '前回'+new Date(cached.at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false})+'取得'
+}
+function weatherRetryButton(handler){
+ var button=document.createElement('button');button.type='button';button.className='weatherRetryButton';button.textContent='↻ 再取得';button.onclick=handler;return button
+}
+function weatherStatusLine(point,entry,error,refreshing){
+ var label=error?'⚠ '+(entry&&entry.reason||'更新失敗'):refreshing?'更新中…':'';
+ var time=weatherPreviousLabel(entry);
+ return (time?time+(label?' · ':''):'')+label
+}
+function renderTodayWeatherCard(point,data,error,refreshing,entry){
+ var box=$id('todayWeatherCard');if(!box)return;
+ if(!point){box.textContent=currentLocationStatus==='loading'?'天気地点を取得中…':'天気地点なし（位置情報か地図ピンを設定）';return}
+ if(!data){
+  if(error){
+   box.innerHTML='<div class="todayWeatherMain">天気取得に失敗</div><div class="todayWeatherSource">'+esc(entry&&entry.reason||'通信できません')+'</div><div class="todayWeatherSource">'+esc(point.label)+'</div>';
+   box.appendChild(weatherRetryButton(function(){requestTodayWeather(point,true)}));return
+  }
+  box.innerHTML='<div class="todayWeatherMain">天気を取得中…</div><div class="todayWeatherSource">'+esc(point.label)+'</div>';return
+ }
+ var core=data.core||{},current=core.current||{},dailyCode=dailyValueForDate(core,'weather_code',today),info=weatherCodeInfo(dailyCode!==undefined?dailyCode:current.weather_code),max=weatherNumber(dailyValueForDate(core,'temperature_2m_max',today)),min=weatherNumber(dailyValueForDate(core,'temperature_2m_min',today)),pop=weatherNumber(dailyValueForDate(data.pop,'precipitation_probability_max',today)),status=(refreshing||error)?weatherStatusLine(point,entry,error,refreshing):'';
+ box.innerHTML='<div class="todayWeatherMain">'+info.emoji+' '+weatherNumber(current.temperature_2m)+'℃</div><div class="todayWeatherMeta">'+info.label+'　'+max+'° / '+min+'°</div><div class="todayWeatherMeta">降水 '+pop+'%</div>'+(status?'<div class="todayWeatherSource">'+esc(status)+'</div>':'')+'<div class="todayWeatherSource">'+esc(point.label)+'</div>';
+ if(error)box.appendChild(weatherRetryButton(function(){requestTodayWeather(point,true)}))
+}
+// One supported Open-Meteo Best Match request for all shown current/daily fields.
 function weatherUrl(point){
  return 'https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(point.lat)+'&longitude='+encodeURIComponent(point.lng)+'&current=temperature_2m,apparent_temperature,weather_code,precipitation,rain,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Asia%2FTokyo&forecast_days=8&wind_speed_unit=ms&cell_selection=land'
 }
-function validWeatherPayload(data){return !!(data&&data.current&&data.daily&&Array.isArray(data.daily.time)&&Array.isArray(data.daily.temperature_2m_max)&&Array.isArray(data.daily.temperature_2m_min)&&Array.isArray(data.daily.weather_code))}
+function validWeatherPayload(data){
+ return !!(data&&data.current&&typeof data.current.temperature_2m==='number'&&isFinite(data.current.temperature_2m)&&data.daily&&Array.isArray(data.daily.time)&&Array.isArray(data.daily.temperature_2m_max)&&Array.isArray(data.daily.temperature_2m_min)&&Array.isArray(data.daily.weather_code)&&Array.isArray(data.daily.precipitation_probability_max))
+}
 function fetchWeatherBundle(point){
  return new Promise(function(resolve,reject){
   var controller=typeof AbortController==='function'?new AbortController():null,settled=false;
@@ -791,29 +854,33 @@ function fetchWeatherBundle(point){
 function weatherRequest(point){
  var key=weatherPointCacheKey(point);
  if(weatherPending[key])return weatherPending[key];
- var pending=fetchWeatherBundle(point).then(function(data){weatherCache[key]={data:data,at:Date.now(),error:false};return data}).catch(function(error){
-  weatherCache[key]={data:null,at:Date.now(),error:true};
-  if(window.console&&console.info)console.info('[VENDRIVE2 weather] retrieval failed:',String(error&&error.message||error));
+ var pending=fetchWeatherBundle(point).then(function(data){
+  var success={data:data,at:Date.now(),day:today,error:false};
+  weatherCache[key]=success;weatherPersistSuccess(point,key,success);return data
+ }).catch(function(error){
+  var old=weatherCache[key]||weatherLoadSaved(point,key),fallback=weatherCacheUsable(old)?old:null;
+  weatherCache[key]={data:fallback?fallback.data:null,at:fallback?fallback.at:Date.now(),day:today,error:true,failedAt:Date.now(),reason:weatherFailureLabel(error)};
+  if(window.console&&console.info)console.info('[VENDRIVE2 weather] retrieval failed:',weatherFailureLabel(error));
   throw error
  }).finally(function(){if(weatherPending[key]===pending)delete weatherPending[key]});
  weatherPending[key]=pending;
  return pending
 }
-function weatherCacheFresh(cached){return !!(cached&&Date.now()-cached.at<(cached.error?15000:30*60000))}
+function weatherCacheFresh(cached){return !!(cached&&(cached.error?Date.now()-(cached.failedAt||cached.at)<15000:weatherCacheUsable(cached)&&Date.now()-cached.at<30*60000))}
 function dailyIndexForDate(data,date){var daily=data&&data.daily;return daily&&Array.isArray(daily.time)?daily.time.indexOf(date):-1}
 function dailyValueForDate(data,field,date){var index=dailyIndexForDate(data,date),values=data&&data.daily&&data.daily[field];return index>=0&&Array.isArray(values)?values[index]:undefined}
 function requestTodayWeather(point,force){
- var key=weatherPointCacheKey(point),cached=weatherCache[key];
- if(!force&&weatherCacheFresh(cached)){renderTodayWeatherCard(point,cached.data,cached.error);return}
+ var key=weatherPointCacheKey(point),cached=weatherGetCached(point);
+ if(!force&&weatherCacheFresh(cached)){renderTodayWeatherCard(point,cached.data,cached.error,false,cached);return}
  if(!force&&weatherInFlightKey===key)return;
  var sequence=++weatherRequestSequence;weatherInFlightKey=key;
- renderTodayWeatherCard(point,null,false);
+ renderTodayWeatherCard(point,weatherCacheUsable(cached)?cached.data:null,false,true,cached);
  weatherRequest(point).then(function(data){
   if(sequence!==weatherRequestSequence||key!==activeWeatherPointKey)return;
-  weatherInFlightKey='';renderTodayWeatherCard(point,data,false)
+  weatherInFlightKey='';renderTodayWeatherCard(point,data,false,false,weatherCache[key])
  },function(){
   if(sequence!==weatherRequestSequence||key!==activeWeatherPointKey)return;
-  weatherInFlightKey='';renderTodayWeatherCard(point,null,true)
+  weatherInFlightKey='';var fallback=weatherCache[key];renderTodayWeatherCard(point,weatherCacheUsable(fallback)?fallback.data:null,true,false,fallback)
  })
 }
 function renderTodayWeather(){
@@ -825,32 +892,34 @@ function renderTodayWeather(){
  requestTodayWeather(point,false)
 }
 function tomorrowWeatherIndex(data){var daily=data&&data.daily,target=iso(tomorrowDate());if(!daily||!Array.isArray(daily.time))return-1;return daily.time.indexOf(target)}
-function renderTomorrowWeatherCard(point,data,error){
+function renderTomorrowWeatherCard(point,data,error,refreshing,entry){
  var box=$id('tomorrowWeatherCard');if(!box)return;
- if(!point){box.textContent='天気地点なし（位置情報か地図ピンを設定）';return}
- if(error){
-  box.innerHTML='<div class="tomorrowWeatherTitle">天気取得に失敗</div><button class="weatherRetryButton" type="button">↻ 再取得</button><div class="tomorrowWeatherSource">'+esc(point.label)+'</div>';
-  box.querySelector('.weatherRetryButton').onclick=function(){requestTomorrowWeather(point,true)};
-  return
+ if(!point){box.textContent=currentLocationStatus==='loading'?'天気地点を取得中…':'天気地点なし（位置情報か地図ピンを設定）';return}
+ if(!data){
+  if(error){
+   box.innerHTML='<div class="tomorrowWeatherTitle">天気取得に失敗</div><div class="tomorrowWeatherSource">'+esc(entry&&entry.reason||'通信できません')+'</div><div class="tomorrowWeatherSource">'+esc(point.label)+'</div>';
+   box.appendChild(weatherRetryButton(function(){requestTomorrowWeather(point,true)}));return
+  }
+  box.innerHTML='<div class="tomorrowWeatherTitle">翌出勤日の天気を取得中…</div><div class="tomorrowWeatherSource">'+esc(point.label)+'</div>';return
  }
- if(!data){box.innerHTML='<div class="tomorrowWeatherTitle">翌出勤日の天気を取得中…</div><div class="tomorrowWeatherSource">'+esc(point.label)+'</div>';return}
  var target=iso(tomorrowDate()),core=data.core||{},index=dailyIndexForDate(core,target);
  if(index<0){box.innerHTML='<div class="tomorrowWeatherTitle">翌出勤日の天気情報を取得できません</div><div class="tomorrowWeatherSource">'+esc(point.label)+'</div>';return}
- var info=weatherCodeInfo(dailyValueForDate(core,'weather_code',target)),max=weatherNumber(dailyValueForDate(core,'temperature_2m_max',target)),min=weatherNumber(dailyValueForDate(core,'temperature_2m_min',target)),pop=weatherNumber(dailyValueForDate(data.pop,'precipitation_probability_max',target));
- box.innerHTML='<div class="tomorrowWeatherTitle">'+info.emoji+' 翌出勤日の天気　'+info.label+'</div><div class="tomorrowWeatherMeta">最高 '+max+'℃ / 最低 '+min+'℃　降水 '+pop+'%</div><div class="tomorrowWeatherSource">'+esc(point.label)+'</div>'
+ var info=weatherCodeInfo(dailyValueForDate(core,'weather_code',target)),max=weatherNumber(dailyValueForDate(core,'temperature_2m_max',target)),min=weatherNumber(dailyValueForDate(core,'temperature_2m_min',target)),pop=weatherNumber(dailyValueForDate(data.pop,'precipitation_probability_max',target)),status=(refreshing||error)?weatherStatusLine(point,entry,error,refreshing):'';
+ box.innerHTML='<div class="tomorrowWeatherTitle">'+info.emoji+' 翌出勤日の天気　'+info.label+'</div><div class="tomorrowWeatherMeta">最高 '+max+'℃ / 最低 '+min+'℃　降水 '+pop+'%</div>'+(status?'<div class="tomorrowWeatherSource">'+esc(status)+'</div>':'')+'<div class="tomorrowWeatherSource">'+esc(point.label)+'</div>';
+ if(error)box.appendChild(weatherRetryButton(function(){requestTomorrowWeather(point,true)}))
 }
 function requestTomorrowWeather(point,force){
- var key=weatherPointCacheKey(point),cached=weatherCache[key];
- if(!force&&weatherCacheFresh(cached)){renderTomorrowWeatherCard(point,cached.data,cached.error);return}
+ var key=weatherPointCacheKey(point),cached=weatherGetCached(point);
+ if(!force&&weatherCacheFresh(cached)){renderTomorrowWeatherCard(point,cached.data,cached.error,false,cached);return}
  if(!force&&tomorrowWeatherInFlightKey===key)return;
  var sequence=++tomorrowWeatherRequestSequence;tomorrowWeatherInFlightKey=key;
- renderTomorrowWeatherCard(point,null,false);
+ renderTomorrowWeatherCard(point,weatherCacheUsable(cached)?cached.data:null,false,true,cached);
  weatherRequest(point).then(function(data){
   if(sequence!==tomorrowWeatherRequestSequence||key!==tomorrowWeatherActivePointKey)return;
-  tomorrowWeatherInFlightKey='';renderTomorrowWeatherCard(point,data,false)
+  tomorrowWeatherInFlightKey='';renderTomorrowWeatherCard(point,data,false,false,weatherCache[key])
  },function(){
   if(sequence!==tomorrowWeatherRequestSequence||key!==tomorrowWeatherActivePointKey)return;
-  tomorrowWeatherInFlightKey='';renderTomorrowWeatherCard(point,null,true)
+  tomorrowWeatherInFlightKey='';var fallback=weatherCache[key];renderTomorrowWeatherCard(point,weatherCacheUsable(fallback)?fallback.data:null,true,false,fallback)
  })
 }
 function renderTomorrowWeather(){
