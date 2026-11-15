@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import { runWeatherGate } from './weather-fetch-gate.mjs';
 import { runUiCopyCleanupGate } from './ui-copy-cleanup-gate.mjs';
+import { runVisualConsistencyGate } from './visual-consistency-gate.mjs';
 
 const baseUrl = process.env.VENDRIVE_TEST_BASE_URL || 'http://127.0.0.1:4173';
 const gates = [
@@ -53,6 +54,11 @@ try {
     await runUiCopyCleanupGate(browser, baseUrl);
   } catch (error) {
     failures.push('tests/ui-copy-cleanup-gate.mjs: '+String(error?.stack || error));
+  }
+  try {
+    await runVisualConsistencyGate(browser, baseUrl);
+  } catch (error) {
+    failures.push('tests/visual-consistency-gate.mjs: '+String(error?.stack || error));
   }
 } finally {
   await browser.close();

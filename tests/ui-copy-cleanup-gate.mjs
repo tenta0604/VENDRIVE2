@@ -33,7 +33,8 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
   try{
    await page.goto(baseUrl.replace(/\/$/,'')+'/index.html?copyGate='+Date.now(),{waitUntil:'domcontentloaded',timeout:30000});
    await page.locator('#deliveryNav').waitFor({state:'attached'});
-   assert.match(await page.locator('#appVersion').innerText(),/2026\.11\.15-FINAL\.66/,'rendered app version matches manifest');
+   const manifestVersion=await page.evaluate(async()=>{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw new Error('version.json failed');return (await response.json()).version});
+   assert.equal((await page.locator('#appVersion').innerText()).trim(),'Ver. '+manifestVersion,'rendered app version matches live manifest');
    await checkNotice(page,'todayNavSafety',width);
    assert.equal(await page.locator('#todayList').count(),1,'Today list remains available');
    assert.equal(await page.locator('#finishDay').count(),1,'day completion remains available');
