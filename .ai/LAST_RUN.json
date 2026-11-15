@@ -1,45 +1,42 @@
 {
-  "evidenceVersion": 96,
-  "runType": "final66_ui_copy_cleanup_production_closeout_20261115",
-  "phase": "FINAL66_UI_COPY_AND_COMPACT_EXTERNAL_NAV_SAFETY",
+  "evidenceVersion": 97,
+  "runType": "final67_visual_foundation_consistency_production_closeout_20261115",
+  "phase": "FINAL67_UI_VISUAL_FOUNDATION_CONSISTENCY",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "e3660fcc7f71871eb00c176773824e10ba13f281",
-    "preEditImmutableSafetyTag": "PASS Issue #272 annotated backup-pre-FINAL66-UI-COPY-CLEANUP-20261115-20261115",
-    "productPR": 273,
-    "productMerge": "cd8424fb52fe7625213c1289e2be9386d2271094"
+    "mainBefore": "946442a29a947ca26a56ca6198541f41f05b6d43",
+    "preEditImmutableSafetyTag": "PASS Issue #275 annotated backup-pre-FINAL67-VISUAL-CONSISTENCY-20261115-20261115",
+    "productPR": 276,
+    "productMerge": "f56147c69ae47fda4329b093db87b51669039882"
   },
   "versions": {
-    "app": "2026.11.15-FINAL.66",
+    "app": "2026.11.15-FINAL.67",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Removed redundant explanatory UI copy from Task, Map, Order and Delivery. Replaced large Today/Map truck cautions with compact accessible native disclosures: always-visible ⚠️ 車両制限非対応, full limits + road-sign warning on tap.",
-    "safeScope": "No data migration, schedule, visit, weather, analytics, machine/delivery/Order behavior, navigation routing, production data, or AN15 changes. Corrected only affected CI text assertions to match accessible UI.",
-    "ciEnvironmentNote": "ubuntu-latest updated to unsupported Ubuntu26.04 for Playwright1.55; pinned browser and external nav workflows to ubuntu-24.04; retried and exact-head PASSED."
+    "summary": "Established small shared CSS visual tokens for existing white/black design: 15px cards, 11px controls and 18px sections, form/search white surfaces and consistent subtle borders, headings/actions, visible focus, fixed undefined Map search --accent leading to contrast issue. No page flow or content modifications.",
+    "safety": "No user data, routing, map tiles, location, planning, tasks, deliveries, weather, external nav, DB/schema or AN15 promotion changes.",
+    "testHarness": "Existing UI-copy gate incorrectly required FINAL.66 literal; replaced with dynamic comparison to version.json, then reran required finite exact-head suites to SUCCESS."
   },
   "gates": {
-    "preEditImmutableSafetyTag": "PASS Issue #272 target e3660fcc7f71871eb00c176773824e10ba13f281",
-    "staticSyntaxAndDiff": "PASS inline JS parse / Playwright browser and real Edge static diff checks",
-    "exactHeadBrowserRegression": "PASS run 43668389796; 7 legacy browser gates, weather, new ui copy cleanup 320/390/430px",
-    "exactHeadRealMicrosoftEdge": "PASS run 43668389777 real Edge map/external nav/swipe/collapsible truck warning",
-    "productMerge": "PASS PR #273 cd8424fb52fe7625213c1289e2be9386d2271094",
-    "vercel": "PASS READY dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc exact product merge",
-    "pages": "PASS public 2026.11.15-FINAL.66",
-    "backend": "PASS HTTP200 2026.11.15-FINAL.66",
-    "dataSchemaMigration": "NOT_REQUIRED — UI/static text only"
+    "preEditImmutableTag": "PASS Issue #275 target 946442a29a947ca26a56ca6198541f41f05b6d43",
+    "staticSyntax": "PASS index inline JS parse and browser/Edge syntax gates",
+    "exactHeadBrowserRegression": "PASS run 43671569040 (7 legacy HTML suites, weather, FINAL.66 copy, FINAL.67 320/390/430px)",
+    "exactHeadRealMicrosoftEdge": "PASS run 43671569114 (external nav, MAP, deliveries and browser regressions)",
+    "productMerge": "PASS PR #276 f56147c69ae47fda4329b093db87b51669039882",
+    "vercel": "PASS READY dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq exact product merge",
+    "pages": "PASS public 2026.11.15-FINAL.67",
+    "backend": "PASS 200 2026.11.15-FINAL.67",
+    "dataMigration": "NOT_REQUIRED - CSS, version and tests only"
   },
   "changedFiles": [
     "index.html",
-    "delivery.js",
     "version.json",
     "tests/run-browser-gates.mjs",
+    "tests/visual-consistency-gate.mjs",
     "tests/ui-copy-cleanup-gate.mjs",
-    "tests/run-external-navigation-gates.mjs",
-    ".github/workflows/browser-regression-gates.yml",
-    ".github/workflows/truck-route-gates.yml",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -47,12 +44,12 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Await owner UI field feedback; do not auto-resume AN15.",
+  "nextAction": "COMPLETE; await owner observation of design consistency. Do not resume AN15 or change operational workflow.",
   "continuityCheckpoint": {
-    "status": "FINAL66_UI_COPY_CLEANUP_AND_COMPACT_SAFETY_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.15-FINAL.66",
-    "productMerge": "cd8424fb52fe7625213c1289e2be9386d2271094",
-    "nav": "⚠️ 車両制限非対応 compact warning with full notice in native details",
-    "legacy": "FINAL.65 weather + FINAL.64 delivery priority, 28-day monthly, AN14B3B5 DB/schema4, paused AN15"
+    "status": "FINAL67_VISUAL_FOUNDATION_CONSISTENCY_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.15-FINAL.67",
+    "productMerge": "f56147c69ae47fda4329b093db87b51669039882",
+    "tokens": "black-white-purple, card15/control11/section18, map search corrected",
+    "legacy": "FINAL.66 copy, FINAL.65 weather, FINAL.64 delivery; AN14B3B5 DB/schema4 paused AN15"
   }
 }
