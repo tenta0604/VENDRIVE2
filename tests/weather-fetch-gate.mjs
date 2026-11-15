@@ -73,6 +73,17 @@ export async function runWeatherGate(browser,baseUrl){
   assert.deepEqual(test.errors,[],'weather retry caused page errors');
   await test.context.close();test=null;
 
+  // A syntactically valid HTTP 200 but incomplete payload must fail promptly;
+  // it used to throw inside a .then success callback and wait seven seconds.
+  test=await openTest(browser,baseUrl,true,async route=>{
+   await route.fulfill({status:200,contentType:'application/json',body:'{"current":{},"daily":{}}'});
+  });
+  await test.page.locator('#todayWeatherCard .weatherRetryButton').waitFor({timeout:3000});
+  assert.match(await test.page.locator('#todayWeatherCard').innerText(),/天気データを確認できません/);
+  assert.equal(test.calls.length,1,'incomplete forecast rejected once without timeout');
+  assert.deepEqual(test.errors,[],'malformed API payload should be caught without unhandled rejection');
+  await test.context.close();test=null;
+
   // A hung fetch must terminate after the configured time budget and allow a retry.
   test=await openTest(browser,baseUrl,true,async(route,n)=>{
    if(n===1){await new Promise(resolve=>setTimeout(resolve,10000));try{await route.fulfill({status:200,contentType:'application/json',body})}catch{};return}
@@ -175,7 +186,7 @@ export async function runWeatherGate(browser,baseUrl){
    assert.deepEqual(gpsErrors,[],'GPS jitter must not cause script errors');
   }finally{await gpsContext.close()}
 
-  console.log('\n=== tests/weather-fetch-gate.mjs ===\nPASS\none Open-Meteo Best Match request: PASS\nToday cache and precipitation: PASS\nHTTP error retry: PASS\nhung request timeout/recovery: PASS\nmissing location safety: PASS\npersistent last-good and offline fallback: PASS\nGPS jitter single weather request and GPS privacy: PASS');
+  console.log('\n=== tests/weather-fetch-gate.mjs ===\nPASS\none Open-Meteo Best Match request: PASS\nToday cache and precipitation: PASS\nHTTP error retry: PASS\nmalformed payload prompt failure: PASS\nhung request timeout/recovery: PASS\nmissing location safety: PASS\npersistent last-good and offline fallback: PASS\nGPS jitter single weather request and GPS privacy: PASS');
  }finally{
   if(test)await test.context.close();
  }
