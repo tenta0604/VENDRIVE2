@@ -1,40 +1,41 @@
 {
-  "evidenceVersion": 98,
-  "runType": "final68_weather_recurrence_resilience_production_closeout_20261115",
-  "phase": "FINAL68_WEATHER_GPS_STABILITY_LAST_GOOD_CACHE_ERROR_HANDLING",
+  "evidenceVersion": 99,
+  "runType": "final69_today_card_readability_production_closeout_20261115",
+  "phase": "FINAL69_TODAY_CARD_READABILITY_VISUAL_POLISH",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "314891134ebbe43f8a56c1942d6b218670fbbc26",
-    "preEditImmutableSafetyTag": "PASS Issue #278 backup-pre-FINAL68-WEATHER-RECURRENCE-20261115-20261115",
-    "productPR": 279,
-    "productMerge": "8a2592fc9f5add97cdcef80af17f92c14ce75111"
+    "mainBefore": "78bf5c267b944128df97587807719b429eba24cd",
+    "preEditImmutableSafetyTag": "PASS Issue #281 annotated backup-pre-FINAL69-TODAY-CARD-READABILITY-20261115-20261115",
+    "productPR": 282,
+    "productMerge": "d3406dc1739d6b1c71d510ca25491d042f44c1aa"
   },
   "versions": {
-    "app": "2026.11.15-FINAL.68",
+    "app": "2026.11.15-FINAL.69",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Weather-only current GPS anchor stable for <2km location jitter, avoids repeated in-flight changing coordinates. Persist bounded last-good successful non-GPS office/route forecasts (max six, same calendar day, max six hours) in separate localStorage; serve stale immediately while refreshing, retain on failure with age, reason, retry. Full .catch handles invalid HTTP200 payload without seven-second hang or unhandled promise. Improved response validation and readable phone status.",
-    "safety": "Preserves user local data and scheduling; does not store live raw device coordinates, does not write to existing saved app state or migrate DB; no route, analytics, AN15, visual or server-side change.",
-    "limitation": "No live iPhone network trace; Open-Meteo request returned HTTP200 from external vantage during investigation. Behavior fixed for reproducible code flaws, not a demonstrated provider outage."
+    "summary": "Today-only CSS refines machine/delivery card reading order, title 13px, detail 10px, left flexible text with long-name wrap, stable 78px badge/nav column and 40px nav touch height, section header two-row visible swipe hint, complete card opacity 0.74. Maintains all priorities, swipes, navigation and full previously approved UI copy trimming.",
+    "safety": "No mutation or migration of user state, no order, weather, map, tasks, delivery or scheduling behavior changes, no backend/API or AN15 changes. No changes to markup or event handlers.",
+    "limit": "Real iPhone visual acceptance requires owner; controlled Chromium/real Edge and two public deployments fully verified."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #278 target 314891134ebbe43f8a56c1942d6b218670fbbc26",
-    "staticSyntax": "PASS inline app scripts parsed and Browser/Edge static checks",
-    "browser": "PASS run 43673461895 (7 legacy, weather malformed-200, GPS jitter, persisted last-good 503 recovery, timeout, copy+visual)",
-    "realEdge": "PASS run 43673461974 (external navigation, MAP, delivery, legacy browser)",
-    "productMerge": "PASS PR #279 8a2592fc9f5add97cdcef80af17f92c14ce75111",
-    "vercel": "PASS READY dpl_o9bujc1dikt7NYTjCNoxePqHGrpe exact product merge",
-    "pages": "PASS public 2026.11.15-FINAL.68",
-    "backend": "PASS 200 2026.11.15-FINAL.68",
-    "schemaMigration": "NOT_REQUIRED separate bounded weather-only cache, legacy data intact"
+    "preEditImmutableTag": "PASS Issue #281 dereferenced 78bf5c267b944128df97587807719b429eba24cd",
+    "staticSyntax": "PASS inline app script parse and browser/Edge gate checks",
+    "exactHeadBrowserRegression": "PASS run 43676631223; Today 320/390/430px, prior 7 HTML suites, weather, FINAL66/67",
+    "exactHeadRealMicrosoftEdge": "PASS run 43676631227 external-navigation/MAP/gesture/delivery",
+    "productMerge": "PASS PR #282 d3406dc1739d6b1c71d510ca25491d042f44c1aa",
+    "vercel": "PASS READY dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo exact product merge",
+    "pages": "PASS public 2026.11.15-FINAL.69",
+    "backend": "PASS HTTP200 2026.11.15-FINAL.69",
+    "dataMigration": "NOT_REQUIRED, CSS and browser tests only"
   },
   "changedFiles": [
     "index.html",
     "version.json",
-    "tests/weather-fetch-gate.mjs",
+    "tests/run-browser-gates.mjs",
+    "tests/today-card-readability-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -42,12 +43,12 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Await device feedback; no need for personal GPS traces or re-opening AN15.",
+  "nextAction": "COMPLETE; next owner action is view Today at FINAL.69 and provide any polish feedback. No automatic AN15 progression.",
   "continuityCheckpoint": {
-    "status": "FINAL68_WEATHER_RECURRENCE_HARDENING_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.15-FINAL.68",
-    "productMerge": "8a2592fc9f5add97cdcef80af17f92c14ce75111",
-    "weather": "GPS stable2km, non-GPS last-good6h max6, 7s timeout, clear error reasons",
-    "legacy": "FINAL.67 visual, FINAL.66 copy, FINAL.64 delivery, 28d monthly, AN14B3B5 DB/schema4, paused AN15"
+    "status": "FINAL69_TODAY_CARD_READABILITY_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.15-FINAL.69",
+    "productMerge": "d3406dc1739d6b1c71d510ca25491d042f44c1aa",
+    "UI": "Today-only responsive 13px title, 10px meta, nav40px, done opacity.74",
+    "legacy": "FINAL.68 weather, FINAL.67 style, FINAL.66 copy, FINAL.64 delivery priority; paused AN15"
   }
 }
