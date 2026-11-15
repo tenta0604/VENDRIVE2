@@ -128,6 +128,48 @@ body.mapFullscreen.mapSoftRotated #map .maptag{display:none}
 .taskHistoryOpen{flex:1;text-align:left;cursor:pointer}
 @media(max-width:360px){body.mapFullscreen.mapSoftRotated .modal.open .sheet{width:calc(100dvh - 34px);max-height:calc(100vw - 24px);padding:9px 11px}}
 </style>
+
+<style id="final67-visual-foundation">
+/* FINAL.67: keep the established black/white palette and layout; unify shared UI surfaces. */
+:root{
+  --accent:var(--ink);
+  --ui-card-radius:15px;
+  --ui-control-radius:11px;
+  --ui-section-space:18px;
+  --ui-focus:var(--purple);
+}
+.page>.row{align-items:center;gap:10px;min-width:0}
+.page>.row>div:first-child{min-width:0}
+.section{margin-top:var(--ui-section-space)}
+.sectionhead{gap:8px;min-width:0}
+.sectionhead b{line-height:1.35}
+.item,.swipeRow,.kpi{border-radius:var(--ui-card-radius)}
+.pill,.primary,.secondary,.bigComplete{border-radius:var(--ui-control-radius)}
+.pill,.secondary{border-color:var(--line)}
+.search,.results{border-color:var(--line)}
+.search{border-radius:var(--ui-control-radius);min-height:42px}
+.search:focus-within{border-color:#b4b8c0;box-shadow:0 0 0 2px rgba(17,17,17,.065)}
+.formGroup label{font-size:10px;color:#60646b;line-height:1.4}
+.formGroup input,.formGroup select,.formGroup textarea,.machineFilters select{
+  border:1px solid var(--line);
+  border-radius:var(--ui-control-radius);
+  background:#fff;
+}
+.formGroup input,.formGroup select,.formGroup textarea{font-size:12px;line-height:1.4}
+.day,.dayPicker button{border-radius:var(--ui-control-radius)}
+.mapSearchButton{
+  background:var(--ink);
+  color:#fff;
+  font-weight:850;
+  border-radius:9px;
+  min-height:32px;
+}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
+  outline:2px solid var(--ui-focus);
+  outline-offset:2px;
+}
+.search input:focus-visible{outline:none}
+</style>
 </head>
 <body>
 <div class="portraitGuard" id="portraitGuard" role="dialog" aria-modal="true" aria-label="縦画面で使用してください"><div class="portraitGuardCard"><div class="portraitGuardIcon">↻</div><b>この画面は縦向きで使用してください</b><span>MAPだけ横画面に対応しています。</span><button class="primary" id="portraitOpenMap" type="button">MAPを開く</button></div></div>
@@ -331,7 +373,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.15-FINAL.66',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.15-FINAL.67',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
