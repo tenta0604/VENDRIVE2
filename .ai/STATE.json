@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.13-FINAL.65",
+  "appVersion": "2026.11.15-FINAL.66",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL65_WEATHER_FETCH_RESILIENCE_PRODUCTION_VERIFIED",
+  "status": "FINAL66_UI_COPY_CLEANUP_AND_COMPACT_SAFETY_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.65 live: fast weather fetch with bounded failure, shared requests and explicit retry",
-    "scope": "Owner reported Today weather retrieval was slow and often unavailable in FINAL.64. Verified client defects: Promise.allSettled waited for two JMA+Best Match Open-Meteo responses, no timeout, failure results cached for 30min, Today/Tomorrow duplicate in-flight requests and stale point subscriptions. FINAL.65 uses one Open-Meteo Best Match forecast call for current+daily+rain probability, 7s AbortController timeout, shared per-point in-flight promise across Today/Tomorrow, 30min successful cache/15s failure cooldown, on-card manual retry after errors, and explicit no-location message when GPS and saved pins are unavailable. It does not guess a location. Local JSON, visits, deliveries, route, schedules, data schema and AN15 unchanged.",
-    "releaseStatus": "Product PR #270 merged 301227afbe7444fa1cfa1dbdc4f3e5febb87784e. Exact-head Browser regression 43387290975 PASS, including new weather one-fetch/cache, HTTP503 retry, hung request 7s timeout and recovery, missing-location safety; real Edge/MAP/external navigation run 43387290909 PASS. Pre-edit annotated safety tag Issue #269 verified at b55b6edec7ab95932f7324c09b5203534e18452a. Generic Open-Meteo external test returned HTTP200 with valid current/daily forecast; both endpoint samples currently reachable, exact user-device root cause not independently captured. Vercel dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh READY at product merge. Public GitHub Pages/Vercel /version.json both 2026.11.13-FINAL.65.",
+    "title": "FINAL.66 live: remove redundant explanatory UI copy and compact external navigation caution",
+    "scope": "Owner-approved UI-only polish based on five screenshots. Removed Task explanatory subtitle and hero text, Map explanatory subtitle, Order repetitive notice, Delivery explanatory subtitle and long notice. Replaced permanently visible Today and Map truck warning paragraphs with compact clickable native <details> labels '⚠️ 車両制限非対応'; full 2t truck height/width/weight plus road-sign caution retained on tap. OpenStreetMap attribution, current tab actions, history, weather, Today list, swipe, order, tasks and delivery behavior untouched. App VERSION/manifest both 2026.11.15-FINAL.66. Existing engine, DB/schema4 and paused AN15 untouched.",
+    "releaseStatus": "Product PR #273 merged cd8424fb52fe7625213c1289e2be9386d2271094. Immutable annotated tag Issue #272 PASS at e3660fcc7f71871eb00c176773824e10ba13f281. Exact-head Browser regression 43668389796 PASS (320/390/430px compact warnings and tab controls, legacy and weather suites), real Edge external navigation/MAP 43668389777 PASS with updated disclosure assertions. CI runners pinned Ubuntu 24.04 to support existing Playwright 1.55 after ubuntu-latest shifted 26.04; first installer failure was environment-only. Production Vercel dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc READY exact product merge, public Vercel and GitHub Pages /version.json both 2026.11.15-FINAL.66. No data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #269: backup-pre-FINAL65-WEATHER-RESILIENCE-20261113-20261113 -> b55b6edec7ab95932f7324c09b5203534e18452a",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/270",
-      "browser": "PASS exact-head 43387290975, weather scenarios + legacy gates",
-      "realMicrosoftEdge": "PASS exact-head 43387290909, external map/gesture/legacy suites",
-      "merge": "PASS 301227afbe7444fa1cfa1dbdc4f3e5febb87784e",
-      "vercel": "PASS READY production dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh exact product merge",
-      "pages": "PASS public 2026.11.13-FINAL.65",
-      "backend": "PASS public 2026.11.13-FINAL.65"
+      "preEditImmutableSafetyTag": "PASS Issue #272 annotated backup-pre-FINAL66-UI-COPY-CLEANUP-20261115-20261115 -> e3660fcc7f71871eb00c176773824e10ba13f281",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/273",
+      "browser": "PASS 43668389796 exact product head, new UI gate 320/390/430px + old suites",
+      "realMicrosoftEdge": "PASS 43668389777 exact product head, external nav/map/gesture + disclosure warning",
+      "merge": "PASS cd8424fb52fe7625213c1289e2be9386d2271094",
+      "vercel": "PASS READY dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc exact product merge",
+      "pages": "PASS public 2026.11.15-FINAL.66 Firecrawl no-cache",
+      "backend": "PASS 200 2026.11.15-FINAL.66"
     },
-    "nextOwnerAction": "Open 本日 on normal phone usage; weather should load once at available route/office/current pin. If offline/API failure, tap ↻ 再取得. With no registered pin and no location permission, app shows 天気地点なし; register a pin or enable geolocation."
+    "nextOwnerAction": "Open latest VENDRIVE; explanatory paragraphs removed and compact '⚠️ 車両制限非対応' in Today/Map expands full safety details when tapped. Retain field feedback for further UI polish."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 FINAL.65 weather retrieval hotfix production verified 2026-11-13. Always read latest main and canonical files. Owner reported slow/missing Today weather. Fixed doubled Open-Meteo JMA+BestMatch Promise.allSettled wait, no timeout, 30min negative cache. Now one Best Match request provides all required fields, 7s timeout, shared per-location in-flight request, success cache 30min/failure 15s, UI retry and explicit no-pin/geolocation message. PR #270 merged 301227afbe7444fa1cfa1dbdc4f3e5febb87784e; annotated pre-edit tag Issue #269 at b55b6edec7ab95932f7324c09b5203534e18452a; browser 43387290975 incl one-call/error/timeout/missing-location PASS and Edge 43387290909 PASS; production Vercel dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh READY exact merge, Pages and Vercel version 2026.11.13-FINAL.65. FINAL.64 pending delivery priority retained. Engine AN14B3B5, DB/schema4 unchanged, in-app routing retired, 28d monthly, AN15 paused. Do not claim field iPhone network cause known without privacy-safe trace.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.66 UI copy cleanup production verified 2026-11-15. Latest main + canonical docs authoritative. Owner approved removing repetitive explanatory text from Task, Map, Order and Delivery, and replacing large Today/Map external navigation truck safety notices with compact '⚠️ 車両制限非対応' native <details> retaining full truck restrictions and road-sign caution on tap. Product PR #273 merged cd8424fb52fe7625213c1289e2be9386d2271094 after immutable pre-edit annotated tag Issue #272 at e3660fcc7f71871eb00c176773824e10ba13f281. Exact-head Browser run 43668389796 PASS incl new mobile 320/390/430px tests, real Edge run 43668389777 PASS. CI browser runners pinned Ubuntu 24.04 to avoid Playwright 1.55 unsupported Ubuntu 26.04 from ubuntu-latest. Vercel dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc READY at product SHA; Pages/Vercel versions 2026.11.15-FINAL.66. FINAL.65 weather resilience, FINAL.64 delivery priority, FINAL.63 unified Today delivery and swipe preserved. Engine AN14B3B5, DB/schema4, 28d monthly, retired in-app route, AN15 paused.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.65 weather retrieval hotfix verified on live Pages and Vercel. No further automatic development until owner field feedback; preserve FINAL.64 Today delivery priority.",
-    "latestContinuityCheckpoint": "2026-11-13 FINAL.65 weather single-fetch/timeout/retry production verified PR #270, Browser+Edge PASS, Pages+Vercel version verified",
+    "handoffBoundary": "FINAL.66 UI copy trimming and compact external navigation safety delivered and verified. Preserve all runtime behavior and on-demand full truck safety warning; wait for owner feedback before further UI changes.",
+    "latestContinuityCheckpoint": "2026-11-15 FINAL.66 PR #273 merged; Browser+Edge PASS, Vercel READY + Pages version verified; canonical docs closeout.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.65 weather fetch resilience release COMPLETE. Owner may observe normal phone weather behavior; no forced additional diagnostics.",
-    "If missing weather persists on user's device, distinguish no-point (GPS denied and no office/machine map pin) vs HTTP/network error using visible UI and optional privacy-safe diagnostics; do not invent underlying field cause.",
-    "Preserve FINAL.64 pending deliveries above completed vending, FINAL.63 delivery swipe, monthly=28d, archived overrides, external-only navigation, AN14B3B5/DBschema4 and intentionally paused AN15."
+    "FINAL.66 UI cleanup and compact external-navigation caution COMPLETE; no additional automatic UI changes without new owner decision.",
+    "Keep full 2t truck restrictions accessible via compact warning on Today and Map; never imply external Google Maps honors vehicle dimensions.",
+    "Preserve FINAL.65 weather reliability, FINAL.64 delivery priority, FINAL.63 delivery swipe, 28-day monthly, archived legacy cycles, retired in-app navigation, AN14B3B5 DB/schema4 and AN15 paused."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
