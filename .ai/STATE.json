@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.15-FINAL.67",
+  "appVersion": "2026.11.15-FINAL.68",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL67_VISUAL_FOUNDATION_CONSISTENCY_PRODUCTION_VERIFIED",
+  "status": "FINAL68_WEATHER_RECURRENCE_HARDENING_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.67 live: unify shared VENDRIVE visual foundation without changing app workflows",
-    "scope": "Owner accepted FINAL.66 removal of redundant explanation copy and directed next previously agreed polish phase. Scoped FIRST design-system consistency pass, not full redesign. Existing black/white/purple palette, six-tab structure and page content retained. In index.html late isolated stylesheet consolidates 15px card radius, 11px button/field/search radius, 18px section spacing, consistent white input backgrounds and borders, compact heading/action alignment, keyboard/text-field focus visibility, and repairs undefined --accent CSS so Map search button is black with white text. No user data, scheduling, swipe, delivery, weather, navigation, ANALYTICS or AN15 change. APP_VERSION + manifest aligned at 2026.11.15-FINAL.67.",
-    "releaseStatus": "Product PR #276 merged f56147c69ae47fda4329b093db87b51669039882. Pre-edit annotated safety tag Issue #275 -> 946442a29a947ca26a56ca6198541f41f05b6d43 verified. Exact-head Browser regression 43671569040 PASS incl 7 legacy, weather, FINAL.66 copy, new 320/390/430px design consistency tests; real Edge external navigation/MAP run 43671569114 PASS. Prior test-only version assertion was hardcoded FINAL.66; it now compares to version.json dynamically (harness-only). Production Vercel dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq READY exact product merge, public Vercel and GitHub Pages /version.json both 2026.11.15-FINAL.67 verified. No data migration.",
+    "title": "FINAL.68 live: GPS weather re-fetch stabilization, persistent last-good forecast, and error handling",
+    "scope": "Owner reported recurring slow/unavailable Today weather after FINAL.65/FINAL.67. Current source contained three confirmed client resilience issues: when only current GPS supplies weather point, small GPS jumps across 0.001-degree weather-key buckets repeatedly restarted in-flight weather views; previous successfully retrieved weather was memory-only and vanished on reload; malformed HTTP200 forecast payload thrown inside .then success handler escaped the same .then's reject handler, causing unhandled rejections and waiting for timeout. Current fix keeps the weather-only current GPS point stable until movement >=2km (not map/user GPS), caches at most six non-current-GPS saved route/office forecasts for same day and <=6h in separate localStorage key, immediately displays previous forecast when refresh is needed, leaves last-good temperature and explicit last-retrieval time/reason/retry visible on failure, catches every fetch/validation rejection, validates current temperature and precipitation arrays. Existing 7s timeout/15s negative cooldown and manual retry retained. No user data migration or raw-device-GPS persistence. No schedule, route, delivery, design-system, schema, engine or paused AN15 changes.",
+    "releaseStatus": "Product PR #279 merged 8a2592fc9f5add97cdcef80af17f92c14ce75111. Immutable annotated pre-edit safety tag Issue #278 at 314891134ebbe43f8a56c1942d6b218670fbbc26 PASS. Exact-head Browser regression run 43673461895 SUCCESS: seven legacy browser gates + weather (GPS jitter single request, persisted last-good reload 503 and recovery, malformed HTTP200 prompt rejection, timeout/retry, no-pin safety), FINAL.66 UI copy and FINAL.67 visual gates. Exact-head real Microsoft Edge/MAP/external navigation run 43673461974 SUCCESS. Vercel dpl_o9bujc1dikt7NYTjCNoxePqHGrpe READY exact product merge. Public Pages and Vercel version.json both 2026.11.15-FINAL.68 confirmed. Open-Meteo fixture request returned HTTP 200 2026-11-15; exact intermittent user iPhone connectivity cause cannot be proven remotely.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #275 backup-pre-FINAL67-VISUAL-CONSISTENCY-20261115-20261115 -> 946442a29a947ca26a56ca6198541f41f05b6d43",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/276",
-      "browser": "PASS 43671569040 exact-head, visual 320/390/430 + legacy/weather/copy",
-      "realMicrosoftEdge": "PASS 43671569114 exact-head external navigation/MAP/gesture and regressions",
-      "merge": "PASS f56147c69ae47fda4329b093db87b51669039882",
-      "vercel": "PASS READY dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq exact product merge",
-      "pages": "PASS public 2026.11.15-FINAL.67 (fresh independent fetch)",
-      "backend": "PASS HTTP 200 2026.11.15-FINAL.67"
+      "preEditImmutableSafetyTag": "PASS Issue #278 annotated backup-pre-FINAL68-WEATHER-RECURRENCE-20261115-20261115 -> 314891134ebbe43f8a56c1942d6b218670fbbc26",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/279",
+      "browser": "PASS exact-head 43673461895, including new GPS jitter, persistent last-good, malformed payload, error/timeouts",
+      "realMicrosoftEdge": "PASS exact-head 43673461974, MAP + external navigation + legacy regression",
+      "merge": "PASS 8a2592fc9f5add97cdcef80af17f92c14ce75111",
+      "vercel": "PASS READY dpl_o9bujc1dikt7NYTjCNoxePqHGrpe exact product merge",
+      "pages": "PASS public 2026.11.15-FINAL.68 (TinyFish)",
+      "backend": "PASS 200 2026.11.15-FINAL.68"
     },
-    "nextOwnerAction": "Open latest VENDRIVE and check all-tab visual consistency and black high-contrast Map search button; this is the first visual-system polish pass. Next possible stage is concentrated Today-card readability only after owner feedback."
+    "nextOwnerAction": "Open FINAL.68 Today tab under normal use. If there is a previous route/office forecast within 6h for this app day, it displays immediately with 24h time while refreshing; if refresh fails, tap ↻ 再取得. If failure continues, share only the visible weather-card status, not GPS coordinates, so diagnostics can distinguish GPS/no pin, invalid response and network error."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.67 FINAL.67 first visual-system consistency pass production verified 2026-11-15. Latest main and canonical docs authoritative. Owner accepted FINAL.66 copy removal and directed next planned UI polish (global consistency). Kept existing monochrome palette and page layouts, standardized card radius15/control radius11/section spacing18, white search/form borders/background, headings/actions, visible focus, fixed undefined --accent so Map search button black-on-white text. Product PR #276 merged f56147c69ae47fda4329b093db87b51669039882; immutable annotated tag Issue #275 at 946442a29a947ca26a56ca6198541f41f05b6d43 PASS. Exact-head Browser regression 43671569040 incl 320/390/430px new visual tests PASS; real Edge navigation/MAP 43671569114 PASS. Vercel dpl_64pwH4Vtx5wmwq6ZX1Te1192a8Yq READY matching product SHA and public Pages/backend version 2026.11.15-FINAL.67 confirmed. FINAL.66 text and truck warnings, FINAL.65 weather, FINAL.64 delivery priority, FINAL.63 delivery gestures unchanged. Engine AN14B3B5 DB/schema4, 28-day monthly and intentionally paused AN15 unchanged. No further UI step automatically; await owner.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.68 weather recurrence hotfix production verified 2026-11-15. Read latest main plus canonical docs. Owner reported recurrent slow/missing weather after FINAL.65. Verified code flaws: current-only GPS key jitter can restart weather requests; no last-good weather persisted across reloads; invalid HTTP200 payload thrown in .then onFulfilled bypassed rejection handler. FINAL.68 stabilizes weather-only GPS point within 2km, retains bounded same-day <=6h last-good forecasts for saved non-GPS route/office point only (no raw GPS persisted), shows stale-with-timestamp while refreshing and error reason with retry while retaining data, adds robust .catch and schema validation. Exact product PR #279 merged 8a2592fc9f5add97cdcef80af17f92c14ce75111; safety tag Issue #278 314891134ebbe43f8a56c1942d6b218670fbbc26 verified; Browser 43673461895 and real Edge 43673461974 PASS; Vercel dpl_o9bujc1dikt7NYTjCNoxePqHGrpe READY exact merge, Pages/Vercel 2026.11.15-FINAL.68 verified. User device root cause remains unverified. FINAL.67 visual foundation, FINAL.66 copy/safety, FINAL.64 delivery priority preserved. Engine AN14B3B5, DB/schema4, monthly28d, external-only navigation, AN15 paused.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.67 design foundation consistency verified: preserve original palette and functionality; no more UI refactor until owner's next direction. Old final66 test hardcoded version now dynamic.",
-    "latestContinuityCheckpoint": "2026-11-15 FINAL.67 product PR #276, Browser+Edge PASS, Vercel READY and Pages version verified; canonical closeout.",
+    "handoffBoundary": "FINAL.68 weather recurrence mitigations production verified. Await owner phone field feedback only; do not propose UI redesign or resume paused AN15 without new instruction.",
+    "latestContinuityCheckpoint": "2026-11-15 FINAL.68 weather recurrence fix PR #279 Browser+Edge PASS, Vercel+Pages verified; status closeout complete.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.67 initial visual-system unification COMPLETE. Await owner evaluation before further design changes.",
-    "If approved, next planned UI focus: 本日タブ readability, machine/delivery card hierarchy and spacing; keep visual updates separate from behavior changes.",
-    "Preserve FINAL.66 text removal + truck safety details, FINAL.65 weather, FINAL.64 delivery priority, 28-day monthly, external-only nav, AN14B3B5 DB/schema4 and paused AN15."
+    "FINAL.68 weather resilience recurrence remediation COMPLETE; no automatic next feature. Await owner field observation.",
+    "If iPhone still shows 天気取得に失敗, ask for visible card reason only; do not request exact GPS or private logs by default. Distinguish network error/no GPS/service-side incomplete payload.",
+    "Preserve FINAL.67 UI, FINAL.66 compact 2t caution, FINAL.65 single Open-Meteo query, FINAL.64 delivery priority, 28-day monthly, external-only Google Maps, AN14B3B5 DB/schema4, intentionally paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
