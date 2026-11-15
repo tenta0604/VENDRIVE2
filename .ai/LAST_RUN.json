@@ -1,57 +1,58 @@
 {
-  "evidenceVersion": 95,
-  "runType": "final65_weather_fetch_resilience_production_closeout_20261113",
-  "phase": "FINAL65_WEATHER_FETCH_RESILIENCE",
+  "evidenceVersion": 96,
+  "runType": "final66_ui_copy_cleanup_production_closeout_20261115",
+  "phase": "FINAL66_UI_COPY_AND_COMPACT_EXTERNAL_NAV_SAFETY",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "b55b6edec7ab95932f7324c09b5203534e18452a",
-    "preEditImmutableSafetyTag": "PASS Issue #269, annotated backup-pre-FINAL65-WEATHER-RESILIENCE-20261113-20261113",
-    "productPR": 270,
-    "productMerge": "301227afbe7444fa1cfa1dbdc4f3e5febb87784e"
+    "mainBefore": "e3660fcc7f71871eb00c176773824e10ba13f281",
+    "preEditImmutableSafetyTag": "PASS Issue #272 annotated backup-pre-FINAL66-UI-COPY-CLEANUP-20261115-20261115",
+    "productPR": 273,
+    "productMerge": "cd8424fb52fe7625213c1289e2be9386d2271094"
   },
   "versions": {
-    "app": "2026.11.13-FINAL.65",
+    "app": "2026.11.15-FINAL.66",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Eliminated double weather API wait in FINAL.64. Generic Best Match request carries current/daily/rain probability in one call; 7s timeout prevents infinite loading; shared in-flight per coordinates, 15s negative cache, inline manual retry. Explicit missing-point UI rather than conflating no GPS with network failure.",
-    "safety": "No location guess, production user-data access/migration/write, API credentials, schema or route changes. No revenue/analytics promotion; AN15 paused.",
-    "limits": "User-specific iPhone weather network trace not observed. Both Open-Meteo generic and optional JMA test endpoints returned HTTP 200 externally on 2026-11-13. Regression reproduces network timeout and 503 recovery using controlled browser fixtures."
+    "summary": "Removed redundant explanatory UI copy from Task, Map, Order and Delivery. Replaced large Today/Map truck cautions with compact accessible native disclosures: always-visible ⚠️ 車両制限非対応, full limits + road-sign warning on tap.",
+    "safeScope": "No data migration, schedule, visit, weather, analytics, machine/delivery/Order behavior, navigation routing, production data, or AN15 changes. Corrected only affected CI text assertions to match accessible UI.",
+    "ciEnvironmentNote": "ubuntu-latest updated to unsupported Ubuntu26.04 for Playwright1.55; pinned browser and external nav workflows to ubuntu-24.04; retried and exact-head PASSED."
   },
   "gates": {
-    "preEditImmutableTag": "PASS annotated tag verified target main b55b6edec7ab95932f7324c09b5203534e18452a",
-    "staticSyntax": "PASS index.html inline JavaScript and tests compiled before PR",
-    "exactHeadBrowserRegression": "PASS run 43387290975, includes tests/weather-fetch-gate.mjs one query/cache/503 retry/7s hung request/missing-point",
-    "exactHeadRealMicrosoftEdge": "PASS run 43387290909 existing navigation/map/delivery/gesture",
-    "productMerge": "PASS PR #270 301227afbe7444fa1cfa1dbdc4f3e5febb87784e",
-    "vercel": "PASS READY dpl_2b7FyuCS7QK4iJSLQcNNCyG1LVKh exact product merge",
-    "pages": "PASS public /version.json 2026.11.13-FINAL.65",
-    "backend": "PASS public /version.json 2026.11.13-FINAL.65",
-    "dataMigration": "NOT_REQUIRED; runtime browser cache only; no persistent data/schema changes"
+    "preEditImmutableSafetyTag": "PASS Issue #272 target e3660fcc7f71871eb00c176773824e10ba13f281",
+    "staticSyntaxAndDiff": "PASS inline JS parse / Playwright browser and real Edge static diff checks",
+    "exactHeadBrowserRegression": "PASS run 43668389796; 7 legacy browser gates, weather, new ui copy cleanup 320/390/430px",
+    "exactHeadRealMicrosoftEdge": "PASS run 43668389777 real Edge map/external nav/swipe/collapsible truck warning",
+    "productMerge": "PASS PR #273 cd8424fb52fe7625213c1289e2be9386d2271094",
+    "vercel": "PASS READY dpl_Aauy9VYjuvqXj4dyFTzRkdnkftmc exact product merge",
+    "pages": "PASS public 2026.11.15-FINAL.66",
+    "backend": "PASS HTTP200 2026.11.15-FINAL.66",
+    "dataSchemaMigration": "NOT_REQUIRED — UI/static text only"
   },
   "changedFiles": [
     "index.html",
+    "delivery.js",
     "version.json",
-    "tests/weather-fetch-gate.mjs",
     "tests/run-browser-gates.mjs",
+    "tests/ui-copy-cleanup-gate.mjs",
+    "tests/run-external-navigation-gates.mjs",
+    ".github/workflows/browser-regression-gates.yml",
+    ".github/workflows/truck-route-gates.yml",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
-    "AI_ROADMAP.md",
-    ".ai/DECISIONS.md"
+    ".ai/DECISIONS.md",
+    "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE; owner uses live FINAL.65 and may tap weather retry if network fails. Exact field-network cause requires evidence if it persists.",
+  "nextAction": "COMPLETE. Await owner UI field feedback; do not auto-resume AN15.",
   "continuityCheckpoint": {
-    "status": "FINAL65_WEATHER_FETCH_RESILIENCE_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.13-FINAL.65",
-    "productMerge": "301227afbe7444fa1cfa1dbdc4f3e5febb87784e",
-    "requests": "one Best Match per point with shared inflight",
-    "timeout": "7s",
-    "errorCache": "15s",
-    "retry": "manual inline",
-    "legacy": "FINAL.64 delivery order, 28d monthly, AN14B3B5 DB/schema4, AN15 paused unchanged"
+    "status": "FINAL66_UI_COPY_CLEANUP_AND_COMPACT_SAFETY_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.15-FINAL.66",
+    "productMerge": "cd8424fb52fe7625213c1289e2be9386d2271094",
+    "nav": "⚠️ 車両制限非対応 compact warning with full notice in native details",
+    "legacy": "FINAL.65 weather + FINAL.64 delivery priority, 28-day monthly, AN14B3B5 DB/schema4, paused AN15"
   }
 }
