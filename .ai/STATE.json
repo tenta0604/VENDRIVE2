@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.15-FINAL.68",
+  "appVersion": "2026.11.15-FINAL.69",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL68_WEATHER_RECURRENCE_HARDENING_PRODUCTION_VERIFIED",
+  "status": "FINAL69_TODAY_CARD_READABILITY_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.68 live: GPS weather re-fetch stabilization, persistent last-good forecast, and error handling",
-    "scope": "Owner reported recurring slow/unavailable Today weather after FINAL.65/FINAL.67. Current source contained three confirmed client resilience issues: when only current GPS supplies weather point, small GPS jumps across 0.001-degree weather-key buckets repeatedly restarted in-flight weather views; previous successfully retrieved weather was memory-only and vanished on reload; malformed HTTP200 forecast payload thrown inside .then success handler escaped the same .then's reject handler, causing unhandled rejections and waiting for timeout. Current fix keeps the weather-only current GPS point stable until movement >=2km (not map/user GPS), caches at most six non-current-GPS saved route/office forecasts for same day and <=6h in separate localStorage key, immediately displays previous forecast when refresh is needed, leaves last-good temperature and explicit last-retrieval time/reason/retry visible on failure, catches every fetch/validation rejection, validates current temperature and precipitation arrays. Existing 7s timeout/15s negative cooldown and manual retry retained. No user data migration or raw-device-GPS persistence. No schedule, route, delivery, design-system, schema, engine or paused AN15 changes.",
-    "releaseStatus": "Product PR #279 merged 8a2592fc9f5add97cdcef80af17f92c14ce75111. Immutable annotated pre-edit safety tag Issue #278 at 314891134ebbe43f8a56c1942d6b218670fbbc26 PASS. Exact-head Browser regression run 43673461895 SUCCESS: seven legacy browser gates + weather (GPS jitter single request, persisted last-good reload 503 and recovery, malformed HTTP200 prompt rejection, timeout/retry, no-pin safety), FINAL.66 UI copy and FINAL.67 visual gates. Exact-head real Microsoft Edge/MAP/external navigation run 43673461974 SUCCESS. Vercel dpl_o9bujc1dikt7NYTjCNoxePqHGrpe READY exact product merge. Public Pages and Vercel version.json both 2026.11.15-FINAL.68 confirmed. Open-Meteo fixture request returned HTTP 200 2026-11-15; exact intermittent user iPhone connectivity cause cannot be proven remotely.",
+    "title": "FINAL.69 live: Today machine and delivery card readability polish",
+    "scope": "Owner confirmed FINAL.68 weather works and directed next agreed design polish phase, focusing exclusively on Today cards. New isolated CSS (#final69-today-card-readability) uses two-row section header with visible swipe guidance and unchanged Today route label. Machine and delivery card titles are readable at 13px, supporting metadata 10px, balanced 88px minimum card height and 9px row spacing, status badge and 40px external-navigation button aligned in stable action column; long Japanese names and details wrap without overlapping controls. Completed cards still separate but now readable at opacity 0.74 rather than the previous 0.43. No machine/delivery markup, actions, JS behavior, priority, swipe, right-skip, navigation, weather, copy, storage or schemas changed. FINAL.69 app and version.json synchronized. Existing FINAL.67 monochrome design retained.",
+    "releaseStatus": "Product PR #282 merged d3406dc1739d6b1c71d510ca25491d042f44c1aa. Pre-edit immutable annotated safety tag Issue #281 verified at 78bf5c267b944128df97587807719b429eba24cd. Exact-head Browser regression run 43676631223 PASS, including all earlier weather, copy, visual and 320/390/430px Today readability tests verifying long names, button geometry, no overlap, data unchanged and pending delivery before completed vending. Real Microsoft Edge/external-navigation/MAP run 43676631227 PASS. Production Vercel dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo READY matching product SHA; public GitHub Pages and Vercel both 2026.11.15-FINAL.69 confirmed by fresh checks. No data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #278 annotated backup-pre-FINAL68-WEATHER-RECURRENCE-20261115-20261115 -> 314891134ebbe43f8a56c1942d6b218670fbbc26",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/279",
-      "browser": "PASS exact-head 43673461895, including new GPS jitter, persistent last-good, malformed payload, error/timeouts",
-      "realMicrosoftEdge": "PASS exact-head 43673461974, MAP + external navigation + legacy regression",
-      "merge": "PASS 8a2592fc9f5add97cdcef80af17f92c14ce75111",
-      "vercel": "PASS READY dpl_o9bujc1dikt7NYTjCNoxePqHGrpe exact product merge",
-      "pages": "PASS public 2026.11.15-FINAL.68 (TinyFish)",
-      "backend": "PASS 200 2026.11.15-FINAL.68"
+      "preEditImmutableSafetyTag": "PASS Issue #281 annotated backup-pre-FINAL69-TODAY-CARD-READABILITY-20261115-20261115 -> 78bf5c267b944128df97587807719b429eba24cd",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/282",
+      "browser": "PASS exact-head 43676631223, 320/390/430px Today cards + previous weather/copy/visual/legacy gates",
+      "realMicrosoftEdge": "PASS exact-head 43676631227, external navigation/MAP/gesture/legacy",
+      "merge": "PASS d3406dc1739d6b1c71d510ca25491d042f44c1aa",
+      "vercel": "PASS READY dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo exact product merge",
+      "pages": "PASS public 2026.11.15-FINAL.69 fresh independent fetch",
+      "backend": "PASS HTTP200 2026.11.15-FINAL.69"
     },
-    "nextOwnerAction": "Open FINAL.68 Today tab under normal use. If there is a previous route/office forecast within 6h for this app day, it displays immediately with 24h time while refreshing; if refresh fails, tap ↻ 再取得. If failure continues, share only the visible weather-card status, not GPS coordinates, so diagnostics can distinguish GPS/no pin, invalid response and network error."
+    "nextOwnerAction": "Open latest VENDRIVE and inspect Today card readability on own phone. Names wrap, status/nav align, completed cards remain legible. Await owner feedback before further polish."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.68 weather recurrence hotfix production verified 2026-11-15. Read latest main plus canonical docs. Owner reported recurrent slow/missing weather after FINAL.65. Verified code flaws: current-only GPS key jitter can restart weather requests; no last-good weather persisted across reloads; invalid HTTP200 payload thrown in .then onFulfilled bypassed rejection handler. FINAL.68 stabilizes weather-only GPS point within 2km, retains bounded same-day <=6h last-good forecasts for saved non-GPS route/office point only (no raw GPS persisted), shows stale-with-timestamp while refreshing and error reason with retry while retaining data, adds robust .catch and schema validation. Exact product PR #279 merged 8a2592fc9f5add97cdcef80af17f92c14ce75111; safety tag Issue #278 314891134ebbe43f8a56c1942d6b218670fbbc26 verified; Browser 43673461895 and real Edge 43673461974 PASS; Vercel dpl_o9bujc1dikt7NYTjCNoxePqHGrpe READY exact merge, Pages/Vercel 2026.11.15-FINAL.68 verified. User device root cause remains unverified. FINAL.67 visual foundation, FINAL.66 copy/safety, FINAL.64 delivery priority preserved. Engine AN14B3B5, DB/schema4, monthly28d, external-only navigation, AN15 paused.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.69 Today card readability production verified 2026-11-15. Latest main and canonical docs authoritative. Owner confirmed weather FINAL.68 and directed agreed next UI phase. FINAL.69 adds Today-only CSS: two-row section heading preserving swipe instructions, 13px machine/delivery names with wrapping, 10px meta, balanced 88px card minheight, aligned badge and 40px external nav, completed cards opacity .74 instead of .43. No DOM/swipe/priority/data changes. Product PR #282 merged d3406dc1739d6b1c71d510ca25491d042f44c1aa; immutable annotated tag Issue #281 at 78bf5c267b944128df97587807719b429eba24cd PASS; Browser run 43676631223 PASS incl new 320/390/430px Today card and all legacy suites; real Edge run 43676631227 PASS; Vercel dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo READY product merge, Pages/Vercel 2026.11.15-FINAL.69 verified. FINAL.68 weather fixes, FINAL.67 global design, FINAL.66 copy and compact truck caution, FINAL.64 deliveries above finished machines preserved. Engine AN14B3B5 DB/schema4, 28d monthly, retired in-app route, AN15 intentionally paused. Await owner UI field feedback; do not auto-advance.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.68 weather recurrence mitigations production verified. Await owner phone field feedback only; do not propose UI redesign or resume paused AN15 without new instruction.",
-    "latestContinuityCheckpoint": "2026-11-15 FINAL.68 weather recurrence fix PR #279 Browser+Edge PASS, Vercel+Pages verified; status closeout complete.",
+    "handoffBoundary": "FINAL.69 scoped Today-card readability is live/verified. Preserve all actions, data, priority/gestures, truck warning and weather. Await owner direction for any next visual phase.",
+    "latestContinuityCheckpoint": "2026-11-15 FINAL.69 Today-card readability PR #282, Browser+Edge PASS, live Vercel+Pages version verified.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.68 weather resilience recurrence remediation COMPLETE; no automatic next feature. Await owner field observation.",
-    "If iPhone still shows 天気取得に失敗, ask for visible card reason only; do not request exact GPS or private logs by default. Distinguish network error/no GPS/service-side incomplete payload.",
-    "Preserve FINAL.67 UI, FINAL.66 compact 2t caution, FINAL.65 single Open-Meteo query, FINAL.64 delivery priority, 28-day monthly, external-only Google Maps, AN14B3B5 DB/schema4, intentionally paused AN15."
+    "FINAL.69 Today-card readability COMPLETE; await owner's real-device view and feedback before next visual phase.",
+    "Any further animation, card restructuring or other tab overhaul requires separate authorization; retain explicit confirmed current hierarchy and machine/delivery behavior.",
+    "Preserve FINAL.68 GPS weather, FINAL.67 global styles, FINAL.66 copy/caution, FINAL.64 delivery priority, 28d monthly, external-only Google Maps, AN14B3B5 DB/schema4 and paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
