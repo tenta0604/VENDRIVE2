@@ -171,6 +171,90 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 }
 .search input:focus-visible{outline:none}
 </style>
+
+<style id="final69-today-card-readability">
+/* Today only: make machine and delivery cards scan the same way. */
+#todayPage .sectionhead{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ grid-template-areas:"label route" "hint hint";
+ align-items:center;
+ column-gap:8px;
+ row-gap:5px;
+}
+#todayPage .sectionhead>b{grid-area:label;min-width:0;line-height:1.35}
+#todayPage .sectionhead #todayRoute{grid-area:route;justify-self:end;white-space:nowrap}
+#todayPage .sectionhead .swipeHint{
+ grid-area:hint;
+ display:block;
+ font-size:9px;
+ line-height:1.45;
+ color:#777d86;
+ white-space:normal;
+ margin:0;
+}
+#todayList .swipeRow{margin-top:9px}
+#todayList .swipeCard{padding:13px 12px;gap:10px;min-height:88px;align-items:flex-start}
+#todayList .swipeCard>div:first-child{
+ flex:1 1 auto;
+ min-width:0;
+ overflow-wrap:anywhere;
+}
+#todayList .swipeCard>div:first-child>b{
+ display:block;
+ font-size:13px;
+ font-weight:900;
+ line-height:1.45;
+ letter-spacing:.005em;
+ overflow-wrap:anywhere;
+}
+#todayList .swipeCard .makerChip{font-size:9px;padding:4px 8px;margin-top:6px}
+#todayList .swipeCard .meta,
+#todayList .swipeCard .deliveryItemMeta{
+ color:#656b74;
+ font-size:10px;
+ line-height:1.5;
+ margin-top:5px;
+ overflow-wrap:anywhere;
+}
+#todayList .swipeCard .todayCardActions{
+ display:flex;
+ flex:0 0 78px;
+ width:78px;
+ flex-direction:column;
+ align-items:stretch;
+ gap:9px;
+}
+#todayList .swipeCard .todayCardActions .badge{
+ display:block;
+ border-radius:10px;
+ padding:6px 4px;
+ font-size:9px;
+ line-height:1.3;
+ text-align:center;
+ white-space:normal;
+}
+#todayList .swipeCard .todayExternalNav{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ width:100%;
+ min-height:40px;
+ padding:9px 4px;
+ border-radius:10px;
+ font-size:10px;
+ line-height:1.2;
+ white-space:nowrap;
+}
+#todayList .swipeCard.done{
+ opacity:.74;
+ background:#fafbfc;
+}
+@media(max-width:360px){
+ #todayList .swipeCard{padding:12px 10px;gap:8px}
+ #todayList .swipeCard .todayCardActions{flex-basis:74px;width:74px}
+}
+</style>
 </head>
 <body>
 <div class="portraitGuard" id="portraitGuard" role="dialog" aria-modal="true" aria-label="縦画面で使用してください"><div class="portraitGuardCard"><div class="portraitGuardIcon">↻</div><b>この画面は縦向きで使用してください</b><span>MAPだけ横画面に対応しています。</span><button class="primary" id="portraitOpenMap" type="button">MAPを開く</button></div></div>
@@ -374,7 +458,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.15-FINAL.68',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.15-FINAL.69',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
