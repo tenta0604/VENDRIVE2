@@ -303,6 +303,114 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
  #todayPage .kpi:active{transform:none}
 }
 </style>
+
+<style id="final72-other-tabs-visual-cohesion">
+/* Finish only the five non-Today tabs; keep Today, overlays, map controls and behaviors intact. */
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.row{
+ min-height:44px;
+ align-items:center;
+ gap:8px;
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.row>.title,
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.row>div:first-child .title{
+ font-size:24px;
+ line-height:1.18;
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.row button{
+ min-height:38px;
+ border-radius:var(--ui-control-radius);
+ white-space:nowrap;
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.section>.sectionhead{
+ min-height:27px;
+ align-items:center;
+ gap:9px;
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.section>.sectionhead b{
+ font-size:13px;
+ line-height:1.45;
+ overflow-wrap:anywhere;
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.section>.sectionhead .muted{
+ font-size:10px;
+ line-height:1.4;
+ text-align:right;
+}
+:is(#mapPage,#machinesPage,#deliveryPage) .search{
+ min-height:44px;
+ border-radius:var(--ui-control-radius);
+ background:#fff;
+ border-color:var(--line);
+ padding:9px 11px;
+ gap:8px;
+}
+:is(#mapPage,#machinesPage,#deliveryPage) .search input{
+ font-size:12px;
+ line-height:1.45;
+}
+#mapPage .mapSearchButton{min-height:34px;border-radius:9px}
+#mapPage .days .day{min-height:38px}
+#machinesPage .machineFilters select{
+ min-height:42px;
+ font-size:11px;
+ border-radius:var(--ui-control-radius);
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)
+ :is(.taskCard,#officeList .item,#mapList .item,#deliveryMapList .item,
+ #machineList .item,#ordersList .item,#deliverySitesList .item,
+ #deliveryPendingList .item,#deliveryHistoryList .item){
+ min-width:0;
+ min-height:58px;
+ padding:12px 13px;
+ gap:10px;
+ border:1px solid var(--line);
+ border-radius:var(--ui-card-radius);
+ background:#fff;
+ box-shadow:0 2px 10px rgba(17,17,17,.035);
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)
+ :is(.taskCard,#officeList .item,#mapList .item,#deliveryMapList .item,
+ #machineList .item,#ordersList .item,#deliverySitesList .item,
+ #deliveryPendingList .item,#deliveryHistoryList .item)>div:first-child{
+ min-width:0;
+ overflow-wrap:anywhere;
+}
+:is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)
+ :is(.taskCard,#officeList .item,#mapList .item,#deliveryMapList .item,
+ #machineList .item,#ordersList .item,#deliverySitesList .item,
+ #deliveryPendingList .item,#deliveryHistoryList .item) b{
+ font-size:12px;
+ line-height:1.45;
+ overflow-wrap:anywhere;
+}
+:is(#tasksPage,#ordersPage,#deliveryPage) .history{
+ padding:12px 13px;
+ border-radius:var(--ui-card-radius);
+ background:#fff;
+ border-color:var(--line);
+ box-shadow:0 2px 10px rgba(17,17,17,.035);
+ min-width:0;
+}
+:is(#tasksPage,#ordersPage,#deliveryPage) .history>div:first-child{
+ min-width:0;
+ overflow-wrap:anywhere;
+}
+:is(#tasksPage,#ordersPage,#deliveryPage) .history b{
+ font-size:12px;
+ line-height:1.45;
+ overflow-wrap:anywhere;
+}
+#tasksPage .taskDelete,
+#ordersPage .historyDelete,
+#deliveryPage .deliveryActions button{
+ min-height:34px;
+ border-radius:9px;
+}
+@media(max-width:360px){
+ :is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.row>div:first-child .title{font-size:22px}
+ :is(#tasksPage,#mapPage,#machinesPage,#ordersPage,#deliveryPage)>.row button{padding:8px 9px}
+}
+</style>
 </head>
 <body>
 <div class="portraitGuard" id="portraitGuard" role="dialog" aria-modal="true" aria-label="縦画面で使用してください"><div class="portraitGuardCard"><div class="portraitGuardIcon">↻</div><b>この画面は縦向きで使用してください</b><span>MAPだけ横画面に対応しています。</span><button class="primary" id="portraitOpenMap" type="button">MAPを開く</button></div></div>
@@ -506,7 +614,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.16-FINAL.71',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.16-FINAL.72',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
