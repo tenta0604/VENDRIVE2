@@ -1,40 +1,42 @@
 {
-  "evidenceVersion": 102,
-  "runType": "final72_other_tabs_visual_cohesion_production_closeout_20261116",
-  "phase": "FINAL72_OTHER_TABS_VISUAL_COHESION",
+  "evidenceVersion": 103,
+  "runType": "vendrive_1_0_official_release_naming_closeout_20261116",
+  "phase": "VENDRIVE_1_0_PUBLIC_NAMING",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "1a2e7c52f40f81f21d17499628221a2e0b6b30da",
-    "preEditImmutableSafetyTag": "PASS Issue #290 annotated backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116",
-    "productPR": 291,
-    "productMerge": "5f970acdb528fec3fc9af571c2561de0d50725ce"
+    "mainBefore": "d0bbb806ef748a61be70c9e162c607612ec76a67",
+    "preEditImmutableSafetyTag": "PASS Issue #293 annotated backup-pre-VENDRIVE-1.0-RELEASE-NAMING-20261116-20261116",
+    "productPR": 294,
+    "productMerge": "455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
+    "previousMilestone": "2026.11.16-FINAL.72"
   },
   "versions": {
-    "app": "2026.11.16-FINAL.72",
+    "app": "1.0.0",
+    "brand": "VENDRIVE 1.0",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Non-Today five-tab isolated CSS: aligned 44px headings, 38px action buttons, 27px/13px section headings, white 44px searches, 42px machine filters, 38px MAP day targets, rounded 15px/list+history cards, consistent spacing/type and long Japanese wrapping. All Today styles and interactions untouched.",
-    "safety": "No behavior, navigation, route, weather, map overlays or map full-screen, tab order, delivery sorting, persisted data, database schema or engine change; no AN15 resumption."
+    "summary": "Public release rename only: APP_VERSION/version.json 1.0.0, <title>VENDRIVE 1.0</title>, manifest name VENDRIVE 1.0 / short_name VENDRIVE. Existing header brand VENDRIVE and Ver. 1.0.0. PWA id/start_url/scope /VENDRIVE2/ deliberately preserved to keep existing install/data. Code/UX/data/runtime behavior unchanged.",
+    "safety": "No data migration, PWA identity change, IndexedDB/localStorage backup contract change, route/navigation/weather/delivery or paused AN15 change. Previous FINAL.72 code frozen as baseline."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #290 target 1a2e7c52f40f81f21d17499628221a2e0b6b30da",
-    "staticSyntax": "PASS inline app JavaScript/test syntax and exact-head browser checks",
-    "exactHeadBrowserRegression": "PASS run 43824736011 (320/390/430px all five tab headers/search/card geometry, seeded long-name machines/delivery, previous weather/copy/swipe suites)",
-    "exactHeadRealMicrosoftEdge": "PASS run 43824735932 (real Edge external navigation/MAP and legacy browser)",
-    "productMerge": "PASS PR #291 5f970acdb528fec3fc9af571c2561de0d50725ce",
-    "vercel": "PASS READY dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw exact product merge",
-    "pages": "PASS public 2026.11.16-FINAL.72",
-    "backend": "PASS HTTP200 2026.11.16-FINAL.72",
-    "dataMigration": "NOT_REQUIRED CSS/test/version only"
+    "preEditImmutableTag": "PASS Issue #293 target d0bbb806ef748a61be70c9e162c607612ec76a67",
+    "staticSyntax": "PASS index inline JavaScript parse, JSON parse; browser gate checks",
+    "exactHeadBrowserRegression": "PASS run 43826193603 all prior suites + explicit official semver/PWA title/name/scope 320/390/430px",
+    "exactHeadRealMicrosoftEdge": "PASS run 43826193424 external nav/MAP and legacy regression",
+    "productMerge": "PASS PR #294 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
+    "vercel": "PASS READY dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ exact product merge",
+    "pages": "PASS public version.json 1.0.0 fresh",
+    "backend": "PASS HTTP200 version.json 1.0.0",
+    "dataMigration": "NOT REQUIRED release-name/version-only change"
   },
   "changedFiles": [
     "index.html",
     "version.json",
-    "tests/visual-consistency-gate.mjs",
-    "tests/today-card-readability-gate.mjs",
+    "manifest.webmanifest",
+    "tests/ui-copy-cleanup-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -42,12 +44,13 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Await owner field visual acceptance. No automatic next UI phase or AN15.",
+  "nextAction": "COMPLETE — await owner display confirmation; next actual fix or feature requires new instruction; paused AN15 preserved.",
   "continuityCheckpoint": {
-    "status": "FINAL72_OTHER_TABS_VISUAL_COHESION_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.16-FINAL.72",
-    "productMerge": "5f970acdb528fec3fc9af571c2561de0d50725ce",
-    "UI": "Five non-Today tab visual cohesion; Today/Map behavior untouched",
-    "legacy": "FINAL.70 done .48, FINAL.71 swipe, FINAL.68 weather, FINAL.64 delivery, paused AN15"
+    "status": "VENDRIVE_1_0_OFFICIAL_RELEASE_PRODUCTION_VERIFIED",
+    "appVersion": "1.0.0",
+    "productName": "VENDRIVE 1.0",
+    "productMerge": "455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
+    "pwaIdentity": "/VENDRIVE2/ unchanged",
+    "legacy": "FINAL.72 visual finish; FINAL.68 weather; FINAL.70 done opacity .48; paused AN15"
   }
 }
