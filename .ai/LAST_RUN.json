@@ -1,34 +1,35 @@
 {
-  "evidenceVersion": 100,
-  "runType": "final70_done_card_opacity_owner_feedback_production_closeout_20261116",
-  "phase": "FINAL70_TODAY_DONE_FADE_FEEDBACK_ADJUSTMENT",
+  "evidenceVersion": 101,
+  "runType": "final71_interaction_feedback_production_closeout_20261116",
+  "phase": "FINAL71_UI_MICRO_INTERACTION_FEEDBACK",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "904ba88fe0c12fa2f6592d0c99490f95ac049e71",
-    "preEditImmutableSafetyTag": "PASS Issue #284 annotated backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116",
-    "productPR": 285,
-    "productMerge": "d6b6e4a453f30091321fa7892919d50d6e2b4b8b"
+    "mainBefore": "a5f41cf873c825f4f654be014b9857afb26e2715",
+    "preEditImmutableSafetyTag": "PASS Issue #287 annotated backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116",
+    "productPR": 288,
+    "productMerge": "d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34"
   },
   "versions": {
-    "app": "2026.11.16-FINAL.70",
+    "app": "2026.11.16-FINAL.71",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Owner requested completed work clearly lighter than unfinished after FINAL.69. Today #todayList .swipeCard.done opacity 0.74 -> 0.48 (done vending and done delivery); pending remains 1.0. No change to markup, scrolling, gestures, ordering, status text or navigation buttons.",
-    "safety": "CSS-only functional change; manifest/version synchronized; no user-data writes/migration, no API/schedules/delivery/weather/navigation or AN15 changes."
+    "summary": "150ms restrained touch feedback for tabs/Today buttons/KPIs, 230ms progress easing, existing swipe +/-70px threshold now shows specific ready-complete ✓ or ready-skip ↷ cues only at threshold; back-off/cancel clears cues. Reduced-motion preference disables cosmetic transitions, preserves direct swiping.",
+    "safety": "No data writes or migration, no gesture thresholds/delay, no delivery right-skip, navigation or map functionality changed, no AN15."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #284 target 904ba88fe0c12fa2f6592d0c99490f95ac049e71",
-    "staticSyntax": "PASS inline HTML JavaScript parse and test syntax",
-    "exactHeadBrowserRegression": "PASS run 43811472168 (Today completed=.48 pending=1 at 320/390/430px; prior suites)",
-    "exactHeadRealMicrosoftEdge": "PASS run 43811472156 external navigation/MAP and legacy tests",
-    "productMerge": "PASS PR #285 d6b6e4a453f30091321fa7892919d50d6e2b4b8b",
-    "vercel": "PASS READY dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 exact product merge",
-    "pages": "PASS public 2026.11.16-FINAL.70 fresh",
-    "backend": "PASS 200 2026.11.16-FINAL.70",
-    "dataMigration": "NOT_REQUIRED — CSS only"
+    "preEditImmutableTag": "PASS Issue #287 -> a5f41cf873c825f4f654be014b9857afb26e2715",
+    "staticSyntax": "PASS all inline JS scripts syntax; extended test suite syntax",
+    "exactHeadBrowserRegression": "PASS run 43822988325 (mobile 320/390/430px threshold/cancel/motion; legacy/weather/visual)",
+    "exactHeadRealMicrosoftEdge": "PASS run 43822988263 external navigation/MAP and regression",
+    "testHarnessNote": "First run failed solely on `translateX(0px)` vs string `translateX(0)`; corrected test to accept CSS unit normalization, exact-head rerun PASS",
+    "productMerge": "PASS PR #288 d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34",
+    "vercel": "PASS READY dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C exact product merge",
+    "pages": "PASS public 2026.11.16-FINAL.71",
+    "backend": "PASS HTTP200 2026.11.16-FINAL.71",
+    "dataMigration": "NOT_REQUIRED CSS and transient DOM classes only"
   },
   "changedFiles": [
     "index.html",
@@ -41,12 +42,12 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Await user acceptance of increased completed-card fading. No automatic AN15 or next styling changes.",
+  "nextAction": "COMPLETE. Await owner field UX feedback; no automatic next UI phase or AN15.",
   "continuityCheckpoint": {
-    "status": "FINAL70_DONE_CARD_OPACITY_FEEDBACK_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.16-FINAL.70",
-    "productMerge": "d6b6e4a453f30091321fa7892919d50d6e2b4b8b",
-    "opacity": "done0.48/pending1.0, Today only",
-    "legacy": "FINAL.69 card geometry, FINAL.68 weather, FINAL.66 copy, FINAL.64 deliveries, paused AN15"
+    "status": "FINAL71_INTERACTION_FEEDBACK_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.16-FINAL.71",
+    "productMerge": "d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34",
+    "UX": "150ms press/230ms progress, existing +/-70px ready cue, reduced-motion",
+    "legacy": "FINAL.70 done opacity .48, FINAL.68 weather, FINAL.64 delivery, paused AN15"
   }
 }

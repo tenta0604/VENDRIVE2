@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.16-FINAL.70",
+  "appVersion": "2026.11.16-FINAL.71",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL70_DONE_CARD_OPACITY_FEEDBACK_PRODUCTION_VERIFIED",
+  "status": "FINAL71_INTERACTION_FEEDBACK_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.70 live: clearly faded completed Today cards (owner follow-up)",
-    "scope": "Owner visually reviewed FINAL.69 and said completed Today cards were too dark to distinguish from unfinished. At owner's direction changed exactly Today #todayList .swipeCard.done opacity from 0.74 to 0.48; applies to done vending and done delivery cards, with pending remaining fully opaque (1). Preserves FINAL.69 readable names, metadata, card spacing, status badges and 40px nav button, plus delivery priority, swipe gestures, live weather, external navigation, all other tabs, user data and app architecture. No data migration or AN15 change. App/manifest synchronized FINAL.70.",
-    "releaseStatus": "Product PR #285 merged d6b6e4a453f30091321fa7892919d50d6e2b4b8b. Immutable annotated pre-edit safety tag Issue #284 backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116 verified at 904ba88fe0c12fa2f6592d0c99490f95ac049e71. Exact-head Browser regression run 43811472168 PASS, including mobile Today 320/390/430px completed opacity 0.48 and pending 1.0 + previous suites. Real Microsoft Edge/external MAP navigation run 43811472156 PASS. Vercel dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 READY exact product merge, public Vercel /version.json HTTP 200 FINAL.70 and GitHub Pages public /version.json FINAL.70 confirmed fresh. No data migration.",
+    "title": "FINAL.71 live: refined tactile feedback and swipe-ready cues",
+    "scope": "Owner said to advance to next UI polish phase after FINAL.70; agreed next stage was interaction animation. Added a small isolated CSS layer with 150ms tabs/Today nav/finish day/KPI pressed feedback and 230ms Today progress bar easing. Existing swipe threshold -70px complete and +70px vending-only skip now toggles transient readyComplete/readySkip CSS classes to show green checkmark or dark skip arrow only at ready threshold; partial swipe does not falsely imply committed action, backing off/cancel resets cues. Existing pointer swipe/140ms commit, delivery right-swipe no-op, task confirmation and all state changes remain exactly as before. prefers-reduced-motion disables cosmetic animation, not pointer gestures. FINAL.70 completed opacity .48 and all previously confirmed UI, routes, weather and data preserved. No schema or AN15 change.",
+    "releaseStatus": "Product PR #288 merged d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34. Pre-edit immutable annotated safety tag Issue #287 backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116 -> a5f41cf873c825f4f654be014b9857afb26e2715 verified. First browser/Edge runs caught a harness-only CSS serialization assertion (translateX(0px) vs translateX(0)); assertion fixed without product changes. Exact-head Browser regression 43822988325 PASS: existing browser suite, 320/390/430px swipe ready/partial/cancel, reduced-motion and earlier FINAL.70 tests. Exact-head real Edge MAP/external navigation 43822988263 PASS. Vercel dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C READY exact product merge. Public Vercel and GitHub Pages /version.json both 2026.11.16-FINAL.71 verified. No data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #284 annotated backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116 -> 904ba88fe0c12fa2f6592d0c99490f95ac049e71",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/285",
-      "browser": "PASS exact-head 43811472168, Today done0.48 vs pending1.0 at 320/390/430px and legacy suites",
-      "realMicrosoftEdge": "PASS exact-head 43811472156 real Edge MAP/external navigation and legacy suites",
-      "merge": "PASS d6b6e4a453f30091321fa7892919d50d6e2b4b8b",
-      "vercel": "PASS READY dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 exact product merge",
-      "pages": "PASS public 2026.11.16-FINAL.70 fresh fetch",
-      "backend": "PASS HTTP200 2026.11.16-FINAL.70"
+      "preEditImmutableSafetyTag": "PASS Issue #287 annotated backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116 -> a5f41cf873c825f4f654be014b9857afb26e2715",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/288",
+      "browser": "PASS exact-head 43822988325 including mobile swipe threshold/cancel and reduced motion",
+      "realMicrosoftEdge": "PASS exact-head 43822988263 external navigation/MAP/legacy",
+      "merge": "PASS d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34",
+      "vercel": "PASS READY dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C exact product merge",
+      "pages": "PASS public 2026.11.16-FINAL.71 from independent fresh fetch",
+      "backend": "PASS HTTP200 2026.11.16-FINAL.71"
     },
-    "nextOwnerAction": "View new FINAL.70 Today list; completed vending and delivery should look clearly lighter than uncompleted, without changing card layout. Further adjustments only on owner feedback."
+    "nextOwnerAction": "Open FINAL.71 Today tab and try a slow swipe. Before 70px there is only reveal; once it reaches the existing completion threshold, a green ✓ ready cue appears. Let go to finish as usual, or pull back to cancel. Check that the action feels natural; no need to test while driving."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.16-FINAL.70 production verified 2026-11-16. Owner found FINAL.69 done opacity 0.74 made completed cards insufficiently distinct, requested stronger fade. FINAL.70 adjusted only #todayList .swipeCard.done opacity to .48 (both completed machine and delivery), pending remains opacity1; no other UI or behavior changes. PR #285 merged d6b6e4a453f30091321fa7892919d50d6e2b4b8b; annotated pre-edit safety tag Issue #284 backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116 -> 904ba88fe0c12fa2f6592d0c99490f95ac049e71 verified. Exact-head Browser 43811472168 PASS including Today 320/390/430px state opacity and all prior gates; real Edge external MAP/nav 43811472156 PASS. Vercel dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 READY exact product merge; public Pages/Vercel version 2026.11.16-FINAL.70 verified. FINAL.69 readability, FINAL.68 weather, FINAL.66 copy/safety, FINAL.64 delivery priority retained. Engine AN14B3B5 DB/schema4, 28d monthly, external-only Google Maps, AN15 paused. Await owner UI feedback.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.16-FINAL.71 UI microinteraction polish production verified on 2026-11-16. Read latest main and canonical docs. Owner advanced one UI phase after FINAL.70, originally agreed microinteraction stage. Product PR #288 merged d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34; immutable safety tag Issue #287 backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116 -> a5f41cf873c825f4f654be014b9857afb26e2715 verified. Isolated CSS: 150ms pressed tab/Today button/KPI feedback; 230ms progress width; swipe READY classes only at original +/-70px thresholds to show completion green check or skip arrow, reset on cancel/backoff; reduced-motion disables cosmetics but not gestures. Exact-head Browser 43822988325 PASS incl 320/390/430px, cancel and reduced-motion; real Edge 43822988263 PASS; first failed run was test-only 'translateX(0)' vs browser '0px' normalization, corrected and rerun. Vercel dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C READY exact SHA, Pages/Vercel 2026.11.16-FINAL.71 verified. FINAL.70 done opacity .48, FINAL.69 card layout, FINAL.68 weather, FINAL.66 copy and 2t caution, FINAL.64 delivery priority preserved. Engine AN14B3B5 DB/schema4, 28-day monthly, external-only Google Maps, AN15 paused. Await owner acceptance before next stage.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.70 completed Today cards fade strengthened to .48 on user instruction. Verified live. No further UI phase automatically; preserve all behavior and data.",
-    "latestContinuityCheckpoint": "2026-11-16 FINAL.70 PR #285 done-opacity calibration, Browser+Edge PASS, Vercel and Pages FINAL.70 verified.",
+    "handoffBoundary": "FINAL.71 microinteraction phase complete: preserve thresholds, 140ms commit, swipe cancellation, reduced motion and done opacity .48; next other-tab polish only if owner advances.",
+    "latestContinuityCheckpoint": "2026-11-16 FINAL.71 PR #288 UI feedback released, Browser+Edge PASS, Vercel+Pages FINAL.71 live; canonical docs closed.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.70 owner-driven completed card opacity adjustment COMPLETE. Await owner's phone visual confirmation.",
-    "Maintain pending cards fully opaque, completed cards opacity .48; if owner requests another refinement, adjust only that state-specific CSS and its computed-style tests.",
-    "Preserve FINAL.69 Today card layout, FINAL.68 weather, FINAL.67 global styling, FINAL.66 copy/vehicle warning, FINAL.64 delivery ordering, engine AN14B3B5 DB/schema4, 28-day monthly and paused AN15."
+    "FINAL.71 microinteraction polish COMPLETE; await real-device UI acceptance before a new UI phase.",
+    "Next optional agreed UI phase (only on owner direction): other tabs' visual refinements, one focused set at a time; preserve Today behavior.",
+    "Keep FINAL.70 completed opacity .48, FINAL.69 card hierarchy, FINAL.68 weather, FINAL.66 copy/2t warning, FINAL.64 delivery priority, 28-day monthly, AN14B3B5 DB/schema4, and paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
