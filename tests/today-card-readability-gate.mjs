@@ -152,6 +152,32 @@ export async function runTodayCardReadabilityGate(browser,baseUrl){
    assert.match(styles.progress,/0\.23s/,'progress width easing 230ms');
    await checkGestureFeedback(page,'#todayList .swipeRow[data-machine-id="M-P"]',false);
    await checkGestureFeedback(page,'#todayList .swipeRow[data-delivery-id="REQ-P"]',true);
+   // Non-Today lists use the same visual rhythm without changing data or
+   // removing actions. Exercise real cards with long Japanese names.
+   for(const view of [
+    {tab:'machinesPage',selector:'#machineList .item',fragment:'とても長い施設名'},
+    {tab:'deliveryPage',selector:'#deliverySitesList .item',fragment:'長い名前を持つ納品先'}
+   ]){
+    await page.locator('.tabs button[data-page="'+view.tab+'"]').click();
+    await page.locator(view.selector).first().waitFor({state:'visible',timeout:8000});
+    const card=await page.locator(view.selector).first().evaluate(el=>{
+     const b=el.querySelector('b'),r=el.getBoundingClientRect(),st=getComputedStyle(el);
+     return {font:b&&getComputedStyle(b).fontSize,bg:st.backgroundColor,
+      radius:st.borderRadius,minHeight:st.minHeight,pad:st.paddingTop,
+      overflow:el.scrollWidth>el.clientWidth+1,right:r.right,
+      text:el.innerText};
+    });
+    assert.equal(card.radius,'15px',view.tab+' cards share radius');
+    assert.equal(card.minHeight,'58px',view.tab+' cards share minimum size');
+    assert.equal(card.pad,'12px',view.tab+' cards share vertical padding');
+    assert.equal(card.font,'12px',view.tab+' names share readability');
+    assert.equal(card.bg,'rgb(255, 255, 255)',view.tab+' card contrast');
+    assert.equal(card.overflow,false,view.tab+' long names have no horizontal card overflow');
+    assert(card.right<=width+1,view.tab+' list fits viewport width');
+    assert(card.text.includes(view.fragment),view.tab+' long Japanese fixture name preserved');
+   }
+   await page.locator('.tabs button[data-page="todayPage"]').click();
+   assert.equal(Number(await page.locator('#todayList .swipeRow[data-machine-id="M-D"] .swipeCard').evaluate(el=>getComputedStyle(el).opacity)),0.48,'Today completed opacity must not be changed by other tab styling');
    const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
    assert.equal(before.machines.find(m=>m.id==='M-P').visited,false,'viewing the card must not mark a vending visit');
    assert.equal(before.deliveryRequests.find(r=>r.id==='REQ-P').status,'pending','viewing the card must not complete delivery');
