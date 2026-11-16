@@ -81,7 +81,7 @@ async function checkGestureFeedback(page,selector,isDelivery){
  assert.equal(phases.backed.ready,false,'backing off removes ready state');
  assert.equal(phases.canceled.ready,false,'cancel clears ready state');
  assert.equal(phases.canceled.reveal,false,'cancel clears reveal');
- assert.equal(phases.canceled.inlineTransform,'translateX(0)','cancel restores card');
+ assert.match(phases.canceled.inlineTransform,/^translateX\(0(?:px)?\)$/,'cancel restores card regardless of browser CSS unit normalization');
  assert.equal(phases.right.readyRight,!isDelivery,'only vending can be right-skipped');
  assert.equal(phases.right.right,!isDelivery,'delivery cannot reveal right skip');
  if(!isDelivery)assert.match(phases.right.skipMark,/↷/,'skip readiness arrow');
