@@ -35,6 +35,19 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
    await page.locator('#deliveryNav').waitFor({state:'attached'});
    const manifestVersion=await page.evaluate(async()=>{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw new Error('version.json failed');return (await response.json()).version});
    assert.equal((await page.locator('#appVersion').innerText()).trim(),'Ver. '+manifestVersion,'rendered app version matches live manifest');
+   assert.equal(manifestVersion,'1.0.0','public 1.0 semantic release version is consistent');
+   assert.equal(await page.title(),'VENDRIVE 1.0','browser tab reflects public release');
+   const pwa=await page.evaluate(async()=>{
+    const response=await fetch('manifest.webmanifest',{cache:'no-store'});
+    if(!response.ok)throw Error('PWA manifest unavailable');
+    const j=await response.json();
+    return {name:j.name,short_name:j.short_name,id:j.id,start_url:j.start_url,scope:j.scope};
+   });
+   assert.equal(pwa.name,'VENDRIVE 1.0','PWA long name uses approved public brand');
+   assert.equal(pwa.short_name,'VENDRIVE','PWA launcher remains compact');
+   for(const key of ['id','start_url','scope'])
+    assert.equal(pwa[key],'/VENDRIVE2/','PWA existing install and data identity remains stable: '+key);
+
    await checkNotice(page,'todayNavSafety',width);
    assert.equal(await page.locator('#todayList').count(),1,'Today list remains available');
    assert.equal(await page.locator('#finishDay').count(),1,'day completion remains available');
