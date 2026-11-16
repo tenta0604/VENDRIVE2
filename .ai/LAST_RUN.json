@@ -1,40 +1,38 @@
 {
-  "evidenceVersion": 99,
-  "runType": "final69_today_card_readability_production_closeout_20261115",
-  "phase": "FINAL69_TODAY_CARD_READABILITY_VISUAL_POLISH",
+  "evidenceVersion": 100,
+  "runType": "final70_done_card_opacity_owner_feedback_production_closeout_20261116",
+  "phase": "FINAL70_TODAY_DONE_FADE_FEEDBACK_ADJUSTMENT",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "78bf5c267b944128df97587807719b429eba24cd",
-    "preEditImmutableSafetyTag": "PASS Issue #281 annotated backup-pre-FINAL69-TODAY-CARD-READABILITY-20261115-20261115",
-    "productPR": 282,
-    "productMerge": "d3406dc1739d6b1c71d510ca25491d042f44c1aa"
+    "mainBefore": "904ba88fe0c12fa2f6592d0c99490f95ac049e71",
+    "preEditImmutableSafetyTag": "PASS Issue #284 annotated backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116",
+    "productPR": 285,
+    "productMerge": "d6b6e4a453f30091321fa7892919d50d6e2b4b8b"
   },
   "versions": {
-    "app": "2026.11.15-FINAL.69",
+    "app": "2026.11.16-FINAL.70",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Today-only CSS refines machine/delivery card reading order, title 13px, detail 10px, left flexible text with long-name wrap, stable 78px badge/nav column and 40px nav touch height, section header two-row visible swipe hint, complete card opacity 0.74. Maintains all priorities, swipes, navigation and full previously approved UI copy trimming.",
-    "safety": "No mutation or migration of user state, no order, weather, map, tasks, delivery or scheduling behavior changes, no backend/API or AN15 changes. No changes to markup or event handlers.",
-    "limit": "Real iPhone visual acceptance requires owner; controlled Chromium/real Edge and two public deployments fully verified."
+    "summary": "Owner requested completed work clearly lighter than unfinished after FINAL.69. Today #todayList .swipeCard.done opacity 0.74 -> 0.48 (done vending and done delivery); pending remains 1.0. No change to markup, scrolling, gestures, ordering, status text or navigation buttons.",
+    "safety": "CSS-only functional change; manifest/version synchronized; no user-data writes/migration, no API/schedules/delivery/weather/navigation or AN15 changes."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #281 dereferenced 78bf5c267b944128df97587807719b429eba24cd",
-    "staticSyntax": "PASS inline app script parse and browser/Edge gate checks",
-    "exactHeadBrowserRegression": "PASS run 43676631223; Today 320/390/430px, prior 7 HTML suites, weather, FINAL66/67",
-    "exactHeadRealMicrosoftEdge": "PASS run 43676631227 external-navigation/MAP/gesture/delivery",
-    "productMerge": "PASS PR #282 d3406dc1739d6b1c71d510ca25491d042f44c1aa",
-    "vercel": "PASS READY dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo exact product merge",
-    "pages": "PASS public 2026.11.15-FINAL.69",
-    "backend": "PASS HTTP200 2026.11.15-FINAL.69",
-    "dataMigration": "NOT_REQUIRED, CSS and browser tests only"
+    "preEditImmutableTag": "PASS Issue #284 target 904ba88fe0c12fa2f6592d0c99490f95ac049e71",
+    "staticSyntax": "PASS inline HTML JavaScript parse and test syntax",
+    "exactHeadBrowserRegression": "PASS run 43811472168 (Today completed=.48 pending=1 at 320/390/430px; prior suites)",
+    "exactHeadRealMicrosoftEdge": "PASS run 43811472156 external navigation/MAP and legacy tests",
+    "productMerge": "PASS PR #285 d6b6e4a453f30091321fa7892919d50d6e2b4b8b",
+    "vercel": "PASS READY dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 exact product merge",
+    "pages": "PASS public 2026.11.16-FINAL.70 fresh",
+    "backend": "PASS 200 2026.11.16-FINAL.70",
+    "dataMigration": "NOT_REQUIRED — CSS only"
   },
   "changedFiles": [
     "index.html",
     "version.json",
-    "tests/run-browser-gates.mjs",
     "tests/today-card-readability-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
@@ -43,12 +41,12 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE; next owner action is view Today at FINAL.69 and provide any polish feedback. No automatic AN15 progression.",
+  "nextAction": "COMPLETE. Await user acceptance of increased completed-card fading. No automatic AN15 or next styling changes.",
   "continuityCheckpoint": {
-    "status": "FINAL69_TODAY_CARD_READABILITY_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.15-FINAL.69",
-    "productMerge": "d3406dc1739d6b1c71d510ca25491d042f44c1aa",
-    "UI": "Today-only responsive 13px title, 10px meta, nav40px, done opacity.74",
-    "legacy": "FINAL.68 weather, FINAL.67 style, FINAL.66 copy, FINAL.64 delivery priority; paused AN15"
+    "status": "FINAL70_DONE_CARD_OPACITY_FEEDBACK_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.16-FINAL.70",
+    "productMerge": "d6b6e4a453f30091321fa7892919d50d6e2b4b8b",
+    "opacity": "done0.48/pending1.0, Today only",
+    "legacy": "FINAL.69 card geometry, FINAL.68 weather, FINAL.66 copy, FINAL.64 deliveries, paused AN15"
   }
 }

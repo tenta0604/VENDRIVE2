@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.15-FINAL.69",
+  "appVersion": "2026.11.16-FINAL.70",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL69_TODAY_CARD_READABILITY_PRODUCTION_VERIFIED",
+  "status": "FINAL70_DONE_CARD_OPACITY_FEEDBACK_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.69 live: Today machine and delivery card readability polish",
-    "scope": "Owner confirmed FINAL.68 weather works and directed next agreed design polish phase, focusing exclusively on Today cards. New isolated CSS (#final69-today-card-readability) uses two-row section header with visible swipe guidance and unchanged Today route label. Machine and delivery card titles are readable at 13px, supporting metadata 10px, balanced 88px minimum card height and 9px row spacing, status badge and 40px external-navigation button aligned in stable action column; long Japanese names and details wrap without overlapping controls. Completed cards still separate but now readable at opacity 0.74 rather than the previous 0.43. No machine/delivery markup, actions, JS behavior, priority, swipe, right-skip, navigation, weather, copy, storage or schemas changed. FINAL.69 app and version.json synchronized. Existing FINAL.67 monochrome design retained.",
-    "releaseStatus": "Product PR #282 merged d3406dc1739d6b1c71d510ca25491d042f44c1aa. Pre-edit immutable annotated safety tag Issue #281 verified at 78bf5c267b944128df97587807719b429eba24cd. Exact-head Browser regression run 43676631223 PASS, including all earlier weather, copy, visual and 320/390/430px Today readability tests verifying long names, button geometry, no overlap, data unchanged and pending delivery before completed vending. Real Microsoft Edge/external-navigation/MAP run 43676631227 PASS. Production Vercel dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo READY matching product SHA; public GitHub Pages and Vercel both 2026.11.15-FINAL.69 confirmed by fresh checks. No data migration.",
+    "title": "FINAL.70 live: clearly faded completed Today cards (owner follow-up)",
+    "scope": "Owner visually reviewed FINAL.69 and said completed Today cards were too dark to distinguish from unfinished. At owner's direction changed exactly Today #todayList .swipeCard.done opacity from 0.74 to 0.48; applies to done vending and done delivery cards, with pending remaining fully opaque (1). Preserves FINAL.69 readable names, metadata, card spacing, status badges and 40px nav button, plus delivery priority, swipe gestures, live weather, external navigation, all other tabs, user data and app architecture. No data migration or AN15 change. App/manifest synchronized FINAL.70.",
+    "releaseStatus": "Product PR #285 merged d6b6e4a453f30091321fa7892919d50d6e2b4b8b. Immutable annotated pre-edit safety tag Issue #284 backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116 verified at 904ba88fe0c12fa2f6592d0c99490f95ac049e71. Exact-head Browser regression run 43811472168 PASS, including mobile Today 320/390/430px completed opacity 0.48 and pending 1.0 + previous suites. Real Microsoft Edge/external MAP navigation run 43811472156 PASS. Vercel dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 READY exact product merge, public Vercel /version.json HTTP 200 FINAL.70 and GitHub Pages public /version.json FINAL.70 confirmed fresh. No data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #281 annotated backup-pre-FINAL69-TODAY-CARD-READABILITY-20261115-20261115 -> 78bf5c267b944128df97587807719b429eba24cd",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/282",
-      "browser": "PASS exact-head 43676631223, 320/390/430px Today cards + previous weather/copy/visual/legacy gates",
-      "realMicrosoftEdge": "PASS exact-head 43676631227, external navigation/MAP/gesture/legacy",
-      "merge": "PASS d3406dc1739d6b1c71d510ca25491d042f44c1aa",
-      "vercel": "PASS READY dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo exact product merge",
-      "pages": "PASS public 2026.11.15-FINAL.69 fresh independent fetch",
-      "backend": "PASS HTTP200 2026.11.15-FINAL.69"
+      "preEditImmutableSafetyTag": "PASS Issue #284 annotated backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116 -> 904ba88fe0c12fa2f6592d0c99490f95ac049e71",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/285",
+      "browser": "PASS exact-head 43811472168, Today done0.48 vs pending1.0 at 320/390/430px and legacy suites",
+      "realMicrosoftEdge": "PASS exact-head 43811472156 real Edge MAP/external navigation and legacy suites",
+      "merge": "PASS d6b6e4a453f30091321fa7892919d50d6e2b4b8b",
+      "vercel": "PASS READY dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 exact product merge",
+      "pages": "PASS public 2026.11.16-FINAL.70 fresh fetch",
+      "backend": "PASS HTTP200 2026.11.16-FINAL.70"
     },
-    "nextOwnerAction": "Open latest VENDRIVE and inspect Today card readability on own phone. Names wrap, status/nav align, completed cards remain legible. Await owner feedback before further polish."
+    "nextOwnerAction": "View new FINAL.70 Today list; completed vending and delivery should look clearly lighter than uncompleted, without changing card layout. Further adjustments only on owner feedback."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.15-FINAL.69 Today card readability production verified 2026-11-15. Latest main and canonical docs authoritative. Owner confirmed weather FINAL.68 and directed agreed next UI phase. FINAL.69 adds Today-only CSS: two-row section heading preserving swipe instructions, 13px machine/delivery names with wrapping, 10px meta, balanced 88px card minheight, aligned badge and 40px external nav, completed cards opacity .74 instead of .43. No DOM/swipe/priority/data changes. Product PR #282 merged d3406dc1739d6b1c71d510ca25491d042f44c1aa; immutable annotated tag Issue #281 at 78bf5c267b944128df97587807719b429eba24cd PASS; Browser run 43676631223 PASS incl new 320/390/430px Today card and all legacy suites; real Edge run 43676631227 PASS; Vercel dpl_qukCDyUqMmet8vSYj1qxkKFwSfYo READY product merge, Pages/Vercel 2026.11.15-FINAL.69 verified. FINAL.68 weather fixes, FINAL.67 global design, FINAL.66 copy and compact truck caution, FINAL.64 deliveries above finished machines preserved. Engine AN14B3B5 DB/schema4, 28d monthly, retired in-app route, AN15 intentionally paused. Await owner UI field feedback; do not auto-advance.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.16-FINAL.70 production verified 2026-11-16. Owner found FINAL.69 done opacity 0.74 made completed cards insufficiently distinct, requested stronger fade. FINAL.70 adjusted only #todayList .swipeCard.done opacity to .48 (both completed machine and delivery), pending remains opacity1; no other UI or behavior changes. PR #285 merged d6b6e4a453f30091321fa7892919d50d6e2b4b8b; annotated pre-edit safety tag Issue #284 backup-pre-FINAL70-DONE-CARD-FADE-20261116-20261116 -> 904ba88fe0c12fa2f6592d0c99490f95ac049e71 verified. Exact-head Browser 43811472168 PASS including Today 320/390/430px state opacity and all prior gates; real Edge external MAP/nav 43811472156 PASS. Vercel dpl_AwQNd5amMSZzwMCmo64pj9YeNac5 READY exact product merge; public Pages/Vercel version 2026.11.16-FINAL.70 verified. FINAL.69 readability, FINAL.68 weather, FINAL.66 copy/safety, FINAL.64 delivery priority retained. Engine AN14B3B5 DB/schema4, 28d monthly, external-only Google Maps, AN15 paused. Await owner UI feedback.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.69 scoped Today-card readability is live/verified. Preserve all actions, data, priority/gestures, truck warning and weather. Await owner direction for any next visual phase.",
-    "latestContinuityCheckpoint": "2026-11-15 FINAL.69 Today-card readability PR #282, Browser+Edge PASS, live Vercel+Pages version verified.",
+    "handoffBoundary": "FINAL.70 completed Today cards fade strengthened to .48 on user instruction. Verified live. No further UI phase automatically; preserve all behavior and data.",
+    "latestContinuityCheckpoint": "2026-11-16 FINAL.70 PR #285 done-opacity calibration, Browser+Edge PASS, Vercel and Pages FINAL.70 verified.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.69 Today-card readability COMPLETE; await owner's real-device view and feedback before next visual phase.",
-    "Any further animation, card restructuring or other tab overhaul requires separate authorization; retain explicit confirmed current hierarchy and machine/delivery behavior.",
-    "Preserve FINAL.68 GPS weather, FINAL.67 global styles, FINAL.66 copy/caution, FINAL.64 delivery priority, 28d monthly, external-only Google Maps, AN14B3B5 DB/schema4 and paused AN15."
+    "FINAL.70 owner-driven completed card opacity adjustment COMPLETE. Await owner's phone visual confirmation.",
+    "Maintain pending cards fully opaque, completed cards opacity .48; if owner requests another refinement, adjust only that state-specific CSS and its computed-style tests.",
+    "Preserve FINAL.69 Today card layout, FINAL.68 weather, FINAL.67 global styling, FINAL.66 copy/vehicle warning, FINAL.64 delivery ordering, engine AN14B3B5 DB/schema4, 28-day monthly and paused AN15."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
