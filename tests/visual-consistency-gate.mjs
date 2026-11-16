@@ -8,7 +8,7 @@ async function inspect(page,selector){
   return {background:s.backgroundColor,color:s.color,borderRadius:s.borderRadius,
    borderColor:s.borderTopColor,minHeight:s.minHeight,marginTop:s.marginTop,
    alignItems:s.alignItems,lineHeight:s.lineHeight,width:r.width,height:r.height,left:r.left,right:r.right,
-   outlineColor:s.outlineColor}
+   outlineColor:s.outlineColor,fontSize:s.fontSize,paddingTop:s.paddingTop,paddingLeft:s.paddingLeft}
  });
 }
 export async function runVisualConsistencyGate(browser,baseUrl){
@@ -42,6 +42,10 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    const kpi=await inspect(page,'#todayPage .kpi');
    assert.equal(kpi.borderRadius,'15px','Today KPI matches shared card corners');
    await page.locator('.tabs button[data-page="tasksPage"]').click();
+   assert.equal((await inspect(page,'#tasksPage>.row')).minHeight,'44px','Tasks heading row aligned to common height');
+   assert.equal((await inspect(page,'#tasksPage .title')).fontSize,width<=360?'22px':'24px','Tasks heading hierarchy');
+   assert.equal((await inspect(page,'#addTask')).minHeight,'38px','Task registration button is comfortable');
+   assert.equal((await inspect(page,'#tasksPage .sectionhead b')).fontSize,'13px','Tasks section title aligns with other tabs');
    const taskSection=await inspect(page,'#tasksPage .section');
    assert.equal(taskSection.marginTop,'18px','Task section rhythm is consistent');
    assert.equal((await inspect(page,'#tasksPage>.row')).alignItems,'center','Task heading/actions align');
@@ -55,9 +59,13 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    await page.locator('#cancelTask').click();
 
    await page.locator('.tabs button[data-page="mapPage"]').click();
+   assert.equal((await inspect(page,'#mapPage>.row')).minHeight,'44px','Map heading aligned');
+   assert.equal((await inspect(page,'#officeAddTop')).minHeight,'38px','Map office top action has consistent height');
    const search=await inspect(page,'#mapPage .search');
    assert.equal(search.borderRadius,'11px','Map search matches control geometry');
-   assert(search.height>=42,'Map search touch target is comfortable');
+   assert(search.height>=44,'Map search touch target is comfortable');
+   assert.equal(search.background,'rgb(255, 255, 255)','Map search stays white');
+   assert.equal((await inspect(page,'#mapPage .days .day')).minHeight,'38px','Map weekday target remains reachable');
    const mapSearch=await inspect(page,'#addressSearchButton');
    sameColor(mapSearch.background,'rgb(17, 17, 17)','Map search button no longer uses missing CSS variable');
    sameColor(mapSearch.color,'rgb(255, 255, 255)','Map search button text is legible');
@@ -66,17 +74,30 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    assert.match(await page.locator('#externalNavSafety summary').innerText(),/車両制限非対応/,'truck safety notice retained');
 
    await page.locator('.tabs button[data-page="machinesPage"]').click();
+   assert.equal((await inspect(page,'#machinesPage>.row')).minHeight,'44px','Machine header aligned');
+   assert.equal((await inspect(page,'#machineSort')).minHeight,'38px','Machine sort button matches registration');
    const machineSearch=await inspect(page,'#machinesPage .search');
    assert.equal(machineSearch.borderRadius,'11px','Machine search matches Map search');
+   assert(machineSearch.height>=44,'Machine search touch target');
+   assert.equal((await inspect(page,'#machineDayFilter')).minHeight,'42px','Machine day filter touch target');
+   assert.equal((await inspect(page,'#machineMakerFilter')).minHeight,'42px','Machine maker filter touch target');
    await page.locator('#addMachine').click();
    assert.equal((await inspect(page,'#newName')).borderRadius,'11px','Machine registration fields match Task fields');
    await page.locator('#cancelAdd').click();
 
    await page.locator('.tabs button[data-page="ordersPage"]').click();
+   assert.equal((await inspect(page,'#ordersPage>.row')).minHeight,'44px','Order header aligned');
    assert.equal((await inspect(page,'#addOrder')).borderRadius,'11px','Order button matches shared controls');
+   assert.equal((await inspect(page,'#addOrder')).minHeight,'38px','Order registration target height');
    await page.locator('.tabs button[data-page="deliveryPage"]').click();
+   assert.equal((await inspect(page,'#deliveryPage>.row')).minHeight,'44px','Delivery header aligned');
    assert.equal((await inspect(page,'#deliveryAddSite')).borderRadius,'11px','Delivery button matches shared controls');
-   assert.equal((await inspect(page,'#deliveryPage .search')).borderRadius,'11px','Delivery search matches other tabs');
+   assert.equal((await inspect(page,'#deliveryAddSite')).minHeight,'38px','Delivery registration target height');
+   const deliverySearch=await inspect(page,'#deliveryPage .search');
+   assert.equal(deliverySearch.borderRadius,'11px','Delivery search matches other tabs');
+   assert(deliverySearch.height>=44,'Delivery search touch target');
+   assert.equal(deliverySearch.background,'rgb(255, 255, 255)','Delivery search remains white');
+   assert.equal((await inspect(page,'#deliveryPage .sectionhead b')).fontSize,'13px','Delivery section titles consistent');
 
    const widthResult=await page.evaluate(()=>({
     scrollWidth:document.documentElement.scrollWidth,
