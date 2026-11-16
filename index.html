@@ -255,6 +255,54 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
  #todayList .swipeCard .todayCardActions{flex-basis:74px;width:74px}
 }
 </style>
+
+<style id="final71-interaction-feedback">
+/* Short-lived feedback only. Do not change swipe distances, actions or saved state. */
+.tabs button,
+#todayPage .kpi,
+#todayPage .todayExternalNav,
+#todayPage #finishDay {
+ transition:background-color 150ms ease,border-color 150ms ease,box-shadow 150ms ease,transform 150ms ease;
+}
+.tabs button:active,
+#todayPage .todayExternalNav:active,
+#todayPage #finishDay:active,
+#todayPage .kpi:active {
+ transform:scale(.97);
+}
+#todayPage .kpi:active{box-shadow:0 1px 4px #00000016}
+#todayPage #progressBar{transition:width 230ms ease-out}
+.swipeRow.readyComplete .swipeAction.complete{
+ background:#176c50;
+ font-size:11px;
+}
+.swipeRow.readyComplete .swipeAction.complete::before{
+ content:"✓";
+ margin-right:4px;
+ font-size:13px;
+}
+.swipeRow.readySkip .swipeAction.skip{background:#424b58}
+.swipeRow.readySkip .swipeAction.skip::before{
+ content:"↷";
+ margin-right:4px;
+ font-size:13px;
+}
+@media(prefers-reduced-motion:reduce){
+ .tabs button,
+ #todayPage .kpi,
+ #todayPage .todayExternalNav,
+ #todayPage #finishDay,
+ #todayPage #progressBar,
+ .swipeRow .swipeAction,
+ .swipeRow>.swipeCard {
+  transition:none!important;
+ }
+ .tabs button:active,
+ #todayPage .todayExternalNav:active,
+ #todayPage #finishDay:active,
+ #todayPage .kpi:active{transform:none}
+}
+</style>
 </head>
 <body>
 <div class="portraitGuard" id="portraitGuard" role="dialog" aria-modal="true" aria-label="縦画面で使用してください"><div class="portraitGuardCard"><div class="portraitGuardIcon">↻</div><b>この画面は縦向きで使用してください</b><span>MAPだけ横画面に対応しています。</span><button class="primary" id="portraitOpenMap" type="button">MAPを開く</button></div></div>
@@ -458,7 +506,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='2026.11.16-FINAL.70',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='2026.11.16-FINAL.71',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
@@ -1534,10 +1582,10 @@ function saveTaskDetail(){if(!editingTask)return;var task=editingTask,original=(
 function renderTasks(){var active=(state.tasks||[]).filter(function(task){return task&&typeof task==='object'&&!task.completed}),box=$id('taskList');if(!box)return;$id('taskCount').textContent=active.length;box.innerHTML='';if(!active.length)box.innerHTML='<div class="card" style="padding:14px;color:#777;font-size:11px">未完了タスクはありません。</div>';active.forEach(function(task){var progress=taskProgress(task),actualPercent=progress.total?progress.done/progress.total*100:0,percent=Math.round(actualPercent),threshold=taskCompletionThreshold(task),gaugePercent=taskThresholdGaugePercent(actualPercent,threshold),row=document.createElement('div');row.className='item taskItem taskCard';row.innerHTML='<div class="taskCardMain"><b>'+esc(task.text)+'</b><div class="taskMeta">'+esc(taskTargetLabel(task))+' ・ 完了 '+progress.done+' / '+progress.total+'台（'+percent+'%） ・ 自動完了 '+threshold+'%</div><div class="taskProgress" data-actual-percent="'+percent+'" data-threshold-percent="'+threshold+'" data-gauge-percent="'+gaugePercent.toFixed(1)+'"><i style="width:'+gaugePercent.toFixed(1)+'%"></i></div></div><button class="taskDelete" type="button">削除</button>';row.onclick=function(){openTaskDetail(task)};row.querySelector('button').onclick=function(event){event.stopPropagation();deleteActiveTask(task)};box.appendChild(row)});renderTaskHistory()}function makeSwipeComplete(wrapper,m,onDeliveryComplete){
   var isDelivery=typeof onDeliveryComplete==='function';
  var card=wrapper.querySelector('.swipeCard'),sx=0,sy=0,dx=0,tracking=false,pointerId=null;
- function reset(){card.classList.remove('swiping');wrapper.classList.remove('revealComplete','revealSkip');card.style.transform='translateX(0)';dx=0;tracking=false;pointerId=null}
- function finish(){if(!tracking)return;card.classList.remove('swiping');var complete=dx<=-70,skip=!isDelivery&&dx>=70;if(complete||skip){wrapper.classList.toggle('revealComplete',complete);wrapper.classList.toggle('revealSkip',skip);card.style.transform='translateX('+(complete?-92:92)+'px)';tracking=false;if(isDelivery){if(onDeliveryComplete()===false)reset()}else setTimeout(function(){selectedMachine=m;if(complete){if(completeVisit()===false)reset()}else skipVisit()},140)}else reset()}
+ function reset(){card.classList.remove('swiping');wrapper.classList.remove('revealComplete','revealSkip','readyComplete','readySkip');card.style.transform='translateX(0)';dx=0;tracking=false;pointerId=null}
+ function finish(){if(!tracking)return;card.classList.remove('swiping');var complete=dx<=-70,skip=!isDelivery&&dx>=70;if(complete||skip){wrapper.classList.toggle('revealComplete',complete);wrapper.classList.toggle('revealSkip',skip);wrapper.classList.toggle('readyComplete',complete);wrapper.classList.toggle('readySkip',skip);card.style.transform='translateX('+(complete?-92:92)+'px)';tracking=false;if(isDelivery){if(onDeliveryComplete()===false)reset()}else setTimeout(function(){selectedMachine=m;if(complete){if(completeVisit()===false)reset()}else skipVisit()},140)}else reset()}
  card.addEventListener('pointerdown',function(e){if(e.target&&e.target.closest&&e.target.closest('.todayExternalNav'))return;if(e.pointerType==='mouse'&&e.button!==0)return;sx=e.clientX;sy=e.clientY;tracking=true;pointerId=e.pointerId;card.classList.add('swiping');if(card.setPointerCapture)try{card.setPointerCapture(pointerId)}catch(error){}});
- card.addEventListener('pointermove',function(e){if(!tracking||e.pointerId!==pointerId)return;var mx=e.clientX-sx,my=e.clientY-sy,rotated=!!(wrapper.closest&&wrapper.closest('#arrivalVisitModal')&&mapSoftRotationActive()),primary=rotated?my:mx,cross=rotated?mx:my;if(Math.abs(cross)>Math.abs(primary)+8){reset();return}dx=Math.max(-105,Math.min(105,primary));card.style.transform='translateX('+dx+'px)';wrapper.classList.toggle('revealComplete',dx<=-12);wrapper.classList.toggle('revealSkip',!isDelivery&&dx>=12)});
+ card.addEventListener('pointermove',function(e){if(!tracking||e.pointerId!==pointerId)return;var mx=e.clientX-sx,my=e.clientY-sy,rotated=!!(wrapper.closest&&wrapper.closest('#arrivalVisitModal')&&mapSoftRotationActive()),primary=rotated?my:mx,cross=rotated?mx:my;if(Math.abs(cross)>Math.abs(primary)+8){reset();return}dx=Math.max(-105,Math.min(105,primary));card.style.transform='translateX('+dx+'px)';wrapper.classList.toggle('revealComplete',dx<=-12);wrapper.classList.toggle('revealSkip',!isDelivery&&dx>=12);wrapper.classList.toggle('readyComplete',dx<=-70);wrapper.classList.toggle('readySkip',!isDelivery&&dx>=70)});
  card.addEventListener('pointerup',function(e){if(e.pointerId!==pointerId)return;finish()});
  card.addEventListener('pointercancel',reset);
 }

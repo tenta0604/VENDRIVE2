@@ -54,6 +54,40 @@ function verifyCard(card,width,label){
  assert(card.card.right<=width+1,label+' card stays inside viewport');
  assert.equal(card.warning,false,label+' no overflowing text/content');
 }
+
+async function checkGestureFeedback(page,selector,isDelivery){
+ const phases=await page.locator(selector).evaluate((row,delivery)=>{
+  const card=row.querySelector('.swipeCard'),bounds=card.getBoundingClientRect();
+  const x=bounds.left+45,y=bounds.top+30;
+  function fire(type,dx){card.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerId:47,pointerType:'touch',clientX:x+dx,clientY:y,button:0}))}
+  function state(){return {reveal:row.classList.contains('revealComplete'),ready:row.classList.contains('readyComplete'),
+   right:row.classList.contains('revealSkip'),readyRight:row.classList.contains('readySkip'),
+   color:getComputedStyle(row.querySelector('.swipeAction.complete')).backgroundColor,
+   mark:getComputedStyle(row.querySelector('.swipeAction.complete'),'::before').content,
+   skipMark:delivery?'':getComputedStyle(row.querySelector('.swipeAction.skip'),'::before').content,
+   inlineTransform:card.style.transform}}
+  fire('pointerdown',0);fire('pointermove',-40);const partial=state();
+  fire('pointermove',-85);const ready=state();
+  fire('pointermove',-30);const backed=state();
+  fire('pointercancel',-30);const canceled=state();
+  fire('pointerdown',0);fire('pointermove',85);const right=state();
+  fire('pointercancel',85);const canceledRight=state();
+  return {partial,ready,backed,canceled,right,canceledRight};
+ },isDelivery);
+ assert(phases.partial.reveal&&!phases.partial.ready,'partial swipe reveals but cannot commit');
+ assert(phases.ready.ready,'full swipe threshold has explicit ready cue');
+ assert.equal(phases.ready.color,'rgb(23, 108, 80)','ready completion color');
+ assert.match(phases.ready.mark,/✓/,'ready completion checkmark');
+ assert.equal(phases.backed.ready,false,'backing off removes ready state');
+ assert.equal(phases.canceled.ready,false,'cancel clears ready state');
+ assert.equal(phases.canceled.reveal,false,'cancel clears reveal');
+ assert.match(phases.canceled.inlineTransform,/^translateX\(0(?:px)?\)$/,'cancel restores card regardless of browser CSS unit normalization');
+ assert.equal(phases.right.readyRight,!isDelivery,'only vending can be right-skipped');
+ assert.equal(phases.right.right,!isDelivery,'delivery cannot reveal right skip');
+ if(!isDelivery)assert.match(phases.right.skipMark,/↷/,'skip readiness arrow');
+ assert.equal(phases.canceledRight.readyRight,false,'cancel clears right readiness');
+}
+
 export async function runTodayCardReadabilityGate(browser,baseUrl){
  for(const width of [320,390,430]){
   const context=await browser.newContext({viewport:{width,height:860}});
@@ -108,6 +142,16 @@ export async function runTodayCardReadabilityGate(browser,baseUrl){
    assert.equal(await page.locator('#todayList .todayExternalNav').count(),4,'all quick nav buttons preserved');
    assert.match(await page.locator('#todayList .deliverySwipeCard .deliveryItemMeta').first().innerText(),/ミネラルウォーター/,'delivery item details remain');
    assert.match(await page.locator('#todayList .swipeRow[data-machine-id="M-P"] .makerChip').innerText(),/サントリー/,'machine maker label preserved');
+   const styles=await page.evaluate(()=>({
+    tab:getComputedStyle(document.querySelector('.tabs button')).transitionDuration,
+    button:getComputedStyle(document.querySelector('#todayList .todayExternalNav')).transitionDuration,
+    progress:getComputedStyle(document.querySelector('#progressBar')).transitionDuration
+   }));
+   assert.match(styles.tab,/0\.15s/,'tab feedback 150ms');
+   assert.match(styles.button,/0\.15s/,'button feedback 150ms');
+   assert.match(styles.progress,/0\.23s/,'progress width easing 230ms');
+   await checkGestureFeedback(page,'#todayList .swipeRow[data-machine-id="M-P"]',false);
+   await checkGestureFeedback(page,'#todayList .swipeRow[data-delivery-id="REQ-P"]',true);
    const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('vendrive2_v7_data')));
    assert.equal(before.machines.find(m=>m.id==='M-P').visited,false,'viewing the card must not mark a vending visit');
    assert.equal(before.deliveryRequests.find(r=>r.id==='REQ-P').status,'pending','viewing the card must not complete delivery');
@@ -116,5 +160,35 @@ export async function runTodayCardReadabilityGate(browser,baseUrl){
    console.log('PASS Today machine/delivery card hierarchy and preserved ordering at '+width+'px');
   }finally{await context.close()}
  }
+ const reduced=await browser.newContext({viewport:{width:390,height:860},reducedMotion:'reduce'});
+ const page=await reduced.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(String(e)));
+ try{
+  await reduced.addInitScript(data=>{
+   localStorage.setItem('vendrive2_v7_data',JSON.stringify(data));
+   const d=new Date(),day=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+   localStorage.setItem('vendrive2_last_day',day);
+   Object.defineProperty(navigator,'geolocation',{configurable:true,value:{
+    watchPosition(_ok,fail){queueMicrotask(()=>fail?.({code:1}));return 1},
+    clearWatch(){},getCurrentPosition(_ok,fail){queueMicrotask(()=>fail?.({code:1}))}
+   }});
+  },fixture());
+  await reduced.route(/https:\/\/api\.open-meteo\.com\/v1\/forecast/,route=>
+   route.fulfill({status:503,contentType:'application/json',body:'{}'}));
+  await page.goto(baseUrl.replace(/\/$/,'')+'/index.html?reducedMotionGate='+Date.now(),{waitUntil:'domcontentloaded',timeout:30000});
+  await page.waitForFunction(()=>document.querySelectorAll('#todayList .swipeRow').length===4,null,{timeout:12000});
+  assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true,'reduced motion enabled');
+  const transitions=await page.evaluate(()=>({
+   tab:getComputedStyle(document.querySelector('.tabs button')).transitionDuration,
+   button:getComputedStyle(document.querySelector('#todayList .todayExternalNav')).transitionDuration,
+   progress:getComputedStyle(document.querySelector('#progressBar')).transitionDuration,
+   card:getComputedStyle(document.querySelector('#todayList .swipeCard')).transitionDuration
+  }));
+  for(const [control,duration] of Object.entries(transitions))assert.equal(duration,'0s',control+' reduced-motion transition');
+  await checkGestureFeedback(page,'#todayList .swipeRow[data-machine-id="M-P"]',false);
+  await checkGestureFeedback(page,'#todayList .swipeRow[data-delivery-id="REQ-P"]',true);
+  assert.deepEqual(errors,[],'reduced-motion runs without page errors');
+  console.log('PASS reduced motion disables animation while swipe still reacts');
+ }finally{await reduced.close()}
  console.log('=== tests/today-card-readability-gate.mjs ===\nPASS');
 }
