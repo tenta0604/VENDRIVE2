@@ -97,7 +97,13 @@ export async function runTodayCardReadabilityGate(browser,baseUrl){
     '#todayList .swipeRow[data-machine-id="M-D"] .swipeCard',
     '#todayList .swipeRow[data-delivery-id="REQ-D"] .swipeCard']){
     const opacity=Number(await page.locator(selector).evaluate(el=>getComputedStyle(el).opacity));
-    assert(opacity>=0.7&&opacity<=0.8,'completed work readable but visually subdued: '+opacity);
+    assert(Math.abs(opacity-0.48)<0.011,'completed work should be clearly faded: '+opacity);
+   }
+   for(const selector of [
+    '#todayList .swipeRow[data-machine-id="M-P"] .swipeCard',
+    '#todayList .swipeRow[data-delivery-id="REQ-P"] .swipeCard']){
+    const opacity=Number(await page.locator(selector).evaluate(el=>getComputedStyle(el).opacity));
+    assert.equal(opacity,1,'pending work must remain fully opaque');
    }
    assert.equal(await page.locator('#todayList .todayExternalNav').count(),4,'all quick nav buttons preserved');
    assert.match(await page.locator('#todayList .deliverySwipeCard .deliveryItemMeta').first().innerText(),/ミネラルウォーター/,'delivery item details remain');
