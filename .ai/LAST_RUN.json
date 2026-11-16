@@ -1,39 +1,39 @@
 {
-  "evidenceVersion": 101,
-  "runType": "final71_interaction_feedback_production_closeout_20261116",
-  "phase": "FINAL71_UI_MICRO_INTERACTION_FEEDBACK",
+  "evidenceVersion": 102,
+  "runType": "final72_other_tabs_visual_cohesion_production_closeout_20261116",
+  "phase": "FINAL72_OTHER_TABS_VISUAL_COHESION",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "a5f41cf873c825f4f654be014b9857afb26e2715",
-    "preEditImmutableSafetyTag": "PASS Issue #287 annotated backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116",
-    "productPR": 288,
-    "productMerge": "d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34"
+    "mainBefore": "1a2e7c52f40f81f21d17499628221a2e0b6b30da",
+    "preEditImmutableSafetyTag": "PASS Issue #290 annotated backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116",
+    "productPR": 291,
+    "productMerge": "5f970acdb528fec3fc9af571c2561de0d50725ce"
   },
   "versions": {
-    "app": "2026.11.16-FINAL.71",
+    "app": "2026.11.16-FINAL.72",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "150ms restrained touch feedback for tabs/Today buttons/KPIs, 230ms progress easing, existing swipe +/-70px threshold now shows specific ready-complete ✓ or ready-skip ↷ cues only at threshold; back-off/cancel clears cues. Reduced-motion preference disables cosmetic transitions, preserves direct swiping.",
-    "safety": "No data writes or migration, no gesture thresholds/delay, no delivery right-skip, navigation or map functionality changed, no AN15."
+    "summary": "Non-Today five-tab isolated CSS: aligned 44px headings, 38px action buttons, 27px/13px section headings, white 44px searches, 42px machine filters, 38px MAP day targets, rounded 15px/list+history cards, consistent spacing/type and long Japanese wrapping. All Today styles and interactions untouched.",
+    "safety": "No behavior, navigation, route, weather, map overlays or map full-screen, tab order, delivery sorting, persisted data, database schema or engine change; no AN15 resumption."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #287 -> a5f41cf873c825f4f654be014b9857afb26e2715",
-    "staticSyntax": "PASS all inline JS scripts syntax; extended test suite syntax",
-    "exactHeadBrowserRegression": "PASS run 43822988325 (mobile 320/390/430px threshold/cancel/motion; legacy/weather/visual)",
-    "exactHeadRealMicrosoftEdge": "PASS run 43822988263 external navigation/MAP and regression",
-    "testHarnessNote": "First run failed solely on `translateX(0px)` vs string `translateX(0)`; corrected test to accept CSS unit normalization, exact-head rerun PASS",
-    "productMerge": "PASS PR #288 d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34",
-    "vercel": "PASS READY dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C exact product merge",
-    "pages": "PASS public 2026.11.16-FINAL.71",
-    "backend": "PASS HTTP200 2026.11.16-FINAL.71",
-    "dataMigration": "NOT_REQUIRED CSS and transient DOM classes only"
+    "preEditImmutableTag": "PASS Issue #290 target 1a2e7c52f40f81f21d17499628221a2e0b6b30da",
+    "staticSyntax": "PASS inline app JavaScript/test syntax and exact-head browser checks",
+    "exactHeadBrowserRegression": "PASS run 43824736011 (320/390/430px all five tab headers/search/card geometry, seeded long-name machines/delivery, previous weather/copy/swipe suites)",
+    "exactHeadRealMicrosoftEdge": "PASS run 43824735932 (real Edge external navigation/MAP and legacy browser)",
+    "productMerge": "PASS PR #291 5f970acdb528fec3fc9af571c2561de0d50725ce",
+    "vercel": "PASS READY dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw exact product merge",
+    "pages": "PASS public 2026.11.16-FINAL.72",
+    "backend": "PASS HTTP200 2026.11.16-FINAL.72",
+    "dataMigration": "NOT_REQUIRED CSS/test/version only"
   },
   "changedFiles": [
     "index.html",
     "version.json",
+    "tests/visual-consistency-gate.mjs",
     "tests/today-card-readability-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
@@ -42,12 +42,12 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE. Await owner field UX feedback; no automatic next UI phase or AN15.",
+  "nextAction": "COMPLETE. Await owner field visual acceptance. No automatic next UI phase or AN15.",
   "continuityCheckpoint": {
-    "status": "FINAL71_INTERACTION_FEEDBACK_PRODUCTION_VERIFIED",
-    "appVersion": "2026.11.16-FINAL.71",
-    "productMerge": "d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34",
-    "UX": "150ms press/230ms progress, existing +/-70px ready cue, reduced-motion",
-    "legacy": "FINAL.70 done opacity .48, FINAL.68 weather, FINAL.64 delivery, paused AN15"
+    "status": "FINAL72_OTHER_TABS_VISUAL_COHESION_PRODUCTION_VERIFIED",
+    "appVersion": "2026.11.16-FINAL.72",
+    "productMerge": "5f970acdb528fec3fc9af571c2561de0d50725ce",
+    "UI": "Five non-Today tab visual cohesion; Today/Map behavior untouched",
+    "legacy": "FINAL.70 done .48, FINAL.71 swipe, FINAL.68 weather, FINAL.64 delivery, paused AN15"
   }
 }

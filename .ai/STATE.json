@@ -5,26 +5,26 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.16-FINAL.71",
+  "appVersion": "2026.11.16-FINAL.72",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL71_INTERACTION_FEEDBACK_PRODUCTION_VERIFIED",
+  "status": "FINAL72_OTHER_TABS_VISUAL_COHESION_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.71 live: refined tactile feedback and swipe-ready cues",
-    "scope": "Owner said to advance to next UI polish phase after FINAL.70; agreed next stage was interaction animation. Added a small isolated CSS layer with 150ms tabs/Today nav/finish day/KPI pressed feedback and 230ms Today progress bar easing. Existing swipe threshold -70px complete and +70px vending-only skip now toggles transient readyComplete/readySkip CSS classes to show green checkmark or dark skip arrow only at ready threshold; partial swipe does not falsely imply committed action, backing off/cancel resets cues. Existing pointer swipe/140ms commit, delivery right-swipe no-op, task confirmation and all state changes remain exactly as before. prefers-reduced-motion disables cosmetic animation, not pointer gestures. FINAL.70 completed opacity .48 and all previously confirmed UI, routes, weather and data preserved. No schema or AN15 change.",
-    "releaseStatus": "Product PR #288 merged d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34. Pre-edit immutable annotated safety tag Issue #287 backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116 -> a5f41cf873c825f4f654be014b9857afb26e2715 verified. First browser/Edge runs caught a harness-only CSS serialization assertion (translateX(0px) vs translateX(0)); assertion fixed without product changes. Exact-head Browser regression 43822988325 PASS: existing browser suite, 320/390/430px swipe ready/partial/cancel, reduced-motion and earlier FINAL.70 tests. Exact-head real Edge MAP/external navigation 43822988263 PASS. Vercel dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C READY exact product merge. Public Vercel and GitHub Pages /version.json both 2026.11.16-FINAL.71 verified. No data migration.",
+    "title": "FINAL.72 live: unified visual rhythm in five non-Today tabs",
+    "scope": "Owner accepted FINAL.71 microinteractions and explicitly requested finishing the app design. One scoped visual-only phase: isolated #final72-other-tabs-visual-cohesion stylesheet brings Task, MAP, Machines, Orders and Delivery tab headings/action buttons to consistent 44px header and 38px button minimum, section heading 13px/27px rhythm, shared white search rows min44px, MAP weekday min38px, Machine filters min42px, shared 15px white list/history cards with 12px Japanese title, 58px minimum and balanced padding, long-name wrapping. CSS selectors specifically exclude Today; do not modify map geometry, fullscreen positioning, overlays, external nav, OpenStreetMap attribution, safety disclosures or existing user copy. FINAL.70 completed opacity .48/pending1, FINAL.71 swipe readiness and reduced-motion, weather FINAL.68, delivery priority FINAL.64 preserved; no data/schema/engine/AN15 change.",
+    "releaseStatus": "Product PR #291 merged 5f970acdb528fec3fc9af571c2561de0d50725ce. Immutable annotated pre-edit safety tag Issue #290 backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116 -> 1a2e7c52f40f81f21d17499628221a2e0b6b30da verified. Exact-head Browser regression run 43824736011 PASS including extended 320/390/430px non-Today search/header/filter, seeded long Japanese machine/delivery list cards and protected Today opacity; legacy weather, copy, visual and swipe tests passed. Real Microsoft Edge external navigation/MAP run 43824735932 PASS. Vercel dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw READY matching exact product merge. Public GitHub Pages and Vercel version.json both 2026.11.16-FINAL.72 confirmed. No data migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #287 annotated backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116 -> a5f41cf873c825f4f654be014b9857afb26e2715",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/288",
-      "browser": "PASS exact-head 43822988325 including mobile swipe threshold/cancel and reduced motion",
-      "realMicrosoftEdge": "PASS exact-head 43822988263 external navigation/MAP/legacy",
-      "merge": "PASS d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34",
-      "vercel": "PASS READY dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C exact product merge",
-      "pages": "PASS public 2026.11.16-FINAL.71 from independent fresh fetch",
-      "backend": "PASS HTTP200 2026.11.16-FINAL.71"
+      "preEditImmutableSafetyTag": "PASS Issue #290 annotated backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116 -> 1a2e7c52f40f81f21d17499628221a2e0b6b30da",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/291",
+      "browser": "PASS exact-head 43824736011 including 320/390/430px non-Today UI and seeded list data; legacy gates",
+      "realMicrosoftEdge": "PASS exact-head 43824735932 external navigation/MAP/legacy",
+      "merge": "PASS 5f970acdb528fec3fc9af571c2561de0d50725ce",
+      "vercel": "PASS READY dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw exact product merge",
+      "pages": "PASS public 2026.11.16-FINAL.72 independent fresh request",
+      "backend": "PASS HTTP200 2026.11.16-FINAL.72"
     },
-    "nextOwnerAction": "Open FINAL.71 Today tab and try a slow swipe. Before 70px there is only reveal; once it reaches the existing completion threshold, a green ✓ ready cue appears. Let go to finish as usual, or pull back to cancel. Check that the action feels natural; no need to test while driving."
+    "nextOwnerAction": "View FINAL.72 on phone. Compare Task, Map, Machines, Order and Delivery headings, search, filter and list cards for consistent look. Any further aesthetic change or behavior request is separate and requires owner feedback; no automatic next phase."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +44,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.16-FINAL.71 UI microinteraction polish production verified on 2026-11-16. Read latest main and canonical docs. Owner advanced one UI phase after FINAL.70, originally agreed microinteraction stage. Product PR #288 merged d8b9c9b1356c6dc1ce4cd00042e91dcfb15ccf34; immutable safety tag Issue #287 backup-pre-FINAL71-MICRO-INTERACTION-POLISH-20261116-20261116 -> a5f41cf873c825f4f654be014b9857afb26e2715 verified. Isolated CSS: 150ms pressed tab/Today button/KPI feedback; 230ms progress width; swipe READY classes only at original +/-70px thresholds to show completion green check or skip arrow, reset on cancel/backoff; reduced-motion disables cosmetics but not gestures. Exact-head Browser 43822988325 PASS incl 320/390/430px, cancel and reduced-motion; real Edge 43822988263 PASS; first failed run was test-only 'translateX(0)' vs browser '0px' normalization, corrected and rerun. Vercel dpl_AthSUp7UMxTPwgjhizcJ5Mx91B9C READY exact SHA, Pages/Vercel 2026.11.16-FINAL.71 verified. FINAL.70 done opacity .48, FINAL.69 card layout, FINAL.68 weather, FINAL.66 copy and 2t caution, FINAL.64 delivery priority preserved. Engine AN14B3B5 DB/schema4, 28-day monthly, external-only Google Maps, AN15 paused. Await owner acceptance before next stage.",
+    "shortResumePrompt": "VENDRIVE2 2026.11.16-FINAL.72 non-Today UI finishing pass production verified 2026-11-16. Read latest main and canonical docs. Owner approved next visual finish after FINAL.71. FINAL.72 isolated CSS harmonizes Task, Map, Machines, Order, Delivery headers/actions, white search, section hierarchy, machine filters, list/history card spacing/radii and long Japanese name wrapping; excludes Today/map overlays/fullscreen/modals. Product PR #291 merged 5f970acdb528fec3fc9af571c2561de0d50725ce; pre-edit immutable tag Issue #290 backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116 -> 1a2e7c52f40f81f21d17499628221a2e0b6b30da verified. Exact-head Browser 43824736011 PASS with new 320/390/430px visual tests and seeded machine/delivery long-name fixtures + all previous gates; real Edge/MAP 43824735932 PASS. Vercel dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw READY exact merge, Pages/Vercel 2026.11.16-FINAL.72 verified. Preserve FINAL.70 Today done opacity .48, FINAL.71 +/-70px cues/reduced-motion, FINAL.68 weather, FINAL.66 copy/2t caution, FINAL.64 delivery priority, 28d monthly, external-only Google Maps. Engine AN14B3B5 DB/schema4, AN15 intentionally paused. Await owner real-device UI feedback; no automatic new product phase.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.71 microinteraction phase complete: preserve thresholds, 140ms commit, swipe cancellation, reduced motion and done opacity .48; next other-tab polish only if owner advances.",
-    "latestContinuityCheckpoint": "2026-11-16 FINAL.71 PR #288 UI feedback released, Browser+Edge PASS, Vercel+Pages FINAL.71 live; canonical docs closed.",
+    "handoffBoundary": "FINAL.72 non-Today visual cohesion COMPLETE. Keep all confirmed prior UI and behavior; next actions require owner feedback. AN15 remains paused.",
+    "latestContinuityCheckpoint": "2026-11-16 FINAL.72 PR #291 five other tabs styling, Browser+Edge PASS, Vercel+Pages version live; canonical closeout.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +59,9 @@
     }
   },
   "nextActions": [
-    "FINAL.71 microinteraction polish COMPLETE; await real-device UI acceptance before a new UI phase.",
-    "Next optional agreed UI phase (only on owner direction): other tabs' visual refinements, one focused set at a time; preserve Today behavior.",
-    "Keep FINAL.70 completed opacity .48, FINAL.69 card hierarchy, FINAL.68 weather, FINAL.66 copy/2t warning, FINAL.64 delivery priority, 28-day monthly, AN14B3B5 DB/schema4, and paused AN15."
+    "FINAL.72 non-Today visual finishing pass COMPLETE. Await owner's real-device view and feedback before new scope.",
+    "Next if owner asks: targeted final screen-specific UI corrections only; avoid speculative large redesign.",
+    "Keep FINAL.70 completed opacity .48, FINAL.71 swipe-ready thresholds and reduced-motion, FINAL.68 weather resilience, FINAL.66 copy/truck warning, FINAL.64 delivery priority, 28-day cycle, external navigation only, AN14B3B5 DB/schema4 and AN15 paused."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
