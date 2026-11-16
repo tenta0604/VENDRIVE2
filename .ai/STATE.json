@@ -5,26 +5,27 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "2026.11.16-FINAL.72",
+  "appVersion": "1.0.0",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "FINAL72_OTHER_TABS_VISUAL_COHESION_PRODUCTION_VERIFIED",
+  "status": "VENDRIVE_1_0_OFFICIAL_RELEASE_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "FINAL.72 live: unified visual rhythm in five non-Today tabs",
-    "scope": "Owner accepted FINAL.71 microinteractions and explicitly requested finishing the app design. One scoped visual-only phase: isolated #final72-other-tabs-visual-cohesion stylesheet brings Task, MAP, Machines, Orders and Delivery tab headings/action buttons to consistent 44px header and 38px button minimum, section heading 13px/27px rhythm, shared white search rows min44px, MAP weekday min38px, Machine filters min42px, shared 15px white list/history cards with 12px Japanese title, 58px minimum and balanced padding, long-name wrapping. CSS selectors specifically exclude Today; do not modify map geometry, fullscreen positioning, overlays, external nav, OpenStreetMap attribution, safety disclosures or existing user copy. FINAL.70 completed opacity .48/pending1, FINAL.71 swipe readiness and reduced-motion, weather FINAL.68, delivery priority FINAL.64 preserved; no data/schema/engine/AN15 change.",
-    "releaseStatus": "Product PR #291 merged 5f970acdb528fec3fc9af571c2561de0d50725ce. Immutable annotated pre-edit safety tag Issue #290 backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116 -> 1a2e7c52f40f81f21d17499628221a2e0b6b30da verified. Exact-head Browser regression run 43824736011 PASS including extended 320/390/430px non-Today search/header/filter, seeded long Japanese machine/delivery list cards and protected Today opacity; legacy weather, copy, visual and swipe tests passed. Real Microsoft Edge external navigation/MAP run 43824735932 PASS. Vercel dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw READY matching exact product merge. Public GitHub Pages and Vercel version.json both 2026.11.16-FINAL.72 confirmed. No data migration.",
+    "title": "VENDRIVE 1.0 official named release (build 1.0.0)",
+    "scope": "Owner declared FINAL.72 design acceptable and suggested marking the product VENDRIVE 1.0. Release naming ONLY: browser title VENDRIVE 1.0; PWA manifest name VENDRIVE 1.0 and short_name VENDRIVE; APP_VERSION and public version.json 1.0.0; original VENDRIVE header and 'Ver. 1.0.0' label retained. PWA id/start_url/scope remain /VENDRIVE2/ to protect existing installation identity and user data; GitHub repository and legacy localStorage/IndexedDB and backup format are unchanged. FINAL.72 is historical development baseline, not current user-facing release number. UI, weather, map, routing, delivery, analytics, 28-day schedule, truck restrictions, AN14B3B5 DB/schema4, intentionally paused AN15 all preserved.",
+    "releaseStatus": "Product PR #294 merged 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7. Pre-edit immutable annotated safety tag Issue #293 backup-pre-VENDRIVE-1.0-RELEASE-NAMING-20261116-20261116 -> d0bbb806ef748a61be70c9e162c607612ec76a67 PASS. Exact-head Browser regression 43826193603 PASS including 320/390/430px assertions public release name, semver/version manifest, PWA identity unchanged and legacy suites. Real Edge navigation/MAP run 43826193424 PASS. Vercel dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ READY exact product merge; Pages and Vercel public /version.json both 1.0.0 verified fresh. No data/schema migration.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #290 annotated backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116 -> 1a2e7c52f40f81f21d17499628221a2e0b6b30da",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/291",
-      "browser": "PASS exact-head 43824736011 including 320/390/430px non-Today UI and seeded list data; legacy gates",
-      "realMicrosoftEdge": "PASS exact-head 43824735932 external navigation/MAP/legacy",
-      "merge": "PASS 5f970acdb528fec3fc9af571c2561de0d50725ce",
-      "vercel": "PASS READY dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw exact product merge",
-      "pages": "PASS public 2026.11.16-FINAL.72 independent fresh request",
-      "backend": "PASS HTTP200 2026.11.16-FINAL.72"
+      "preEditImmutableSafetyTag": "PASS Issue #293 annotated backup-pre-VENDRIVE-1.0-RELEASE-NAMING-20261116-20261116 -> d0bbb806ef748a61be70c9e162c607612ec76a67",
+      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/294",
+      "browser": "PASS exact-head 43826193603 including official release version, title, PWA identity and 320/390/430px legacy regressions",
+      "realMicrosoftEdge": "PASS exact-head 43826193424 external navigation/MAP and legacy regression",
+      "merge": "PASS 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
+      "vercel": "PASS READY dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ exact product SHA",
+      "pages": "PASS public 1.0.0 fresh fetched",
+      "backend": "PASS 200 1.0.0",
+      "pwaIdentity": "UNCHANGED id/start_url/scope /VENDRIVE2/"
     },
-    "nextOwnerAction": "View FINAL.72 on phone. Compare Task, Map, Machines, Order and Delivery headings, search, filter and list cards for consistent look. Any further aesthetic change or behavior request is separate and requires owner feedback; no automatic next phase."
+    "nextOwnerAction": "Open updated VENDRIVE: header shows Ver. 1.0.0 and browser title VENDRIVE 1.0. Home-screen installed app label may reflect updates differently depending on OS/browser cache; do not delete installed app to force changes, as that could risk local device data. No additional product work until requested."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -44,10 +45,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE2 2026.11.16-FINAL.72 non-Today UI finishing pass production verified 2026-11-16. Read latest main and canonical docs. Owner approved next visual finish after FINAL.71. FINAL.72 isolated CSS harmonizes Task, Map, Machines, Order, Delivery headers/actions, white search, section hierarchy, machine filters, list/history card spacing/radii and long Japanese name wrapping; excludes Today/map overlays/fullscreen/modals. Product PR #291 merged 5f970acdb528fec3fc9af571c2561de0d50725ce; pre-edit immutable tag Issue #290 backup-pre-FINAL72-OTHER-TABS-VISUAL-COHESION-20261116-20261116 -> 1a2e7c52f40f81f21d17499628221a2e0b6b30da verified. Exact-head Browser 43824736011 PASS with new 320/390/430px visual tests and seeded machine/delivery long-name fixtures + all previous gates; real Edge/MAP 43824735932 PASS. Vercel dpl_5DG7PxDCEXyKRmXfSjcvn5Sc1Lfw READY exact merge, Pages/Vercel 2026.11.16-FINAL.72 verified. Preserve FINAL.70 Today done opacity .48, FINAL.71 +/-70px cues/reduced-motion, FINAL.68 weather, FINAL.66 copy/2t caution, FINAL.64 delivery priority, 28d monthly, external-only Google Maps. Engine AN14B3B5 DB/schema4, AN15 intentionally paused. Await owner real-device UI feedback; no automatic new product phase.",
+    "shortResumePrompt": "VENDRIVE 1.0 OFFICIAL RELEASE v1.0.0 production verified 2026-11-16; latest main and canonical docs authoritative. Owner accepted all FINAL.72 visual changes and approved the name VENDRIVE 1.0. Only public release naming changed: index browser title and PWA full name VENDRIVE 1.0, PWA short name VENDRIVE, APP_VERSION/version.json 1.0.0; existing VENDRIVE header displays Ver. 1.0.0. PWA identity/id/start_url/scope /VENDRIVE2/ and user-data storage paths unchanged (CRITICAL); repository remains tenta0604/VENDRIVE2. Product PR #294 merged 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7 with safety tag Issue #293 target d0bbb806ef748a61be70c9e162c607612ec76a67 PASS. Browser 43826193603 and real Edge 43826193424 PASS; production Vercel dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ READY exact SHA, GitHub Pages/Vercel v1.0.0 live. FINAL.72 design, FINAL.70 done opacity .48, FINAL.71 swipe cues, FINAL.68 weather resilience, FINAL.64 delivery order and external-only truck navigation preserved. Engine AN14B3B5, DB/schema4, 28d monthly, AN15 paused. No automatic next phase, await owner.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "FINAL.72 non-Today visual cohesion COMPLETE. Keep all confirmed prior UI and behavior; next actions require owner feedback. AN15 remains paused.",
-    "latestContinuityCheckpoint": "2026-11-16 FINAL.72 PR #291 five other tabs styling, Browser+Edge PASS, Vercel+Pages version live; canonical closeout.",
+    "handoffBoundary": "VENDRIVE 1.0 public release name/version COMPLETE, production verified; preserve /VENDRIVE2/ PWA identity and repository, all existing data/features and paused AN15. No auto next phase.",
+    "latestContinuityCheckpoint": "2026-11-16 VENDRIVE 1.0 (v1.0.0) release naming product PR #294; exact-head Browser+Edge PASS, Vercel READY and GitHub Pages live, canonical release closeout.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -59,9 +60,9 @@
     }
   },
   "nextActions": [
-    "FINAL.72 non-Today visual finishing pass COMPLETE. Await owner's real-device view and feedback before new scope.",
-    "Next if owner asks: targeted final screen-specific UI corrections only; avoid speculative large redesign.",
-    "Keep FINAL.70 completed opacity .48, FINAL.71 swipe-ready thresholds and reduced-motion, FINAL.68 weather resilience, FINAL.66 copy/truck warning, FINAL.64 delivery priority, 28-day cycle, external navigation only, AN14B3B5 DB/schema4 and AN15 paused."
+    "Official VENDRIVE 1.0 naming complete; await user confirmation of app title/version. Avoid triggering iOS app deletion/reinstallation solely to rename the icon.",
+    "Future maintenance uses semver: 1.0.1 small fixes, 1.1.0 new features, 2.0.0 breaking changes only after agreement. Historical 2026.11.16-FINAL.72 remains last development milestone.",
+    "Preserve existing PWA id/start_url/scope /VENDRIVE2/, storage and backup integrity, engine AN14B3B5 DB/schema4, external-only Google Maps, FINAL.70 done opacity .48, FINAL.68 weather, 28d monthly, AN15 paused."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",
