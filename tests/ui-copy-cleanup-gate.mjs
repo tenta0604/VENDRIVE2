@@ -74,7 +74,7 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
    await page.locator('#deliveryNav').waitFor({state:'attached'});
    const manifestVersion=await page.evaluate(async()=>{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw new Error('version.json failed');return (await response.json()).version});
    assert.equal((await page.locator('#appVersion').innerText()).trim(),'Ver. '+manifestVersion,'rendered app version matches live manifest');
-   assert.equal(manifestVersion,'1.2.1','public icon patch version is consistent');
+   assert.equal(manifestVersion,'1.2.2','public header icon patch version is consistent');
    assert.equal(await page.title(),'VENDRIVE 1.0','browser tab reflects public release');
    const pwa=await page.evaluate(async()=>{
     const response=await fetch('manifest.webmanifest',{cache:'no-store'});
@@ -108,6 +108,12 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
     },size);
     assert.deepEqual(result,{type:'image/png',w:size,h:size},'decodable PNG at declared size '+size);
    }
+   const headerIcon=page.locator('.header .brand img.mark');
+   assert.equal(await headerIcon.count(),1,'header uses approved app icon image');
+   assert.equal(await headerIcon.getAttribute('src'),'./vendrive-icon-180.png');
+   const headerIconSize=await headerIcon.evaluate(async img=>{await img.decode();const r=img.getBoundingClientRect();return {w:r.width,h:r.height,natural:img.naturalWidth,fit:getComputedStyle(img).objectFit}});
+   assert.deepEqual(headerIconSize,{w:33,h:33,natural:180,fit:'cover'},'header icon remains 33px and decodes correctly');
+   assert.equal(await page.locator('.header .brand .name').innerText(),'VENDRIVE','brand text preserved');
    await checkNotice(page,'todayNavSafety',width);
    assert.equal(await page.locator('#todayList').count(),1,'Today list remains available');
    assert.equal(await page.locator('#finishDay').count(),1,'day completion remains available');
