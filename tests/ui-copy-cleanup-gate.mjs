@@ -25,6 +25,45 @@ async function checkNotice(page,id,width){
  await summary.click();
  assert.equal(await detail.isVisible(),false,'tap collapses disclosure again');
 }
+
+async function checkMonthlyUnvisited(context,page,width){
+ await context.addInitScript(()=>{
+  const now=new Date(),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const plus=n=>{const d=new Date(now);d.setDate(d.getDate()+n);return d};
+  const today=iso(now),lastMonth=iso(new Date(now.getFullYear(),now.getMonth(),0)),first=iso(new Date(now.getFullYear(),now.getMonth(),1));
+  const week=['日','月','火','水','木','金','土'],rest=[week[plus(1).getDay()]],manualDate=iso(plus(2));
+  const m=(id,last,extra={})=>({id,name:'機器 '+id,code:id,address:'テスト住所 '+id,maker:'TEST',days:week,cycle:'毎日',last,visited:false,lat:35.31,lng:136.81,...extra});
+  const machines=[m('done',first),m('todayDone',today,{visited:true}),m('old',lastMonth),m('never',null),m('manual',null,{days:[],cycle:'1週間に1回'}),m('skipped',lastMonth,{skip:today}),m('unknown',null,{days:[],cycle:'1週間に1回'})];
+  localStorage.setItem('vendrive2_v7_data',JSON.stringify({machines,offices:[],history:[],tasks:[],taskHistory:[],temporaryVisitPeriods:[],restDays:rest,makers:['TEST'],makerColors:{},makerSettings:[],tomorrowPlan:{manual:true,date:manualDate,ids:['manual']}}));
+  localStorage.setItem('vendrive2_last_day',today);
+ });
+ await page.reload({waitUntil:'domcontentloaded'});
+ await page.locator('.tabs button[data-page="machinesPage"]').click();
+ assert.equal(await page.locator('#machineAllTab').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('#machineList').isVisible(),true,'original Machines list visible');
+ await page.locator('#machineMonthlyTab').click();
+ assert.equal(await page.locator('#machineList').isVisible(),false,'monthly view hides original list');
+ assert.equal(await page.locator('#machineMonthlyPanel').isVisible(),true);
+ const rows=page.locator('#machineMonthlyList .monthlyMachine'),ids=await rows.evaluateAll(nodes=>nodes.map(node=>node.dataset.machineId));
+ assert.deepEqual(ids,['old','never','manual','skipped','unknown'],'only calendar-month unvisited machines in planned date order');
+ assert.equal(await page.locator('#machineMonthlyCount').innerText(),'5台 / 7台');
+ const date=await page.evaluate(()=>{const d=new Date(),f=n=>{const a=new Date(d);a.setDate(a.getDate()+n);return a.getFullYear()+'-'+String(a.getMonth()+1).padStart(2,'0')+'-'+String(a.getDate()).padStart(2,'0')};return [f(0),f(2),f(3)]});
+ const row=id=>page.locator('#machineMonthlyList [data-machine-id="'+id+'"]');
+ assert((await row('never').innerText()).includes(date[0]),'today due date');
+ assert((await row('manual').innerText()).includes(date[1]),'manual next workday appointment honored');
+ assert((await row('skipped').innerText()).includes(date[2]),'today skip, rest day and manual exclusion honored');
+ assert((await row('unknown').innerText()).includes('未定'),'no eligible schedule shown honestly');
+ for(const node of await rows.all()){const b=await node.boundingBox();assert(b&&b.x>=-1&&b.x+b.width<=width+1,'monthly card stays within mobile viewport')}
+ await row('old').click();
+ assert.equal(await page.locator('#machineModal').evaluate(x=>x.classList.contains('open')),true,'opens existing machine detail');
+ await page.locator('#completeMachine').click();
+ assert.equal(await row('old').count(),0,'completed visit immediately disappears');
+ await page.locator('#undoAction').click();
+ assert.equal(await row('old').count(),1,'undo restores monthly unvisited status');
+ await page.locator('#machineAllTab').click();
+ assert.equal(await page.locator('#machineList').isVisible(),true);
+ assert.equal(await page.locator('#machineMonthlyPanel').isVisible(),false);
+}
 export async function runUiCopyCleanupGate(browser,baseUrl){
  for(const width of [320,390,430]){
   const context=await browser.newContext({viewport:{width,height:860}});
@@ -35,7 +74,7 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
    await page.locator('#deliveryNav').waitFor({state:'attached'});
    const manifestVersion=await page.evaluate(async()=>{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw new Error('version.json failed');return (await response.json()).version});
    assert.equal((await page.locator('#appVersion').innerText()).trim(),'Ver. '+manifestVersion,'rendered app version matches live manifest');
-   assert.equal(manifestVersion,'1.0.0','public 1.0 semantic release version is consistent');
+   assert.equal(manifestVersion,'1.1.0','public feature release version is consistent');
    assert.equal(await page.title(),'VENDRIVE 1.0','browser tab reflects public release');
    const pwa=await page.evaluate(async()=>{
     const response=await fetch('manifest.webmanifest',{cache:'no-store'});
@@ -75,7 +114,8 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
     const remaining=await page.evaluate(s=>document.body.textContent.includes(s),copy);
     assert.equal(remaining,false,'removed explanatory copy persists: '+copy);
    }
-   assert.deepEqual(errors,[],'page errors during UI copy cleanup');
+   await checkMonthlyUnvisited(context,page,width);
+   assert.deepEqual(errors,[],'page errors during UI copy cleanup and monthly unvisited');
    console.log('UI copy, collapsible safety and controls PASS at '+width+'px');
   }finally{await context.close()}
  }
