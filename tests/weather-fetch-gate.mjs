@@ -65,8 +65,11 @@ export async function runWeatherGate(browser,baseUrl){
   await test.page.waitForTimeout(120);
   assert.equal(test.calls.length,1,'repeated Today renders should reuse successful cache');
   assert.deepEqual(test.errors,[],'healthy weather render caused page errors');
+  const confirmations=[];
+  test.page.on('dialog',async dialog=>{confirmations.push(dialog.message());await dialog.accept()});
   await test.page.locator('#finishDay').click();
   await test.page.locator('#tomorrowWeatherCard .weatherLineIcon').waitFor({timeout:12000});
+  assert.equal(confirmations.length,2,'both end-of-day confirmations accepted');
   assert.match(await test.page.locator('#tomorrowWeatherCard .weatherLineIcon').getAttribute('class'),/weatherIcon-partly/);
   assert.match(await test.page.locator('#tomorrowWeatherCard').innerText(),/翌出勤日の天気.*晴れ\/曇り/);
   assert.match(await test.page.locator('#tomorrowWeatherCard').innerText(),/降水 42%/);
