@@ -5,27 +5,27 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "1.2.2",
+  "appVersion": "1.2.3",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "VENDRIVE_1_2_2_HEADER_ICON_PRODUCTION_VERIFIED",
+  "status": "VENDRIVE_1_2_3_WEATHER_ICONS_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "VENDRIVE v1.2.2 header icon",
-    "scope": "Owner confirmed the v1.2.1 home-screen icon changed on iPhone and requested the identical icon in the upper-left header. Reuse the existing approved 180px PNG, 33px square header image with unchanged surrounding spacing and brand name. Only header markup/style and patch version 1.2.2 changed; existing PWA identity/icons, data, business logic, UI layout and AN15 pause preserved. New header actual iPhone display not yet confirmed.",
-    "releaseStatus": "Product PR #306 merged; exact-head Browser/Edge PASS; both live version and header verified",
+    "title": "VENDRIVE v1.2.3 weather line icons",
+    "scope": "Owner confirmed v1.2.2 header icon and noticed weather emoji remained. Approved v1.2.0 preview sun SVG restored exactly, with matching line icons for other conditions; Today and next-workday weather use SVG. Weather labels, temperatures, precipitation, request/cache/timeout and location privacy unchanged. Patch version 1.2.3. Existing PWA identity, storage, scheduling, delivery, UI layout and AN15 pause preserved. Actual iPhone display not yet verified.",
+    "releaseStatus": "Product PR #309 merged; exact-head Browser/Edge PASS; both live versions verified",
     "validationEvidence": {
-      "preEditImmutableTag": "PASS Issue #305 backup-pre-VENDRIVE-1.2.2-HEADER-ICON-20261125 -> f29a214ce2210edc044e200c44daa10845d16c04",
-      "staticSyntax": "PASS inline JS, regression script and version JSON",
-      "exactHeadBrowserRegression": "PASS 45634980798 at 0fba56fcb3456f9df83fc0268cc1362cca2869be; header image source/decode, 33px layout at 320/390/430px and existing gates",
-      "exactHeadRealMicrosoftEdge": "PASS 45634980581 at same exact head; external nav/MAP and legacy regression",
-      "productMerge": "PASS PR #306 5660c46219d62855e3e29b3c62e07676031b56db",
-      "vercel": "PASS READY dpl_7LuU7xKmHeWiLiMknNkjVSpL6aTT exact product merge; public version 1.2.2 and header image markup",
-      "pages": "PASS public version 1.2.2 and index.html header image markup",
+      "preEditImmutableTag": "PASS Issue #308 backup-pre-VENDRIVE-1.2.3-WEATHER-ICONS-20261125 -> 56b4b78dce161d97db0f4ac19d5537a7504c927f",
+      "staticSyntax": "PASS inline JS, JSON, test script; 18 original/new condition label checks",
+      "exactHeadBrowserRegression": "PASS 45636738706 at 4e44231e1c76fee732fd84480eb3aff42606b38d; Today and next-workday weather SVG and existing weather/cache/timeout/GPS and other gates. Earlier two failures were test harness private-function access and unaccepted confirmation dialogs; corrected before merge.",
+      "exactHeadRealMicrosoftEdge": "PASS 45636739061 at same head; external nav/MAP and legacy regression",
+      "productMerge": "PASS PR #309 f68798e5cfbf772f89663e791219eb5430dc93d5",
+      "vercel": "PASS READY dpl_HbmBESXegsiChnCm9iXzietEuR4m exact product merge; public version 1.2.3",
+      "pages": "PASS public version.json 1.2.3",
       "dataMigration": "NOT_REQUIRED no storage/schema change",
-      "ownerDevice": "Owner confirmed previous home-screen icon works; new header display NOT_PERFORMED"
+      "ownerDevice": "Previous header confirmed; new weather icons NOT_PERFORMED"
     },
-    "nextOwnerAction": "Open existing app; confirm upper-left icon. No reinstall needed. Await new instruction."
+    "nextOwnerAction": "Open existing app; confirm weather icons on iPhone. No reinstall. Await new instruction."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -45,10 +45,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "Owner confirmed the v1.2.1 home-screen icon changed on iPhone and requested the identical icon in the upper-left header. Reuse the existing approved 180px PNG, 33px square header image with unchanged surrounding spacing and brand name. Only header markup/style and patch version 1.2.2 changed; existing PWA identity/icons, data, business logic, UI layout and AN15 pause preserved. New header actual iPhone display not yet confirmed. PASS Issue #305 backup-pre-VENDRIVE-1.2.2-HEADER-ICON-20261125 -> f29a214ce2210edc044e200c44daa10845d16c04; PASS inline JS, regression script and version JSON; PASS 45634980798 at 0fba56fcb3456f9df83fc0268cc1362cca2869be; header image source/decode, 33px layout at 320/390/430px and existing gates; PASS 45634980581 at same exact head; external nav/MAP and legacy regression; PASS PR #306 5660c46219d62855e3e29b3c62e07676031b56db; PASS READY dpl_7LuU7xKmHeWiLiMknNkjVSpL6aTT exact product merge; public version 1.2.2 and header image markup; PASS public version 1.2.2 and index.html header image markup; NOT_REQUIRED no storage/schema change; Owner confirmed previous home-screen icon works; new header display NOT_PERFORMED",
+    "shortResumePrompt": "Owner confirmed v1.2.2 header icon and noticed weather emoji remained. Approved v1.2.0 preview sun SVG restored exactly, with matching line icons for other conditions; Today and next-workday weather use SVG. Weather labels, temperatures, precipitation, request/cache/timeout and location privacy unchanged. Patch version 1.2.3. Existing PWA identity, storage, scheduling, delivery, UI layout and AN15 pause preserved. Actual iPhone display not yet verified. PASS Issue #308 backup-pre-VENDRIVE-1.2.3-WEATHER-ICONS-20261125 -> 56b4b78dce161d97db0f4ac19d5537a7504c927f; PASS inline JS, JSON, test script; 18 original/new condition label checks; PASS 45636738706 at 4e44231e1c76fee732fd84480eb3aff42606b38d; Today and next-workday weather SVG and existing weather/cache/timeout/GPS and other gates. Earlier two failures were test harness private-function access and unaccepted confirmation dialogs; corrected before merge.; PASS 45636739061 at same head; external nav/MAP and legacy regression; PASS PR #309 f68798e5cfbf772f89663e791219eb5430dc93d5; PASS READY dpl_HbmBESXegsiChnCm9iXzietEuR4m exact product merge; public version 1.2.3; PASS public version.json 1.2.3; NOT_REQUIRED no storage/schema change; Previous header confirmed; new weather icons NOT_PERFORMED",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "v1.2.2 header icon COMPLETE; retain existing data, PWA identity and AN15 pause.",
-    "latestContinuityCheckpoint": "2026-11-25 v1.2.2 product PR #306, Browser/Edge PASS, both public headers verified.",
+    "handoffBoundary": "v1.2.3 weather icons COMPLETE; retain data, PWA identity and AN15 pause.",
+    "latestContinuityCheckpoint": "2026-11-25 v1.2.3 product PR #309, Browser/Edge PASS, both public versions verified.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
