@@ -25,8 +25,8 @@ export async function runVisualConsistencyGate(browser,baseUrl){
     return {accent:s.getPropertyValue('--accent').trim(),cardRadius:s.getPropertyValue('--ui-card-radius').trim(),
      controlRadius:s.getPropertyValue('--ui-control-radius').trim(),sectionSpace:s.getPropertyValue('--ui-section-space').trim()};
    });
-   assert.match(root.accent,/(?:#111|rgb\(17, 17, 17\)|var\(--ink\))/,'Map search accent follows original dark palette');
-   assert.equal(root.cardRadius,'15px','cards share a 15px radius');
+   assert.equal(root.accent,'#285eaa','approved blue accent');
+   assert.equal(root.cardRadius,'16px','cards share a 16px radius');
    assert.equal(root.controlRadius,'11px','form fields/buttons share 11px radius');
    assert.equal(root.sectionSpace,'18px','sections use shared spacing');
 
@@ -40,12 +40,23 @@ export async function runVisualConsistencyGate(browser,baseUrl){
     if(i>0)assert(tabRects[i].left>=tabRects[i-1].right-1,'tabs must not overlap');
    }
    const kpi=await inspect(page,'#todayPage .kpi');
-   assert.equal(kpi.borderRadius,'15px','Today KPI matches shared card corners');
+   assert.equal(kpi.borderRadius,'0px','Today KPIs form a single integrated progress card');
+   assert.equal(await page.locator('#todayPage .hero .kpi').count(),3,'three interactive metrics inside the progress card');
+   assert.equal(await page.locator('#heroPercent').innerText(),'0%','empty progress percentage is zero');
+   const nav=await page.locator('.tabs').evaluate(el=>({position:getComputedStyle(el).position,bottom:el.getBoundingClientRect().bottom,icons:[...el.querySelectorAll('button')].map(b=>getComputedStyle(b,'::before').maskImage),height:el.getBoundingClientRect().height}));
+   assert.equal(nav.position,'fixed','navigation dock is fixed');
+   assert(Math.abs(nav.bottom-844)<2,'dock is at viewport bottom');
+   assert(nav.height>=60,'dock has comfortable targets');
+   assert(nav.icons.every(x=>x.includes('data:image/svg+xml')),'each of the six tabs has its own vector icon');
+   assert(tabRects.every(x=>x.bottom-x.top>=44),'six accessible touch targets');
+   await page.locator('#todayPage .kpi').first().click();
+   assert.equal(await page.locator('#statsModal').evaluate(el=>el.classList.contains('open')),true,'integrated metric opens existing detail');
+   await page.locator('#closeStats').click();
    await page.locator('.tabs button[data-page="tasksPage"]').click();
    assert.equal((await inspect(page,'#tasksPage>.row')).minHeight,'44px','Tasks heading row aligned to common height');
    assert.equal((await inspect(page,'#tasksPage .title')).fontSize,width<=360?'22px':'24px','Tasks heading hierarchy');
    assert.equal((await inspect(page,'#addTask')).minHeight,'38px','Task registration button is comfortable');
-   assert.equal((await inspect(page,'#tasksPage .sectionhead b')).fontSize,'13px','Tasks section title aligns with other tabs');
+   assert.equal((await inspect(page,'#tasksPage .sectionhead b')).fontSize,'14px','Tasks section title aligns with other tabs');
    const taskSection=await inspect(page,'#tasksPage .section');
    assert.equal(taskSection.marginTop,'18px','Task section rhythm is consistent');
    assert.equal((await inspect(page,'#tasksPage>.row')).alignItems,'center','Task heading/actions align');
@@ -55,7 +66,7 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    assert.equal(textInput.background,'rgb(255, 255, 255)','form surfaces use shared white');
    assert.equal(textInput.borderRadius,'11px','Task input matches shared controls');
    await page.locator('#taskText').focus();
-   sameColor((await inspect(page,'#taskText')).outlineColor,'rgb(124, 58, 237)','keyboard/text-input focus is discoverable');
+   sameColor((await inspect(page,'#taskText')).outlineColor,'rgb(40, 94, 170)','keyboard/text-input focus is discoverable');
    await page.locator('#cancelTask').click();
 
    await page.locator('.tabs button[data-page="mapPage"]').click();
@@ -67,7 +78,7 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    assert.equal(search.background,'rgb(255, 255, 255)','Map search stays white');
    assert.equal((await inspect(page,'#mapPage .days .day')).minHeight,'38px','Map weekday target remains reachable');
    const mapSearch=await inspect(page,'#addressSearchButton');
-   sameColor(mapSearch.background,'rgb(17, 17, 17)','Map search button no longer uses missing CSS variable');
+   sameColor(mapSearch.background,'rgb(24, 46, 73)','Map search button no longer uses missing CSS variable');
    sameColor(mapSearch.color,'rgb(255, 255, 255)','Map search button text is legible');
    assert.equal((await inspect(page,'#mapPage>.row')).alignItems,'center','Map heading/actions align');
    assert.match(await page.locator('.mapSearchAttribution').innerText(),/OpenStreetMap contributors/,'map attribution retained');
@@ -97,7 +108,7 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    assert.equal(deliverySearch.borderRadius,'11px','Delivery search matches other tabs');
    assert(deliverySearch.height>=44,'Delivery search touch target');
    assert.equal(deliverySearch.background,'rgb(255, 255, 255)','Delivery search remains white');
-   assert.equal((await inspect(page,'#deliveryPage .sectionhead b')).fontSize,'13px','Delivery section titles consistent');
+   assert.equal((await inspect(page,'#deliveryPage .sectionhead b')).fontSize,'14px','Delivery section titles consistent');
 
    const widthResult=await page.evaluate(()=>({
     scrollWidth:document.documentElement.scrollWidth,
@@ -105,7 +116,7 @@ export async function runVisualConsistencyGate(browser,baseUrl){
    }));
    assert(widthResult.scrollWidth<=width+1,'No horizontal app overflow at '+width+'px: '+JSON.stringify(widthResult));
    assert.deepEqual(errors,[],'no JavaScript errors during design checks');
-   console.log('PASS visual foundations, six tabs, fields, dark Map search and focus at '+width+'px');
+   console.log('PASS visual foundations, six tabs, fields, navy Map search and focus at '+width+'px');
   }finally{await context.close()}
  }
  console.log('=== tests/visual-consistency-gate.mjs ===\nPASS');

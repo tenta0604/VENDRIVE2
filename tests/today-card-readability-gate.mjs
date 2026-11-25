@@ -43,12 +43,12 @@ async function inspectCard(page,selector,width){
 }
 function verifyCard(card,width,label){
  assert.equal(card.style.minHeight,'88px',label+' minimum height');
- assert.equal(card.title.font,'13px',label+' readable title font');
+ assert.equal(card.title.font,width<=360?'13px':'14px',label+' readable title font');
  assert.equal(card.meta?.font,'10px',label+' consistent supporting copy');
  assert(card.title.height>=18,label+' title line box is legible');
  assert(card.title.right<=card.action.left+1,label+' long title does not overlap actions');
  assert(card.action.left>=card.info.right-1,label+' action and content regions stay separate');
- assert(card.nav.height>=40,label+' external navigation gets 40px touch height');
+ assert(card.nav.height>=44,label+' external navigation gets 44px touch height');
  assert(card.nav.left>=card.card.left-1&&card.nav.right<=card.card.right+1,label+' nav stays inside card');
  assert(card.badge.right<=card.card.right+1,label+' status stays inside card');
  assert(card.card.right<=width+1,label+' card stays inside viewport');
@@ -140,6 +140,11 @@ export async function runTodayCardReadabilityGate(browser,baseUrl){
     assert.equal(opacity,1,'pending work must remain fully opaque');
    }
    assert.equal(await page.locator('#todayList .todayExternalNav').count(),4,'all quick nav buttons preserved');
+   assert.equal(await page.locator('#heroPercent').innerText(),'50%','real fixture progress percentage');
+   const navVisual=await page.locator('#todayList .todayExternalNav').first().evaluate(el=>({bg:getComputedStyle(el).backgroundColor,mask:getComputedStyle(el,'::before').maskImage,text:el.textContent,aria:el.getAttribute('aria-label')}));
+   assert.equal(navVisual.bg,'rgb(234, 241, 252)','approved pale blue icon button');
+   assert(navVisual.mask.includes('data:image/svg+xml'),'external navigation has real vector icon');
+   assert(navVisual.text.includes('外部ナビ')||navVisual.aria?.includes('外部ナビ'),'accessible navigation label remains');
    assert.match(await page.locator('#todayList .deliverySwipeCard .deliveryItemMeta').first().innerText(),/ミネラルウォーター/,'delivery item details remain');
    assert.match(await page.locator('#todayList .swipeRow[data-machine-id="M-P"] .makerChip').innerText(),/サントリー/,'machine maker label preserved');
    const styles=await page.evaluate(()=>({
@@ -167,10 +172,10 @@ export async function runTodayCardReadabilityGate(browser,baseUrl){
       overflow:el.scrollWidth>el.clientWidth+1,right:r.right,
       text:el.innerText};
     });
-    assert.equal(card.radius,'15px',view.tab+' cards share radius');
+    assert.equal(card.radius,'16px',view.tab+' cards share radius');
     assert.equal(card.minHeight,'58px',view.tab+' cards share minimum size');
     assert.equal(card.pad,'12px',view.tab+' cards share vertical padding');
-    assert.equal(card.font,'12px',view.tab+' names share readability');
+    assert.equal(card.font,'14px',view.tab+' names share readability');
     assert.equal(card.bg,'rgb(255, 255, 255)',view.tab+' card contrast');
     assert.equal(card.overflow,false,view.tab+' long names have no horizontal card overflow');
     assert(card.right<=width+1,view.tab+' list fits viewport width');
