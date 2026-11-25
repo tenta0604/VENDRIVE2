@@ -5,27 +5,29 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "1.0.0",
+  "appVersion": "1.1.0",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "VENDRIVE_1_0_OFFICIAL_RELEASE_PRODUCTION_VERIFIED",
+  "status": "VENDRIVE_1_1_MONTHLY_UNVISITED_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "VENDRIVE 1.0 official named release (build 1.0.0)",
-    "scope": "Owner declared FINAL.72 design acceptable and suggested marking the product VENDRIVE 1.0. Release naming ONLY: browser title VENDRIVE 1.0; PWA manifest name VENDRIVE 1.0 and short_name VENDRIVE; APP_VERSION and public version.json 1.0.0; original VENDRIVE header and 'Ver. 1.0.0' label retained. PWA id/start_url/scope remain /VENDRIVE2/ to protect existing installation identity and user data; GitHub repository and legacy localStorage/IndexedDB and backup format are unchanged. FINAL.72 is historical development baseline, not current user-facing release number. UI, weather, map, routing, delivery, analytics, 28-day schedule, truck restrictions, AN14B3B5 DB/schema4, intentionally paused AN15 all preserved.",
-    "releaseStatus": "Product PR #294 merged 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7. Pre-edit immutable annotated safety tag Issue #293 backup-pre-VENDRIVE-1.0-RELEASE-NAMING-20261116-20261116 -> d0bbb806ef748a61be70c9e162c607612ec76a67 PASS. Exact-head Browser regression 43826193603 PASS including 320/390/430px assertions public release name, semver/version manifest, PWA identity unchanged and legacy suites. Real Edge navigation/MAP run 43826193424 PASS. Vercel dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ READY exact product merge; Pages and Vercel public /version.json both 1.0.0 verified fresh. No data/schema migration.",
+    "title": "VENDRIVE v1.1.0 calendar-month unvisited machines",
+    "scope": "Owner requested 自販機 > 今月未訪問 plus next visit date. Calendar month based on valid existing last visit date (including manually registered visit date), not today's visited flag or rolling 28-day cycle. Dedicated subtab shows names, maker/code/address, count and upcoming date sorted ascending; dates beyond the current month are flagged, unknown dates shown as 未定. Existing Today skip/force/order and manual next-work plan, rest days and standard recurrence govern date estimates. Existing details, completion and undo refresh the list; no new data fields or migrations. PWA id/start_url/scope /VENDRIVE2/, public approved brand VENDRIVE 1.0, legacy storage, backup format, engine AN14B3B5 DB/schema4, 28-day scheduling, weather, delivery, external navigation, and AN15 pause unchanged. APP_VERSION/version.json 1.1.0 per agreed new-feature semver policy. iPhone owner field confirmation not performed.",
+    "releaseStatus": "Product PR #297 merged bc595617352e6e84e7fc09c438e4a9a2079b5540; exact-head Browser and Edge PASS, Vercel READY, both public version manifests and subtab markup verified.",
     "validationEvidence": {
-      "preEditImmutableSafetyTag": "PASS Issue #293 annotated backup-pre-VENDRIVE-1.0-RELEASE-NAMING-20261116-20261116 -> d0bbb806ef748a61be70c9e162c607612ec76a67",
-      "productPR": "https://github.com/tenta0604/VENDRIVE2/pull/294",
-      "browser": "PASS exact-head 43826193603 including official release version, title, PWA identity and 320/390/430px legacy regressions",
-      "realMicrosoftEdge": "PASS exact-head 43826193424 external navigation/MAP and legacy regression",
-      "merge": "PASS 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
-      "vercel": "PASS READY dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ exact product SHA",
-      "pages": "PASS public 1.0.0 fresh fetched",
-      "backend": "PASS 200 1.0.0",
-      "pwaIdentity": "UNCHANGED id/start_url/scope /VENDRIVE2/"
+      "preEditImmutableTag": "PASS Issue #296 backup-pre-VENDRIVE-1.1.0-MONTHLY-UNVISITED-20261125 -> f7d0f9d4e8cd113724a79df8409d920133e9ed23",
+      "staticSyntax": "PASS actual inline JS and test syntax parse; version JSON",
+      "logic": "PASS 16 deterministic tests of actual source functions, calendar boundaries, invalid/future dates, skip/rest/manual/force/order and 28-day cycle",
+      "exactHeadBrowserRegression": "PASS run 45558823414 on 933bd8c7a7f0bd89650900d4a29df60a3c53e6b2; monthly seeded fixtures, completion/undo, 320/390/430px and legacy suites",
+      "exactHeadRealMicrosoftEdge": "PASS run 45558823336 on 933bd8c7a7f0bd89650900d4a29df60a3c53e6b2; external nav/MAP and legacy regression",
+      "productMerge": "PASS PR #297 bc595617352e6e84e7fc09c438e4a9a2079b5540",
+      "vercel": "PASS READY dpl_ENPEvaUWmgppcG6PWhv6D7QTgqDC exact product merge",
+      "pages": "PASS public version.json 1.1.0 and new subtab markup verified fresh",
+      "backend": "PASS public version.json 1.1.0 and new subtab markup verified fresh",
+      "dataMigration": "NOT_REQUIRED read-only derived view; legacy data unchanged",
+      "ownerDevice": "NOT_PERFORMED actual owner iPhone/data check"
     },
-    "nextOwnerAction": "Open updated VENDRIVE: header shows Ver. 1.0.0 and browser title VENDRIVE 1.0. Home-screen installed app label may reflect updates differently depending on OS/browser cache; do not delete installed app to force changes, as that could risk local device data. No additional product work until requested."
+    "nextOwnerAction": "Open existing app (do not reinstall); check Ver. 1.1.0 > 自販機 > 今月未訪問 against own data. No development without new instruction."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -45,10 +47,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "VENDRIVE 1.0 OFFICIAL RELEASE v1.0.0 production verified 2026-11-16; latest main and canonical docs authoritative. Owner accepted all FINAL.72 visual changes and approved the name VENDRIVE 1.0. Only public release naming changed: index browser title and PWA full name VENDRIVE 1.0, PWA short name VENDRIVE, APP_VERSION/version.json 1.0.0; existing VENDRIVE header displays Ver. 1.0.0. PWA identity/id/start_url/scope /VENDRIVE2/ and user-data storage paths unchanged (CRITICAL); repository remains tenta0604/VENDRIVE2. Product PR #294 merged 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7 with safety tag Issue #293 target d0bbb806ef748a61be70c9e162c607612ec76a67 PASS. Browser 43826193603 and real Edge 43826193424 PASS; production Vercel dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ READY exact SHA, GitHub Pages/Vercel v1.0.0 live. FINAL.72 design, FINAL.70 done opacity .48, FINAL.71 swipe cues, FINAL.68 weather resilience, FINAL.64 delivery order and external-only truck navigation preserved. Engine AN14B3B5, DB/schema4, 28d monthly, AN15 paused. No automatic next phase, await owner.",
+    "shortResumePrompt": "VENDRIVE v1.1.0 monthly unvisited feature COMPLETE 2026-11-25. Owner requested 自販機 > 今月未訪問 plus next visit date. Calendar month based on valid existing last visit date (including manually registered visit date), not today's visited flag or rolling 28-day cycle. Dedicated subtab shows names, maker/code/address, count and upcoming date sorted ascending; dates beyond the current month are flagged, unknown dates shown as 未定. Existing Today skip/force/order and manual next-work plan, rest days and standard recurrence govern date estimates. Existing details, completion and undo refresh the list; no new data fields or migrations. PWA id/start_url/scope /VENDRIVE2/, public approved brand VENDRIVE 1.0, legacy storage, backup format, engine AN14B3B5 DB/schema4, 28-day scheduling, weather, delivery, external navigation, and AN15 pause unchanged. APP_VERSION/version.json 1.1.0 per agreed new-feature semver policy. iPhone owner field confirmation not performed. Product PR #297 bc595617352e6e84e7fc09c438e4a9a2079b5540; tag Issue #296 backup-pre-VENDRIVE-1.1.0-MONTHLY-UNVISITED-20261125 at f7d0f9d4e8cd113724a79df8409d920133e9ed23; Browser 45558823414 and Edge 45558823336 PASS; Vercel dpl_ENPEvaUWmgppcG6PWhv6D7QTgqDC READY and both Pages/Vercel live 1.1.0. Latest main and canonical docs authoritative. No automatic next phase.",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "VENDRIVE 1.0 public release name/version COMPLETE, production verified; preserve /VENDRIVE2/ PWA identity and repository, all existing data/features and paused AN15. No auto next phase.",
-    "latestContinuityCheckpoint": "2026-11-16 VENDRIVE 1.0 (v1.0.0) release naming product PR #294; exact-head Browser+Edge PASS, Vercel READY and GitHub Pages live, canonical release closeout.",
+    "handoffBoundary": "v1.1.0 monthly-unvisited COMPLETE production verified; preserve all existing data, PWA identity and paused AN15.",
+    "latestContinuityCheckpoint": "2026-11-25 v1.1.0 product PR #297; exact-head Browser/Edge PASS, Vercel READY and public Pages/Vercel verified.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
@@ -60,9 +62,8 @@
     }
   },
   "nextActions": [
-    "Official VENDRIVE 1.0 naming complete; await user confirmation of app title/version. Avoid triggering iOS app deletion/reinstallation solely to rename the icon.",
-    "Future maintenance uses semver: 1.0.1 small fixes, 1.1.0 new features, 2.0.0 breaking changes only after agreement. Historical 2026.11.16-FINAL.72 remains last development milestone.",
-    "Preserve existing PWA id/start_url/scope /VENDRIVE2/, storage and backup integrity, engine AN14B3B5 DB/schema4, external-only Google Maps, FINAL.70 done opacity .48, FINAL.68 weather, 28d monthly, AN15 paused."
+    "Await new owner request; actual iPhone field check remains separate from automated gates. Do not reinstall app.",
+    "Future maintenance uses semver; preserve PWA identity, backup/storage, external navigation, weather, delivery, 28d scheduling and AN15 pause."
   ],
   "fieldEvidenceIntake": {
     "status": "ARCHIVED_IN_APP_ROUTE_RETIRED_FINAL60",

@@ -1,41 +1,43 @@
 {
-  "evidenceVersion": 103,
-  "runType": "vendrive_1_0_official_release_naming_closeout_20261116",
-  "phase": "VENDRIVE_1_0_PUBLIC_NAMING",
+  "evidenceVersion": 104,
+  "runType": "vendrive_1_1_monthly_unvisited_closeout_20261125",
+  "phase": "VENDRIVE_1_1_MONTHLY_UNVISITED",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "d0bbb806ef748a61be70c9e162c607612ec76a67",
-    "preEditImmutableSafetyTag": "PASS Issue #293 annotated backup-pre-VENDRIVE-1.0-RELEASE-NAMING-20261116-20261116",
-    "productPR": 294,
-    "productMerge": "455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
-    "previousMilestone": "2026.11.16-FINAL.72"
+    "mainBefore": "f7d0f9d4e8cd113724a79df8409d920133e9ed23",
+    "preEditImmutableSafetyTag": "backup-pre-VENDRIVE-1.1.0-MONTHLY-UNVISITED-20261125 -> f7d0f9d4e8cd113724a79df8409d920133e9ed23 (Issue #296 PASS)",
+    "productPR": 297,
+    "productMerge": "bc595617352e6e84e7fc09c438e4a9a2079b5540",
+    "exactProductHead": "933bd8c7a7f0bd89650900d4a29df60a3c53e6b2",
+    "previousMilestone": "1.0.0"
   },
   "versions": {
-    "app": "1.0.0",
+    "app": "1.1.0",
     "brand": "VENDRIVE 1.0",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Public release rename only: APP_VERSION/version.json 1.0.0, <title>VENDRIVE 1.0</title>, manifest name VENDRIVE 1.0 / short_name VENDRIVE. Existing header brand VENDRIVE and Ver. 1.0.0. PWA id/start_url/scope /VENDRIVE2/ deliberately preserved to keep existing install/data. Code/UX/data/runtime behavior unchanged.",
-    "safety": "No data migration, PWA identity change, IndexedDB/localStorage backup contract change, route/navigation/weather/delivery or paused AN15 change. Previous FINAL.72 code frozen as baseline."
+    "summary": "Owner requested 自販機 > 今月未訪問 plus next visit date. Calendar month based on valid existing last visit date (including manually registered visit date), not today's visited flag or rolling 28-day cycle. Dedicated subtab shows names, maker/code/address, count and upcoming date sorted ascending; dates beyond the current month are flagged, unknown dates shown as 未定. Existing Today skip/force/order and manual next-work plan, rest days and standard recurrence govern date estimates. Existing details, completion and undo refresh the list; no new data fields or migrations.",
+    "safety": "PWA id/start_url/scope /VENDRIVE2/, public approved brand VENDRIVE 1.0, legacy storage, backup format, engine AN14B3B5 DB/schema4, 28-day scheduling, weather, delivery, external navigation, and AN15 pause unchanged. APP_VERSION/version.json 1.1.0 per agreed new-feature semver policy. iPhone owner field confirmation not performed."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #293 target d0bbb806ef748a61be70c9e162c607612ec76a67",
-    "staticSyntax": "PASS index inline JavaScript parse, JSON parse; browser gate checks",
-    "exactHeadBrowserRegression": "PASS run 43826193603 all prior suites + explicit official semver/PWA title/name/scope 320/390/430px",
-    "exactHeadRealMicrosoftEdge": "PASS run 43826193424 external nav/MAP and legacy regression",
-    "productMerge": "PASS PR #294 455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
-    "vercel": "PASS READY dpl_EHJz8J3YTiTK6wEGfhVWpgFn6yRJ exact product merge",
-    "pages": "PASS public version.json 1.0.0 fresh",
-    "backend": "PASS HTTP200 version.json 1.0.0",
-    "dataMigration": "NOT REQUIRED release-name/version-only change"
+    "preEditImmutableTag": "PASS Issue #296 backup-pre-VENDRIVE-1.1.0-MONTHLY-UNVISITED-20261125 -> f7d0f9d4e8cd113724a79df8409d920133e9ed23",
+    "staticSyntax": "PASS actual inline JS and test syntax parse; version JSON",
+    "logic": "PASS 16 deterministic tests of actual source functions, calendar boundaries, invalid/future dates, skip/rest/manual/force/order and 28-day cycle",
+    "exactHeadBrowserRegression": "PASS run 45558823414 on 933bd8c7a7f0bd89650900d4a29df60a3c53e6b2; monthly seeded fixtures, completion/undo, 320/390/430px and legacy suites",
+    "exactHeadRealMicrosoftEdge": "PASS run 45558823336 on 933bd8c7a7f0bd89650900d4a29df60a3c53e6b2; external nav/MAP and legacy regression",
+    "productMerge": "PASS PR #297 bc595617352e6e84e7fc09c438e4a9a2079b5540",
+    "vercel": "PASS READY dpl_ENPEvaUWmgppcG6PWhv6D7QTgqDC exact product merge",
+    "pages": "PASS public version.json 1.1.0 and new subtab markup verified fresh",
+    "backend": "PASS public version.json 1.1.0 and new subtab markup verified fresh",
+    "dataMigration": "NOT_REQUIRED read-only derived view; legacy data unchanged",
+    "ownerDevice": "NOT_PERFORMED actual owner iPhone/data check"
   },
   "changedFiles": [
     "index.html",
     "version.json",
-    "manifest.webmanifest",
     "tests/ui-copy-cleanup-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
@@ -44,13 +46,13 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE — await owner display confirmation; next actual fix or feature requires new instruction; paused AN15 preserved.",
+  "nextAction": "COMPLETE — await new owner instruction; optional owner iPhone field confirmation. Preserve paused AN15.",
   "continuityCheckpoint": {
-    "status": "VENDRIVE_1_0_OFFICIAL_RELEASE_PRODUCTION_VERIFIED",
-    "appVersion": "1.0.0",
+    "status": "VENDRIVE_1_1_MONTHLY_UNVISITED_PRODUCTION_VERIFIED",
+    "appVersion": "1.1.0",
     "productName": "VENDRIVE 1.0",
-    "productMerge": "455c6cef18a28fc08a8b9e86cfb505b8afde1fb7",
+    "productMerge": "bc595617352e6e84e7fc09c438e4a9a2079b5540",
     "pwaIdentity": "/VENDRIVE2/ unchanged",
-    "legacy": "FINAL.72 visual finish; FINAL.68 weather; FINAL.70 done opacity .48; paused AN15"
+    "legacy": "FINAL.72 visual finish; 28-day cycle; AN15 paused"
   }
 }
