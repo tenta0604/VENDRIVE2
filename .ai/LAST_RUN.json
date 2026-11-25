@@ -1,45 +1,47 @@
 {
-  "evidenceVersion": 105,
-  "runType": "vendrive_1_2_design_closeout_20261125",
-  "phase": "VENDRIVE_1_2_DESIGN",
+  "evidenceVersion": 106,
+  "runType": "vendrive_1_2_1_icon_closeout_20261125",
+  "phase": "VENDRIVE_1_2_1_ICON",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "0336a555bd24e69398394f87c6322f8a618a0a18",
-    "preEditImmutableSafetyTag": "PASS Issue #299 backup-pre-VENDRIVE-1.2.0-DESIGN-20261125 -> 0336a555bd24e69398394f87c6322f8a618a0a18",
-    "productPR": 300,
-    "productMerge": "b263467061c67d3fc738e12d0007c5d82e5d641a",
-    "exactProductHead": "968b50e0d870ea0636e81b0638395370292af653",
-    "previousMilestone": "1.1.0"
+    "mainBefore": "fc51bb2e63d6a684156954a3c937b710bcfc81e7",
+    "preEditImmutableSafetyTag": "PASS Issue #302 backup-pre-VENDRIVE-1.2.1-ICON-20261125 -> fc51bb2e63d6a684156954a3c937b710bcfc81e7",
+    "productPR": 303,
+    "productMerge": "1f32923514aca471a9b247797c0ed3b964c1a6c4",
+    "exactProductHead": "c7ea9bff9b9168244b9643afd19722325033f21e",
+    "previousMilestone": "1.2.0"
   },
   "versions": {
-    "app": "1.2.0",
+    "app": "1.2.1",
     "brand": "VENDRIVE 1.0",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Owner approved Today and all-six-tab VENDRIVE 1.2.0 design previews. Ported navy/blue-grey palette, bottom six-tab dock with vector icons, integrated Today live progress/percentage and metrics, coordinated cards/forms, and icon-only external navigation with accessible labels. Existing monthly-unvisited, visit/delivery order, completion/undo, 28-day calendar, weather, map geometry and fullscreen, navigation safety, storage/backup, PWA identity /VENDRIVE2/, brand VENDRIVE 1.0 and AN15 pause remain unchanged. Actual owner iPhone check not performed.",
-    "safety": "No user data migration; immutable safety tag; product gate verified. First narrow-card title height failure corrected before merge."
+    "summary": "Owner approved the exact textless blue V vending-machine icon. Resized the approved source to 180/192/512px PNG with no redesign; added Apple touch icon, favicon and web manifest icon references. Patch version 1.2.1. Existing PWA identity, data, UI layout, business logic and AN15 pause remain unchanged. Existing iPhone home screen may retain its cached icon; actual owner device verification not performed.",
+    "safety": "No data migration; immutable safety tag; verified assets and gates; iOS cache check separate."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #299 backup-pre-VENDRIVE-1.2.0-DESIGN-20261125 -> 0336a555bd24e69398394f87c6322f8a618a0a18",
-    "staticSyntax": "PASS actual inline JS and regression scripts parse; version JSON",
-    "exactHeadBrowserRegression": "PASS 45567463082 at 968b50e0d870ea0636e81b0638395370292af653; 320/390/430px, bottom dock, icons, progress, six tabs, monthly and legacy suites, reduced motion",
-    "exactHeadRealMicrosoftEdge": "PASS 45567463144 at same exact head; external nav/MAP and legacy regression",
-    "productMerge": "PASS PR #300 b263467061c67d3fc738e12d0007c5d82e5d641a",
-    "vercel": "PASS READY dpl_3f7hGgJPzeuQFECmNVVgcPjJC4yA exact product merge",
-    "pages": "PASS public version.json 1.2.0 and new Today progress markup",
-    "backend": "PASS public version.json 1.2.0 and new Today progress markup",
-    "dataMigration": "NOT_REQUIRED no storage or schema change",
-    "ownerDevice": "NOT_PERFORMED actual iPhone display/data check"
+    "preEditImmutableTag": "PASS Issue #302 backup-pre-VENDRIVE-1.2.1-ICON-20261125 -> fc51bb2e63d6a684156954a3c937b710bcfc81e7",
+    "assetIntegrity": "PASS exact local PNG Git blob SHA 180:845b274a1ba47ed2ca87c11766a32e10d44d355e; 192:fc4a094ede1313055a074d3f375cf0379d574d8f; 512:3c86312b7e9ed2df5358ff1179e9ff70729464db; readback matches",
+    "staticSyntax": "PASS inline JS, manifest/version JSON, regression script parse; manifest identity equality",
+    "exactHeadBrowserRegression": "PASS 45632573343 at c7ea9bff9b9168244b9643afd19722325033f21e; PNG decodes and dimensions, manifest/Apple touch icon references, legacy gates",
+    "exactHeadRealMicrosoftEdge": "PASS 45632573438 at same exact head; external navigation/MAP and legacy regression",
+    "productMerge": "PASS PR #303 1f32923514aca471a9b247797c0ed3b964c1a6c4",
+    "vercel": "PASS READY dpl_Bj4PYGkGPWxviXodkditQBknRidP exact product merge; public version/manifest verified 1.2.1",
+    "pages": "PASS public version.json 1.2.1 and manifest icons verified fresh",
+    "dataMigration": "NOT_REQUIRED no storage/schema change",
+    "ownerDevice": "NOT_PERFORMED actual iPhone home-screen cache/data check"
   },
   "changedFiles": [
     "index.html",
+    "manifest.webmanifest",
     "version.json",
+    "vendrive-icon-180.png",
+    "vendrive-icon-192.png",
+    "vendrive-icon-512.png",
     "tests/ui-copy-cleanup-gate.mjs",
-    "tests/visual-consistency-gate.mjs",
-    "tests/today-card-readability-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -47,13 +49,13 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE — await new owner instruction; optional iPhone check. Preserve AN15 pause.",
+  "nextAction": "COMPLETE — await owner instruction; optional device check, no reinstall without verified backup.",
   "continuityCheckpoint": {
-    "status": "VENDRIVE_1_2_DESIGN_PRODUCTION_VERIFIED",
-    "appVersion": "1.2.0",
+    "status": "VENDRIVE_1_2_1_ICON_PRODUCTION_VERIFIED",
+    "appVersion": "1.2.1",
     "productName": "VENDRIVE 1.0",
-    "productMerge": "b263467061c67d3fc738e12d0007c5d82e5d641a",
+    "productMerge": "1f32923514aca471a9b247797c0ed3b964c1a6c4",
     "pwaIdentity": "/VENDRIVE2/ unchanged",
-    "legacy": "monthly unvisited, 28-day cycle, AN15 paused"
+    "legacy": "approved 1.2 design, monthly unvisited, 28-day cycle, AN15 paused"
   }
 }
