@@ -74,7 +74,7 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
    await page.locator('#deliveryNav').waitFor({state:'attached'});
    const manifestVersion=await page.evaluate(async()=>{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw new Error('version.json failed');return (await response.json()).version});
    assert.equal((await page.locator('#appVersion').innerText()).trim(),'Ver. '+manifestVersion,'rendered app version matches live manifest');
-   assert.equal(manifestVersion,'1.2.2','public header icon patch version is consistent');
+   assert.equal(manifestVersion,'1.2.3','public weather icon patch version is consistent');
    assert.equal(await page.title(),'VENDRIVE 1.0','browser tab reflects public release');
    const pwa=await page.evaluate(async()=>{
     const response=await fetch('manifest.webmanifest',{cache:'no-store'});

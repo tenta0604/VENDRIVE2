@@ -53,12 +53,27 @@ export async function runWeatherGate(browser,baseUrl){
   });
   await waitWeather(test.page,'23℃');
   assert.match(await test.page.locator('#todayWeatherCard').innerText(),/降水 42%/);
+  const icon=test.page.locator('#todayWeatherCard .weatherLineIcon');
+  assert.equal(await icon.count(),1,'Today shows one SVG weather icon');
+  assert.equal(await icon.getAttribute('viewBox'),'0 0 24 24');
+  assert.equal(await icon.getAttribute('stroke-width'),'1.7');
+  assert.match(await icon.getAttribute('class'),/weatherIcon-partly/);
+  assert.equal(await icon.getAttribute('aria-hidden'),'true');
   assert.equal(test.calls.length,1,'Today should issue exactly one weather query (not JMA + Best Match)');
   assert(!test.calls[0].includes('models='),'single query should use Open-Meteo Best Match');
   await test.page.evaluate(()=>window.VENDRIVE2DeliveryBridge.renderAll());
   await test.page.waitForTimeout(120);
   assert.equal(test.calls.length,1,'repeated Today renders should reuse successful cache');
   assert.deepEqual(test.errors,[],'healthy weather render caused page errors');
+  const confirmations=[];
+  test.page.on('dialog',async dialog=>{confirmations.push(dialog.message());await dialog.accept()});
+  await test.page.locator('#finishDay').click();
+  await test.page.locator('#tomorrowWeatherCard .weatherLineIcon').waitFor({timeout:12000});
+  assert.equal(confirmations.length,2,'both end-of-day confirmations accepted');
+  assert.match(await test.page.locator('#tomorrowWeatherCard .weatherLineIcon').getAttribute('class'),/weatherIcon-partly/);
+  assert.match(await test.page.locator('#tomorrowWeatherCard').innerText(),/翌出勤日の天気.*晴れ\/曇り/);
+  assert.match(await test.page.locator('#tomorrowWeatherCard').innerText(),/降水 42%/);
+  console.log('Today and next-workday line weather icons: PASS');
   await test.context.close();test=null;
 
   // Failed response exposes a retry; retry must bypass short-lived negative cache.
