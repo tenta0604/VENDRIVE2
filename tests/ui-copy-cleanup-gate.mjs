@@ -74,19 +74,40 @@ export async function runUiCopyCleanupGate(browser,baseUrl){
    await page.locator('#deliveryNav').waitFor({state:'attached'});
    const manifestVersion=await page.evaluate(async()=>{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw new Error('version.json failed');return (await response.json()).version});
    assert.equal((await page.locator('#appVersion').innerText()).trim(),'Ver. '+manifestVersion,'rendered app version matches live manifest');
-   assert.equal(manifestVersion,'1.2.0','public design release version is consistent');
+   assert.equal(manifestVersion,'1.2.1','public icon patch version is consistent');
    assert.equal(await page.title(),'VENDRIVE 1.0','browser tab reflects public release');
    const pwa=await page.evaluate(async()=>{
     const response=await fetch('manifest.webmanifest',{cache:'no-store'});
     if(!response.ok)throw Error('PWA manifest unavailable');
     const j=await response.json();
-    return {name:j.name,short_name:j.short_name,id:j.id,start_url:j.start_url,scope:j.scope};
+    return {name:j.name,short_name:j.short_name,id:j.id,start_url:j.start_url,scope:j.scope,icons:j.icons};
    });
    assert.equal(pwa.name,'VENDRIVE 1.0','PWA long name uses approved public brand');
    assert.equal(pwa.short_name,'VENDRIVE','PWA launcher remains compact');
    for(const key of ['id','start_url','scope'])
     assert.equal(pwa[key],'/VENDRIVE2/','PWA existing install and data identity remains stable: '+key);
 
+   assert.deepEqual(pwa.icons,[
+    {src:'./vendrive-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
+    {src:'./vendrive-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'}
+   ],'approved app icon references and sizes');
+   const apple=page.locator('link[rel="apple-touch-icon"]');
+   assert.equal(await apple.count(),1,'one Apple touch icon');
+   assert.equal(await apple.getAttribute('href'),'./vendrive-icon-180.png');
+   assert.equal(await apple.getAttribute('sizes'),'180x180');
+   assert.equal(await page.locator('link[rel="icon"]').getAttribute('href'),'./vendrive-icon-192.png');
+   for(const size of [180,192,512]){
+    const result=await page.evaluate(async n=>{
+     const url='./vendrive-icon-'+n+'.png';
+     const response=await fetch(url,{cache:'no-store'});
+     if(!response.ok)throw Error('icon unavailable '+n);
+     const blob=await response.blob();
+     const image=new Image();image.src=URL.createObjectURL(blob);
+     try{await image.decode();return {type:blob.type,w:image.naturalWidth,h:image.naturalHeight}}
+     finally{URL.revokeObjectURL(image.src)}
+    },size);
+    assert.deepEqual(result,{type:'image/png',w:size,h:size},'decodable PNG at declared size '+size);
+   }
    await checkNotice(page,'todayNavSafety',width);
    assert.equal(await page.locator('#todayList').count(),1,'Today list remains available');
    assert.equal(await page.locator('#finishDay').count(),1,'day completion remains available');
