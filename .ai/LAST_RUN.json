@@ -1,44 +1,45 @@
 {
-  "evidenceVersion": 104,
-  "runType": "vendrive_1_1_monthly_unvisited_closeout_20261125",
-  "phase": "VENDRIVE_1_1_MONTHLY_UNVISITED",
+  "evidenceVersion": 105,
+  "runType": "vendrive_1_2_design_closeout_20261125",
+  "phase": "VENDRIVE_1_2_DESIGN",
   "status": "COMPLETE",
   "base": {
-    "mainBefore": "f7d0f9d4e8cd113724a79df8409d920133e9ed23",
-    "preEditImmutableSafetyTag": "backup-pre-VENDRIVE-1.1.0-MONTHLY-UNVISITED-20261125 -> f7d0f9d4e8cd113724a79df8409d920133e9ed23 (Issue #296 PASS)",
-    "productPR": 297,
-    "productMerge": "bc595617352e6e84e7fc09c438e4a9a2079b5540",
-    "exactProductHead": "933bd8c7a7f0bd89650900d4a29df60a3c53e6b2",
-    "previousMilestone": "1.0.0"
+    "mainBefore": "0336a555bd24e69398394f87c6322f8a618a0a18",
+    "preEditImmutableSafetyTag": "PASS Issue #299 backup-pre-VENDRIVE-1.2.0-DESIGN-20261125 -> 0336a555bd24e69398394f87c6322f8a618a0a18",
+    "productPR": 300,
+    "productMerge": "b263467061c67d3fc738e12d0007c5d82e5d641a",
+    "exactProductHead": "968b50e0d870ea0636e81b0638395370292af653",
+    "previousMilestone": "1.1.0"
   },
   "versions": {
-    "app": "1.1.0",
+    "app": "1.2.0",
     "brand": "VENDRIVE 1.0",
     "engine": "AN14B3B5",
     "db": 4,
     "schema": 4
   },
   "work": {
-    "summary": "Owner requested 自販機 > 今月未訪問 plus next visit date. Calendar month based on valid existing last visit date (including manually registered visit date), not today's visited flag or rolling 28-day cycle. Dedicated subtab shows names, maker/code/address, count and upcoming date sorted ascending; dates beyond the current month are flagged, unknown dates shown as 未定. Existing Today skip/force/order and manual next-work plan, rest days and standard recurrence govern date estimates. Existing details, completion and undo refresh the list; no new data fields or migrations.",
-    "safety": "PWA id/start_url/scope /VENDRIVE2/, public approved brand VENDRIVE 1.0, legacy storage, backup format, engine AN14B3B5 DB/schema4, 28-day scheduling, weather, delivery, external navigation, and AN15 pause unchanged. APP_VERSION/version.json 1.1.0 per agreed new-feature semver policy. iPhone owner field confirmation not performed."
+    "summary": "Owner approved Today and all-six-tab VENDRIVE 1.2.0 design previews. Ported navy/blue-grey palette, bottom six-tab dock with vector icons, integrated Today live progress/percentage and metrics, coordinated cards/forms, and icon-only external navigation with accessible labels. Existing monthly-unvisited, visit/delivery order, completion/undo, 28-day calendar, weather, map geometry and fullscreen, navigation safety, storage/backup, PWA identity /VENDRIVE2/, brand VENDRIVE 1.0 and AN15 pause remain unchanged. Actual owner iPhone check not performed.",
+    "safety": "No user data migration; immutable safety tag; product gate verified. First narrow-card title height failure corrected before merge."
   },
   "gates": {
-    "preEditImmutableTag": "PASS Issue #296 backup-pre-VENDRIVE-1.1.0-MONTHLY-UNVISITED-20261125 -> f7d0f9d4e8cd113724a79df8409d920133e9ed23",
-    "staticSyntax": "PASS actual inline JS and test syntax parse; version JSON",
-    "logic": "PASS 16 deterministic tests of actual source functions, calendar boundaries, invalid/future dates, skip/rest/manual/force/order and 28-day cycle",
-    "exactHeadBrowserRegression": "PASS run 45558823414 on 933bd8c7a7f0bd89650900d4a29df60a3c53e6b2; monthly seeded fixtures, completion/undo, 320/390/430px and legacy suites",
-    "exactHeadRealMicrosoftEdge": "PASS run 45558823336 on 933bd8c7a7f0bd89650900d4a29df60a3c53e6b2; external nav/MAP and legacy regression",
-    "productMerge": "PASS PR #297 bc595617352e6e84e7fc09c438e4a9a2079b5540",
-    "vercel": "PASS READY dpl_ENPEvaUWmgppcG6PWhv6D7QTgqDC exact product merge",
-    "pages": "PASS public version.json 1.1.0 and new subtab markup verified fresh",
-    "backend": "PASS public version.json 1.1.0 and new subtab markup verified fresh",
-    "dataMigration": "NOT_REQUIRED read-only derived view; legacy data unchanged",
-    "ownerDevice": "NOT_PERFORMED actual owner iPhone/data check"
+    "preEditImmutableTag": "PASS Issue #299 backup-pre-VENDRIVE-1.2.0-DESIGN-20261125 -> 0336a555bd24e69398394f87c6322f8a618a0a18",
+    "staticSyntax": "PASS actual inline JS and regression scripts parse; version JSON",
+    "exactHeadBrowserRegression": "PASS 45567463082 at 968b50e0d870ea0636e81b0638395370292af653; 320/390/430px, bottom dock, icons, progress, six tabs, monthly and legacy suites, reduced motion",
+    "exactHeadRealMicrosoftEdge": "PASS 45567463144 at same exact head; external nav/MAP and legacy regression",
+    "productMerge": "PASS PR #300 b263467061c67d3fc738e12d0007c5d82e5d641a",
+    "vercel": "PASS READY dpl_3f7hGgJPzeuQFECmNVVgcPjJC4yA exact product merge",
+    "pages": "PASS public version.json 1.2.0 and new Today progress markup",
+    "backend": "PASS public version.json 1.2.0 and new Today progress markup",
+    "dataMigration": "NOT_REQUIRED no storage or schema change",
+    "ownerDevice": "NOT_PERFORMED actual iPhone display/data check"
   },
   "changedFiles": [
     "index.html",
     "version.json",
     "tests/ui-copy-cleanup-gate.mjs",
+    "tests/visual-consistency-gate.mjs",
+    "tests/today-card-readability-gate.mjs",
     ".ai/STATE.json",
     ".ai/LAST_RUN.json",
     ".ai/HANDOFF.md",
@@ -46,13 +47,13 @@
     "AI_ROADMAP.md"
   ],
   "openItems": [],
-  "nextAction": "COMPLETE — await new owner instruction; optional owner iPhone field confirmation. Preserve paused AN15.",
+  "nextAction": "COMPLETE — await new owner instruction; optional iPhone check. Preserve AN15 pause.",
   "continuityCheckpoint": {
-    "status": "VENDRIVE_1_1_MONTHLY_UNVISITED_PRODUCTION_VERIFIED",
-    "appVersion": "1.1.0",
+    "status": "VENDRIVE_1_2_DESIGN_PRODUCTION_VERIFIED",
+    "appVersion": "1.2.0",
     "productName": "VENDRIVE 1.0",
-    "productMerge": "bc595617352e6e84e7fc09c438e4a9a2079b5540",
+    "productMerge": "b263467061c67d3fc738e12d0007c5d82e5d641a",
     "pwaIdentity": "/VENDRIVE2/ unchanged",
-    "legacy": "FINAL.72 visual finish; 28-day cycle; AN15 paused"
+    "legacy": "monthly unvisited, 28-day cycle, AN15 paused"
   }
 }
