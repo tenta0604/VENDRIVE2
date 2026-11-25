@@ -5,28 +5,27 @@
   "completedPhase": "AN15G2_PRODUCTION_TRANSPORT_VERIFIED",
   "activePhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
   "nextPhase": "AN15_REAL_EVIDENCE_ACCUMULATION_AND_PROMOTION_GATE",
-  "appVersion": "1.2.1",
+  "appVersion": "1.2.2",
   "engineVersion": "AN14B3B5",
   "dbVersion": 4,
   "schemaVersion": 4,
-  "status": "VENDRIVE_1_2_1_ICON_PRODUCTION_VERIFIED",
+  "status": "VENDRIVE_1_2_2_HEADER_ICON_PRODUCTION_VERIFIED",
   "currentWork": {
-    "title": "VENDRIVE v1.2.1 approved app icon",
-    "scope": "Owner approved the exact textless blue V vending-machine icon. Resized the approved source to 180/192/512px PNG with no redesign; added Apple touch icon, favicon and web manifest icon references. Patch version 1.2.1. Existing PWA identity, data, UI layout, business logic and AN15 pause remain unchanged. Existing iPhone home screen may retain its cached icon; actual owner device verification not performed.",
-    "releaseStatus": "Product PR #303 merged; exact-head Browser/Edge PASS; both live version and manifest verified",
+    "title": "VENDRIVE v1.2.2 header icon",
+    "scope": "Owner confirmed the v1.2.1 home-screen icon changed on iPhone and requested the identical icon in the upper-left header. Reuse the existing approved 180px PNG, 33px square header image with unchanged surrounding spacing and brand name. Only header markup/style and patch version 1.2.2 changed; existing PWA identity/icons, data, business logic, UI layout and AN15 pause preserved. New header actual iPhone display not yet confirmed.",
+    "releaseStatus": "Product PR #306 merged; exact-head Browser/Edge PASS; both live version and header verified",
     "validationEvidence": {
-      "preEditImmutableTag": "PASS Issue #302 backup-pre-VENDRIVE-1.2.1-ICON-20261125 -> fc51bb2e63d6a684156954a3c937b710bcfc81e7",
-      "assetIntegrity": "PASS exact local PNG Git blob SHA 180:845b274a1ba47ed2ca87c11766a32e10d44d355e; 192:fc4a094ede1313055a074d3f375cf0379d574d8f; 512:3c86312b7e9ed2df5358ff1179e9ff70729464db; readback matches",
-      "staticSyntax": "PASS inline JS, manifest/version JSON, regression script parse; manifest identity equality",
-      "exactHeadBrowserRegression": "PASS 45632573343 at c7ea9bff9b9168244b9643afd19722325033f21e; PNG decodes and dimensions, manifest/Apple touch icon references, legacy gates",
-      "exactHeadRealMicrosoftEdge": "PASS 45632573438 at same exact head; external navigation/MAP and legacy regression",
-      "productMerge": "PASS PR #303 1f32923514aca471a9b247797c0ed3b964c1a6c4",
-      "vercel": "PASS READY dpl_Bj4PYGkGPWxviXodkditQBknRidP exact product merge; public version/manifest verified 1.2.1",
-      "pages": "PASS public version.json 1.2.1 and manifest icons verified fresh",
+      "preEditImmutableTag": "PASS Issue #305 backup-pre-VENDRIVE-1.2.2-HEADER-ICON-20261125 -> f29a214ce2210edc044e200c44daa10845d16c04",
+      "staticSyntax": "PASS inline JS, regression script and version JSON",
+      "exactHeadBrowserRegression": "PASS 45634980798 at 0fba56fcb3456f9df83fc0268cc1362cca2869be; header image source/decode, 33px layout at 320/390/430px and existing gates",
+      "exactHeadRealMicrosoftEdge": "PASS 45634980581 at same exact head; external nav/MAP and legacy regression",
+      "productMerge": "PASS PR #306 5660c46219d62855e3e29b3c62e07676031b56db",
+      "vercel": "PASS READY dpl_7LuU7xKmHeWiLiMknNkjVSpL6aTT exact product merge; public version 1.2.2 and header image markup",
+      "pages": "PASS public version 1.2.2 and index.html header image markup",
       "dataMigration": "NOT_REQUIRED no storage/schema change",
-      "ownerDevice": "NOT_PERFORMED actual iPhone home-screen cache/data check"
+      "ownerDevice": "Owner confirmed previous home-screen icon works; new header display NOT_PERFORMED"
     },
-    "nextOwnerAction": "Open existing app; check icon. Do not delete/reinstall if cached without verified backup. Await new instruction."
+    "nextOwnerAction": "Open existing app; confirm upper-left icon. No reinstall needed. Await new instruction."
   },
   "requiredUserInput": [],
   "unresolved": [
@@ -46,10 +45,10 @@
       ".ai/DECISIONS.md",
       ".ai/WORKFLOW.md"
     ],
-    "shortResumePrompt": "Owner approved the exact textless blue V vending-machine icon. Resized the approved source to 180/192/512px PNG with no redesign; added Apple touch icon, favicon and web manifest icon references. Patch version 1.2.1. Existing PWA identity, data, UI layout, business logic and AN15 pause remain unchanged. Existing iPhone home screen may retain its cached icon; actual owner device verification not performed. PASS Issue #302 backup-pre-VENDRIVE-1.2.1-ICON-20261125 -> fc51bb2e63d6a684156954a3c937b710bcfc81e7; PASS exact local PNG Git blob SHA 180:845b274a1ba47ed2ca87c11766a32e10d44d355e; 192:fc4a094ede1313055a074d3f375cf0379d574d8f; 512:3c86312b7e9ed2df5358ff1179e9ff70729464db; readback matches; PASS inline JS, manifest/version JSON, regression script parse; manifest identity equality; PASS 45632573343 at c7ea9bff9b9168244b9643afd19722325033f21e; PNG decodes and dimensions, manifest/Apple touch icon references, legacy gates; PASS 45632573438 at same exact head; external navigation/MAP and legacy regression; PASS PR #303 1f32923514aca471a9b247797c0ed3b964c1a6c4; PASS READY dpl_Bj4PYGkGPWxviXodkditQBknRidP exact product merge; public version/manifest verified 1.2.1; PASS public version.json 1.2.1 and manifest icons verified fresh; NOT_REQUIRED no storage/schema change; NOT_PERFORMED actual iPhone home-screen cache/data check",
+    "shortResumePrompt": "Owner confirmed the v1.2.1 home-screen icon changed on iPhone and requested the identical icon in the upper-left header. Reuse the existing approved 180px PNG, 33px square header image with unchanged surrounding spacing and brand name. Only header markup/style and patch version 1.2.2 changed; existing PWA identity/icons, data, business logic, UI layout and AN15 pause preserved. New header actual iPhone display not yet confirmed. PASS Issue #305 backup-pre-VENDRIVE-1.2.2-HEADER-ICON-20261125 -> f29a214ce2210edc044e200c44daa10845d16c04; PASS inline JS, regression script and version JSON; PASS 45634980798 at 0fba56fcb3456f9df83fc0268cc1362cca2869be; header image source/decode, 33px layout at 320/390/430px and existing gates; PASS 45634980581 at same exact head; external nav/MAP and legacy regression; PASS PR #306 5660c46219d62855e3e29b3c62e07676031b56db; PASS READY dpl_7LuU7xKmHeWiLiMknNkjVSpL6aTT exact product merge; public version 1.2.2 and header image markup; PASS public version 1.2.2 and index.html header image markup; NOT_REQUIRED no storage/schema change; Owner confirmed previous home-screen icon works; new header display NOT_PERFORMED",
     "handoffFile": ".ai/HANDOFF.md",
-    "handoffBoundary": "v1.2.1 approved icon COMPLETE; retain PWA identity/data and AN15 pause.",
-    "latestContinuityCheckpoint": "2026-11-25 v1.2.1 product PR #303, Browser/Edge PASS, both public manifests verified.",
+    "handoffBoundary": "v1.2.2 header icon COMPLETE; retain existing data, PWA identity and AN15 pause.",
+    "latestContinuityCheckpoint": "2026-11-25 v1.2.2 product PR #306, Browser/Edge PASS, both public headers verified.",
     "pauseMode": {
       "active": true,
       "requestedBy": "FINAL.55 diagnostics released, awaiting new owner route evidence",
