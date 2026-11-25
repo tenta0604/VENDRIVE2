@@ -432,7 +432,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 html,body{background:#e4e8ed;-webkit-font-smoothing:antialiased}
 .app{min-height:100dvh;padding-bottom:var(--bottom-nav-height)}
 .header{position:relative;top:auto;background:var(--bg);border:0;backdrop-filter:none;padding:calc(13px + env(safe-area-inset-top,0px)) 18px 12px}
-.brand{gap:9px}.mark{background:#172e48;width:33px;height:33px;border-radius:10px;font-size:24px;font-style:italic;letter-spacing:-2px;padding-right:2px}
+.brand{gap:9px}.mark{display:block;flex:0 0 33px;width:33px;height:33px;border-radius:10px;background:#172e48;object-fit:cover;padding:0}
 .name{font-size:16px;font-weight:850;letter-spacing:1.7px;line-height:1.2}.date{font-size:10px;font-weight:650;color:var(--muted)}.appVersion{font-size:9px;color:var(--muted)}
 .main{padding:4px 16px 20px}
 .tabs{position:fixed;top:auto;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,430px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;z-index:30;padding:5px 5px calc(7px + env(safe-area-inset-bottom,0px));border:0;border-top:1px solid var(--line);background:rgba(255,255,255,.97);backdrop-filter:blur(18px)}
@@ -509,7 +509,7 @@ body.mapFullscreen .toast,body.mapFullscreen .undoToast{z-index:25001}
 <body>
 <div class="portraitGuard" id="portraitGuard" role="dialog" aria-modal="true" aria-label="縦画面で使用してください"><div class="portraitGuardCard"><div class="portraitGuardIcon">↻</div><b>この画面は縦向きで使用してください</b><span>MAPだけ横画面に対応しています。</span><button class="primary" id="portraitOpenMap" type="button">MAPを開く</button></div></div>
 <div class="app">
-<header class="header"><div class="brand"><div class="mark">V</div><div><div class="name">VENDRIVE</div><div class="date" id="headerDate"></div><div class="appVersion" id="appVersion"></div></div></div></header>
+<header class="header"><div class="brand"><img class="mark" src="./vendrive-icon-180.png" width="33" height="33" alt=""><div><div class="name">VENDRIVE</div><div class="date" id="headerDate"></div><div class="appVersion" id="appVersion"></div></div></div></header>
 <nav class="tabs">
 <button class="active" data-page="todayPage">本日</button>
 <button data-page="tasksPage">タスク</button><button data-page="mapPage">マップ</button>
@@ -710,7 +710,7 @@ function lockBackgroundScroll(){if(lockedPageScrollY!==null)return;lockedPageScr
 function unlockBackgroundScroll(){if(document.querySelector('.modal.open')||lockedPageScrollY===null)return;var saved=lockedPageScrollY,body=document.body;lockedPageScrollY=null;body.classList.remove('modalOpen');body.style.top='';body.style.left='';body.style.right='';body.style.width='';window.scrollTo(0,saved)}
 function openModal(id){var modal=$id(id);if(!modal.classList.contains('open')){modal.classList.add('open');lockBackgroundScroll()}}
 function closeModal(id){var modal=$id(id);modal.classList.remove('open');unlockBackgroundScroll()}
-var STORAGE_VERSION=1,APP_VERSION='1.2.1',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
+var STORAGE_VERSION=1,APP_VERSION='1.2.2',BACKUP_FORMAT_VERSION=1,LEGACY_DB_VERSION=2,dbPromise=null;
 var versionCheckAt=0,versionCheckInFlight=false,versionCheckTimer=null;
 function currentVersionQuery(){var m=location.search.match(/[?&]v=([^&]*)/);if(!m)return'';try{return decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){return m[1]}}
 function checkForAppUpdate(){
